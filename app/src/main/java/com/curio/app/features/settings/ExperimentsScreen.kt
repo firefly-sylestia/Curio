@@ -141,7 +141,7 @@ fun ExperimentsScreen(navController: NavController) {
                     SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Reading settings",
-                        "Paper, type, face, orientation and the page's tap zones",
+                        "Paper, type, face, orientation and the page's tap zones"
                     ) { navController.navigate(CurioRoutes.READER_SETTINGS) }
                 }
             }
