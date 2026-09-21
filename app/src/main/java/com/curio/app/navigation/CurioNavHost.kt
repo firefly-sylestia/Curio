@@ -820,10 +820,16 @@ fun CurioNavHost(
                     // beside the old one instead of snapping across a
                     // quarter-screen gap — the settings-family opens feel
                     // calm instead of quick.
+                    // v440 — AND THE PUSH HAS ITS OWN CLOCK (see
+                    // [CurioMotion.Durations.Push]): the travel is the same 1/6, the
+                    // tempo is a quarter of a second instead of half one. The journal
+                    // editor, a chapter and every other plain push are this branch, so
+                    // this is the member's "the open animation of journal is clanky"
+                    // fixed at its root.
                     else -> slideInHorizontally(
                         initialOffsetX = { fullWidth -> fullWidth / 6 },
-                        animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
-                    ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Deliberate))
+                        animationSpec = tween(CurioMotion.Durations.Push, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Push))
                 }
             },
             exitTransition = {
@@ -869,8 +875,8 @@ fun CurioNavHost(
                     // a touch (1/8) over the same slower slide.
                     else -> slideOutHorizontally(
                         targetOffsetX = { fullWidth -> -fullWidth / 8 },
-                        animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
-                    ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
+                        animationSpec = tween(CurioMotion.Durations.Push, easing = FastOutSlowInEasing)
+                    ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Push))
                 }
             },
             popEnterTransition = {
@@ -910,8 +916,8 @@ fun CurioNavHost(
                         // slower twin of the forward push).
                         slideInHorizontally(
                             initialOffsetX = { fullWidth -> -fullWidth / 8 },
-                            animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Quick))
+                            animationSpec = tween(CurioMotion.Durations.Pop, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Pop))
                     }
                 }
             },
@@ -945,8 +951,8 @@ fun CurioNavHost(
                         // softer back-slide of the page underneath).
                         slideOutHorizontally(
                             targetOffsetX = { fullWidth -> fullWidth / 8 },
-                            animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
-                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                            animationSpec = tween(CurioMotion.Durations.Pop, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Pop))
                     }
                 }
             }

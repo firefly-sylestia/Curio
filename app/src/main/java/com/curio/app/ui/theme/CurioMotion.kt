@@ -144,6 +144,34 @@ object CurioMotion {
         const val Standard: Int = 300
         const val Deliberate: Int = 500
 
+        /**
+         * v440 — HOW LONG A PAGE TAKES TO PUSH IN, AND TO COME BACK.
+         *
+         * The member, after the journal's own open: *"the animation open animation
+         * of journal is clanky"* — and the cause was this clock, not the journal.
+         * Every plain forward navigation (the journal editor, a chapter, a
+         * profile, a book) fell into the nav host's generic branch, which glided
+         * the new page in over **[Deliberate] = 500ms** while the outgoing page
+         * drifted for the same half second behind it: half a second is a beat the
+         * eye reads as the app thinking, and on a phone it is the difference
+         * between a push and a slow cross-fade.
+         *
+         * The screen push has its own clock now, and it is the one every modern
+         * platform uses for this: **a page arrives in a quarter of a second and is
+         * gone a little faster than that on the way back**, with the travel
+         * unchanged (1/6 of the width in, 1/8 out) so the language of the push is
+         * the same — only its tempo changed. [Deliberate] stays for what it was
+         * written for: a change worth watching, never a screen appearing.
+         */
+        const val Push: Int = 260
+
+        /**
+         * And the way back. A pop is a VERDICT — the member has already decided —
+         * so it is quicker than the push it mirrors, the same asymmetry the
+         * floating pills use ([ENTER_MS] vs [EXIT_MS]).
+         */
+        const val Pop: Int = 220
+
         /** Shape morphing transitions — smooth but snappy (v7.94: 700 → 450
          *  so screen-to-screen morphs stop feeling laggy). */
         const val Morph: Int = 450
@@ -208,16 +236,24 @@ object CurioMotion {
     //  3. **Travel is proportional to the thing that moves.** See [settle].
 
     /**
-     * What arrives. 220ms on a slow-in/slow-out curve: long enough to read as
+     * What arrives. 190ms on a slow-in/slow-out curve: long enough to read as
      * movement, short enough that a member tapping a tool never waits for it.
+     *
+     * v440 — 220 → 190, because the member's report after living with it was that
+     * the app's furniture still read as soft: a tool that appears UNDER THE THUMB
+     * (the journal's dock, its copy box, the reader's selection bar) is not a thing
+     * the eye needs to watch arrive — it is a thing the member has already decided
+     * to use, and every millisecond over ~200 is a beat they feel as the app
+     * catching up. The curves and the one-clock rule are unchanged; only the tempo
+     * is crisper.
      */
-    const val ENTER_MS = 220L
+    const val ENTER_MS = 190L
 
     /**
      * What leaves. A faster verdict, on the curve that spends its travel early —
      * a thing on its way out should be gone by the time the eye looks for it.
      */
-    const val EXIT_MS = 140L
+    const val EXIT_MS = 130L
 
     /**
      * A change worth watching: a panel growing under a row, a page's colour
