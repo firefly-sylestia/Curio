@@ -396,20 +396,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
 
-    // ── THE CHROME LEAVES ON ITS OWN — BUT NOT OUT FROM UNDER A HAND (v406) ──
+    // ── v432 — AND THE CHROME NEVER LEAVES ON ITS OWN ANY MORE ─────────────
     //
-    // The countdown is reset by a turn asked for at the bar, and it does not run
-    // at all while one is in flight: the member was HOLDING the tools when the
-    // tools left (their report: "when i switch page though the that page switch
-    // pill why the tools hide … it should hide only when i touch the page"). A
-    // turn asked for is not the member moving, so the countdown waits for it to
-    // settle and then starts again from full.
-    LaunchedEffect(chrome, sheet, askedByReader) {
-        if (!chrome || sheet != null) return@LaunchedEffect
-        if (askedByReader) return@LaunchedEffect
-        delay(4200)
-        chrome = false
-    }
+    // v406 put a 4.2s countdown on the chrome: the tools went away by themselves
+    // while the member was reading (their report now: "its appear and disapper of
+    // the tools"). A countdown is the wrong shape for this — the reader can never
+    // tell "the member has stopped using me" from "the member is reading the page
+    // I am standing over", and the tools vanishing mid-sentence is what that
+    // guess looks like from the other side. So the chrome leaves when it is TOLD
+    // to, which is the rule the member asked for in the first place: a tap on the
+    // page puts it away ([tapPage]), a scroll of the member's own does the same
+    // ([onScrolled] — a turn or a jump the reader asked for keeps it, see
+    // [askedByReader]), a selection steps it aside, and a jump from a mark or a
+    // chapter closes it. Nothing else moves it.
 
     /**
      * Jump to a MARK's own place — a block index in a reflowable book, a page in

@@ -77,18 +77,20 @@ path — and the flag self-heals on the next down even if a surface is disposed 
 pill rises from below (`slideInVertically`/`slideOutVertically` at 240/200ms on top of the
 180/150ms fade).
 
+**And it never leaves on its own.** Asked directly, the member confirmed the auto-hide WAS the
+"appear and disapper": v406's 4.2s countdown is REMOVED. The chrome now leaves only when it is
+told to — `tapPage()`, a scroll of the member's own (`onScrolled`, still guarded by
+`askedByReader` so a turn or a jump the READER asked for keeps it), a selection, or a jump from
+a mark or chapter. That is the v389 spec the member wrote in the first place.
+
 **Docs:** a v432 section in `app/AGENTS.md` (both rules to keep, named), and three FIX
 bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
 
 ## 4. Still open
 
-- **The chrome's 4.2s auto-hide is untouched.** It is the other way the tools can leave
-  without being asked (v406 added the countdown; the member's original spec, v389, was TAP
-  toggles and SCROLL hides). Removing or lengthening it changes behaviour the member asked
-  for once, so it is being put to them rather than decided here.
-- **The journal dock pass (the message right before this one) has NOT been started** — the
-  session ended before any edit and the tree was clean at `17bef96c`. It is logged in the User
-  prompts slot below.
+- **The journal dock pass (the message before this one) is NOT started** — the session ended
+  before any edit, and asked again this session the member said **not yet** (
+  "Not yet"). It stays logged in the User prompts slot below, with its full wording.
 
 ## Instruction changes (this session)
 
