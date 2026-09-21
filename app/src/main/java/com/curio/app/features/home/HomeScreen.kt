@@ -2905,7 +2905,6 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
     // explored-first one. A star must never move because a different lane's
     // knowledge changed.
     val mapLanes = lanes.sortedBy { it.id }
-    val exploredCount = lanes.count { it.explored }
     val totalKnowledge = lanes.sumOf { it.knowledge }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2993,18 +2992,17 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
             selected = selected,
             onSelect = { selected = it }
         )
+        // v427 — NO COUNTER UNDER THE SKY. A line reading "1 of 338 lanes
+        // explored" under a map is a meter wearing a caption: the stars already
+        // say who is lit and who is not (member: "remove the 1 out of 338 lanes
+        // explored"). What is left under the map is the readout of the star you
+        // actually tapped.
         val picked = lanes.firstOrNull { it.id == selected }
         if (picked != null) {
             // The readout NAMES the star that was tapped (the same strip the
             // Stats grid shows), so the map itself never has to shout 36
             // labels over the sky.
             CurioLaneDetailStrip(picked)
-        } else {
-            Text(
-                "$exploredCount of ${lanes.size} lanes explored",
-                style = MaterialTheme.typography.labelSmall,
-                color = muted
-            )
         }
     }
 }
@@ -3017,13 +3015,20 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
  * and the stars now spread to the panel's own edges (member: "it doesnt cover
  * the drawer a little more").
  *
- * v422 — 320dp, because this number is the ONLY dial that makes the pattern
- * bigger. [starPoint] multiplies a polar radius by half the box's SHORTER side,
- * which on a phone drawer is this height — so widening the drawer, or the panel,
- * moves not one star (member: "in the drawer the pattern is good … incrase the
- * size").
+ * v422 — 320dp, because this number was the ONLY dial that could make the
+ * pattern bigger. [starPoint] multiplied a polar radius by half the box's
+ * SHORTER side — so widening the drawer, or the panel, moved not one star
+ * (member: "in the drawer the pattern is good … incrase the size").
+ *
+ * v427 — 372dp, AND the field fills the box on both axes now (see [starPoint]).
+ * The v422 note above was only half true: the drawer is a fixed 336dp wide, so
+ * its map measures 304dp across, and the SHORTER side was the WIDTH — a taller
+ * sky used to add empty paper above and below the stars and nothing else. With
+ * the reach following each axis the extra height is real: the sky reads longer,
+ * the stars spread into it, and the constellations run further (member: "a
+ * little more longer look too").
  */
-private val DrawerStarMapHeight = 320.dp
+private val DrawerStarMapHeight = 372.dp
 
 /**
  * v411 — THE DRAWER'S CURIOSITY MAP: the lanes as a sky.
@@ -3120,10 +3125,16 @@ private fun DrawerLaneStarMap(
                     // draws with (pixel space, not unit space), so a tap can
                     // never land a few dp off the star it looks like it hit.
                     val hub = Offset(sizePx.width / 2f, sizePx.height / 2f)
-                    val unitPx = minOf(sizePx.width, sizePx.height) * 0.5f
                     val reach = 30.dp.toPx()
                     val hit = slots.indices
-                        .map { i -> i to starPoint(slots[i], hub, unitPx) }
+                        .map { i ->
+                            i to starPoint(
+                                slots[i],
+                                hub,
+                                sizePx.width.toFloat(),
+                                sizePx.height.toFloat()
+                            )
+                        }
                         .filter { (_, point) -> (point - tap).getDistance() <= reach }
                         .minByOrNull { (_, point) -> (point - tap).getDistance() }
                         ?.first
@@ -3135,8 +3146,36 @@ private fun DrawerLaneStarMap(
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val hub = Offset(size.width / 2f, size.height / 2f)
-            val unitPx = minOf(size.width, size.height) * 0.5f
-            fun at(index: Int) = starPoint(slots[index], hub, unitPx)
+            fun at(index: Int) = starPoint(slots[index], hub, size.width, size.height)
+            // ── v427 — WHAT A LIT STAR'S GLOW REACHES, in pixels. The painter
+            //    and the joins below ask the SAME function, which is what lets a
+            //    hairline stop exactly at the edge of the halo it runs into
+            //    instead of disappearing under it. ──
+            fun bornOf(index: Int): Float {
+                val wait = (index * 0.012f).coerceAtMost(0.55f)
+                return ((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f)
+            }
+            fun corePxOf(index: Int): Float {
+                val born = bornOf(index)
+                if (born <= 0f) return 0f
+                val lane = lanes[index]
+                val picked = lane.id == selected
+                val core = if (lane.explored) {
+                    val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
+                    (2.2f + 3.4f * fraction) * born * (if (picked) 1.5f else 1f)
+                } else {
+                    (if (picked) 3.6f else 2.6f) * born
+                }
+                return core.dp.toPx()
+            }
+            // The star the member picked, as an index — the joins that touch it
+            // come on with it.
+            val pickedIndex = lanes.indexOfFirst { it.id == selected }
+            // A join longer than this crosses the sky rather than joining two
+            // stars, so it is not drawn at all (v427). The cap follows the AVERAGE
+            // of the two axes: the field is taller than it is wide now, so a
+            // width-only cap would quietly drop the vertical constellations.
+            val joinReach = (size.width + size.height) * 0.15f
             // ── THE SKY, NOT A DIAL (v419) — the astrolabe grid is GONE.
             //    The rings and the twelve spokes were perfectly regular, and
             //    that regularity is exactly what read as too symmetric (member:
@@ -3151,14 +3190,52 @@ private fun DrawerLaneStarMap(
                     center = Offset(dot.x * size.width, dot.y * size.height)
                 )
             }
-            // ── The hairlines: each star joined to its NEAREST neighbour, so
-            //    the sky reads as loose constellations — never rings, never a
-            //    regular mesh. ──
+            // ── THE CONSTELLATIONS (v427). Each star is still joined to its
+            //    NEAREST neighbour — never rings, never a mesh — but the JOIN
+            //    itself is drawn properly now, because the flat grey hairline
+            //    was the part the member called out ("the lines are not visually
+            //    greate"):
+            //
+            //     · it wears the TWO lanes' own colours, faintly, instead of
+            //       one grey — a constellation is made of the stars it joins,
+            //       and grey over a coloured sky read as wire;
+            //     · it STOPS AT THE GLOW: each end is pulled back to the star's
+            //       own lit size, so no line pierces a halo;
+            //     · a wide faint pass sits under a crisp one — the same
+            //       OPAQUE-mix trick the halos use, which is the only kind of
+            //       soft edge this surface allows (no alpha anywhere);
+            //     · and a hop that is still long enough to cross a quarter of
+            //       the sky is dropped rather than drawn: with no orbits left,
+            //       a lone star's nearest neighbour can be halfway across the
+            //       map, and one such line ruins the chart.
             links.forEach { link ->
+                val start = at(link.first)
+                val end = at(link.second)
+                val span = (end - start).getDistance()
+                if (span > joinReach) return@forEach
+                val trimStart = corePxOf(link.first) * HaloTrimFactor + 2.dp.toPx()
+                val trimEnd = corePxOf(link.second) * HaloTrimFactor + 2.dp.toPx()
+                val floor = 6.dp.toPx()
+                if (span <= trimStart + trimEnd + floor) return@forEach
+                val dir = (end - start) / span
+                val from = start + dir * trimStart
+                val to = end - dir * trimEnd
+                val hue = lerp(
+                    lanes[link.first].accent,
+                    lanes[link.second].accent,
+                    0.5f
+                )
+                val joined = pickedIndex == link.first || pickedIndex == link.second
                 drawLine(
-                    color = lerp(page, muted, 0.34f),
-                    start = at(link.first),
-                    end = at(link.second),
+                    color = lerp(page, hue, if (joined) 0.22f else 0.13f),
+                    start = from,
+                    end = to,
+                    strokeWidth = 2.6.dp.toPx()
+                )
+                drawLine(
+                    color = lerp(page, hue, if (joined) 0.48f else 0.32f),
+                    start = from,
+                    end = to,
                     strokeWidth = 1.dp.toPx()
                 )
             }
@@ -3167,32 +3244,35 @@ private fun DrawerLaneStarMap(
                 val centre = at(index)
                 // The staggered light-up: each star waits its own turn, so the
                 // sky fills in as a sweep rather than blinking on.
-                val wait = (index * 0.012f).coerceAtMost(0.55f)
-                val born = ((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f)
+                val born = bornOf(index)
                 if (born <= 0f) return@forEachIndexed
-                val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
                 // v422 — THE PICK MAKES THE STAR COME ON. It grows and its halo
                 // steps brighten toward the lane's own accent; there is no ring
                 // any more, because a circle drawn around a star read as
                 // furniture rather than as the star answering.
                 val picked = lane.id == selected
                 if (lane.explored) {
-                    val core = (2.2f + 3.4f * fraction) * born * (if (picked) 1.5f else 1f)
-                    val corePx = core.dp.toPx()
-                    // Halo, mid ring, core — three OPAQUE steps of the PAGE
-                    // mixed toward the lane's accent (no alpha anywhere).
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.30f else 0.16f), corePx * 2.6f, centre)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.62f else 0.40f), corePx * 1.5f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.94f), corePx, centre)
+                    val corePx = corePxOf(index)
+                    // THE BLOOM (v427) — four OPAQUE steps of the PAGE mixed
+                    // toward the lane's own accent, where there were three flat
+                    // ones: a wide field barely off the page, a mid ring, an
+                    // inner ring and the hot core. The falloff is what makes a
+                    // star read as LIT rather than as a dot with a circle round
+                    // it (member: "make the glow better").
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.20f else 0.10f), corePx * 3.2f, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.40f else 0.22f), corePx * 2.0f, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.64f else 0.44f), corePx * 1.35f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.97f), corePx, centre)
                 } else if (picked) {
                     // A lane you have not started still answers a tap: it lights
                     // in its own colour at the smallest lit size, so the readout
                     // under the map and the star agree about which one was
                     // picked.
-                    val corePx = 3.6f.dp.toPx()
-                    drawCircle(lerp(page, lane.accent, 0.26f), corePx * 2.4f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.55f), corePx * 1.4f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.94f), corePx, centre)
+                    val corePx = corePxOf(index)
+                    drawCircle(lerp(page, lane.accent, 0.24f), corePx * 2.9f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.48f), corePx * 1.8f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.62f), corePx * 1.25f, centre)
+                    drawCircle(lerp(page, lane.accent, 0.95f), corePx, centre)
                 } else {
                     // Unexplored: a SOLID dim point — present, but plainly not
                     // lit yet.
@@ -3217,21 +3297,36 @@ private const val STAR_DUST_COUNT = 56
 
 /**
  * v414 — ONE LANE'S PLACE ON THE CHART: a polar SLOT (angle + radius), not a
- * point.
- *
- * Keeping the slot is what lets the canvas draw TRUE circles whatever aspect
- * the panel ends up: the painter multiplies the radius by the SHORTER side, so
- * the scatter stays round in a wide drawer instead of stretching into ellipses,
- * which is what the old unit-space scatter got wrong.
+ * point. Keeping the slot (rather than a finished offset) is what lets the same
+ * lane land correctly in a box of any shape.
  */
 private data class StarSlot(val angle: Float, val radius: Float)
 
-/** Where [slot] sits, in pixels, around [hub]. Shared by the painter and the
- *  hit test, so a tap can never miss the star it looks like it hit. */
-private fun starPoint(slot: StarSlot, hub: Offset, unitPx: Float): Offset = Offset(
-    x = hub.x + cos(slot.angle) * unitPx * slot.radius,
-    y = hub.y + sin(slot.angle) * unitPx * slot.radius
-)
+/**
+ * Where [slot] sits, in pixels, around [hub] inside a [width]×[height] sky.
+ * Shared by the painter and the hit test, so a tap can never miss the star it
+ * looks like it hit.
+ *
+ * v427 — THE FIELD FOLLOWS THE BOX. It used to multiply the radius by the
+ * SHORTER side on BOTH axes, which kept the scatter perfectly round but also
+ * meant a taller sky could not hold a single extra star's worth of reach: the
+ * drawer is a fixed 336dp wide (its map 304dp across), so the shorter side was
+ * the WIDTH and the height above it went to waste. Each axis is used now — the
+ * sky reads longer, and the points themselves are drawn in dp (see the bloom in
+ * [DrawerLaneStarMap]), so a lit star is still a perfect circle.
+ */
+private fun starPoint(slot: StarSlot, hub: Offset, width: Float, height: Float): Offset =
+    Offset(
+        x = hub.x + cos(slot.angle) * (width * 0.5f) * slot.radius,
+        y = hub.y + sin(slot.angle) * (height * 0.5f) * slot.radius
+    )
+
+/**
+ * How far past a star's own core its glow is worth stopping a line at: the
+ * painter's mid ring sits at 1.35 of the core (see the bloom), and a line that
+ * starts there meets the halo's edge instead of vanishing under it.
+ */
+private const val HaloTrimFactor = 1.35f
 
 /**
  * v419 — LANES ON A GOLDEN-ANGLE SCATTER (this replaced the v414 lattice).

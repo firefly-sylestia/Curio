@@ -9547,17 +9547,43 @@ scheme role means something different there than in the app's own schemes.
   straight on the drawer) and **`page` = `MaterialTheme.colorScheme.surface` is
   the base for the dust, the hairlines and all three of a star's steps**. If the
   drawer's container colour ever changes, this base changes with it.
-- **v422 — THE HEIGHT IS THE ONLY DIAL THAT SIZES THE PATTERN.** `starPoint`
-  multiplies a polar radius by HALF THE BOX'S SHORTER SIDE, so on a phone drawer
-  (`DrawerStarMapHeight` 320dp < the sheet's width) the sky's diameter can never
-  exceed that height. Widening the drawer moves not one star. 254 → 320dp is how
-  "incrase the size" was answered; `STAR_DUST_COUNT` went 46 → 56 with it.
-- **The picked star LIGHTS UP; there is no orbit ring.** Its core grows 1.5× and
-  its two halo steps brighten toward the lane's accent, and an UNEXPLORED lane
+- **v427 — THE FIELD FOLLOWS THE BOX ON BOTH AXES (this supersedes v422's "the
+  height is the only dial").** `starPoint(slot, hub, width, height)` multiplies
+  the polar radius by HALF OF EACH AXIS, so the scatter fills the sky it is
+  given instead of being capped by the shorter side. v422's note was only half
+  true: the drawer sheet is a fixed 336dp wide
+  (`ModalDrawerSheet(modifier = Modifier.width(336.dp))`), so its map measures
+  304dp ACROSS and the shorter side was always the WIDTH — a taller sky added
+  empty paper above and below the stars and moved not one of them. With the axes
+  separate, `DrawerStarMapHeight` 320 → 372dp is real: the sky reads longer and
+  the stars spread into it. The GLYPHS are untouched by any of this (every star
+  radius is in dp), so a star stays a perfect circle however the box is shaped.
+- **v427 — NO COUNTER UNDER THE SKY.** The "N of N lanes explored" line is gone
+  (member: "remove the 1 out of 338 lanes explored") — a counter under a map is a
+  meter wearing a caption, and the stars already say who is lit. Under the map is
+  the tapped star's readout, or nothing.
+- **v427 — A STAR'S LIT SIZE IS ONE FUNCTION (`corePxOf`), AND ITS GLOW IS FOUR
+  OPAQUE STEPS.** `bornOf`/`corePxOf` (inside the painter) are what the stars AND
+  the joins read, which is what lets a hairline stop at the edge of the halo it
+  runs into. The bloom is a wide field (3.2× the core at 0.10 of the accent), a
+  mid ring (2.0× at 0.22), an inner ring (1.35× at 0.44) and the hot core (0.97)
+  — three flat steps read as a dot with a circle around it. The picked star grows
+  1.5× and every step brightens (0.20 / 0.40 / 0.64), and an UNEXPLORED lane
   lights too (at the smallest lit size) so a tap on a lane you have not started
-  still answers. The ring was removed because a circle drawn around a star read
-  as chrome rather than as the star responding. An untouched lane is a SOLID dim
+  still answers. There is no orbit ring: a circle drawn around a star read as
+  chrome rather than as the star responding. An untouched lane is a SOLID dim
   point, never a hollow `Stroke` circle.
+- **v427 — A JOIN WEARS THE TWO LANES' OWN COLOURS AND STOPS AT THE GLOW.** Each
+  hairline is `lerp(page, lerp(a.accent, b.accent, 0.5f), …)` drawn TWICE — a
+  2.6dp faint pass under a 1dp crisp one (opaque mixes, never alpha, like every
+  other tone on this canvas) — brightened when the picked lane is one of its ends,
+  trimmed by `HaloTrimFactor` (1.35, the mid ring's own radius) plus 2dp at each
+  end, and DROPPED outright when its span exceeds 0.15 of the box's TWO AXES
+  ADDED (a width-only cap would drop the vertical constellations now that the
+  field is taller than it is wide): with no
+  orbits left a lone star's nearest neighbour can be halfway across the map, and
+  one such line ruins the chart. **A flat grey hairline is what the member
+  rejected** — grey over a coloured sky reads as wire.
 - Nothing on that canvas is transparent (every colour is an opaque `lerp`), and
   the light-up is a ONE-SHOT `Animatable`, never an infinite transition: the
   drawer is composed while it is closed, so an idle twinkle would spend the

@@ -1,4 +1,5 @@
 FIX:
+- Home: the drawer's star map is a night sky now — the constellations wear the two lanes' own colours instead of one grey, each line stops at the glow of the star it joins (and a join long enough to cross the sky is not drawn at all), every star's halo is a four-step bloom where there were three flat rings, the sky itself is taller with the stars spread into it, and the "N of N lanes explored" line under it is gone (the stars already say it).
 - Reveal: the previews on a topic read properly again — a book's synopsis teaser, an album's track list, a series or anime's synopsis and episode rows, and the chapter chips all sit on a card tinted with the topic's own colour, while their words were wearing the inks meant for the UNTINTED page; each card now asks its own fill what reads on it, in light and dark alike.
 
 ADD:
