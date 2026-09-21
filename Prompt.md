@@ -332,8 +332,28 @@ prompt stays below it.)*
      being placed (`ReaderZoneHandle.onAdjust` — drag start/end/cancel), by a collapse door on
      the panel, and by v434's eye for the washes. Standing down leaves a "Gestures" pill in
      the corner that opens it again, and every movement is a `CurioMotion` factory.
-  **Still awaiting one answer:** *"do the reader, journal additions"* — which of the suggested
-  settings groups to build (see "What remains" below). Nothing else in this prompt is open.
+  **§34b — the additions the member then ticked (DONE EXCEPT TWO).**
+  Reader: **night dim on a schedule** (`ReaderLook.dimAuto` — "At sunset" = the phone's own
+  dark theme, which is what a phone set to automatic switches at sunset; Android has no
+  sunset to ask for and computing one needs the location, which this app holds for nothing
+  else); **pages left in the chapter** in the progress card (a book with pages answers from
+  `ReaderOutlineEntry.page`, a reflowed book from `TextPagedReader`, and a page-less flow
+  says nothing rather than a made-up zero). Journal: **filter by mood / colour / length**
+  (mood and colour are columns; the length counts are taken once per (list, bucket) on
+  `Dispatchers.Default` and only while a length is on — a word count decodes a document);
+  **a writing goal with its own evening nudge** (`AppPreferences.getJournalGoal`,
+  `JournalGoalReminderScheduler` + `JournalGoalReminderReceiver` + manifest, and the day's
+  rail in the journals head); **"open today's page"** (`rememberJournalDoor` — today's page
+  if the day was written, a new one if it was blank, or the last page opened; the editor
+  records the last id as a page loads). **No SQL change and no migration anywhere in §34.**
+  **STILL OPEN:** *read-aloud with a speed and voice picker* (a `TextToSpeech` subsystem — the
+  app has none today) and *dictionary provider choice* — **that one needs the member**:
+  Curio's dictionary is ONLINE-ONLY (Wiktionary, keyless, `ReaderDictionary`), there is no
+  bundled dictionary in the app, and shipping one means shipping a dictionary asset
+  (size + licensing). Also unchanged: which part "the highlight pill selector in a pdf"
+  means (they answered "the row of pens after a long press" — that bar already carries all
+  five pens, the note, the bookmark, the dictionary, ⋯ and the cross in `ReaderSelectionBar`,
+  so it needs a device pass rather than more code).
 - **§32 — "continue and still the pdf reader buttom sheet close is weirdly slow ... do the motion token set and one arrival for every floating pill ... and in pdf reader, a high charge save turns on" (DONE, v439).** Built: the sheet close now travels its OWN height (the "weirdly slow" was 60%-of-screen travel on a 200dp sheet, not the clock — see `app/AGENTS.md` v439); the pill clock added to `CurioMotion` and spent across the reader's and journal's floating furniture; the back button is its own 50dp circle pill; press feedback on the reader's two control builders; and **low power reading** (`ReaderLook.lowPower`, on by default, a real "Power" row in the reader's settings — RGB_565 pages, a 1.5× upscale cap, `beyondViewportPageCount = 0`, and `cacheDir/book-images` pruned as the reader closes). **Also fixed the red build that was pushed as `147a2516`**: `PersonalPage.kt:722` had an orphan `else MaterialTheme.colorScheme.background` left by v438's edit — the file's own paper is `journalPaper()`. No SQL change for anything in either round.
 
 - **§31 — the reader's polish round two (PARTLY DONE, plan in §7).** Done from it: back
