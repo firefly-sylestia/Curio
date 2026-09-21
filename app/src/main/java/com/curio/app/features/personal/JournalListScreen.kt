@@ -70,6 +70,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalMood
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
+import com.curio.app.data.wordCount
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
