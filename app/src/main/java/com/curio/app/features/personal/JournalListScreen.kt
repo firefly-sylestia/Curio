@@ -253,6 +253,13 @@ private fun JournalRow(
     // version of the entry rather than on every recomposition of the list.
     val words = remember(journal.id, journal.updatedAtMillis) { journal.doc.wordsLabel() }
     val press = rememberCurioPressSource(pressedScale = 0.985f)
+    // v428 — a page the member gave a colour to wears it HERE, on the spine: the
+    // list stays one notebook, but a coloured day is findable down the margin
+    // without opening it (see [journalDoorAccent]). Resolved in the COMPOSABLE
+    // scope, never inside the draw lambda below: a `drawBehind` block is a DRAW
+    // pass where no @Composable may be called, so the colour is read once per row
+    // here and captured there.
+    val spine = journalDoorAccent(journal.accentArgb)
     Surface(
         shape = RoundedCornerShape(20.dp),
         // v411 — the journal's OWN paper (a warm parchment tinted with the
@@ -278,12 +285,8 @@ private fun JournalRow(
                 .drawBehind {
                     val barWidth = 3.dp.toPx()
                     drawRoundRect(
-            // v428 — a page the member gave a colour to carries it HERE, on the
-            // spine: the list stays one notebook, but a coloured day is
-            // findable down the margin without opening it (see
-            // [journalDoorAccent]).
-            color = journalDoorAccent(journal.accentArgb),
-            size = androidx.compose.ui.geometry.Size(barWidth, size.height),
+                        color = spine,
+                        size = androidx.compose.ui.geometry.Size(barWidth, size.height),
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f)
                     )
                 }

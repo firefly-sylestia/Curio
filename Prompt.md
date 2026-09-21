@@ -1007,11 +1007,25 @@ and both workflows export both secrets. No change needed — §17 got the two ke
    helper that takes one-or-more vars per provider, so TMDB counts as present when EITHER secret is
    exported, and the label still prints once.
 
+### CI fix on top (the journal-colour pass's own bug)
+
+`compileReleaseKotlin` failed at `JournalListScreen.kt:285` — *"@Composable invocations can only happen
+from the context of a @Composable function"*: §15's spine drew `color = journalDoorAccent(journal.accentArgb)`
+**inside `drawBehind`**, which is a DRAW pass, not a composable one. Its own doc comment even says the two
+read views must agree, and the chip beside it in `PersonalHome.kt` was already right — `JournalChip` hoists
+`val own = journalDoorAccent(...)` in the composable scope and captures it in the lambda. `JournalRow` now
+does the same (`val spine = …` above the `Surface`), and that rule is worth keeping in mind for every
+colour a spine, a chip or a door wears: **read it in the composable, capture it in the draw.** The mangled
+indentation that edit left behind is gone with it.
+
 ### Verification
 
 - Both credentials, the attribution sentence and the logo rules were read from TMDB's own pages (above).
 - `bash -n .github/scripts/build-summary.sh` → syntax OK.
-- Brace/paren balance 0/0/0 on all four touched Kotlin files (the character scanner, not a regex).
+- Brace/paren balance 0/0/0 on every touched Kotlin file (the character scanner, not a regex).
+- Every other call site of a @Composable colour helper was checked for the same mistake: `JournalChip`
+  (`PersonalHome.kt`) hoists its colour, and `PersonalCanvas`'s `accent: Color = personalAccent()` is a
+  composable function's DEFAULT PARAMETER (legal, and pre-existing).
 - No Gradle here — CI compiles it (per `AGENTS.md`).
 
 ## User prompts
