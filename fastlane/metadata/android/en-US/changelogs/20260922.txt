@@ -1,4 +1,14 @@
 ADD:
+- Share card: the Signature design is a hand-drawn sketchbook page, one per category — warm paper, a wobbly pen outline, pencil shading, washi tape and a doodle of its own, titled in the app's own handwriting.
+- Post: the share card is edited with the same card editor the topic reveal opens, from a door on the post's own preview, and the shape switch (3:4 or 9:16) sits right there with it.
+
+REMOVE:
+- Share card: the Classic Signature design is gone for every category except Games and Films.
+
+FIX:
+- Writing: the journal's four alignment buttons are one tool with the four choices behind it, and the scrolled tool bars keep their place instead of snapping back to their first tool.
+
+ADD:
 - Settings: TMDB's attribution sits in About Curio — its own approved mark and the notice "This product uses the TMDB API but is not endorsed or certified by TMDB.", shown by a build that uses TMDB and linking to themoviedb.org.
 - Incursion: a watch button on every row and tile — one tap marks a title watched, the next takes it back, and every finer state is still the sheet's own chips.
 - Incursion: a series' sheet carries its episode guide — the show's own episodes with their numbers, names and airdates, read through the same fetcher the series lane uses (and the year and season are stripped from the lookup, so "Loki S2" is looked up as "Loki").

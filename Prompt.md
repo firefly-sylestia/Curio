@@ -1028,10 +1028,68 @@ indentation that edit left behind is gone with it.
   composable function's DEFAULT PARAMETER (legal, and pre-existing).
 - No Gradle here — CI compiles it (per `AGENTS.md`).
 
+## 19. Request — the align tool, the scrolled bars, the sketchbook Signature, the post's card editor
+
+**The ask (member):** *"now collapse the alignments into one option they show in that tool row for
+journal, add remeber state to the scrolled tool bar, now for signature desings for share card, remove
+the classic or siganture for all except games and films, and now make the design like collections style
+like hand drawn doodles got it, now do one unique per category for signature cards, and then for the post
+share card show the topic reveal share card buttom sheet editor and the editing layout ration stays
+intact in each scren of post dont push this yet"*
+
+**Answers taken before implementing** (ask_user): the doodle look is a **sketchbook page** ("cream/kraft
+paper, wobbly hand-drawn ink frame, scribbled hatching, an arrow or two, washi-tape corners and a
+hand-lettered title — a drawn page, one per category"); Games and Films keep **both** the doodle and the
+Classic (*"Classic only for Games + Films"*); and the post's card editor **opens from the post card
+screen** (*"the post preview itself gets the ratio switch, and the editor sheet is opened from the post
+card screen"*).
+
+### What was built
+
+1. **One align tool** — the dock's four alignment buttons (left / centre / right / justify) became one
+   button wearing the focused line's own alignment, with the four choices in the menu behind it
+   (`PersonalAlign.toAlignKind()`, `MarkerMenuLabel` rows, a check on the current one).
+2. **Scrolled tool bars remember** — the dock's row, the text bar's two arrow rows and the caption row
+   each own a `rememberSaveable(saver = ScrollState.Saver)` state instead of a fresh
+   `rememberScrollState()` inside the row, and the dock's is hoisted ABOVE its own bar swap — which is
+   the part that actually mattered: a row wider than the phone was resetting the moment the dock
+   changed bars.
+3. **The sketchbook Signature** — new `ui/components/SignatureSketchbook.kt` (914 lines): a shared pen
+   (`sketch` / `sketchRect` / `sketchCircle` / `hatch` / `tape` / `sketchArrow` / `sketchPaper`), a
+   deterministic `jitter` so the drawing never shimmers and the PNG matches the editor, **one motif per
+   lane** (38 of them, none shared), and a per-category page table (paper, pen, marker, layout, doodle)
+   with the FAMILY as the second key for a lane whose name it does not know. `TopicShareCard.kt`'s
+   `signatureDesign(...)` lost its 74,940-character `when` (the thirty-eight printed scenes) and is now
+   a delegator; `SignatureDesign` / `SignatureLayout` became `internal`, and `signatureHairlineFrame`
+   went with the layouts that used it.
+4. **Classic only for Games and Films** — `signatureClassicAvailable(name)` is the single gate, read by
+   the card's own render, by the editor's Classic toggle, and by the Share Hub, whose grid is now built
+   per picked category (`hubDesigns(classicSignature = …)`) and finds its per-category heading from the
+   first override cell rather than a hard-coded index.
+5. **The post's card editor** — `TopicShareSheet` gained `initialAspect` + `onAspectChanged`; the
+   post preview wears the shape switch and an **Edit card** door, and the sheet is composed in the
+   composer's own column (never inside a lazy item, where a sheet dies when its item scrolls away), so
+   one post keeps one shape on the composer, the wall and its card screen.
+
+### Not pushed, on purpose
+
+The member said *"dont push this yet"* — so this batch is committed locally and left unpushed. It is
+NOT verified by CI yet: this environment cannot compile (see `AGENTS.md`), and every claim above is
+backed by reading the code and by the brace/paren balance checker, nothing more.
+
+### Verification
+
+- Brace/paren balance 0/0/0 on all six touched files (the character scanner, not a regex).
+- The 74,940-character deletion was done by brace-matched replacement (anchor + a depth-counting scan,
+  string- and comment-aware), then re-read: the delegator sits where the old `when` did, the two types
+  it needs are `internal`, and `signatureHairlineFrame` is referenced nowhere.
+- Every call site of the two things this pass changed shape (the sheet's aspect, the hub's design list)
+  was re-read after the edit.
+
 ## User prompts
 
 *(Never cleared. A new prompt from the user goes here with its status; when it is done, its
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- (none)
+- (none — §19 is built and committed, waiting for the member's word to push)

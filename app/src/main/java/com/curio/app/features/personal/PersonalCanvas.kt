@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -50,6 +49,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.getValue
@@ -329,6 +329,21 @@ internal fun PersonalAlign.toTextAlign(): TextAlign = when (this) {
     PersonalAlign.CENTER -> TextAlign.Center
     PersonalAlign.END -> TextAlign.End
     PersonalAlign.JUSTIFY -> TextAlign.Justify
+}
+
+/**
+ * v428 — THE SAME FOUR, AS THE DOCK DRAWS THEM.
+ *
+ * The alignment tool's glyph ([AlignGlyph]) takes an [AlignKind], the model
+ * takes a [PersonalAlign], and the dock now has ONE align button that has to
+ * show the focused line's own alignment — so the two enums need one mapping, in
+ * one place, rather than a `when` repeated at each of the four menu rows.
+ */
+internal fun PersonalAlign.toAlignKind(): AlignKind = when (this) {
+    PersonalAlign.START -> AlignKind.START
+    PersonalAlign.CENTER -> AlignKind.CENTER
+    PersonalAlign.END -> AlignKind.END
+    PersonalAlign.JUSTIFY -> AlignKind.JUSTIFY
 }
 
 /**
@@ -5509,6 +5524,12 @@ private fun PersonalPageEditBar(
     // The reach as one sentence: the rows, then — only once they have been
     // reached into — the letters inside them. A count that is not true is worse
     // than no count, so the letter half appears when it has something to say.
+    // v428 — THE TEXT BAR'S TWO ROWS REMEMBER THEIR PLACE. Same reason as the
+    // dock's tool row: a reach is built by pressing the same arrow again and
+    // again, and a row that snapped back to the left between presses made the
+    // member find their arrow a second time.
+    val rowScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
+    val letterScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
     val reachLine = when {
         picked == 0 -> "Nothing picked"
         lettersPicked -> "$picked of $rows rows · $letterCount of $letterTotal letters"
@@ -5528,7 +5549,7 @@ private fun PersonalPageEditBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+                .horizontalScroll(rowScroll),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
@@ -5559,7 +5580,7 @@ private fun PersonalPageEditBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+                .horizontalScroll(letterScroll),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
@@ -5697,6 +5718,14 @@ internal fun PersonalToolDock(
     val accent = personalAccent()
     val accentInk = personalAccentInk()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    // v428 — THE TOOL ROW REMEMBERS WHERE IT WAS LEFT. A row of tools wider
+    // than a phone is scrolled to reach the last of them, and the state used to
+    // be `rememberScrollState()` INSIDE the row — so the moment the dock swapped
+    // to the page's text bar and back (or the page was opened again) the row
+    // snapped to its first tool and the member had to scroll for the same tool
+    // twice. Hoisted above the dock's own bar swap and made saveable, so its
+    // place survives the swap and a rotation alike.
+    val toolScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
     // v389 — TEXT HISTORY, the dock's FIRST tool.
     //
     // The writing pages had it everywhere else in Curio but here, so the one
@@ -5763,8 +5792,9 @@ internal fun PersonalToolDock(
             modifier = Modifier
                 // Nine tools in a fixed row overflowed a narrow phone and cut
                 // the last icons in half; the row scrolls, so every tool is
-                // always reachable and nothing is clipped.
-                .horizontalScroll(rememberScrollState())
+                // always reachable and nothing is clipped — and it keeps its
+                // place (see [toolScroll]).
+                .horizontalScroll(toolScroll)
                 .padding(horizontal = 8.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
@@ -6041,37 +6071,56 @@ internal fun PersonalToolDock(
             ) {
                 CurioIcon(CurioIcons.FormatQuote, null, size = 18.dp)
             }
-            PersonalToolButton(
-                label = "Align left",
-                active = state.alignOfFocused() == PersonalAlign.START,
-                accent = accentInk, ink = ink,
-                onClick = { state.setAlign(PersonalAlign.START) }
-            ) {
-                AlignGlyph(AlignKind.START)
-            }
-            PersonalToolButton(
-                label = "Align centre",
-                active = state.alignOfFocused() == PersonalAlign.CENTER,
-                accent = accentInk, ink = ink,
-                onClick = { state.setAlign(PersonalAlign.CENTER) }
-            ) {
-                AlignGlyph(AlignKind.CENTER)
-            }
-            PersonalToolButton(
-                label = "Align right",
-                active = state.alignOfFocused() == PersonalAlign.END,
-                accent = accentInk, ink = ink,
-                onClick = { state.setAlign(PersonalAlign.END) }
-            ) {
-                AlignGlyph(AlignKind.END)
-            }
-            PersonalToolButton(
-                label = "Justify",
-                active = state.alignOfFocused() == PersonalAlign.JUSTIFY,
-                accent = accentInk, ink = ink,
-                onClick = { state.setAlign(PersonalAlign.JUSTIFY) }
-            ) {
-                AlignGlyph(AlignKind.JUSTIFY)
+            // ── THE ALIGNMENT: ONE TOOL, FOUR CHOICES (v428) ────────────
+            //
+            // Four buttons (left / centre / right / justify) held four slots in
+            // this row, each saying one quarter of the same thing. The member:
+            // *"collapse the alignments into one option"* — so there is ONE
+            // alignment tool now, wearing the FOCUSED LINE's own alignment (the
+            // button answers "what is this line doing?" before it is touched),
+            // with the four choices behind it in the tap-then-menu habit the
+            // bullet tool already teaches. It is lit for anything but plain
+            // left, so a line moved off the margin says so in the dock.
+            Box {
+                val alignMenu = remember { CurioMenuToggle() }
+                val choices = remember {
+                    listOf(
+                        PersonalAlign.START to "Align left",
+                        PersonalAlign.CENTER to "Align centre",
+                        PersonalAlign.END to "Align right",
+                        PersonalAlign.JUSTIFY to "Justify"
+                    )
+                }
+                val focusedAlign = state.alignOfFocused()
+                PersonalToolButton(
+                    label = "Alignment",
+                    active = focusedAlign != PersonalAlign.START,
+                    accent = accentInk, ink = ink,
+                    onClick = { alignMenu.buttonClick() }
+                ) {
+                    AlignGlyph(focusedAlign.toAlignKind())
+                }
+                DropdownMenu(
+                    expanded = alignMenu.open,
+                    onDismissRequest = { alignMenu.dismissed() },
+                    properties = MenuKeepKeyboardProperties
+                ) {
+                    choices.forEach { (align, label) ->
+                        DropdownMenuItem(
+                            text = { MarkerMenuLabel(label) },
+                            leadingIcon = { AlignGlyph(align.toAlignKind()) },
+                            trailingIcon = {
+                                if (focusedAlign == align) {
+                                    CurioIcon(CurioIcons.Check, null, tint = accentInk, size = 18.dp)
+                                }
+                            },
+                            onClick = {
+                                state.setAlign(align)
+                                alignMenu.close()
+                            }
+                        )
+                    }
+                }
             }
             if (showJournalTools) PersonalToolButton(
                 label = "Add a photo",
@@ -6203,10 +6252,12 @@ private fun PersonalCaptionTools(
     val sizeKey = state.captionSizeKey(captionId)
     val orderKey = state.captionOrder(captionId)
     val appOrder = PersonalCaptionDates.order(context)
+    // v428 — and the caption's row keeps its place too (see the dock's note).
+    val captionScroll = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
 
     Row(
         modifier = Modifier
-            .horizontalScroll(rememberScrollState())
+            .horizontalScroll(captionScroll)
             .padding(horizontal = 8.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp)

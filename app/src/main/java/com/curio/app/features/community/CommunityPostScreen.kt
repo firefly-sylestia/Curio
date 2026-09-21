@@ -87,8 +87,10 @@ import com.curio.app.data.supabase.CommunityCardDraft
 import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.KIND_NOTE
 import com.curio.app.data.supabase.KIND_QUOTE
+import com.curio.app.data.CategoryId
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
+import com.curio.app.ui.components.TopicShareSheet
 import com.curio.app.ui.theme.ChevronDown
 import com.curio.app.ui.theme.ChevronUp
 import com.curio.app.ui.theme.CurioIcon
@@ -205,6 +207,12 @@ internal fun CommunityPostScreen(
     var aspect by remember { mutableStateOf(ShareCardAspect.CLASSIC) }
     var bodyScale by remember { mutableStateOf(1f) }
     var posting by remember { mutableStateOf(false) }
+    // v428 — THE CARD EDITOR, ON THE POST. The member: *"for the post share card
+    // show the topic reveal share card bottom sheet editor"* — so the post's card
+    // is edited by the SAME sheet the topic reveal opens, off a door on the
+    // preview itself, and the ratio it is edited at comes back here
+    // (`onAspectChanged`) so one post keeps one shape everywhere it is shown.
+    var shareSheetOpen by remember { mutableStateOf(false) }
 
     // ── THE COMPOSER'S OWN MEMORY ──────────────────────────────────────────
     // What you have typed but not posted, and what you deleted, both kept on
@@ -366,6 +374,38 @@ internal fun CommunityPostScreen(
                     }
                 )
 
+                // The card editor rides here rather than inside the list: a
+                // bottom sheet opened from a lazy ITEM is dismissed the moment
+                // that item scrolls out of view, which is a bug waiting for the
+                // first member who scrolls while the sheet is open.
+                val sheetTopic = topic
+                val sheetCat = category
+                if (shareSheetOpen && sheetTopic != null && sheetCat != null) {
+                    TopicShareSheet(
+                        topicName = sheetTopic.name,
+                        categoryName = sheetCat.displayName,
+                        categoryGlyph = sheetCat.iconGlyph,
+                        accent = sheetCat.themedAccent(),
+                        quickFact = if (sheetCat.id == CategoryId.QUOTES) sheetTopic.name
+                                    else sheetTopic.teaser,
+                        authority = "${context.packageName}.fileprovider",
+                        context = context,
+                        onDismiss = { shareSheetOpen = false },
+                        categoryFamily = sheetCat.family,
+                        topicByline = sheetTopic.byline,
+                        // The sheet's style index is per-FAMILY (see
+                        // [availableStylesForFamily]), not an index into the
+                        // style enum — mapping it any other way opens the sheet
+                        // on a different design than the post is wearing.
+                        initialStyle = com.curio.app.ui.components
+                            .availableStylesForFamily(sheetCat.family, sheetTopic.name)
+                            .indexOf(style)
+                            .coerceAtLeast(0),
+                        initialAspect = aspect,
+                        onAspectChanged = { aspect = it }
+                    )
+                }
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize().imePadding(),
@@ -417,6 +457,9 @@ internal fun CommunityPostScreen(
                             topic = topic,
                             draft = draft,
                             accent = accent,
+                            aspect = aspect,
+                            onAspect = { aspect = it },
+                            onEditCard = { shareSheetOpen = true },
                             onTopicNote = { topicPresentation = TopicPresentation.NOTE },
                             onTopicCard = { topicPresentation = TopicPresentation.CARD }
                         )
@@ -778,6 +821,13 @@ private fun LivePostPreview(
     topic: CurioTopic?,
     draft: CommunityCardDraft,
     accent: Color,
+    // v428 — THE PREVIEW WEARS THE CARD'S OWN CONTROLS. The shape is switched
+    // right here (it is the one edit whose effect the preview has to show
+    // immediately), and the door beside it opens the topic reveal's own card
+    // editor rather than a second, simpler one (see the composer's note).
+    aspect: ShareCardAspect,
+    onAspect: (ShareCardAspect) -> Unit,
+    onEditCard: () -> Unit,
     onTopicNote: () -> Unit,
     onTopicCard: () -> Unit
 ) {
@@ -855,6 +905,40 @@ private fun LivePostPreview(
                         label = "NOTE",
                         body = draft.factText,
                         credit = ""
+                    )
+                }
+            }
+
+            // ── The card's own strip: its shape, and the way in ──────────
+            // Both are about the CARD rather than about the post, so they sit
+            // under the paper they change. The ratio reads as the ratio ("3:4"),
+            // and the door says what it opens.
+            if (kind == KIND_CARD && topicPresentation == TopicPresentation.CARD && topic != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        "Shape",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    PreviewTogglePill(
+                        label = aspect.label,
+                        active = false,
+                        onClick = {
+                            onAspect(
+                                if (aspect == ShareCardAspect.CLASSIC) ShareCardAspect.PORTRAIT
+                                else ShareCardAspect.CLASSIC
+                            )
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                    PreviewTogglePill(
+                        label = "Edit card",
+                        active = false,
+                        onClick = onEditCard
                     )
                 }
             }

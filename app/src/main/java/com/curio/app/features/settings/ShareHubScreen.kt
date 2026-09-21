@@ -58,6 +58,7 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
+import com.curio.app.ui.components.signatureClassicAvailable
 import com.curio.app.ui.components.TopicShareCard
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -151,7 +152,22 @@ fun ShareHubScreen(navController: NavController) {
     val authority = remember { "${context.packageName}.fileprovider" }
 
     val wide = windowWidthSizeClass().isWide
-    val selectedDesign = pickedDesign?.takeIf { it in HubDesigns.indices }?.let { HubDesigns[it] }
+    // v428 — THE GRID IS BUILT FOR THE PICKED CATEGORY. The Classic Signature is
+    // only offered where it still exists (GAMES and FILMS — see
+    // [signatureClassicAvailable]); every other lane browses the one Signature
+    // design it has, so the grid never shows a design the editor would refuse to
+    // open. The list is derived once per category (its indices are what
+    // `pickedDesign` stores, so it must not be rebuilt on every recomposition).
+    val designs = remember(preview.categoryName) {
+        hubDesigns(classicSignature = signatureClassicAvailable(preview.categoryName))
+    }
+    // Where the per-category cells begin — found by the cells themselves rather
+    // than by a hard-coded count, so the heading cannot drift when a design is
+    // added or removed above them.
+    val categorySectionStart = remember(designs) {
+        designs.indexOfFirst { it.categoryOverrideId != null }
+    }
+    val selectedDesign = pickedDesign?.takeIf { it in designs.indices }?.let { designs[it] }
 
     Box(
         modifier = Modifier
@@ -340,10 +356,10 @@ fun ShareHubScreen(navController: NavController) {
                     if (picked != null) "Designs · ${picked.name}" else "Designs · preview with any topic"
                 )
             }
-            HubDesigns.forEachIndexed { i, design ->
-                // The per-category signature cells start after the 9 base
-                // styles — show a section label before them.
-                if (i == 9) {
+            designs.forEachIndexed { i, design ->
+                // The per-category signature cells come after the base styles —
+                // show a section label before the first of them.
+                if (i == categorySectionStart) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         SettingsSectionHeading("Per-category signature designs")
                     }
@@ -604,9 +620,16 @@ private data class HubDesign(
     val categoryOverrideId: CategoryId? = null
 )
 
-/** Every share-card design, including both Signature variants and one cell
- *  per category's signature background. */
-private val HubDesigns: List<HubDesign> = buildList {
+/**
+ * Every share-card design, including the Signature variants and one cell per
+ * category's signature background.
+ *
+ * v428 — [classicSignature] is the CALLER's answer now, not a fixed entry: the
+ * Classic Signature exists only for the lanes that kept it (see
+ * [signatureClassicAvailable]), so a Books topic no longer browses a design its
+ * own editor has no toggle for.
+ */
+private fun hubDesigns(classicSignature: Boolean): List<HubDesign> = buildList {
     // ── Base styles (available for every topic) ──
     add(HubDesign("Paper", ShareCardStyle.PAPER))
     add(HubDesign("Vinyl", ShareCardStyle.VINYL))
@@ -615,7 +638,9 @@ private val HubDesigns: List<HubDesign> = buildList {
     add(HubDesign("Editorial", ShareCardStyle.EDITORIAL))
     add(HubDesign("Minimal", ShareCardStyle.MINIMAL))
     add(HubDesign("Signature", ShareCardStyle.SIGNATURE))
-    add(HubDesign("Signature · Classic", ShareCardStyle.SIGNATURE, classic = true))
+    if (classicSignature) {
+        add(HubDesign("Signature · Classic", ShareCardStyle.SIGNATURE, classic = true))
+    }
     add(HubDesign("Custom", ShareCardStyle.CUSTOM))
     // ── Per-category Signature designs — every category's signature
     //    background is browseable and pickable for any topic. Skips
