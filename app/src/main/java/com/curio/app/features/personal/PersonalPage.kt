@@ -147,11 +147,13 @@ internal data class PersonalPageMeta(
      */
     val accentArgb: Int = JOURNAL_ACCENT_THEME,
     /**
-     * v429 — WHETHER THE PAGE ITSELF WEARS THAT COLOUR ([PersonalNoteEntity
-     * .pagePainted]). It rides the meta for the same reason the colour does: the
-     * writer rebuilds the whole entity from the meta, so a flag left out here
-     * would be a flag ERASED on the next keystroke, and the debounce reads the
-     * meta as a value — flipping the switch saves on the same clock a word does.
+     * v438 — `pagePainted` IS STILL HERE, AND NOTHING SETS IT. It was the v429
+     * switch that let a page paint its own paper with its colour; the member has
+     * withdrawn that (see [journalPaper]), so the writer below keeps sending the
+     * entity's own field at its default rather than a flag nothing can change.
+     * **The column and the field stay** — dropping a Room column is a migration,
+     * and an unused flag that round-trips is not a mess (the same treatment
+     * `profiles.avatar_style` got).
      */
     val pagePainted: Boolean = false
 )
@@ -198,15 +200,7 @@ internal fun PersonalWritingPage(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
-    /**
-     * v429 — AND WHETHER THE PAPER TAKES IT (see [JournalPagePaint]): the
-     * member's own option, offered in the colour sheet beside the colour and
-     * kept with the page. Providered to every surface that paints journal paper
-     * — the reading side, the writing canvas and the export — by the three
-     * `CompositionLocalProvider`s below.
-     */
-    journalPagePainted: Boolean = false,
-    onJournalPagePainted: ((Boolean) -> Unit)? = null,
+
     /** The document as it changes — the to-do page counts its own rows from it
      *  (see TodoScreen), and nothing else has to reach into the editor. */
     onDoc: (PersonalDoc) -> Unit = {},
@@ -252,17 +246,6 @@ internal fun PersonalWritingPage(
     val isNew = entryIdArg == CurioRoutes.PERSONAL_NEW
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // v429 — THE PAGE'S OWN PAINT, resolved once for this page and handed to
-    // everything that draws journal paper (see [JournalPagePaint]). The option
-    // is only meaningful on a page that HAS a colour of its own and a setter to
-    // keep the answer with — which is exactly the journal, and why the note-on-a-
-    // topic, chapter-review and book-review pages keep the theme's parchment.
-    val pagePaint = remember(journalAccent, journalPagePainted, onJournalPagePainted) {
-        JournalPagePaint(
-            argb = journalAccent,
-            painted = journalPagePainted && onJournalPagePainted != null
-        )
-    }
 
     // SAVED, not merely remembered: a brand-new page's id is minted on the
     // first composition, and navigating away (the topic page, a settings trip)
@@ -735,7 +718,7 @@ internal fun PersonalWritingPage(
                 // they are the app's furniture, and they would come out
                 // unreadable over a paper dark enough to be a choice.
                 .background(
-                    if (LocalJournalPagePaint.current.own != null) journalPaper()
+                    journalPaper()
                     else MaterialTheme.colorScheme.background
                 )
                 // The writing area's own top edge, in the window: the line a
@@ -818,9 +801,7 @@ internal fun PersonalWritingPage(
                             val block = doc.blocks.getOrNull(index)
                             if (block != null) editor.setChecked(block.id, !block.checked)
                         },
-                        LocalPersonalTapToEdit provides tapToEdit,
-                        // v429 — the READING side's paper (see [pagePaint]).
-                        LocalJournalPagePaint provides pagePaint
+                        LocalPersonalTapToEdit provides tapToEdit
                     ) {
                         Box(
                             modifier = Modifier
@@ -863,20 +844,12 @@ internal fun PersonalWritingPage(
                         // (a Box STACKED the mood pill on the title — "the mood
                         // select and the journal title … are overlapping").
                         Column { aboveCanvas() }
-                        // v429 — the WRITING side's paper: the canvas paints the
-                        // page the member types on, so it is told the same paint
-                        // the reading side was ("the journal page color also
-                        // needs to chnage with the color chnage").
-                        CompositionLocalProvider(
-                            LocalJournalPagePaint provides pagePaint
-                        ) {
-                            PersonalCanvas(
-                                state = editor,
-                                modifier = Modifier.fillMaxWidth(),
-                                onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
-                                onTitlePosition = reportSectionLine
-                            )
-                        }
+                        PersonalCanvas(
+                            state = editor,
+                            modifier = Modifier.fillMaxWidth(),
+                            onOpenPhoto = { uri, bounds -> photos.open(uri, bounds) },
+                            onTitlePosition = reportSectionLine
+                        )
                         Spacer(Modifier.height(140.dp))
                     }
                 }
@@ -1017,23 +990,14 @@ internal fun PersonalWritingPage(
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 8.dp)
             ) {
-                // v429 — AND THE DOCK, because the dock is where the page's
-                // EXPORT is resolved: a file a page leaves as must wear the paper
-                // the page is wearing, painted or not (see [PersonalExport]).
-                CompositionLocalProvider(
-                    LocalJournalPagePaint provides pagePaint
-                ) {
-                    PersonalToolDock(
-                        state = editor,
-                        onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
-                        showJournalTools = showJournalTools,
-                        journalAccent = journalAccent,
-                        onJournalAccent = onJournalAccent,
-                        journalPagePainted = journalPagePainted,
-                        onJournalPagePainted = onJournalPagePainted,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                PersonalToolDock(
+                    state = editor,
+                    onPickPhoto = { photoPicker.launch(arrayOf("image/*")) },
+                    showJournalTools = showJournalTools,
+                    journalAccent = journalAccent,
+                    onJournalAccent = onJournalAccent,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
 

@@ -730,3 +730,4 @@ FIX:
 - Reading: the ⋯ grid is a pill with the glyph in it and its name underneath — the names were inside the capsule, which is what made the buttons read as huge; the empty notes and highlights lists say nothing but a dash now.
 - Reading: the page slider takes the bottom of the page to itself while it is up, so the buttons it opened from step aside.
 - Writing: a page always keeps a line to type in — cutting or deleting the whole page left the writing with nothing to put the cursor in, so there was no way to type again; an empty line stays at the foot with the cursor already in it.
+- Writing: a journal's colour stays on the previews that name it — the journal list's spine, its chip on Home and the palette tool — and no longer tints the page or its tools, where the words around them could blend into the fill.

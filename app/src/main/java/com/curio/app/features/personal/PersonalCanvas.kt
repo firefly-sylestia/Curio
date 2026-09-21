@@ -6009,14 +6009,6 @@ internal fun PersonalToolDock(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
-    /**
-     * v429 — WHETHER THE PAGE'S PAPER TAKES THE COLOUR TOO (see
-     * [JournalPagePaint]). Stored with the page like the colour, and offered in
-     * the same sheet; null draws no switch, exactly as a null [onJournalAccent]
-     * draws no palette door.
-     */
-    journalPagePainted: Boolean = false,
-    onJournalPagePainted: ((Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -6030,8 +6022,6 @@ internal fun PersonalToolDock(
         JournalAccentSheet(
             current = journalAccent,
             onPick = onJournalAccent,
-            painted = journalPagePainted,
-            onPainted = onJournalPagePainted,
             onDismiss = { accentOpen = false }
         )
     }
@@ -6043,14 +6033,13 @@ internal fun PersonalToolDock(
     // The dock wears the app's own accent (the same one Home's hero uses), not
     // a hard rose — a member on the azure/hero-lane theme sees THEIR accent.
     val accent = personalAccent()
-    // v437 — UNLESS THE PAGE HAS A COLOUR OF ITS OWN, and then the tools light
-    // in THAT. The member: *"the dock's tools don't light in it"*. Every tool,
-    // every panel's lit choice and the marker pens took [personalAccentInk] —
-    // the theme's accent — so a page coloured anything at all still lit rose.
-    // [journalDoorAccent] answers the theme's ink for a page that follows the
-    // theme, so a journal that never picked a colour is pixel-for-pixel what it
-    // was.
-    val accentInk = journalDoorAccent(journalAccent)
+    // v438 — AND THE TOOLS WEAR THE THEME'S ACCENT, NOT THE PAGE'S COLOUR.
+    // v437 lit them with `journalDoorAccent(journalAccent)`, on the member's note
+    // then ("the dock's tools don't light in it"); their answer now is the
+    // reverse — *"the journal tools etc dont get the color they stay like
+    // before"* — so the dock is the theme's own again and the colour lives on the
+    // DOORS (the palette tool below, the list's spine, Home's chips).
+    val accentInk = personalAccentInk()
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     // v428 — THE TOOL ROW REMEMBERS WHERE IT WAS LEFT. A row of tools wider
     // than a phone is scrolled to reach the last of them, and the state used to
