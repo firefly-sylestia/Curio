@@ -15,6 +15,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -87,6 +88,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -542,9 +544,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // its own frame no longer spans what is on screen (v424 — the surfaces
     // translate a tap inside a page before it gets here; see [readerZoneActionAt]).
     val onSurfaceTap: (Offset, IntSize) -> Unit = { at, size ->
+        // ── v432 — A PINCH IS NOT A TAP ─────────────────────────────────────
+        //
+        // A zoom ends with both fingers lifting in one event, which every tap
+        // detector in the reader reads as a TAP on the page it happened over —
+        // so the tools came and went with each zoom, and a lift near the side of
+        // the screen turned the page instead of putting the chrome back (member:
+        // "its appear and disapper of the tools"). Every tap the reader answers
+        // comes through here, the zones included, so this is where it is said
+        // once (see [ReaderTouch]).
         val action =
             if (ReaderLook.tapZones) readerZoneActionAt(at, size) else ReaderZoneAction.OFF
         when {
+            ReaderTouch.multi -> Unit
             action == ReaderZoneAction.OFF -> tapPage()
             action.scrolls -> scrollPage(action.step)
             else -> stepPage(action.step)
@@ -818,7 +830,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // im sure boo pdf hav that table of contnt etc").
     var pdfChapters by remember(document) { mutableStateOf<List<ReaderOutlineEntry>?>(null) }
     LaunchedEffect(sheet, document) {
-        if (sheet != ReaderSheet.PLACES) return@LaunchedEffect
+        if (sheet != ReaderSheet.CONTENTS) return@LaunchedEffect
         if (content !is ReaderContent.Pages) return@LaunchedEffect
         if (pdfChapters != null || document.isBlank()) return@LaunchedEffect
         pdfChapters = withContext(Dispatchers.IO) {
@@ -904,7 +916,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // this sits UNDER the words, so it never eats a long press meant for
             // a paragraph.
             .pointerInput(Unit) {
-                detectTapGestures(onTap = { chrome = !chrome })
+                detectTapGestures(onTap = { if (!ReaderTouch.multi) chrome = !chrome })
             }
     ) {
         when {
@@ -1855,6 +1867,37 @@ private fun PdfScrollReader(
     // the column, because a vertical scroller ignores a sideways one.
     val across = rememberScrollState()
 
+    // ── v432 — A DOUBLE TAP'S CORRECTION, MADE AFTER THE RELAYOUT ───────────
+    //
+    // A double tap is one BIG step of the same zoom a pinch asks for in many
+    // small ones, and that difference decides where its scroll correction can be
+    // made: a pixel offset into a sheet only means a place at the zoom it was
+    // measured at, so the correction waits here until the column has been laid
+    // out at the new size (see [ReaderZoomAsk]).
+    var zoomAsk by remember { mutableStateOf<ReaderZoomAsk?>(null) }
+    LaunchedEffect(zoomAsk) {
+        val ask = zoomAsk ?: return@LaunchedEffect
+        // The sheet has to report its NEW height before the numbers mean
+        // anything — a frame, or two, is all a relayout ever takes.
+        var sheet = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == ask.index }
+        var waited = 0
+        while (waited < 3 && (sheet == null || sheet.size == ask.wasSize)) {
+            withFrameNanos { }
+            sheet = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == ask.index }
+            waited += 1
+        }
+        // A sheet that never reports (it is several screens from where the list
+        // settled) is still the sheet to open, so the new height is taken from
+        // the scale the tap asked for — the file is proportional by design.
+        val size = sheet?.size ?: (ask.wasSize * ask.ratio).roundToInt()
+        // The tapped share of the sheet, put back under the same finger. A
+        // negative ask (the taper near a sheet's head) lands on its top edge,
+        // which is as close as a sheet can be put to the finger.
+        val wanted = (ask.fraction * size - ask.viewportY).roundToInt()
+        listState.scrollToItem(ask.index, wanted.coerceAtLeast(0))
+        if (zoomAsk === ask) zoomAsk = null
+    }
+
     var restored by remember(bookId, document) { mutableStateOf(false) }
     LaunchedEffect(bookId, document, pageCount) {
         if (restored) return@LaunchedEffect
@@ -2033,7 +2076,8 @@ private fun PdfScrollReader(
                                 // so the pan is deliberately not taken off here.
                                 at = Offset(at.x - sidePad, at.y),
                                 down = listState,
-                                across = across
+                                across = across,
+                                onAnchor = { ask -> zoomAsk = ask }
                             )
                         }
                     )
@@ -2196,6 +2240,7 @@ private fun PdfScrollReader(
                                     // surface's (which is what the list's layout
                                     // offsets are measured against).
                                     at = Offset(at.x, (at + where - surfaceOrigin).y),
+                                    onAnchor = { ask -> zoomAsk = ask },
                                     down = listState,
                                     across = across
                                 )
@@ -3319,10 +3364,17 @@ private fun ReaderChrome(
         // back button with the pdf namr of book make it floating pill style that
         // floating at the top", plus "put the search icon at the top right
         // corner").
+        // ── v432 — AND IT COMES IN FROM ITS OWN EDGE ───────────────────
+        //
+        // The pills only faded before, a 1%-per-frame wash that read as a flinch
+        // rather than a tool arriving (member: "its appear and disapper of the
+        // tools"). Each one now SETTLES IN from the edge it lives on — the head
+        // from above, the foot from below — so the reader can see which way the
+        // chrome went, and the two never look like they blinked.
         AnimatedVisibility(
             visible = visible && search == null,
-            enter = fadeIn(tween(180)),
-            exit = fadeOut(tween(160)),
+            enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { -it / 2 },
+            exit = fadeOut(tween(150)) + slideOutVertically(tween(200)) { -it / 2 },
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             ReaderTopPill(title = title, palette = palette, onClose = onClose, onSearch = onSearch)
@@ -3373,8 +3425,8 @@ private fun ReaderChrome(
         //   · ⋯          — notes, highlights, the dictionary, share and settings.
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(180)),
-            exit = fadeOut(tween(220)),
+            enter = fadeIn(tween(180)) + slideInVertically(tween(240)) { it / 2 },
+            exit = fadeOut(tween(150)) + slideOutVertically(tween(200)) { it / 2 },
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             ReaderBottomPill(
@@ -6458,7 +6510,7 @@ private fun pdfTint(
  * a scrolling flow has real pages to turn as well as a column to move, and which
  * one an edge asks for is the member's choice, not the flow's.
  */
-private enum class ReaderZoneAction(val label: String, val hint: String) {
+internal enum class ReaderZoneAction(val label: String, val hint: String) {
     BACK("Back", "The page before"),
     FORWARD("On", "The next page"),
     SCROLL_BACK("Scroll back", "A screenful the other way"),
@@ -6484,7 +6536,7 @@ private enum class ReaderZoneAction(val label: String, val hint: String) {
  * the width and stand the whole height, the head and the foot are measured down
  * the height and sit between the sides (see [readerZoneActionAt]).
  */
-private enum class ReaderZoneEdge(val label: String) {
+internal enum class ReaderZoneEdge(val label: String) {
     LEFT("Left"),
     RIGHT("Right"),
     TOP("Top"),
@@ -6870,6 +6922,25 @@ private fun ZoneChip(
     }
 }
 
+/**
+ * v432 — WHETHER THE GESTURE IN FLIGHT HAS HAD A SECOND FINGER ON IT.
+ *
+ * A pinch ends with the fingers lifting within a frame of each other, and Android
+ * delivers that as ONE event with every change up — which is precisely what
+ * `detectTapGestures` reads as a TAP. So every zoom ended by tapping the page it
+ * was made on: the reader's tools came and went with the gesture, and a lift near
+ * the side of the screen turned the page instead of putting the chrome back
+ * (member: "its appear and disapper of the tools").
+ *
+ * The pinch says so here, on the second finger down, and every tap the reader
+ * answers asks first. It is cleared on the NEXT gesture's first finger — in
+ * [pinchToZoom]'s `awaitFirstDown(requireUnconsumed = false)`, which is the one
+ * place that hears EVERY gesture in the reader, whatever surface it starts on.
+ */
+internal object ReaderTouch {
+    var multi by mutableStateOf(false)
+}
+
 private fun Modifier.pinchToZoom(
     /**
      * What the gesture is bound to. A page whose SHAPE arrives after it was
@@ -6905,6 +6976,9 @@ private fun Modifier.pinchToZoom(
 ): Modifier = pointerInput(key) {
     awaitEachGesture {
         awaitFirstDown(requireUnconsumed = false)
+        // v432 — a gesture begins with one finger; it only becomes a pinch when
+        // a second one lands (see [ReaderTouch]).
+        ReaderTouch.multi = false
         var last: Offset? = null
         // Whether THIS gesture has moved the page, and whether the page turned
         // the drag down at its edge. Both are per-gesture on purpose (v406).
@@ -6916,6 +6990,7 @@ private fun Modifier.pinchToZoom(
             if (pressed.size >= 2) {
                 // Two fingers are always the zoom's, from the first event: a
                 // pinch that begins on a page is never a page turn.
+                ReaderTouch.multi = true
                 ownsTheDrag = true
                 declined = false
                 val zoom = event.calculateZoom()
@@ -7159,21 +7234,79 @@ private fun readerZoomDocument(
 private fun readerDoubleTapDocument(
     at: Offset,
     down: LazyListState,
-    across: ScrollableState
+    across: ScrollableState,
+    /** Where the file has to be put back — handed over, not done here (v432). */
+    onAnchor: (ReaderZoomAsk) -> Unit
 ) {
+    // A PINCH IS NOT A TAP (see [ReaderTouch]).
+    if (ReaderTouch.multi) return
     val owns = ReaderLook.pdfZoomPage == -1
     val out = owns && ReaderLook.pdfZoom > 1.02f
     val was = if (owns) ReaderLook.pdfZoom else 1f
     val next = if (out) 1f else 2.2f
     val ratio = if (was > 0f) next / was else 1f
-    if (ratio != 1f) {
-        down.dispatchRawDelta(documentOffsetAt(down, at.y) * (ratio - 1f))
-        across.dispatchRawDelta(at.x * (ratio - 1f))
-    }
+    // The SIDEWAYS half is safe to do here: a scroll state is a plain number and
+    // the content's own width settles itself around it. The file's own scroll is
+    // NOT (see [ReaderZoomAsk]), so it is measured now — against the layout as
+    // it still stands — and applied by the caller once the new one exists.
+    if (ratio != 1f) across.dispatchRawDelta(at.x * (ratio - 1f))
+    zoomAskOf(down, at.y, ratio)?.let(onAnchor)
     ReaderLook.pdfZoom = next
     ReaderLook.pdfZoomPage = -1
     ReaderLook.pdfPanX = 0f
     ReaderLook.pdfPanY = 0f
+}
+
+/**
+ * v432 — A DOUBLE TAP'S OWN CORRECTION, MADE ONCE THE FILE HAS SETTLED.
+ *
+ * The vertical half of a double tap's anchoring used to be a raw scroll delta,
+ * computed from the layout as it stood a moment before the zoom was written — and
+ * that is right for a PINCH, which arrives as many small steps, and wrong for a
+ * single big one, which is exactly what a double tap is. The scroll position is
+ * held as a pixel offset into the sheet it sits on, and that number is only a
+ * pixel offset at the zoom it was measured at: at 2.2x a sheet is 2.2 screens
+ * tall, so the offset can be LONGER than the whole sheet becomes at 1x. The list
+ * then has to roll it back into the sheet above, and the member ends up a page
+ * (or three) away from the word they tapped (their report: "the double tap zoom
+ * and double tap again to unzoom is kinda buggy").
+ *
+ * So what crosses the zoom is the tapped point's SHARE of its own sheet, and the
+ * scroll is corrected only once the column has been laid out at the new zoom —
+ * the one moment those numbers mean what the correction needs them to. The
+ * remaining error is nil: the sheet under the tap is put back with the same
+ * point of itself under the same finger, at any zoom, in either direction.
+ */
+private class ReaderZoomAsk(
+    /** The sheet the tap landed on. */
+    val index: Int,
+    /** How far into that sheet the finger was, as a SHARE of it (0..1). */
+    val fraction: Float,
+    /** The sheet's laid-out height BEFORE the zoom, so the correction can tell
+     *  the relayout has landed instead of measuring the layout it came from. */
+    val wasSize: Int,
+    /** Where the tap was, in the viewport's own y. */
+    val viewportY: Float,
+    /** The scale change asked for, for the fallback if the sheet never reports. */
+    val ratio: Float
+)
+
+/**
+ * The sheet a tap at [viewportY] landed on, and how far into it it went.
+ *
+ * A tap in the AIR between two sheets (the 16dp gap, the margin above the first)
+ * belongs to whichever sheet it is nearest — the same reading the tap zones and
+ * the pinch anchor already use, so a double tap in the gap does something
+ * sensible rather than nothing.
+ */
+private fun zoomAskOf(state: LazyListState, viewportY: Float, ratio: Float): ReaderZoomAsk? {
+    val visible = state.layoutInfo.visibleItemsInfo
+    if (visible.isEmpty()) return null
+    val under = visible.firstOrNull { viewportY >= it.offset && viewportY < it.offset + it.size }
+        ?: visible.minByOrNull { abs(it.offset + it.size / 2f - viewportY) }
+        ?: return null
+    val fraction = ((viewportY - under.offset) / under.size.toFloat()).coerceIn(0f, 1f)
+    return ReaderZoomAsk(under.index, fraction, under.size, viewportY, ratio)
 }
 
 private fun readerZoomThisPage(
@@ -7241,6 +7374,8 @@ private fun readerZoomThisPage(
  * is still under it afterwards (v399).
  */
 private fun readerDoubleTapZoom(page: Int, box: IntSize, aspect: Float, at: Offset) {
+    // A PINCH IS NOT A TAP (see [ReaderTouch]).
+    if (ReaderTouch.multi) return
     if (ReaderLook.pdfZoomPage == page && ReaderLook.pdfZoom > 1.02f) {
         ReaderLook.pdfZoom = 1f
         ReaderLook.pdfPanX = 0f

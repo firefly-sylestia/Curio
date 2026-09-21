@@ -8,128 +8,95 @@ from the state rather than from memory.
 
 ## 1. The request (this session)
 
-> in vertical pages the pdf zoom is really buggy its scrolling when i try to zoom and it
-> scroll so fast when i try zoom that like 10 pages it scrolls by, fix it please, when the
-> pdf is verticaly stacked, and then the upper back button with the pdf namr of book make
-> it floating pill style that floating at the top and same for the buttom tools make it
-> floating, a proper pill shape not thin. proper pill with 5 buttons, one with appearncae
-> with A- A+ witha slider to adjust the text size, below the font option only 3 in a row
-> then below 5 differnt backgroud color the paper, sepia, night white and 2 more, and then
-> belo 2 toggle with one auto rotate and another ith the horizontal option, then in the
-> next button it shows 3 line which opens up the chapters content keep the bookmark button
-> per chapter with the progress lets separate the bookmarks again and it will be 3rd option
-> with bookmarks, and another with a 3 dot to show the menu of search, notes, highlithts
-> disctionary, share, settings, each arounded pills, with proper ui and logic and settings
-> gets its own screen, oh and the pages in the middle of the doc pill when tapping the
-> pages it opens the page scrubber, and holding the page pins the page count as a small
-> ounter in the corner, and make the ui smooth stbale buttom sheet which smoothly collapse
-> or anything the height stays half of the screen, also put the search icon at the top
-> right corner with proper floating top search with next previous button hihglighting the
-> results on the pdf, use buttons and icons with less text and dont use erm dahses
+> tell me did the previous task finished for the pdf settings etc? smoothly ui etc ? and
+> also it needs a bit more fix the double tap zoom and double tap again to unzoom is kinda
+> buggy and also its appear ad disapper of the tools,
 
-Confirmed with the member via `ask_user` before implementing:
-
-- **Reader settings** — a FULL-SCREEN page INSIDE the reader (reader's own style, not the
-  settings family), also reachable from the settings side: for now the door is wired on the
-  Dev page.
-- **Page inks** — Gray is the sixth, plus a **`+` tile that reveals more tuned papers**
-  (mint, rose, amber, slate).
-- **Dictionary** — in-app **Wiktionary** (keyless). A single-word selection shows ONLY the
-  dictionary icon; the selection bar becomes a **wide floating capsule** (Samsung-like),
-  clean and smooth.
-- **Tap zones** move into the **⋯ menu** (with its long-press placement editor); **Search is
-  removed from the ⋯ menu** because the top-right search door is the one search.
-- **Ship mode** — always-on (the redesign replaces the old chrome; no Settings toggle).
+Three things: (a) report whether the previous reader pass actually landed, (b) fix the
+double-tap zoom in and the double-tap-to-unzoom, (c) fix the tools appearing and
+disappearing.
 
 ## 2. Findings
 
-**The zoom bug is an anchor measured from the top of the file instead of from the sheet
-under the finger.** `readerZoomDocument` (and `readerDoubleTapDocument`) compensated with
+**(a) The previous pass did NOT land.** Both reader commits were pushed
+(`633283e0`, `17bef96c`) but CI **failed** on the second one — five compile errors in
+`BookReaderScreen.kt`: `ReaderSheet.PLACES` no longer exists (renamed to `CONTENTS` in the
+v431 sheet split), and the four `ReaderLook.zone*` properties went `internal` (the object
+had to become `internal` so `ReaderSettingsScreen.kt`, a new file, could read it) while the
+type they carry — `private enum class ReaderZoneAction` / `ReaderZoneEdge` — stayed
+file-private (`'internal' property exposes its 'private-in-file' type`). So the reader
+redesign as shipped was **not compiling**; the app on origin is the v430 build. Fixed first,
+before anything else this session.
 
-```
-down.dispatchRawDelta(documentOffsetAt(down, focus.y) * (ratio - 1f))
-```
+**(b) The double-tap bug.** `readerDoubleTapDocument` corrected the file's scroll with a raw
+`down.dispatchRawDelta(documentOffsetAt(down, at.y) * (ratio - 1f))`. That is right for a
+PINCH — the same arithmetic `readerZoomDocument` uses, and it holds because a pinch arrives
+as many small steps, none of them crossing a sheet — and wrong for a double tap, which is
+ONE big step (1× ↔ 2.2×). A lazy column holds `(firstVisibleItemIndex, scrollOffset)` and
+`scrollOffset` is a pixel count INTO that sheet, so it only means a place at the zoom it was
+measured at: at 2.2× the offset can be longer than the whole sheet becomes back at 1×, so
+the list must ROLL it into the sheet above and the member lands a page or three from the
+word they tapped. (Checked the ordering question both ways: a delta applied against the OLD
+layout is off by one item's growth per sheet crossed; against the NEW layout it is exact —
+and a single big step cannot be relied on to get either.)
 
-and `documentOffsetAt` returned `index · sheetHeight + into` — the distance from the TOP OF
-THE FILE. But a lazy column PRESERVES `(firstVisibleItemIndex, scrollOffset)` across a
-relayout, and every sheet grows by `ratio`, so the relayout ALREADY moves the viewport by
-`index · sheetHeight · (ratio − 1)` in document space. The compensation therefore *doubles*
-the jump, and it is proportional to **how far into the book you are** — which is exactly the
-report ("like 10 pages it scrolls by"): zooming 5% while 300 pages in threw away ~15 pages.
-
-The arithmetic for holding the point under the fingers:
-
-```
-needed delta = (ratio − 1) · <the finger's offset INSIDE the sheet it is over>
-```
-
-(`into` alone). Page padding and the 16dp gaps do not scale with the zoom and cancel in the
-difference, so the index-proportional term is not just stale — it is spurious. The
-horizontal compensation (`focus.x · (ratio − 1)`) was correct and stays: a raw
-`ScrollState` value is not auto-adjusted when its content grows.
-
-The reader's chrome at the time of the request: a full-width opaque HEAD (back + title), a
-floating PAGE BAR pill above the foot, and a full-width opaque FOOT (flow toggle, tap-zones
-toggle, position line, search, palette, bookmark/places) — plus sheets drawn as custom
-bottom surfaces with no drag and no fixed height, and a search sheet rather than a floating
-bar.
+**(c) The tools.** `detectTapGestures` reads a gesture whose changes all go up in ONE event
+as a tap. A pinch ends exactly like that (both fingers lifted within a frame, batched into
+one pointer event), and NO tap detector in the reader asked whether the gesture had been a
+zoom — so every pinch ended by tapping the page it was made on: the chrome toggled (tools
+come and go), and a lift near a side edge turned the page instead (the same lift read as a
+zone tap). The chrome's own appear/leave was a bare cross-fade, which reads as a flinch
+rather than a tool arriving.
 
 ## 3. What was built
 
-**The zoom (the bug):** `documentOffsetAt` answers the finger's distance below the
-FIRST VISIBLE item's top edge, and both `readerZoomDocument` and
-`readerDoubleTapDocument` feed that to `dispatchRawDelta`. The index-proportional
-term is gone, so a pinch holds the point under the fingers instead of adding a
-second, deeper jump on top of the one the relayout already makes.
+**CI repairs:** `ReaderSheet.PLACES` → `ReaderSheet.CONTENTS`; `ReaderZoneAction` and
+`ReaderZoneEdge` are `internal` now, so the `internal object ReaderLook` no longer exposes a
+file-private type.
 
-**The reader chrome, rebuilt (`BookReaderScreen.kt`):**
+**A correction made after the layout it needs exists** (`ReaderZoomAsk`, `zoomAskOf`, and the
+`zoomAsk` effect in `PdfScrollReader`): what crosses a double tap's zoom is the tapped
+point's **share of its own sheet** — index, fraction, the sheet's old height, the tap's
+viewport y and the scale ratio — and the scroll is corrected only once the column has been
+laid out at the new size (it waits for the sheet to report a NEW height, three frames at
+most, then `scrollToItem(index, fraction · newSize − viewportY)`). The sideways half stays
+synchronous: a scroll state is a plain number and the content's width settles itself. A tap
+in the air between two sheets belongs to the nearest one; a tap whose ideal offset would be
+negative lands the sheet's head at the top edge.
 
-- `ReaderTopPill` — back, the book's name in the member's own reading type, and the
-  search door at the end; the head is no longer a band across the page.
-- `ReaderBottomPill` — five buttons: Appearance, Contents, **Pages** (the count, in
-  the middle), Bookmarks, ⋯.
-- `ReaderAppearanceSheet` — A−/slider/A+ for the text size, three typefaces in a row
-  (`ReaderTypeFace`: Lora / Fraunces / the writing hand, applied to the whole page),
-  five papers in a row (`ReaderSkin.primary`) + a `+` tile that unfolds the tuned ones
-  (mint, rose, amber, slate — with a real `out = a·in + ink` PDF filter each), and the
-  two switches: Auto-rotate and Horizontal pages.
-- `ReaderScrubberSheet` (a tap on Pages) + `ReaderPinnedPage` (a HOLD on Pages pins the
-  count in the corner, outside the chrome, so it survives the tools hiding).
-- `ReaderSearchBar` — floating, in the head's row, with the field, the find count,
-  next/previous and the cross; swept on a 320ms pause, the first find stepped onto at
-  once, and every occurrence washed on the PDF pages (the one being stood on washed
-  harder). Search is removed from the ⋯ menu.
-- `ReaderPlacesMode` — the contents / bookmarks / notes / highlights sheets are ONE
-  layout with a mode, so the chapter rows keep their own bookmark and their progress.
-- `ReaderMenuSheet` — Notes, Highlights, Dictionary, Share, Tap zones (with the
-  placement editor on a hold) and Reading settings, each a rounded pill.
-- `ReaderSelectionBar` — a single word offers ONLY the dictionary; anything longer gets
-  the wide floating capsule toolbar (one row, full radius, icons only).
-- `ReaderSheetFrame` — hand-built half-height sheet, tweened in, draggable shut by its
-  handle, scrolls inside itself, and swallows a tap so the scrim cannot shut it.
+**A pinch is not a tap** (`ReaderTouch`): the flag is set on the second finger down inside
+`pinchToZoom` and cleared on the next gesture's `awaitFirstDown(requireUnconsumed = false)`
+— the one place that hears every gesture in the reader, whichever surface it starts on. The
+guards sit where the taps actually arrive: `onSurfaceTap` (which covers the tap ZONES too),
+the chrome's own background tap, and both double-tap doors (`readerDoubleTapDocument`,
+`readerDoubleTapZoom`). Mid-gesture panic is impossible by construction — the pinch already
+consumes every multi-finger event, which is also what cancels the tap detectors' long-press
+path — and the flag self-heals on the next down even if a surface is disposed mid-gesture.
 
-**New files:** `ReaderDictionary.kt` (keyless Wiktionary, memoised, 4s/5s budget) and
-`ReaderSettingsScreen.kt` (`ReaderSettingsScreen` + `ReaderSettingsRoute`) — the reading
-settings page in the READER's palette, opened over the book from the ⋯ menu and wired as
-`CurioRoutes.READER_SETTINGS` behind a door on the Dev page.
+**The chrome moves now** (`ReaderChrome`): the head pill settles down from above and the foot
+pill rises from below (`slideInVertically`/`slideOutVertically` at 240/200ms on top of the
+180/150ms fade).
 
-**One judgement call worth naming:** the member asked for the Pages button "in the middle"
-AND for Bookmarks to be the "3rd option", which cannot both be true in a five-button pill;
-the middle button wins, because the behaviour they described for it (tap for the scrubber,
-hold to pin the count) is the one that only works where the thumb naturally rests.
+**Docs:** a v432 section in `app/AGENTS.md` (both rules to keep, named), and three FIX
+bullets in `fastlane/metadata/android/en-US/changelogs/20260922.txt`.
 
 ## 4. Still open
 
-- Nothing beyond this request's own scope. The reader's own settings page is wired on the
-  Dev page for now, as asked; moving that door into the app's Settings hub is a one-line
-  change when the member wants it.
+- **The chrome's 4.2s auto-hide is untouched.** It is the other way the tools can leave
+  without being asked (v406 added the countdown; the member's original spec, v389, was TAP
+  toggles and SCROLL hides). Removing or lengthening it changes behaviour the member asked
+  for once, so it is being put to them rather than decided here.
+- **The journal dock pass (the message right before this one) has NOT been started** — the
+  session ended before any edit and the tree was clean at `17bef96c`. It is logged in the User
+  prompts slot below.
 
 ## Checks run
 
-- No Gradle command was run: this environment forbids compile/build/lint (`AGENTS.md`), so
-  the change is validated by CI on push plus a careful manual read of every touched API
-  (Compose BOM 2026.05.01; `ModalBottomSheet` + `rememberModalBottomSheetState` are in the
-  BOM and already used elsewhere in the app).
+- No Gradle command was run: this environment forbids compile / build / lint (`AGENTS.md`).
+  The five CI errors were read out of the failed run's log (`gh run view --log`) and fixed
+  one by one; every other API touched (`withFrameNanos`, `slideOutVertically`,
+  `LazyListState.scrollToItem`, `layoutInfo.visibleItemsInfo`) was checked against the
+  Compose BOM (2026.05.01) and is used elsewhere in this file's own imports.
 
 ## User prompts
 
@@ -137,9 +104,24 @@ hold to pin the count) is the one that only works where the thumb naturally rest
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§23 — the reader redesign + the vertical-PDF zoom (done, this session).** Superseded the
-  old §21/§22 note in this slot (those commits were pushed on the member's later instruction;
-  nothing is pending from them). The next items the member named for the source work —
-  **Openverse, Art Institute of Chicago, OpenAlex + Crossref, NASA image library,
-  iNaturalist** — are still NOT built.
+- **§25 — the double tap, and the tools' appear/disappear (done, this session).** The CI-repair
+  half of it is in the same commit: the v431 reader pass would not compile on origin.
+- **§24 — the journal dock pass (NOT started; still pending).** "now a similiar pass for the
+  journal dock tools, and lets make it more compact, collapse the B I U s and font into one
+  toggle … no drop down but the option smoothly expands in that dock … similar grouping for
+  other tools … for format change from drop down to this collapse style but not for the
+  bullet point, and advance for the copy and download, also the copy floating layout, make
+  the arrow proper pills in the corner hide the voice note option when copy tools are on,
+  and add a cross button to close the option box, don't show the nothing picker or 6 out of 6
+  row text … use text select all or just the icon of select all, also fix the line selection,
+  without all select i cant select only word by word, fix it, and instead of cut copy paste
+  use its icon, and for undo the undo icon, make it better, also fix the paint the page too
+  not working, also fix the selected highlight color of the tool it looks bad make them proper
+  icons, also make the today and eye pen pill more capsule like and same for the how did the
+  day feel same capsule style as now they are too thin, use one unified capsule style, so they
+  look good. also from the settings sub pages remove the quick row and its suggestions."
+- **§23 — the reader redesign + the vertical-PDF zoom (done, and shipped in §25's commit).**
+  Compiles now; the next items the member named for the source work — **Openverse, Art
+  Institute of Chicago, OpenAlex + Crossref, NASA image library, iNaturalist** — are still
+  NOT built.
 - (empty slot)

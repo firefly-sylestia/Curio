@@ -671,3 +671,8 @@ ADD:
 - Reading: the dictionary looks words up in the app (Wiktionary) from the ⋯ menu or a selected word.
 - Reading: a reading settings page of its own — paper, type, face, orientation and tap zones — from the ⋯ menu.
 - Reading: share a passage from the ⋯ menu.
+
+FIX:
+- Reading: a double tap in a scrolling PDF opens the page point you tapped and gives the file back from the same place — the file's own scroll was corrected with a number measured at the OTHER zoom, so a double tap to unzoom landed a page or three away from the word you had tapped.
+- Reading: a pinch stops reading as a tap when your fingers lift — the tools no longer come and go with every zoom, and a lift near the side of the screen no longer turns the page instead of bringing the tools back.
+- Reading: the tools arrive and leave with a move — the head pill settles down from the top and the foot pill rises from the bottom, where both only faded in place.
