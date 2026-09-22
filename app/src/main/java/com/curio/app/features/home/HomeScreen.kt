@@ -204,6 +204,7 @@ import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
 import androidx.compose.runtime.withFrameNanos
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -3128,20 +3129,38 @@ private fun DrawerLaneStarMap(
     //
     // It is built once per measured size and drawn as one rect, and it rides the
     // same `reveal` layer as every star, so it arrives and leaves with the drawer.
-    val glowTint = lerp(page, MaterialTheme.colorScheme.primary, 0.22f)
-    val centreGlow = remember(sizePx, page, glowTint) {
+    // v460 — AND ITS FALLOFF IS SMOOTH, AT A STRENGTH EACH THEME ASKS FOR.
+    //
+    // The member, of this sky: *"the drawer constellation i can see the edges in
+    // dark mode, and also in light mode its not visible"*. Both halves were this
+    // one gradient:
+    //
+    //  · **the edges** — four stops is a PIECEWISE-LINEAR ramp, and the eye reads
+    //    every place its slope changes as a ring, which is exactly the banding a
+    //    dark page makes easy to see: the wash arrived as concentric edges rather
+    //    than as light ([glowStops] samples an eased curve at fine steps instead,
+    //    and its slope reaches zero at the rim, so there is no boundary at the
+    //    gradient's own radius either);
+    //  · **not visible in light** — the base tint and the strength were the same
+    //    numbers in both themes, and a 22% wash of the accent on a near-white
+    //    page is not a glow, it is a slightly different white. The strength is
+    //    the theme's own now: the light page asks for a deeper wash than the
+    //    dark one, which is the opposite of how a shadow behaves and the whole
+    //    reason this needed its own number.
+    //
+    // It is still built once per measured size and drawn as one rect (the extra
+    // stops cost nothing at draw time — the brush is cached), and it still rides
+    // the same `reveal` layer as every star.
+    val glowTint = lerp(page, MaterialTheme.colorScheme.primary, GlowTintMix)
+    val glowStrength = if (isCurioDarkTheme()) DarkGlowStrength else LightGlowStrength
+    val centreGlow = remember(sizePx, page, glowTint, glowStrength) {
         if (sizePx.width <= 0 || sizePx.height <= 0) {
             null
         } else {
             Brush.radialGradient(
-                colors = listOf(
-                    lerp(page, glowTint, 0.66f),
-                    lerp(page, glowTint, 0.34f),
-                    lerp(page, glowTint, 0.14f),
-                    page
-                ),
+                colors = glowStops(page, glowTint, glowStrength),
                 center = Offset(sizePx.width / 2f, sizePx.height / 2f),
-                radius = maxOf(sizePx.width, sizePx.height) * 0.66f
+                radius = maxOf(sizePx.width, sizePx.height) * GlowReach
             )
         }
     }
@@ -3184,12 +3203,18 @@ private fun DrawerLaneStarMap(
             }) * (if (picked) 1.18f else 1f)
             val corePx = with(density) { core.dp.toPx() }
             val accent = lane.accent
+            // v460 — the same eased falloff the sky's own wash uses, at the
+            // star's strength: a star's aura was four stops too, so on the dark
+            // page it carried the same visible rings the centre wash did (see
+            // [glowStops]). The exponent is gentler here — a star keeps a solid
+            // core and only its tail softens, which is what the four steps were
+            // standing in for.
             corePx to Brush.radialGradient(
-                colors = listOf(
-                    lerp(page, accent, 0.97f),
-                    lerp(page, accent, if (picked) 0.78f else 0.56f),
-                    lerp(page, accent, if (picked) 0.42f else 0.24f),
-                    page
+                colors = glowStops(
+                    page = page,
+                    tint = accent,
+                    strength = if (picked) 0.97f else 0.90f,
+                    power = 1.5f
                 ),
                 center = centre,
                 radius = corePx * HALO_REACH
@@ -3636,6 +3661,64 @@ private fun DrawerBrainStat(
  *  deep twilight teal with warm cream ink ("looking at a peaceful sky just
  *  before sunrise"). Returns (skyTop, skyBottom, readableInk). */
 @Composable
+/**
+ * v460 — THE ONE SHAPE A GLOW ON THIS SURFACE MAY HAVE.
+ *
+ * Every light in the drawer's sky (the wash the whole map stands in, and each
+ * star's own aura) is a radial gradient from a tint back to the page, and the
+ * member's report of the old one was *"i can see the edges in dark mode"* — the
+ * rings a four-stop gradient shows on a dark fill, because a piecewise-linear
+ * ramp changes slope at every stop and the eye draws a line where it does.
+ *
+ * So the stops are SAMPLED off an eased curve rather than listed by hand: at
+ * [GlowSteps] fine steps, with `(1 - t) ^ power`. Two properties come out of
+ * that, and both are why it reads as light instead of as rings:
+ *
+ *  · no corner anywhere in the ramp, so there is no slope change for the eye to
+ *    find; and
+ *  · `power > 1` makes the falloff flat at the rim (`mix → 0` with zero slope),
+ *    so the edge of the gradient's own radius is not an edge at all.
+ *
+ * The list is built once per brush (the brushes are cached in COMPOSITION) and
+ * costs nothing per frame, which is why the step count can be generous.
+ */
+private fun glowStops(
+    page: Color,
+    tint: Color,
+    strength: Float,
+    power: Float = 2f,
+    steps: Int = GlowSteps
+): List<Color> {
+    // A brush needs at least two stops, so a degenerate step count still answers
+    // with a ramp rather than an empty list.
+    if (steps <= 1) return listOf(page, page)
+    return List(steps) { index ->
+        val t = index.toFloat() / (steps - 1)
+        val mix = strength * (1f - t).pow(power)
+        lerp(page, tint, mix.coerceIn(0f, 1f))
+    }
+}
+
+/** How much of the brand accent the sky's centre wash is mixed from. */
+private const val GlowTintMix = 0.22f
+
+/**
+ * The wash's own strength, per theme.
+ *
+ * Not one number, and not the same direction as a shadow: a wash on a dark page
+ * needs LESS of it to read (the old 0.66 was already strong enough to show its
+ * own steps), and the same 0.66 on a near-white page is invisible — which is the
+ * "in light mode its not visible" half of the member's report.
+ */
+private const val DarkGlowStrength = 0.62f
+private const val LightGlowStrength = 0.92f
+
+/** How far the centre wash reaches, as a share of the map's longer side. */
+private const val GlowReach = 0.72f
+
+/** How finely an eased glow brush is sampled (see [glowStops]). */
+private const val GlowSteps = 18
+
 private fun drawerSkyColors(): Triple<Color, Color, Color> {
     return if (isCurioDarkTheme()) {
         Triple(Color(0xFF12313A), Color(0xFF1D4750), Color(0xFFF4F1E7))

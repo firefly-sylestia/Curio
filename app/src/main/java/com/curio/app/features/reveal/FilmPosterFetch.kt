@@ -73,19 +73,42 @@ object FilmPosterFetch {
             val key = "$title|${year ?: 0}|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
-            // v389f — the keyless sources first (the project's rule: a free
-            // source answers first), with TMDB behind them only when nothing
-            // else found art. No key = nothing changes.
+            // ── v460 — WITH A TMDB CREDENTIAL, TMDB IS THE FILM DOOR AND THE
+            //    FREE ONES BECOME ITS FALLBACK. ─────────────────────────────
             //
-            // The TMDB call sits AFTER the `runCatching`, not inside it: that
-            // lambda is not suspend, so a `posterUrl` inside it would not compile.
-            val viaKeyless = runCatching {
-                when (provider) {
-                    1 -> itunesPoster(title) ?: tvmazePoster(title)
-                    else -> wikipediaPoster(title, year)
-                }
-            }.getOrNull()
-            val resolved = viaKeyless ?: if (provider == 0) TmdbFetch.posterUrl(title) else null
+            // This is the ONE place the project's "free source first, keyed source
+            // as the upgrade" rule inverts, and it inverts on evidence — the
+            // member's own report is *"fix the tmdb api … the posters its fetching
+            // rn is bad. and not accurate"*. A free source answers with A film
+            // image: iTunes hands back its square, album-styled artwork, and
+            // Wikipedia hands back an article's lead image, which is a poster for
+            // most films and a logo, a title card or a still for the rest. TMDB is
+            // the only door here that answers with THE poster for THE film — its
+            // search is scored on the name AND the year (see `TmdbFetch.bestHit`),
+            // which is what keeps a remake's poster off the original. So with a
+            // key present the accurate door goes first, and the compromise is
+            // what we fall back to.
+            //
+            // A keyless build is unchanged: `isConfigured` is false, the free
+            // doors answer exactly as before, and there is nothing to wait for.
+            // ([provider] still selects among the KEYLESS pair, which is what the
+            // dev source lab compares — so provider 1 never asks TMDB.)
+            //
+            // The TMDB call sits OUTSIDE the `runCatching`: that lambda is not
+            // suspend, so a `posterUrl` inside it would not compile.
+            val viaTmdb =
+                if (provider == 0 && TmdbFetch.isConfigured) TmdbFetch.posterUrl(title) else null
+            val viaKeyless = if (viaTmdb != null) {
+                null
+            } else {
+                runCatching {
+                    when (provider) {
+                        1 -> itunesPoster(title) ?: tvmazePoster(title)
+                        else -> wikipediaPoster(title, year)
+                    }
+                }.getOrNull()
+            }
+            val resolved = viaTmdb ?: viaKeyless
 
             cache[key] = resolved.orEmpty()
             resolved

@@ -58,7 +58,19 @@ object SeriesPosterFetch {
             val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
-            val resolved = runCatching {
+            // ── v460 — WITH A TMDB CREDENTIAL, TMDB ANSWERS FOR THE SHOW ─────
+            //
+            // The same inversion [FilmPosterFetch] took, for the same reason
+            // (member: *"fix the tmdb api … the posters its fetching rn is bad.
+            // and not accurate"*): TVMaze returns a show's own still or poster
+            // where it has one and a scene grab where it does not, and iTunes
+            // returns square artwork, while TMDB returns the poster at poster
+            // size for the show its search matched by name. The free pair stays
+            // behind it as the fallback, and a keyless build is untouched —
+            // `isConfigured` is false and TVMaze/iTunes answer exactly as before.
+            val viaTmdb =
+                if (provider == 0 && TmdbFetch.isConfigured) TmdbFetch.posterUrl(title) else null
+            val resolved = viaTmdb ?: runCatching {
                 when (provider) {
                     1 -> itunesPoster(title)
                     else -> tvmazePoster(title)

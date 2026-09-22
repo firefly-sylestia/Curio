@@ -95,7 +95,24 @@ object TmdbFetch {
      * with. The resolution lives here and nowhere else.
      */
     internal val apiKey: String
-        get() = runCatching { BuildConfig.TMDB_API_KEY.trim() }.getOrDefault("")
+        get() = runCatching {
+            BuildConfig.TMDB_API_KEY.trim().ifBlank {
+                // ── v460 — A CREDENTIAL IN THE WRONG BOX IS STILL A CREDENTIAL ──
+                //
+                // TMDB hands an account two secrets and they are NOT
+                // interchangeable by shape: the API Read Access Token is a JWT
+                // (it opens with `eyJ`, which is base64 for `{"`), while the v3
+                // key is 32 hex characters. Pasted the other way round, the value
+                // in `TMDB_READ_TOKEN` is sent as `Authorization: Bearer <hex>`,
+                // which TMDB refuses — and because [readToken] was non-blank the
+                // working key beside it was never tried at all. A non-JWT value in
+                // the token box is therefore read as the KEY it must be; [getJson]'s
+                // own fallback catches the rest (an expired token).
+                BuildConfig.TMDB_READ_TOKEN.trim()
+                    .takeIf { it.isNotEmpty() && !it.startsWith("eyJ") }
+                    .orEmpty()
+            }
+        }.getOrDefault("")
 
     internal val readToken: String
         get() = runCatching {
@@ -206,8 +223,21 @@ object TmdbFetch {
         val name = clean(title)
         if (name.isBlank()) return@withContext null
         factsCache[name]?.let { return@withContext it }
+        // ── v460 — AND THE YEAR THE TITLE CARRIES IS CARRIED INTO THE SEARCH ──
+        //
+        // [clean] strips the "(2005)" a topic name wears, and the stripped name
+        // was ALL that reached the search — so `bestHit`'s own year scoring never
+        // had a year to score against (it reads it out of the string it is given),
+        // and TMDB answered with whichever film its results ranked first. That is
+        // the "not accurate" half of the member's report: a remake, a re-release
+        // or a shared title could dress the original. The year is read here and
+        // asked for at the API ([movieHit]/[showHit]), where TMDB filters on it
+        // rather than leaving it to a tie-break.
+        val year = yearIn(title)
         val resolved = runCatching {
-            withTimeoutOrNull(FACTS_BUDGET_MS) { movieFacts(name) ?: showFacts(name) }
+            withTimeoutOrNull(FACTS_BUDGET_MS) {
+                movieFacts(name, year) ?: showFacts(name, year)
+            }
         }.getOrNull()
         if (resolved != null) factsCache[name] = resolved
         resolved
@@ -248,10 +278,12 @@ object TmdbFetch {
 
     // ── films ───────────────────────────────────────────────────────────────
 
-    private fun movieFacts(title: String): Facts? {
-        val searchBody = getJson("/search/movie?query=${Uri.encode(title)}&include_adult=false")
-            ?: return null
-        val hit = bestHit(searchBody, "title", "release_date", title) ?: return null
+    private fun movieFacts(title: String, year: String): Facts? {
+        // The unfiltered second ask is a branch, not a chained elvis over an `if`:
+        // `a ?: if (…) b else null ?: return null` is a precedence puzzle nobody
+        // should have to solve while reading a fetch chain.
+        val hit = movieHit(title, year) ?: if (year.isEmpty()) null else movieHit(title, "")
+        if (hit == null) return null
         val id = hit.optInt("id", 0)
         if (id <= 0) return null
         val detail = getJson("/movie/$id?append_to_response=credits") ?: return null
@@ -277,10 +309,9 @@ object TmdbFetch {
 
     // ── shows ───────────────────────────────────────────────────────────────
 
-    private fun showFacts(title: String): Facts? {
-        val searchBody = getJson("/search/tv?query=${Uri.encode(title)}&include_adult=false")
-            ?: return null
-        val hit = bestHit(searchBody, "name", "first_air_date", title) ?: return null
+    private fun showFacts(title: String, year: String): Facts? {
+        val hit = showHit(title, year) ?: if (year.isEmpty()) null else showHit(title, "")
+        if (hit == null) return null
         val id = hit.optInt("id", 0)
         if (id <= 0) return null
         val detail = getJson("/tv/$id") ?: return null
@@ -336,6 +367,44 @@ object TmdbFetch {
     }
 
     // ── shared ──────────────────────────────────────────────────────────────
+
+    /**
+     * A FILM'S SEARCH, WITH THE YEAR AS A FILTER (v460 — see [facts]).
+     *
+     * TMDB's own `/search/movie` takes `year` (the film's primary release year),
+     * so a year the app knows stops being a hope and becomes part of the question
+     * — which is what separates a remake, a re-release or a shared title from the
+     * film a topic actually names. The year is handed to [bestHit] as well (as the
+     * title's own `(YYYY)` suffix) so a row TMDB returned for a nearby year is
+     * still SCORED rather than merely accepted.
+     *
+     * A title whose year this app states wrongly is not punished for it: the
+     * caller asks once more without the filter, and only then gives up.
+     */
+    private fun movieHit(title: String, year: String): JSONObject? {
+        val body = getJson(
+            "/search/movie?query=${Uri.encode(title)}&include_adult=false" +
+                if (year.isEmpty()) "" else "&year=$year"
+        ) ?: return null
+        return bestHit(body, "title", "release_date", wantWithYear(title, year))
+    }
+
+    /** A SHOW'S SEARCH, filtered on the first-air year the same way (v460). */
+    private fun showHit(title: String, year: String): JSONObject? {
+        val body = getJson(
+            "/search/tv?query=${Uri.encode(title)}&include_adult=false" +
+                if (year.isEmpty()) "" else "&first_air_date_year=$year"
+        ) ?: return null
+        return bestHit(body, "name", "first_air_date", wantWithYear(title, year))
+    }
+
+    /** `Inception` + `2010` → `Inception (2010)`, the shape [bestHit] scores. */
+    private fun wantWithYear(title: String, year: String): String =
+        if (year.isEmpty()) title else "$title ($year)"
+
+    /** The `(YYYY)` a topic name carries, or "" when it carries none (v460). */
+    private fun yearIn(title: String): String =
+        Regex("""\((\d{4})\)""").find(title)?.groupValues?.get(1).orEmpty()
 
     /**
      * The best of a search response's `results`, or null when nothing is close
@@ -428,11 +497,41 @@ object TmdbFetch {
         // the token authenticates by HEADER (see the note on [readToken]), so the
         // query is left alone when it is present. With a token, `path` keeps its
         // own `?…` untouched.
-        val url = "https://api.themoviedb.org/3$path" + when {
-            token.isNotBlank() || key.isBlank() -> ""
-            path.contains('?') -> "&api_key=$key"
-            else -> "?api_key=$key"
+        val url = "https://api.themoviedb.org/3$path"
+        val keyedUrl = url + if (path.contains('?')) "&api_key=$key" else "?api_key=$key"
+        when {
+            token.isNotBlank() -> {
+                // ── v460 — AND A CREDENTIAL TMDB REFUSES IS NOT A DEAD END ────
+                //
+                // One `401`/`403` used to end TMDB for the whole session: the
+                // token was the only thing tried, so a rotated, expired or
+                // mis-pasted read token answered "nothing" for every title while a
+                // working key sat in the very next field. The member's symptom —
+                // *"the posters its fetching rn is bad. and not accurate"* — is
+                // exactly what that failure looks like from the outside, because
+                // every poster then falls to the keyless doors. So a refused token
+                // is RETRIED ONCE with the key: one extra request, on a door that
+                // is already bounded, and only when the first attempt answered
+                // nothing. A missing key still means one attempt, exactly as
+                // before.
+                val viaToken = read(url, token)
+                if (viaToken != null || key.isBlank()) viaToken else read(keyedUrl, "")
+            }
+            key.isNotBlank() -> read(keyedUrl, "")
+            // No credential at all: [isConfigured] is false and no caller reaches
+            // this, but answering null keeps the function total.
+            else -> null
         }
+    }.getOrNull()
+
+    /**
+     * ONE GET, with whichever credential it is handed — `token` as the docs' own
+     * `Authorization: Bearer …` header (see [readToken]) or, when it is blank, the
+     * `api_key` the caller already put in the URL. `null` for anything but a `200`,
+     * which is what lets [getJson] tell "this credential was refused" from an
+     * answer.
+     */
+    private fun read(url: String, token: String): String? = runCatching {
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
@@ -442,8 +541,6 @@ object TmdbFetch {
             conn.connectTimeout = 3_500
             conn.readTimeout = 5_000
             conn.setRequestProperty("Accept", "application/json")
-            // "Authorization: Bearer ACCESS_TOKEN" — the docs' own header, and
-            // the one form of authentication TMDB accepts on v3 and v4 alike.
             if (token.isNotBlank()) conn.setRequestProperty("Authorization", "Bearer $token")
             if (conn.responseCode == 200) {
                 conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }

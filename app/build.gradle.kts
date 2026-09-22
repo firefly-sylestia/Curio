@@ -188,11 +188,17 @@ android {
         // v113 — 1.1.0: new cosmic launcher icon + the accumulated feature
         // releases (Updates page, auto backup, dark mode, …). versionCode is
         // date-based; 20260920 is the +1 bump over the previous 20260919.
-        versionCode = 20260922
+        //
+        // v458 — 20260923 / 1.4.0: the +1 bump over 20260922 (which shipped as
+        // v1.3.0 and its hotfix). The version NAME is a minor step because this
+        // release carries new behaviour as well as fixes — the film and Incursion
+        // posters are TMDB's (with the year searched for, not guessed), and a
+        // topic whose year this app states wrongly is re-asked without it.
+        versionCode = 20260923
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.3.0"
+        versionName = envReleaseVersion ?: "1.4.0"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

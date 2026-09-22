@@ -1,0 +1,15 @@
+FIX:
+- Films & Incursion: the artwork is the real poster now — with a TMDB key in the build, TMDB answers FIRST instead of being the last door behind the free ones (iTunes' square covers, TVMaze stills and Wikipedia lead images), and a title's own year is searched for rather than ignored, so a remake's poster stops landing on the original. A build with no key is unchanged.
+- Films & Incursion: a credential TMDB refuses no longer takes the posters with it — a read token that has been rotated, expired or pasted into the wrong box is retried once with the API key beside it instead of ending every look-up.
+- Home: the drawer's star map has no edges left in dark mode and is visible in light mode — the sky's glow was four hard stops, which the eye reads as rings on a dark page, and one strength for both themes left it invisible on a light one; the falloff is smooth now and its strength is the theme's own.
+- Reading: a highlight is drawn on the words you highlighted — a phrase the paragraph carries twice used to wash the earlier one, so a pick could land on a different line from the one you made.
+- Reading: the dictionary's browsable word list is words — WordNet's multi-word entries arrived with their database underscores and its symbol strings read as corrupted rows.
+- Reading: the dictionary page's paper reaches the bottom of the screen, and the topic browser remembers your place.
+- Reading: a locked page scrolls like a page — the motion lock re-decided its axis on every event, so a drag that started a hair sideways froze the page.
+- Writing: dictation in Save your take no longer closes the moment you tap the mic, and it types into the note while you speak — Cancel puts the note back, and the dialog's door is Done.
+- Home: the Pages and My shelf rows are already drawn when you come back.
+
+REMOVE:
+- Books: the ISBN barcode scanner is gone, and the camera permission goes with it — Search and Type are the two doors that remain.
+- Privacy: the app no longer asks for all-files access; its only user was the wallpaper experiment retired earlier.
+- Reading: the abridged Webster's 1913 download is gone — the complete 1913 sits beside WordNet and holds the same text in full.

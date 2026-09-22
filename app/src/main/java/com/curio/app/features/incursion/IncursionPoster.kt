@@ -129,13 +129,38 @@ internal object IncursionPosters {
         // door now strips such suffixes anyway ([stripNaming]).
         val filmName =
             entry.year?.takeIf { it > 0 }?.let { "${entry.title} ($it)" } ?: entry.title
-        val doors: List<suspend () -> String?> = listOf(
-            {
-                entry.tmdbId?.takeIf { it > 0 }?.let { id ->
-                    TmdbFetch.posterUrlById(id, isShow = isSeries)
-                        ?: TmdbFetch.posterUrlById(id, isShow = !isSeries)
-                }
-            },
+        // ── v460 — THE KEYED DOOR GOES FIRST; THE RACE IS THE FALLBACK ────
+        //
+        // The keyless doors used to race TMDB, and a race is decided by SPEED:
+        // TVMaze and Wikipedia answer in one short request while TMDB needs a
+        // search and then a detail read, so the free door won almost every time —
+        // a row's plate filled with a scene grab, a square iTunes cover or an
+        // article's lead image while the accurate poster was still on its way
+        // (member: *"fix the tmdb api … the posters its fetching rn is bad. and
+        // not accurate"*). A plate that fills early with the WRONG art is not
+        // the trade the member was offered when they asked for the first success.
+        //
+        // So with a credential present TMDB is asked ALONE, on a short lead of its
+        // own; only if it answers nothing do the keyless doors race as they always
+        // did. Keyless builds are untouched — [TmdbFetch.isConfigured] is false,
+        // the list is empty, and the race begins immediately.
+        val keyed: List<suspend () -> String?> = if (TmdbFetch.isConfigured) {
+            listOf(
+                {
+                    entry.tmdbId?.takeIf { it > 0 }?.let { id ->
+                        TmdbFetch.posterUrlById(id, isShow = isSeries)
+                            ?: TmdbFetch.posterUrlById(id, isShow = !isSeries)
+                    }
+                },
+                // A row whose own data carries no id is still a TITLE TMDB can be
+                // asked for by name — and by year, where the row states one, which
+                // is what tells a remake's poster from the original's.
+                { TmdbFetch.posterUrl(filmName) }
+            )
+        } else {
+            emptyList()
+        }
+        val keyless: List<suspend () -> String?> = listOf(
             {
                 if (isSeries) SeriesPosterFetch.resolvePosterUrl(entry.title)
                 else FilmPosterFetch.resolvePosterUrl(filmName)
@@ -146,7 +171,11 @@ internal object IncursionPosters {
             },
             { IncursionSources.artwork(entry) }
         )
-        val resolved = firstSuccess(POSTER_BUDGET_MS, doors)
+        val resolved = if (keyed.isEmpty()) {
+            firstSuccess(POSTER_BUDGET_MS, keyless)
+        } else {
+            firstSuccess(KEYED_LEAD_MS, keyed) ?: firstSuccess(KEYLESS_BUDGET_MS, keyless)
+        }
         cache[key] = resolved.orEmpty()
         return resolved
     }
@@ -183,6 +212,20 @@ internal object IncursionPosters {
 
     /** How long ONE door may take before the race moves on without it. */
     private const val DOOR_BUDGET_MS = 7_000L
+
+    /**
+     * v460 — How long the KEYED door may answer on its own before the keyless ones
+     * take over (see [resolve]).
+     *
+     * Four seconds is a search plus a detail read with room to spare, and it is
+     * spent only when there is a credential to spend it on. It is deliberately not
+     * [POSTER_BUDGET_MS]: the point of a lead is that the accurate door is not
+     * raced, not that a row waits the whole budget twice for it.
+     */
+    private const val KEYED_LEAD_MS = 4_000L
+
+    /** How long the keyless race gets once the keyed door has come back empty. */
+    private const val KEYLESS_BUDGET_MS = 8_000L
 
     /**
      * How long a row waits for ANY door at all. Twelve seconds is about as long as a

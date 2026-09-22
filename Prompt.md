@@ -6,7 +6,26 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §53–§55 — the scanner and its camera permission, a sweep of everything else that earns nothing, then dictation (fixed and live) plus a redundancy audit
+## 0. THE CURRENT REQUEST — §56 — the TMDB posters, the drawer sky's glow, the version bump (1.4.0), and a batch still to be scoped
+
+> no need can u fix the tmdb api please, i need it to work on the app for the movies and incursion ui posters to work, coz the posters its fetching rn is bad. and not accurate, also the drawer costellation i can see the edges in dark mode, and also in light mode its not visible. and in collection sthe open and close is really clanky and weird looking. lets update the intro as well, and also ability to turn off journal shelf etc, in collections use 3 grid for books etc, add online in intro, with log in in that, and exlaing you can share your thoughts, also a way for user to open the added book directly without going through the book detail, how about when added a pdf in book, user can pin it in home screen shelf door and it shows with the small in icon. also lease the way our app does select all rows, why cant i do the same with select all with android it still sometimes does only 1 row oy or sometimes misses some rows, fix it. also bum version code and number both, and udate the release notes. also maybe simplifying settings, like yk some are really confusing to find
+
+**Done this round (committed and pushed):**
+
+1. **THE POSTERS ARE TMDB'S.** Two faults, neither in the key wiring (both secrets are set and exported by both workflows): (a) **TMDB was the LAST door** — `FilmPosterFetch` was `viaKeyless ?: TmdbFetch.posterUrl(...)`, `SeriesPosterFetch` never asked it at all, and `IncursionPoster` raced it (a race is decided by speed, and a one-request TVMaze/Wikipedia answer beats a search-plus-detail TMDB read), so the plate filled with an iTunes square or a Wikipedia lead image. With a credential present the keyed door now goes **first**, alone, on a 4s lead, with the free doors as the fallback; **keyless builds are byte-for-byte unchanged**. (b) **THE YEAR WAS STRIPPED BEFORE THE SEARCH** — `facts()` cleaned the topic name (removing `(2005)`) *before* calling `movieFacts`, so `bestHit`'s year scoring never saw a year and TMDB answered with whatever ranked first; the year is now read first (`yearIn`) and asked for **at the API** (`&year=` / `&first_air_date_year=`), with one unfiltered retry when the stated year is wrong. `clean` stays the cache key and the query text.
+2. **THE SKY'S GLOW.** *"I can see the edges in dark mode … in light mode its not visible"* — both halves of the v457 wash: four stops is a piecewise-linear ramp (the eye draws a line wherever it changes slope, which a dark page makes plain) and one mix strength served both themes (22% of the accent on near-white is a slightly different white). One helper now samples an eased curve at fine steps (`glowStops`) for **both** the wash and each star's aura, and the strength is the theme's own — **more** of it on the light page, which is the opposite of how a shadow behaves.
+3. **VERSION `20260922` → `20260923`, `1.3.0` → `1.4.0`**, with the new release's notes as a new file (`changelogs/20260923.txt`, per the versionCode contract) — `20260922.txt` is the version that shipped.
+
+**Still open from the same message, and what each needs before code is written** (asked, not guessed — the ask was put to the member at the end of this round):
+
+- **"in collection the open and close is really clanky"** — which surface is *collection*? (the Cabinet's shelves vs the book shelf) and which animation (the drawer-style open, the cards, the panel).
+- **3-up grid for books etc.** — scope: which list, and whether the existing Cabinet grid's adaptive columns simply drop to three on phone widths.
+- **"select all … sometimes does only 1 row or misses some rows"** — the likeliest read is Android's own **Select all** inside the row-based writing editor (the app's own "All rows" already works): each row is its own field, so the system's select-all can only take the row it is in. Needs the editor's selection model read before it is touched.
+- **Turn off the journal shelf**, **pin a book to Home's shelf door with its icon**, **open an added book straight into the reader**, **the intro's online page (sign in + sharing your thoughts)**, and **simplifying Settings** — five separate pieces of work, each needing its own scope call (which shelves the toggle hides; where the pin lives; whether the direct open is the default tap or a long-press door; what the intro's online page offers; which Settings rows merge or move).
+
+---
+
+## 0 (previous). §53–§55 — the scanner and its camera permission, a sweep of everything else that earns nothing, then dictation (fixed and live) plus a redundancy audit
 
 > remove the isbn scanner feature along with its camera ermission,
 
