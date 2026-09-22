@@ -6,186 +6,194 @@ from the state rather than from memory.
 
 ---
 
-## 1. The request (this session) — §37
+## 1. The request (this session) — §38
 
-> the 3 dot for reader its too empty spae and not proper spaced, fix its weird look, add at
-> sunset customisation to be able to set the tiem, the zoom lock is bad it also locks the
-> touches fix it, and also the side tap gesture its slow doesnt work faster receives one ta
-> and doesnt work anymore and doesnt work sometimes fix it, imrpove the discoonary that it
-> suggest work explanation from the selected para, make the word detection better it detects
-> the work even theres a comma or something or a mis type. and still the buttom sheet closing
-> is bad, and the highlight dock is bad fix it too. weird shado and doesnt match the dock,
-> also theupper header animation is clanky
+> fix the reading progress accidental touch and in journal the pain the page remove that
+> option, and then mak ethe coloring smart so that chnaging color automatically adjusts the
+> text color as well so the today the date pill or anything else doesnt get the weird
+> unredable text, also i think dont color the today are,a, and also for the copy arrow the
+> behaviror is unexpected fix it, also for the hihgligh selecter remove the frst x and when
+> tappin git again the color it should deselect, and then the menu the drawer menu icon on
+> home screen its gteeing the profile pic so fix that.
 
-Nine things, all on the reading surface:
+> continue
 
-1. **The ⋯ menu** — too much empty space, badly spaced; fix its weird look.
-2. **Night dim "at sunset"** — the member must be able to SET THE TIME.
-3. **The motion lock** — it also locks the touches.
-4. **The side tap zones** — slow, one tap then dead, sometimes nothing at all.
-5. **The dictionary** — suggest word explanations from the selected paragraph.
-6. **Word detection** — survive a comma, a possessive, a typo.
-7. **The bottom sheet's close** — still bad.
-8. **The highlight dock** — a weird shadow, and it does not match the dock.
-9. **The header's animation** — clanky.
+Seven things across three surfaces (the book page, the journal, the reader's dock and Home),
+plus the one the member added while answering the questions: the dictionary "wasnt working".
 
-Touched: `features/personal/BookReaderScreen.kt` (11,145 lines), `ReaderDictionary.kt`
-(the lookup itself), `ReaderSettingsScreen.kt` (the second surface that sets the dim).
-`web/` and `desktop/` untouched, per root `AGENTS.md`.
+1. **The reading-progress bar** — an accidental touch moves it (and stole the scroll).
+2. **The journal's "Paint the page too"** — remove the option.
+3. **The journal's colouring** — the ink on anything the member's colour fills must adjust
+   itself, so nothing comes out unreadable.
+4. **The Today/date area** — does not take the page's colour.
+5. **The copy box's ← / → arrows** — the behaviour is unexpected.
+6. **The highlight dock's ×** — remove it, and the applied colour should deselect.
+7. **Home's menu pill** — it must not wear the member's picture.
+
+Touched: `features/personal/BookDetailScreen.kt` (the gauge), `PersonalTheme.kt`,
+`JournalAccent.kt`, `PersonalPage.kt`, `JournalEditorScreen.kt`, `PersonalCanvas.kt`,
+`ReaderDictionary.kt`, `BookReaderScreen.kt`, `data/PersonalEntity.kt` (a dead helper),
+`features/home/HomeScreen.kt`. `web/` and `desktop/` untouched, per root `AGENTS.md`.
 
 ## 2. What was actually wrong (found by reading, not by guessing)
 
-1. **⋯ menu** — v437 gave EVERY reader sheet a 45% floor of the screen
-   (`ReaderSheetFrame.minHeightFraction`). A floor is right for a LIST (it grows, and two
-   kept marks would otherwise read as a broken panel) but the ⋯ grid is six FIXED tiles of
-   the same height whatever happens, so 45% was two thirds empty paper. The tiles' gutter
-   was 8dp, which nearly closed once their labels were the widest thing in the row.
-2. **The dim** — v440's "At sunset" was the phone's own dark theme (`isCurioDarkTheme`).
-   That answers `dimAuto = true/false` and nothing else; the member asked for the time.
-3. **The motion lock** — the guard consumed EVERY event in which any finger had moved at
-   all (`it.position != it.previousPosition`). A finger that taps or holds is never
-   perfectly still, so the first pixel of jitter was consumed; a consumed move cancels
-   `detectTapGestures` (and its pending long press), which is how the chrome could not be
-   brought back, the mark dock could not open and a sweep reported nothing on a locked page.
-4. **The side taps** — the zones were answered by the reading surface's own
-   `detectTapGestures`, which ALSO owns the double tap (`readerDoubleTapZoom`). A detector
-   waiting to see whether a second tap follows cannot answer the first one until the
-   double-tap window passes (⇒ "slow"), and a second tap inside that window was read as the
-   FIRST HALF of a double tap (⇒ "receives one tap and doesnt work anymore"). Where a child
-   claimed the gesture first, nobody heard it (⇒ "doesnt work sometimes").
-5. **The dictionary** — the sheet had a single word field and nothing else: a swept
-   PASSAGE had no word in it, and the hold dock seeded it by picking the passage's first
-   letter-bearing token, which was the reader guessing which word the member meant.
-6. **Word detection** — `define()` asked Wiktionary for the selection VERBATIM, so
-   `"Einstein,"` or `"word."` was asked for as a headword that does not exist, and a typo
-   was a dead end with no spelling offered.
-7. **Sheet close** — the only door out was DISTANCE (108dp of deliberate dragging), so the
-   gesture everyone makes on a sheet (a quick downward flick) dragged a few millimetres and
-   sprang back. The distance was also a long way to pull for a panel a few rows tall.
-8. **The highlight dock** — its fill was `palette.surface` (F5F0E8) floating over
-   `palette.paper` (FBF6EC), about two per cent apart, so the only part of the capsule the
-   eye could see was a shadow spread over pale paper on every side. It is the same defect
-   v441 fixed on the page slider, one surface over.
-9. **The header** — its exit carried THREE transitions at all times (fade + drift +
-   `shrinkHorizontally` toward the right edge), so merely HIDING the chrome collapsed the
-   name capsule into the corner while it was leaving upward.
+1. **The progress bar** — `ReadingGauge`'s handler consumed the DOWN and treated ANY movement
+   as a scrub (`if (change.positionChanged()) moved = true`). A finger running down the page
+   that passed over the gauge therefore moved the reading place AND, because the down was
+   consumed, stopped the page from scrolling: one false move cost both gestures.
+2. **"Paint the page too"** — v429 added it, v439 withdrew it, v440b restored it. The switch
+   lived in `JournalAccentSheet`, and the paper it painted came from
+   `JournalPagePaint.painted` through `journalPaper()` (a 0.20 light / 0.28 dark tint) with
+   `journalInk()`'s own contrast branch answering for the result.
+3. **The unreadable text** — `journalOn(fill)` was `settingsReadableInk(fill)`, and
+   `settingsReadableInk` answers from the THEME (a named theme's `onPrimary` pair, the pastel
+   flag, the light/dark branch) and **never looks at `fill` at all**. So the one case
+   `journalOn` exists for — text on a colour the member picked — was the one case it got
+   wrong. The colour sheet's own tick had the same defect (`settingsReadableInk(color)`), and
+   `PersonalCanvas.readableOnFill` was the only place in the journal with the right rule.
+4. **The Today pill** — `JournalTopBar` was handed the page's `accentArgb` (v437: "the day IS
+   the page's own title") and filled the day capsule with it, so a deep page colour left the
+   date's ink at whatever the theme happened to be — the unreadable pill.
+5. **The letter arrows** — `nudgePageLetters(more)`: **→ WALKED** the window along the row
+   once it reached the row's end (`TextRange(range.min - 1, range.max)`) and **← SHRANK** it
+   from the right (walking the other way at a single letter). Between them the two arrows
+   could never hand the member more than the one character they started with.
+6. **The highlight dock** — its colours were a 35% wash of themselves whether the passage wore
+   them or not, so a marked passage's own colour was indistinguishable from the three it did
+   not wear, a second press re-wrote the same mark, and the only way out of a mark from the
+   dock was the × that the member asked to be rid of.
+7. **Home's menu pill** — `TopBarPill` drew the member's face whenever
+   `hasOwnPicture(avatarPath)` was true, and **a member wearing their blob as their picture
+   has no photo path at all**, so `hasOwnPicture(null)` is TRUE for them: the drawer's
+   hamburger, handed no path, drew their face instead of its own glyph.
+8. **The dictionary** — every word Wiktionary does not carry answers **404**, the old getters
+   turned any non-200 into `null`, and `null` is the sheet's own word for UNREACHABLE. A rare
+   word, a name or a misspelling was therefore reported as a dead network, and v442's spelling
+   suggestions could never run at all (they are only asked for after an EMPTY answer, which
+   the 404 path never produced). The sheet's single nullable list also carried "not asked yet"
+   and "unreachable" at once, so its first frame flashed "The dictionary could not be
+   reached." whatever the word was.
 
 ## 3. Decisions, all confirmed before editing
 
-Three questions were asked (the rest had one reading each):
+Seven questions were asked and answered across the session ("Two times — from / until",
+"Chips + context line", "scrink it but dont make it too lose th buttom", "Never paint the
+page", "A scroll over the bar must not move it", "kee adding letter never walk shrink", "The
+× in the selection dock", "The hamburger pill shows my photo").
 
-1. **"At sunset" with a settable time** → the member chose **two times, FROM / UNTIL**
-   (not a preset list, not a single time).
-2. **The dictionary from a selected passage** → **chips + a context line** (chips for the
-   words, and the sentence the answered word stood in quoted beside the meanings).
-3. **The ⋯ sheet** → *"scrink it but dont make it too lose to th buttom"* — a smaller
-   panel, still standing clear of the foot of the glass.
+- **The journal's paper**: **never paint the page** — the switch goes and the paper is the
+  theme's (the member's own answer to "what should removing it do").
+- **The Today area**: keeps the theme's colour (the member's own instruction).
+- **The progress bar**: a scroll over it must not move it.
+- **The letter arrows**: only add — never walk, never shrink.
+- **The dock's ×**: removed, and the applied colour is what deselects.
 
-No new feature was added toggleable-or-not: every one of the nine is a fix or a refinement
-of behaviour that already shipped, except the dim's FROM/UNTIL pair, which lives inside the
-existing "At sunset" mode rather than as a new capability of its own (root `AGENTS.md`'s
-"ask: toggleable or not" applies to ADDING a measure).
+No new feature here is toggleable-or-not: six of the seven are fixes, and the seventh
+(removing "Paint the page too") is a removal the member asked for by name — root
+`AGENTS.md`'s "ask before deleting" rule is satisfied by their own words plus the answer they
+chose when asked what removing it should do.
 
 ## 4. What was built
 
-### 4.1 `ReaderDictionary.kt` — the lookup
+### 4.1 The reading-progress bar (`BookDetailScreen.kt`)
 
-- **`headword(raw)`** — one function that turns what the sweep actually caught into the
-  word to ask for: any run of `EDGE_PUNCTUATION` off both ends (both quote families, both
-  dash families, brackets, the sentence's punctuation — never the hyphen or the apostrophe,
-  which are letters' business INSIDE a word) plus the possessive tail (`Einstein's` →
-  `Einstein`, with a three-letter stem minimum so `it's`/`he's` keep their own page).
-  `define()` now asks for `headword(word)`, so a comma or a possessive can no longer make a
-  real word look unknown.
-- **`suggest(term)`** — Wiktionary's own `opensearch` (the same keyless family the
-  definitions come from, so no second service to trust) for the spellings nearest what was
-  asked. Word-shaped answers only, the word asked for is never echoed back, and misses are
-  memoised like the senses are.
-- **`wordsIn(passage)`** — the words a passage is worth asking about: sentence-split
-  (`SENTENCE`), five letters up, `STOP_WORDS` excluded, never the same word twice, capped at
-  `MAX_SUGGESTIONS`. Each carries the sentence it stood in (`ReaderDictionaryWord`).
+The gauge now **wears in** like the reader's own magnified page: `awaitFirstDown` takes the
+press and consumes nothing, and nothing is taken until the finger crosses the touch slop
+**SIDEWAYS** (`dx > slop && dx > dy`). A finger that crosses it DOWNWARD has announced it is
+scrolling, so the handler leaves the whole gesture to the page. The knob is lit by the CLAIM,
+not by the touch (a scroll over the bar shows nothing at all), and a press that never travels
+is still a tap that seeks on the release.
 
-### 4.2 `BookReaderScreen.kt` — the reader
+### 4.2 The journal (`PersonalTheme.kt`, `JournalAccent.kt`, `PersonalPage.kt`,
+`JournalEditorScreen.kt`, `PersonalCanvas.kt`, `data/PersonalEntity.kt`)
 
-- **The dictionary sheet** offers the passage's words as chips and quotes the sentence
-  (`readerContextFor`). A miss now asks for the nearest spellings and takes the first that
-  HAS a definition, labelled under "Did you mean" so the member can see which word answered.
-  A one-word selection still arrives ready to look up; a PASSAGE arrives with the field
-  EMPTY, because seeding one of its words would be the reader guessing.
-- **The motion lock wears in** — nothing is consumed until the finger has travelled the
-  touch slop (the same rule the magnified page already used), so on a locked page a tap
-  raises the tools, a hold opens the dock and a sweep can report a word, while a real drag or
-  a second finger is still swallowed whole (consuming is what keeps the page still — an
-  ignored drag would be taken by the column or pager underneath).
-- **`Modifier.readerZoneTaps`** — the side zones answered by their own gesture handler,
-  placed INNERMOST in the chain so it sees the finger lift before the surface's double-tap
-  detector, and it CONSUMES the up it answered so that wait is cancelled: one tap, one page
-  turn, never a zoom. Three guards make it a tap and only a tap: a consumed down (a real
-  control) is skipped, a press past the long-press threshold is the sweep's, and a gesture
-  something else consumed mid-flight never reaches the lift. Wired into all four surfaces
-  (the reflowed text, the PDF column, the PDF page, the paged flow), each with the space its
-  own taps are measured in.
-- **The sheet's close** — the finger's own travel per millisecond is measured on the head's
-  drag AND in the body's nested scroll (`flickPeak`/`flickAt`, plain arrays: nothing draws
-  them), and a throw past `dismissFling` (620dp/s) shuts the sheet without the pull having to
-  reach the distance; the distance itself is 96dp now (was 108). A pull that does not reach
-  either springs straight back on the exit clock, and a re-entrancy guard means the flick and
-  the settle after it cannot both dismiss the same sheet. **No `onPostFling` override** — the
-  velocity handler is a second, engine-versioned way to learn what the finger's clock already
-  says.
-- **The ⋯ menu** passes `minHeightFraction = 0.30f` (still a real panel, clear of the foot),
-  the tile rows get 14dp of air with a wider 10dp gutter between tiles and a breath under the
-  last row.
-- **The highlight dock** wears the reader's own pill body — an OPAQUE
-  `lerp(surface, ink, 0.06f)` fill with a hairline `lerp(surface, ink, 0.16f)` edge, the same
-  28dp radius and 8dp lift the page slider wears (v441). Being opaque, the shadow cannot bleed
-  through it; `animateContentSize` deleted with it (the bar is full width and its height never
-  changes, so it cost a layout pass per frame for nothing).
-- **The header** has one exit per reason: the sideways shrink (toward the End) belongs to the
-  SEARCH opening alone — which is what makes the bar read as growing out of the corner the
-  search icon lives in — and every other exit (a tap on the page hiding the chrome) is the
-  plain pill leave. Both clock on the ENTER clock so the head and the search bar are one
-  movement rather than two panels changing places. The foot and the head are now written as
-  `CurioMotion.pillArrive()` / `pillLeave()` tokens instead of their numbers.
-- **The dim's window** — `ReaderLook.dimFromMinute` / `dimUntilMinute` (minutes since
-  midnight, default 20:00 → 06:00) with `dimWindowContains()` reading a window that runs over
-  midnight as the normal evening case and equal ends as "all day". The reader ticks its clock
-  every 30s while the mode is on (`LaunchedEffect(ReaderLook.dimAuto)`), because a member
-  reading at 19:59 with the dim due at 20:00 would otherwise keep a bright page for minutes.
-  Both new fields are in `rememberKey()` and in the store (`reader_dim_from`/`reader_dim_until`).
-- **`ReaderClockRow` / `ReaderClockDialog`** — one row, one label (`readerClockLabel`, "20:00")
-  and one Material `TimePicker` dialog, `internal` in this file so the appearance sheet and
-  reading settings wear the same pair and can never disagree about what "at sunset" means.
+- **The page never paints its paper.** `JournalPagePaint` lost its `painted` flag;
+  `journalPaper()` is the theme's parchment with the app's accent whisper whatever colour the
+  page was given; `journalInk()` is simply the theme's `onSurface`; the page's own box is the
+  plain `background` again. The colour still reaches the page's doors (`journalDoorAccent`)
+  and the tint its own controls wear (`journalPaperRaised`).
+- **The switch is gone** from `JournalAccentSheet` (with its `painted`/`onPainted` params and
+  the now-dead plumbing through `PersonalWritingPage` and `PersonalToolDock`), and the dead
+  `PersonalNoteEntity.paintsOwnAccent` with it. **`pagePainted` is still READ and still
+  WRITTEN** through `PersonalPageMeta` — the writer rebuilds the whole row from the meta, so
+  dropping it would erase a member's earlier answer from their own file on the next
+  keystroke. No SQL, no migration.
+- **The day keeps the theme's colour.** `JournalTopBar` no longer takes `accentArgb` at all
+  and asks for `journalDoorAccent(JOURNAL_ACCENT_THEME)`.
+- **Smart ink.** `journalInkOn(fill)` is the measurement
+  (`fill.luminance() > 0.55f` → the journal's near-black, else its cream) as a PLAIN function
+  (a draw pass and a gesture want it as well as a composition); `journalOn(fill)` is it as a
+  composable; `PersonalCanvas.readableOnFill` delegates to it; the colour sheet's tick asks
+  it instead of the theme role.
 
-### 4.3 `ReaderSettingsScreen.kt`
+### 4.3 The copy box's arrows (`PersonalCanvas.kt`)
 
-The same `ReaderClockRow` pair under the same segment, with the clock dialog hoisted into the
-screen's composable scope (it is a Dialog, not a panel in the column).
+Both arrows only ever ADD: → takes the letter to the RIGHT of the window, ← the letter to its
+LEFT — never walking and never shrinking. Either arrow may OPEN a fresh window (← used to
+refuse, "nothing to give back"), `canNudgePageLetters` is live for both on an empty reach and
+dead only at the row's own edge, and the pills' labels are "One more letter to the left" /
+"…to the right". A wrong reach is started over by a row arrow, "Line" or "Select all", all
+of which reset `pageCharRange`; the box's own cross stays.
+
+### 4.4 The dictionary (`ReaderDictionary.kt`, `BookReaderScreen.kt`)
+
+- **The status is kept.** `Fetch(code, body)` replaces the two old getters' nullable String
+  (one shared `fetch()` with the same 4s / 6s budget), and `define()` answers **404 →
+  `emptyList()`** ("no such headword" — the answer that puts the suggestions on screen),
+  anything else non-200 or a thrown call → `null` (unreachable), and a term that is not a word
+  at all → `emptyList()` (the contract's own line, which the old code contradicted by
+  returning `null` and drawing "could not be reached" for `1234`).
+- **Three states, not one nullable list.** `ReaderLookup.Idle` / `.Answer(senses)` /
+  `.Unreachable`. The sheet flashes nothing while it opens (it used to flash "The dictionary
+  could not be reached." on its first frame, and a blank field sat on that message for good),
+  and an empty field now draws nothing under the input.
+- **The miss path stops at the first `null`** — the source is not answering, so four more
+  neighbours would only buy four more timeouts before the same sentence.
+
+### 4.5 The highlight dock (`BookReaderScreen.kt`)
+
+The passage's own ink is resolved in the screen (`marks.firstOrNull { it.isHighlight && … }`)
+and handed to the bar as `appliedInk`; that swatch is drawn as TAKEN (opaque, a 2dp rim, a
+`Check` tinted with the ink that reads on it — `journalInkOn`), and pressing it **REMOVES the
+mark** (`deleteReaderMark`) instead of writing it again. With that switch in the row the ×
+("Clear the selection") is redundant and gone: the ⋯ door is the way to everything else, and
+a tap on the page puts the dock away (`tapPage` clears a selection first).
+
+### 4.6 Home's menu pill (`HomeScreen.kt`)
+
+`TopBarPill` gained `showingPicture` (default false); only the profile pill passes true, so
+only it ever resolves a face, and a pill handed no path draws its own glyph.
 
 ## 5. Checks run
 
 - **No Gradle command**: this environment forbids compile / build / lint (root `AGENTS.md`).
   Validation is CI on push.
-- Verified by reading the real definitions before use: `CurioMotion.pillArrive/pillLeave`
-  (`fromTop`), `ReaderSheetFrame`'s parameter list, `ReaderZoneAction`, `readerZoneActionAt`
-  and every call site of `readerZoneTaps`; confirmed `CurioIcons.Schedule` is a real bundled
-  glyph (it is in `historyHeroSymbols()`), that `TimePicker`/`rememberTimePickerState` need no
-  local `@OptIn` (the module opts into `ExperimentalMaterial3Api` in `build.gradle.kts`), and
-  that `waitForUpOrCancellation`'s package is right (`RichTextEditor.kt` imports the same one).
-- **Every new import checked against the file's own use**; `Velocity` was removed with the
-  `onPostFling` override that used it, `SystemClock` added for the flick's clock.
-- **A bracket-balance pass over all three files** (string/comment aware): zero unbalanced
-  brackets, which is the one syntax fault a large hand-edit can hide.
-- Progress persisted in Prompt.md (this file) and to be recorded in `app/AGENTS.md`.
+- Every API verified against its real definition in the repo before use:
+  `viewConfiguration.touchSlop` (`GalleryWallFormat.kt` already uses it, so it needs no new
+  import — only `kotlin.math.abs` was added to `BookDetailScreen.kt`), `CurioIcons.Check`
+  (`ReaderMarkSheet` already draws it inside a colour swatch), `ReaderMarkEntity.colorKey`,
+  `deleteReaderMark` (already used by the marks sheet), `PersonalPageMeta.pagePainted` (kept),
+  and `hasOwnPicture`'s exact semantics in `ProfileAvatar.kt`.
+- **A bracket-balance pass over all ten changed files** (string/comment aware, the one syntax
+  fault a large hand-edit hides): zero unbalanced brackets.
+- **Every removed import checked for its other references**: `luminance` out of
+  `PersonalCanvas.kt` (its only use was `readableOnFill`, which now delegates),
+  `settingsReadableInk` and `rememberCurioControlTick` out of `JournalAccent.kt`.
+- The v443 block is in `app/AGENTS.md`, and the release notes are in
+  `fastlane/metadata/android/en-US/changelogs/20260922.txt` — with the stale "Paint the page
+  too" bullets dropped, because the feature never reached a release and the notes are edited
+  in place.
 
 ## 6. Still open
 
-- **The journal's paper following its colour by default** — the "Paint the page too" switch is
-  still deliberate; making it the default needs the member's word.
-- **Read-aloud is done (§35)**; the dictionary provider question from §34 is closed by §37's
-  own answer (Wiktionary stays, and it now suggests spellings and reads the passage).
-- **No SQL change and no migration anywhere in §37** — every change is UI, gesture, dictionary
-  or motion, and the two new look fields are SharedPreferences keys like the rest of `ReaderLook`.
+- **How a letter reach is taken back.** The member asked for "keep adding letter never walk
+  shrink", so neither arrow gives a letter back; a wrong reach is started over by a row
+  arrow, "Line" or "Select all". If they want a way to take one letter back without the
+  window moving, that is one more control on the panel.
+- **The journal's paper following its colour** is settled as "never", and the stored
+  `pagePainted` column is deliberately left in place (a Room column is a migration).
+- **No SQL change and no migration anywhere in §38** — every change is UI, gesture, colour or
+  network, and the two look fields that DID need a store were §37's.
 
 ## User prompts
 
@@ -193,17 +201,30 @@ screen's composable scope (it is a Dialog, not a panel in the column).
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§37 — the nine reader fixes, above (DONE, v442).** The ⋯ sheet sized to its own tiles; the
-  dim's FROM/UNTIL window with one shared clock row and picker; the motion lock's wear-in so a
-  locked page still hears a tap, a hold and a sweep; the side taps answered by their own
-  innermost handler (fast, repeatable, and never read as a double tap); the dictionary
-  suggesting the passage's words as chips with the sentence quoted, plus spelling suggestions
-  on a miss; `headword()` so a comma, a possessive or a stray quote no longer hides a real
-  word; the sheet shutting on a flick as well as a distance, with a longer pull needed nowhere;
-  the highlight dock wearing the reader's own opaque pill body instead of a shadow over
-  near-identical paper; and the header's exit reduced to one motion per reason, written as
-  `CurioMotion` tokens. **No SQL, no migration.** See §4 above and the v442 section of
-  `app/AGENTS.md`.
+- **§38 — the seven fixes across the book page, the journal, the reader's dock and Home
+  (DONE, v443).** The progress gauge wears in sideways so a scroll over it neither moves it nor
+  steals the page's scroll; the journal's "Paint the page too" is gone and the paper is the
+  theme's again; the day pill keeps the theme's colour; ink on any colour the member picks is
+  measured (`journalInkOn`, so nothing comes out unreadable); the copy box's letter arrows only
+  ever ADD a letter on their own side; the reader's highlight dock draws the passage's own
+  colour as taken and pressing it takes the highlight back, with the × gone; and Home's menu
+  pill no longer wears the member's picture. Plus the one that surfaced while answering the
+  questions: the dictionary treated the source's own 404 as "could not be reached", so a
+  misspelled or rare word read as a dead network and the spelling suggestions could never run
+  (the sheet now tells "not asked", "no such word" and "the source is down" apart, and stops
+  asking a source that has stopped answering). **No SQL, no migration** — the stored
+  `pagePainted` column stays, the UI simply no longer offers it. See §1–§6 above and the v443
+  section of `app/AGENTS.md`.
+- **§37 — the nine reader fixes (DONE, v442, pushed as `fe22bfdc`).** The ⋯ sheet sized to its
+  own tiles; the dim's FROM/UNTIL window with one shared clock row and picker; the motion
+  lock's wear-in so a locked page still hears a tap, a hold and a sweep; the side taps answered
+  by their own innermost handler (fast, repeatable, and never read as a double tap); the
+  dictionary suggesting the passage's words as chips with the sentence quoted, plus spelling
+  suggestions on a miss; `headword()` so a comma, a possessive or a stray quote no longer hides
+  a real word; the sheet shutting on a flick as well as a distance, with a longer pull needed
+  nowhere; the highlight dock wearing the reader's own opaque pill body instead of a shadow
+  over near-identical paper; and the header's exit reduced to one motion per reason, written as
+  `CurioMotion` tokens. **No SQL, no migration.** See the v442 section of `app/AGENTS.md`.
 - **§36 — the journal's open animation, and the page slider's arrows + shadow (DONE, v441, pushed as `03bd2e44` and the v441 commit).**
   1. **"the animation open nimation of journal is clanky and the pass u did for motion i
      think that also cause this" — the member was right about the second half and right

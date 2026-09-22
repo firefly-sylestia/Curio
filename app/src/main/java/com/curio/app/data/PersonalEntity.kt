@@ -86,16 +86,21 @@ data class PersonalNoteEntity(
      * beside the colour it is about, and it defaults to false: every journal
      * written before this existed keeps its theme's parchment, exactly as it did.
      *
-     * v438 — THE SWITCH IS WITHDRAWN, THE COLUMN IS NOT. When it was true,
+     * v438/v443 — THE SWITCH IS WITHDRAWN, THE COLUMN IS NOT. When it was true,
      * `journalPaper()` took the page's colour at a real tint and `journalInk()`
-     * answered for the result; the member has since rolled that back ("ykw remove
-     * the paint th epage so the journal tools etc dont get the color"), because a
-     * paper tinted off a colour wheel left the ink drawn on it at a contrast
-     * nothing had measured. The colour lives on the journal's DOORS now.
+     * answered for the result; the member rolled that back ("ykw remove the paint
+     * th epage so the journal tools etc dont get the color"), restored it in
+     * v440b, and has now asked for it gone for good (v443: *"in journal the paint
+     * the page remove that option"* → **never paint the page**), because a paper
+     * tinted off a colour wheel puts the member's own words against a contrast
+     * nothing measured. The colour lives on the journal's DOORS and its own
+     * controls; the paper is the theme's, always.
      *
-     * The field is kept so the column round-trips at its default — dropping a
-     * Room column is a migration, and this is the same treatment
-     * `profiles.avatar_style` got when the portrait picker went. Nothing sets it.
+     * The field is kept so the column round-trips at its value — dropping a Room
+     * column is a migration, and this is the same treatment
+     * `profiles.avatar_style` got when the portrait picker went. The UI no longer
+     * offers it; the writer still carries it, so a member's earlier answer is not
+     * erased from their own file.
      */
     val pagePainted: Boolean = false
 ) {
@@ -104,9 +109,6 @@ data class PersonalNoteEntity(
 
     /** True when the member gave this page a colour of its own. */
     val hasOwnAccent: Boolean get() = accentArgb != 0
-
-    /** True when the page's own colour also paints its paper. */
-    val paintsOwnAccent: Boolean get() = hasOwnAccent && pagePainted
 
     /** True for a checklist page (its rows are tickable). */
     val isTodo: Boolean get() = kind == PAGE_KIND_TODO

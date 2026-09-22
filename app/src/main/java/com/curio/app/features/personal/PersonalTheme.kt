@@ -55,9 +55,30 @@ internal fun personalOnAccent(): Color = settingsReadableInk(personalAccent())
  * "on accent" answer does not hold for it: a near-white page colour under light
  * ink is a pill nobody can read. Named here beside [personalOnAccent] so a page
  * control that wears the page's own colour has one thing to ask.
+ *
+ * v443 — AND IT MEASURES THE FILL, which it did not: it forwarded to
+ * [settingsReadableInk], which answers from the THEME (a named theme's own
+ * `onPrimary` pair, the pastel flag, the light/dark branch) and never looks at
+ * `fill` at all. So the one case this function exists for was the one case it got
+ * wrong — the member: *"changing color automatically adjusts the text color … so
+ * the date pill or anything else doesnt get the weird unredable text"*. The rule
+ * is now the one the journal's own knocked-out ink already uses ([journalInkOn]):
+ * the fill's OWN luminance decides.
  */
 @Composable
-internal fun journalOn(fill: Color): Color = settingsReadableInk(fill)
+internal fun journalOn(fill: Color): Color = journalInkOn(fill)
+
+/**
+ * THE MEASUREMENT ITSELF — a plain function, not a theme role.
+ *
+ * The fill here is a colour SOMEBODY CHOSE, so there is no theme role that can
+ * answer for it, and it is asked for from more than a composition (a draw pass
+ * and a gesture both want it). Dark ink on a light fill, the journal's own cream
+ * on a deep one — the same pairing [journalInk] was written for and the reason a
+ * lit tool can wear any accent a member can pick.
+ */
+internal fun journalInkOn(fill: Color): Color =
+    if (fill.luminance() > 0.55f) Color(0xFF1B1613) else Color(0xFFF7F2E8)
 
 /** Glyph tone on an accent wash or a bare accent surface. */
 @Composable
@@ -66,24 +87,31 @@ internal fun personalIconTint(accent: Color): Color = settingsAccentInk()
 // ── v411 — THE JOURNAL'S OWN COLOURS ────────────────────────────────────────
 
 /**
- * v429 — WHETHER THIS PAGE PAINTS ITS PAPER WITH ITS OWN COLOUR.
+ * THE PAGE'S OWN COLOUR, AS ITS CONTROLS KNOW IT.
  *
- * Provided by the PAGE's host (see `PersonalWritingPage`), because the paper is
- * drawn in five places owned by four different composables and threading a
- * colour through all of them would have made "the page's colour" a parameter of
- * every journal surface that draws a background.
+ * Provided by the PAGE's host (see `PersonalWritingPage`), because the page's
+ * colour is read in several places owned by four different composables and
+ * threading it through all of them would have made "the page's colour" a
+ * parameter of every journal surface that draws a background.
  *
- * [painted] is only ever true when the page HAS a colour of its own and the
- * member turned the option on ([PersonalNoteEntity.pagePainted], stored with the
- * page): a page following the theme keeps the theme's own whisper, which is what
- * every journal written before this existed already looks like.
+ * v443 — AND IT NEVER PAINTS THE PAPER. v429 grew a `painted` flag so the member
+ * could turn the page itself into their colour, and v440b restored it at their
+ * request; their answer now is the other one — *"in journal the paint the page
+ * remove that option"*, and, asked what removing it should do, **never paint the
+ * page**. So the flag is gone and the paper is the theme's again (see
+ * [journalPaper]), while the colour stays where it belongs: on the page's DOORS
+ * (Home's chips, the list's spine, the palette door) and as the tint the page's
+ * own controls wear ([journalPaperRaised]).
+ *
+ * [PersonalNoteEntity.pagePainted] is still stored and still written — a member's
+ * earlier answer is not erased from their own file, the app simply no longer asks.
  */
 internal data class JournalPagePaint(
-    val argb: Int = JOURNAL_ACCENT_THEME,
-    val painted: Boolean = false
+    val argb: Int = JOURNAL_ACCENT_THEME
 ) {
-    /** The colour to tint with, or null when the theme's own accent applies. */
-    val own: Color? get() = if (painted && argb != JOURNAL_ACCENT_THEME) Color(argb) else null
+    /** The colour to tint the page's own controls with, or null when the theme's
+     *  own accent applies. */
+    val own: Color? get() = if (argb != JOURNAL_ACCENT_THEME) Color(argb) else null
 }
 
 /** The page's own paint, provided by the page's host (see [JournalPagePaint]). */
@@ -102,24 +130,18 @@ internal val LocalJournalPagePaint = staticCompositionLocalOf { JournalPagePaint
  * generic container steps, the same fill as a settings row, and it has its own
  * paper now.
  *
- * v429 — AND WHEN THE PAGE HAS A COLOUR OF ITS OWN AND [JournalPagePaint.painted]
- * IS ON, the paper takes THAT colour at a REAL tint (0.20 light / 0.28 dark)
- * rather than the theme's whisper (the member: *"the journal page color also
- * needs to chnage with the color chnage"*), and that is why [journalInk] has to
- * answer for itself below — a paper this coloured is a paper the theme's ink may
- * no longer read on.
+ * v443 — AND THE PAPER IS THE THEME'S, ALWAYS. v429 let it take the page's own
+ * colour at a real tint (0.20 light / 0.28 dark), and the member has since asked
+ * for the option to go: *"in journal the paint the page remove that option"* →
+ * **never paint the page**. The whisper of the app's accent is what is left, so a
+ * journal looks the same whatever colour the member gave its doors, and the
+ * member's colour cannot make their own words hard to read.
  */
 @Composable
 internal fun journalPaper(): Color {
     val warm = if (isCurioDarkTheme()) Color(0xFF17130F) else Color(0xFFFDF9F0)
-    val paint = LocalJournalPagePaint.current
-    val own = paint.own
-    val tint = own ?: personalAccent()
-    val strength = when {
-        own != null -> if (isCurioDarkTheme()) 0.28f else 0.20f
-        else -> if (isCurioDarkTheme()) 0.10f else 0.05f
-    }
-    return lerp(warm, tint, strength)
+    val strength = if (isCurioDarkTheme()) 0.10f else 0.05f
+    return lerp(warm, personalAccent(), strength)
 }
 
 /**
@@ -170,28 +192,16 @@ internal fun journalPaperRaised(): Color =
  * The ink the journal writes with — the page's own onSurface, named so a journal
  * surface never reaches past this file for it.
  *
- * v429 — AND IT ANSWERS FOR A PAINTED PAGE. The theme's ink is measured against
- * the theme's surfaces, not against a colour the member picked off a wheel: a
- * WHITE page on a dark theme would have written light ink on light paper, and a
- * near-black page on a light theme the mirror of that. When the page paints its
- * own colour, the theme's ink is kept only while it still contrasts with the
- * paper; otherwise the page's own readable ink (dark on a light page, light on a
- * dark one) stands in, so the one thing a journal must never do — become
- * unreadable because it was made pretty — cannot happen.
+ * v443 — AND THAT ANSWER IS NOW THE THEME'S, ALWAYS, because the paper can no
+ * longer be the page's own colour (see [journalPaper]): the theme's ink IS
+ * measured against the theme's paper, and a page that never paints itself is the
+ * one surface where that measurement holds. The members that used to need the
+ * v429 branch — a white page on a dark theme, a near-black one on a light theme —
+ * cannot happen; what a member's colour DOES carry now is a fill, and a fill asks
+ * [journalOn], which measures it.
  */
 @Composable
-internal fun journalInk(): Color {
-    val paper = journalPaper()
-    val themeInk = MaterialTheme.colorScheme.onSurface
-    if (LocalJournalPagePaint.current.own == null) return themeInk
-    val paperIsLight = paper.luminance() > 0.5f
-    val inkIsLight = themeInk.luminance() > 0.5f
-    return when {
-        paperIsLight && inkIsLight -> Color(0xFF1B1613)
-        !paperIsLight && !inkIsLight -> Color(0xFFF7F2E8)
-        else -> themeInk
-    }
-}
+internal fun journalInk(): Color = MaterialTheme.colorScheme.onSurface
 
 /** The notebook's hairline — the rules and dividers INSIDE a journal card.
  *  (Cards themselves draw no border: a soft shadow is the edge now.) */

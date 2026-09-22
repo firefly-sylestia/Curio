@@ -41,9 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
-import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioNamedTheme
@@ -103,26 +101,23 @@ internal fun journalHueChoices(): List<Pair<String, Color>> {
  * colour looks like before committing to it — and the page's own debounced
  * writer is what persists it (see `PersonalPageMeta.accentArgb`), so a drag is
  * one write, not one per pixel.
+ *
+ * v443 — AND THE PAGE IS NOT ONE OF THE THINGS IT COLOURS. v429 offered a "Paint
+ * the page too" switch here; the member has since asked for it to go (*"in
+ * journal the paint the page remove that option"*) and, asked what removing it
+ * should do, chose **never paint the page**. The sheet therefore sets the DOORS'
+ * colour and nothing else — Home's chips, the list's spine, the palette door in
+ * the dock — so the colour can never become something the member has to read
+ * their own writing against.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun JournalAccentSheet(
     current: Int,
     onPick: (Int) -> Unit,
-    /**
-     * v429 — WHETHER THIS PAGE PAINTS ITS PAPER WITH THE COLOUR, and the setter
-     * for it. Both are null-free here because the sheet is only ever opened by a
-     * page that HAS a colour of its own to keep (see `onJournalAccent`), but the
-     * switch draws only when a setter was handed in, so a future caller that has
-     * nowhere to store the answer gets no control rather than a dead one.
-     */
-    painted: Boolean = false,
-    onPainted: ((Boolean) -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    // The app's own tick, so this switch feels like every other switch in Curio.
-    val tick = rememberCurioControlTick()
     val hues = journalHueChoices()
     // The wheel keeps its own HS, seeded from the colour in hand (the theme's
     // accent when the page follows it, so the wheel opens ON the colour the
@@ -229,44 +224,6 @@ internal fun JournalAccentSheet(
                     )
                 }
             }
-            // ── v429 — PAINT THE PAGE ITSELF ────────────────────────────────
-            //
-            // Until now the colour was worn by the DOORS — the list's spine,
-            // Home's chip, the palette button in this dock — while the page
-            // stayed the theme's parchment. The member asked for the page to
-            // follow the colour too, as an OPTION they turn on, and for it to be
-            // kept with the page ("in the color sheet, and its per journal
-            // stored with the page"), so it lives here, beside the colour, and
-            // is saved by the page's own writer like the colour is.
-            //
-            // The row draws only when there is a colour to paint with: with the
-            // page still on "Theme" there is nothing of its own to wear, and the
-            // switch would be asking about a colour that does not exist yet.
-            if (onPainted != null && current != JOURNAL_ACCENT_THEME) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Paint the page too",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            "This journal's paper takes the colour. The words stay readable either way.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    androidx.compose.material3.Switch(
-                        checked = painted,
-                        onCheckedChange = { wanted -> tick { onPainted(wanted) } },
-                        colors = androidx.compose.material3.SwitchDefaults.colors()
-                    )
-                }
-            }
         }
     }
 }
@@ -300,10 +257,16 @@ private fun AccentSwatch(
             contentAlignment = Alignment.Center
         ) {
             if (selected) {
+                // v443 — THE TICK IS MEASURED AGAINST THE SWATCH IT SITS ON.
+                // It asked [settingsReadableInk], which answers from the THEME
+                // and never looks at the colour handed to it — so the tick on a
+                // member's dark swatch was the theme's dark ink on dark, which is
+                // the "weird unreadable text" this sheet was reported for. A
+                // swatch IS the arbitrary fill, so it asks the measurement.
                 CurioIcon(
                     CurioIcons.Check,
                     null,
-                    tint = settingsReadableInk(color),
+                    tint = journalInkOn(color),
                     size = 18.dp
                 )
             }

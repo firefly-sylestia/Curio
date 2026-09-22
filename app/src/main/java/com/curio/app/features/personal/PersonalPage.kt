@@ -199,15 +199,6 @@ internal fun PersonalWritingPage(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
-    /**
-     * v429 — AND WHETHER THE PAPER TAKES IT (see [JournalPagePaint]): the
-     * member's own option, offered in the colour sheet beside the colour and
-     * kept with the page. Providered to every surface that paints journal paper
-     * — the reading side, the writing canvas and the export — by the three
-     * `CompositionLocalProvider`s below.
-     */
-    journalPagePainted: Boolean = false,
-    onJournalPagePainted: ((Boolean) -> Unit)? = null,
     /** The document as it changes — the to-do page counts its own rows from it
      *  (see TodoScreen), and nothing else has to reach into the editor. */
     onDoc: (PersonalDoc) -> Unit = {},
@@ -253,16 +244,15 @@ internal fun PersonalWritingPage(
     val isNew = entryIdArg == CurioRoutes.PERSONAL_NEW
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // v429 — THE PAGE'S OWN PAINT, resolved once for this page and handed to
-    // everything that draws journal paper (see [JournalPagePaint]). The option
-    // is only meaningful on a page that HAS a colour of its own and a setter to
-    // keep the answer with — which is exactly the journal, and why the note-on-a-
-    // topic, chapter-review and book-review pages keep the theme's parchment.
-    val pagePaint = remember(journalAccent, journalPagePainted, onJournalPagePainted) {
-        JournalPagePaint(
-            argb = journalAccent,
-            painted = journalPagePainted && onJournalPagePainted != null
-        )
+    // THE PAGE'S OWN COLOUR, resolved once for this page and handed to the
+    // surfaces that need it (see [JournalPagePaint]). Only a page that HAS a
+    // colour of its own resolves to one — which is exactly the journal, and why
+    // the note-on-a-topic, chapter-review and book-review pages keep the theme's
+    // parchment. v443 — the paper is no longer one of the things it paints: the
+    // colour reaches the page's own controls ([journalPaperRaised]) and its doors,
+    // and the words are never read against a colour off a member's wheel.
+    val pagePaint = remember(journalAccent) {
+        JournalPagePaint(argb = journalAccent)
     }
 
     // SAVED, not merely remembered: a brand-new page's id is minted on the
@@ -722,29 +712,17 @@ internal fun PersonalWritingPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                // ── v433, v439 — THE PAGE'S OWN PAPER ────────────────────────
+                // ── v443 — THE PAPER IS THE THEME'S, AND ALWAYS ──────────────
                 //
-                // ── v440b — RESTORED: THE PAGE TAKES THE MEMBER'S COLOUR ────
-                //
-                // v439 withdrew "Paint the page too" and left the colour on the
-                // doors ([journalDoorAccent]). The member lived with it and asked
-                // for this back: *"for the jurnal page color restore this state …
-                // currently its bad so restore this state how it was"*, pointing at
-                // e869bac5. So the page paints itself again.
-                //
-                // The original note still holds and is why this is a TINT rather
-                // than a fill: "Paint the page too" had nothing to paint on until
-                // the surface the words stand on stopped asking the THEME for its
-                // background. The paper here is [journalPaper], which IS the theme's
-                // own parchment until the page paints itself: an unpainted page is
-                // unchanged to the pixel, and a painted one is painted all the way
-                // behind the words. The head and the dock are deliberately left
-                // out — they are the app's furniture, and they would come out
-                // unreadable over a paper dark enough to be a choice.
-                .background(
-                    if (LocalJournalPagePaint.current.own != null) journalPaper()
-                    else MaterialTheme.colorScheme.background
-                )
+                // This box has been both ways: v429 grew "Paint the page too" so
+                // the member could colour the paper itself, v439 withdrew it, v440b
+                // restored it at their request, and their answer now is the other
+                // one — *"in journal the paint the page remove that option"* →
+                // **never paint the page**. It is the plain background again, the
+                // surface the words stand on, and the member's colour stays on the
+                // page's doors and its controls (see [JournalPagePaint]) where it
+                // decorates rather than has to be read against.
+                .background(MaterialTheme.colorScheme.background)
                 // The writing area's own top edge, in the window: the line a
                 // heading has to have gone above to be pinned (see
                 // `pinnedSection`).
@@ -1040,8 +1018,6 @@ internal fun PersonalWritingPage(
                         showJournalTools = showJournalTools,
                         journalAccent = journalAccent,
                         onJournalAccent = onJournalAccent,
-                        journalPagePainted = journalPagePainted,
-                        onJournalPagePainted = onJournalPagePainted,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }

@@ -107,6 +107,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1581,18 +1582,50 @@ private fun ReadingGauge(
                         // stop reading as a teleport. A press that never moves
                         // is still a tap, and it seeks on the release — so "tap
                         // a spot to jump there" behaves exactly as it did.
+                        // ── v443 — A SCROLL OVER THE BAR IS NOT A SCRUB ──
+                        //
+                        // The member: *"fix the reading progress accidental
+                        // touch"*, and asked what should stop it, they chose
+                        // *"a scroll over the bar must not move it"*. The old
+                        // handler consumed the DOWN and treated ANY movement as
+                        // a scrub, so a finger running down the page that
+                        // happened to pass over the gauge moved the reading
+                        // place — and, because the down was consumed, the page
+                        // did not scroll either: one false move cost both
+                        // gestures. It now wears in like the reader's own page
+                        // (see `pinchToZoom`'s `travelled`): nothing is taken
+                        // and nothing is consumed until the finger has crossed
+                        // the touch slop SIDEWAYS, and a finger that crosses it
+                        // DOWNWARD has told us it is scrolling, so the bar
+                        // hands the whole gesture to the page and never moves.
+                        // A press that never travels is still a tap and still
+                        // seeks on the release, exactly as before.
                         Modifier.pointerInput(Unit) {
                             awaitEachGesture {
                                 val down = awaitFirstDown(requireUnconsumed = false)
-                                scrubbing = true
-                                down.consume()
-                                var moved = false
+                                val start = down.position
+                                val slop = viewConfiguration.touchSlop
+                                // The knob is no longer lit by the mere TOUCH:
+                                // it arrives with the claim (see above), so a
+                                // scroll over the bar shows nothing at all.
+                                scrubbing = false
+                                var claimed = false
                                 while (true) {
                                     val event = awaitPointerEvent()
                                     val change = event.changes
                                         .firstOrNull { it.id == down.id } ?: break
-                                    if (change.positionChanged()) moved = true
-                                    if (moved) {
+                                    if (!claimed) {
+                                        val dx = abs(change.position.x - start.x)
+                                        val dy = abs(change.position.y - start.y)
+                                        if (dx > slop && dx > dy) {
+                                            claimed = true
+                                            scrubbing = true
+                                        } else if (dy > slop) {
+                                            // The page's own scroll: leave.
+                                            break
+                                        }
+                                    }
+                                    if (claimed) {
                                         change.consume()
                                         scrubNow?.invoke(
                                             (change.position.x / size.width)
@@ -1600,7 +1633,9 @@ private fun ReadingGauge(
                                         )
                                     }
                                     if (!change.pressed) {
-                                        if (!moved) {
+                                        if (!claimed &&
+                                            abs(change.position.x - start.x) <= slop
+                                        ) {
                                             scrubNow?.invoke(
                                                 (change.position.x / size.width)
                                                     .coerceIn(0f, 1f)

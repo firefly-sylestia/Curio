@@ -1480,20 +1480,41 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     .navigationBarsPadding()
                     .padding(horizontal = 10.dp, vertical = 12.dp)
             ) {
+                // The passage's OWN ink, if it already carries a highlight: the
+                // dock draws that swatch as taken, and a second press on it removes
+                // the mark (v443). Read here rather than passed as a boolean because
+                // the bar needs to know WHICH colour it is, not just that one exists.
+                val wornMark = marks.firstOrNull {
+                    it.isHighlight && it.positionIndex == swept.index
+                }
                 ReaderSelectionBar(
                     selection = swept,
                     palette = palette,
+                    appliedInk = wornMark?.let { readerHighlighter(it.colorKey) },
                     onHighlight = { ink ->
                         selection = null
                         scope.launch {
-                            saveReaderMark(
-                                bookId = bookId,
-                                document = document,
-                                paragraph = swept.asParagraph(),
-                                kind = ReaderMarkKind.HIGHLIGHT,
-                                text = swept.text,
-                                colorKey = ink.key
-                            )
+                            // ── v443 — THE COLOUR IN HAND IS A SWITCH ────────
+                            //
+                            // Pressing the ink the passage already wears TAKES
+                            // THE HIGHLIGHT BACK — the member's own answer for
+                            // how a mark is deselected (*"when tappin git again
+                            // the color it should deselect"*). Any other ink is a
+                            // new mark, written by the same path it always was.
+                            if (wornMark != null && wornMark.colorKey == ink.key) {
+                                runCatching {
+                                    PersonalRepositoryHolder.repo.deleteReaderMark(wornMark.id)
+                                }
+                            } else {
+                                saveReaderMark(
+                                    bookId = bookId,
+                                    document = document,
+                                    paragraph = swept.asParagraph(),
+                                    kind = ReaderMarkKind.HIGHLIGHT,
+                                    text = swept.text,
+                                    colorKey = ink.key
+                                )
+                            }
                         }
                     },
                     onNote = {
@@ -1525,8 +1546,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         // not take the old one away.
                         marking = swept.asParagraph()
                         selection = null
-                    },
-                    onClear = { selection = null }
+                    }
                 )
             }
         }
@@ -6065,6 +6085,29 @@ internal fun ReaderAlignGlyph(justified: Boolean, tint: Color, iconSize: Dp = 18
 }
 
 /**
+ * WHAT THE DICTIONARY IS SHOWING — THREE ANSWERS, WHERE THERE USED TO BE ONE NULL
+ * (v443).
+ *
+ * A single `List?` was carrying two different meanings at once (`null` = "not asked
+ * yet" AND "the dictionary could not be reached"), and the first frame of every
+ * sheet is "not asked yet" — so opening the dictionary flashed *"The dictionary
+ * could not be reached."* for a moment before its first real answer, and a blank
+ * field (a passage with no word worth suggesting) sat on that message for good.
+ * The member's report: *"the dictionary wasnt working"*. Each answer has its own
+ * name now, and the sheet draws each one differently.
+ */
+private sealed interface ReaderLookup {
+    /** Nothing asked yet: an empty field, or the moment before the first call. */
+    object Idle : ReaderLookup
+
+    /** The source answered. An EMPTY list is a real answer — no such headword. */
+    data class Answer(val senses: List<ReaderDictionarySense>) : ReaderLookup
+
+    /** The source could not be reached. Never confused with "no such word". */
+    object Unreachable : ReaderLookup
+}
+
+/**
  * v431 — THE DICTIONARY: THE WORD, AND WHAT IT MEANS, WITHOUT LEAVING THE PAGE.
  *
  * The member asked for the lookup on the spot ("In app wikitionary"), and for
@@ -6095,7 +6138,7 @@ private fun ReaderDictionarySheet(
     var word by remember(initial, passage) {
         mutableStateOf(initial.ifBlank { candidates.firstOrNull()?.word.orEmpty() })
     }
-    var senses by remember { mutableStateOf<List<ReaderDictionarySense>?>(null) }
+    var lookup by remember { mutableStateOf<ReaderLookup>(ReaderLookup.Idle) }
     var looking by remember { mutableStateOf(false) }
     var asked by remember { mutableStateOf("") }
     // The spellings the dictionary offered when the word itself had no entry.
@@ -6105,7 +6148,7 @@ private fun ReaderDictionarySheet(
         // its punctuation and its possessive (see [ReaderDictionary.headword]).
         val term = ReaderDictionary.headword(word)
         if (term.isBlank()) {
-            senses = null
+            lookup = ReaderLookup.Idle
             asked = ""
             guesses = emptyList()
             return@LaunchedEffect
@@ -6119,11 +6162,11 @@ private fun ReaderDictionarySheet(
         if (found == null) {
             // Unreachable is NOT "no such word" — the two read differently (see
             // [ReaderDictionary.define]).
-            senses = null
+            lookup = ReaderLookup.Unreachable
             asked = term
             guesses = emptyList()
         } else if (found.isNotEmpty()) {
-            senses = found
+            lookup = ReaderLookup.Answer(found)
             asked = term
             guesses = emptyList()
         } else {
@@ -6135,20 +6178,36 @@ private fun ReaderDictionarySheet(
             val near = withContext(Dispatchers.IO) {
                 runCatching { ReaderDictionary.suggest(term) }.getOrNull().orEmpty()
             }
-            var bestWord = ""
-            var bestSenses: List<ReaderDictionarySense>? = null
+            // ── v443 — THE SOURCE IS ONLY ASKED WHILE IT IS ANSWERING ────
+            //
+            // Four neighbours, four timeouts, twelve seconds of spinner, and a
+            // sheet that then said the dictionary was unreachable anyway. The
+            // first `null` — the source is not answering AT ALL — ends the run,
+            // which is both the faster and the truer answer.
+            var answeredBy = ""
+            var answered: List<ReaderDictionarySense>? = null
+            var silent = false
             for (candidate in near) {
                 val answer = withContext(Dispatchers.IO) {
                     runCatching { ReaderDictionary.define(candidate) }.getOrNull()
                 }
-                if (answer != null && answer.isNotEmpty()) {
-                    bestWord = candidate
-                    bestSenses = answer
+                if (answer == null) {
+                    silent = true
+                    break
+                }
+                if (answer.isNotEmpty()) {
+                    answeredBy = candidate
+                    answered = answer
                     break
                 }
             }
-            senses = bestSenses ?: emptyList()
-            asked = if (bestSenses != null) bestWord else term
+            val hit = answered
+            lookup = when {
+                hit != null -> ReaderLookup.Answer(hit)
+                silent -> ReaderLookup.Unreachable
+                else -> ReaderLookup.Answer(emptyList())
+            }
+            asked = if (hit != null) answeredBy else term
             guesses = near
         }
         looking = false
@@ -6254,7 +6313,7 @@ private fun ReaderDictionarySheet(
             }
 
             Spacer(Modifier.height(14.dp))
-            val list = senses
+            val state = lookup
             when {
                 looking -> Box(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
@@ -6264,23 +6323,34 @@ private fun ReaderDictionarySheet(
                 }
 
                 // A NULL IS NOT AN EMPTY LIST: unreachable and "no such word"
-                // are two different answers (see [ReaderDictionary.define]).
-                list == null -> Text(
+                // are two different answers (see [ReaderDictionary.define]), and an
+                // empty FIELD is a third that used to draw the first one (v443, see
+                // [ReaderLookup]).
+                state is ReaderLookup.Unreachable -> Text(
                     "The dictionary could not be reached.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.ink.copy(alpha = 0.7f)
                 )
 
-                list.isEmpty() -> Text(
+                state is ReaderLookup.Answer && state.senses.isEmpty() -> Text(
                     "Nothing for \u201C$asked\u201D.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = palette.ink.copy(alpha = 0.7f)
                 )
 
+                // An empty field, or the moment before the first call: nothing
+                // under the input. The field and its own "A word" placeholder are
+                // the whole instruction, and a shorter sheet beats a sentence that
+                // says nothing (see [ReaderLookup.Idle]).
+                state is ReaderLookup.Idle -> Unit
+
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    // The compiler cannot carry the smart cast into a branch that
+                    // is not a shape it can see, so the senses are named once here.
+                    val list = (state as ReaderLookup.Answer).senses
                     // ── v442 — AND THE LINE IT CAME FROM ───────────────
                     //
                     // The member's own pick for a passage lookup: a meaning read
@@ -7963,13 +8033,21 @@ private fun DrawScope.drawPdfPassage(
 private fun ReaderSelectionBar(
     selection: ReaderSelection,
     palette: ReaderPalette,
+    /**
+     * THE INK THIS PASSAGE ALREADY WEARS, or null when it is unmarked.
+     *
+     * v443 — the dock's colours are the mark's own SWITCH now: the one in hand is
+     * drawn as taken, and pressing it again TAKES THE HIGHLIGHT BACK (see the
+     * caller). Without this the bar could only ever add a highlight, so the only
+     * ways out of one were the sheet or the marks list.
+     */
+    appliedInk: ReaderHighlighter? = null,
     onHighlight: (ReaderHighlighter) -> Unit,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
     /** v431 — the dictionary, which is what a ONE-WORD selection is for. */
     onDictionary: () -> Unit,
-    onMore: () -> Unit,
-    onClear: () -> Unit
+    onMore: () -> Unit
 ) {
     // ── v438 — ONE WORD GETS THE WHOLE BAR BACK ──────────────────────
     //
@@ -8025,20 +8103,49 @@ private fun ReaderSelectionBar(
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
                 ReaderHighlighter.entries.forEach { ink ->
+                    val worn = appliedInk == ink
                     Surface(
                         onClick = { onHighlight(ink) },
                         shape = CircleShape,
-                        color = ink.ink.copy(alpha = 0.35f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, ink.ink),
+                        // ── v443 — THE COLOUR IN HAND IS DRAWN AS TAKEN, AND
+                        // IT IS THE WAY BACK OUT. It was a 35% wash of itself
+                        // with a hairline whether the passage wore it or not, so
+                        // a marked passage's own colour looked exactly like the
+                        // three it did not wear, and a second press re-wrote the
+                        // same mark. Opaque with a CHECK while it is the
+                        // passage's, and pressing it REMOVES the highlight (the
+                        // caller answers that) — which is the same pairing the
+                        // marking sheet's own colours wear (see [ReaderMarkSheet]),
+                        // and it is what makes the × this bar used to carry
+                        // unnecessary: the member: *"for the hihgligh selecter
+                        // remove the frst x and when tappin git again the color it
+                        // should deselect"*.
+                        color = ink.ink.copy(alpha = if (worn) 1f else 0.35f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            if (worn) 2.dp else 1.dp,
+                            if (worn) palette.ink else ink.ink
+                        ),
                         modifier = Modifier.size(30.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(ink.ink)
-                            )
+                            if (worn) {
+                                CurioIcon(
+                                    CurioIcons.Check,
+                                    "Remove this highlight",
+                                    // The ink that reads on the fill the member is
+                                    // looking at (see `journalInkOn`) — a glyph in
+                                    // the colour of its own disc is a blank disc.
+                                    tint = journalInkOn(ink.ink),
+                                    size = 16.dp
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                        .background(ink.ink)
+                                )
+                            }
                         }
                     }
                 }
@@ -8062,8 +8169,15 @@ private fun ReaderSelectionBar(
                     palette,
                     onMore
                 )
-                Spacer(Modifier.width(2.dp))
-                SelectionBarAction(CurioIcons.Close, "Clear the selection", palette, onClear)
+                // ── v443 — AND NO CROSS AT THE END ──────────────────────────
+                //
+                // A × here meant "nothing to do with this" — but a selection is
+                // not a state the member has to clear: the ⋯ door is the way to
+                // everything else, and a tap on the page puts the dock away (see
+                // `tapPage`). What the member asked for is the mark's own switch:
+                // the colour in hand, pressed again, takes the highlight back —
+                // and with that in the row, the cross was a second, weaker way to
+                // say "clear", so it is gone.
         }
     }
 }

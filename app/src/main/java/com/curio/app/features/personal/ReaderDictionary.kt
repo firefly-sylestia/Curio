@@ -80,6 +80,21 @@ internal enum class ReaderDictionarySource(val key: String, val label: String) {
 
 internal object ReaderDictionary {
 
+    /**
+     * WHAT ONE GET SAID (v443).
+     *
+     * [code] is the HTTP status, or 0 when the call never happened at all (no
+     * network, a timeout, a refused agent). **The two are not the same answer**,
+     * and confusing them is what broke the dictionary: the member's report was
+     * *"the dictionary wasnt working"*, and the cause was exactly this — every
+     * word Wiktionary does not have answers **404**, the old getters turned any
+     * non-200 into `null`, and `null` is the sheet's own word for UNREACHABLE. So
+     * a rare word, a misspelling or a name read as a dead network, and the
+     * spelling suggestions beside it could never run at all: they are only asked
+     * for after an EMPTY answer, which the 404 path never produced.
+     */
+    private data class Fetch(val code: Int, val body: String?)
+
     /** At most this many senses per part of speech, and this many groups. */
     private const val MAX_SENSES = 4
     private const val MAX_GROUPS = 4
@@ -247,8 +262,18 @@ internal object ReaderDictionary {
             // v442 — the word as it WAS WRITTEN is not always the word to ask
             // for: the selection carries its punctuation (see [headword]).
             val term = headword(word).lowercase()
-            if (term.isEmpty() || term.length > 48) return@withContext null
-            if (!term.all { it.isLetter() || it == '-' || it == '\'' }) return@withContext null
+            // ── v443 — A NON-WORD IS AN EMPTY ANSWER, NOT A FAILURE ─────────
+            //
+            // These two guards answered `null`, and `null` is the sheet's word for
+            // "the dictionary could not be reached" — so a member who typed
+            // `1234` or a phrase was told the dictionary was DOWN. Nothing was
+            // asked and there is nothing to find, which is exactly what an empty
+            // list means (the contract above already said so: "or is not a word at
+            // all").
+            if (term.isEmpty() || term.length > 48) return@withContext emptyList()
+            if (!term.all { it.isLetter() || it == '-' || it == '\'' }) {
+                return@withContext emptyList()
+            }
             // The cache is keyed by SOURCE and term: the same word has a different
             // answer in each dictionary, and a shared key would hand one source's
             // senses to the other.
@@ -258,20 +283,35 @@ internal object ReaderDictionary {
             // inline lambda: a non-local return makes the compiler emit its
             // `$$$$$NON_LOCAL_RETURN$$$$$` helper class, and R8 refuses to dex
             // that name (see the note in the app's other fetch doors).
-            val body = when (source) {
+            val fetched = when (source) {
                 ReaderDictionarySource.WIKTIONARY -> getJson(term)
                 ReaderDictionarySource.FREE -> getFreeJson(term)
             }
-            if (body == null) {
-                null
-            } else {
-                val senses = when (source) {
+            val body = fetched.body
+            // ── v443 — A 404 IS AN ANSWER ───────────────────────────────────
+            //
+            // "The source has no entry for this word" (an EMPTY list, which the
+            // sheet says as "Nothing for …" and which is what puts the spelling
+            // suggestions on screen) is a different thing from "the source could
+            // not be reached" (null). Both used to arrive as null, so a word
+            // Wiktionary simply does not carry looked like a network failure and
+            // the miss path — suggestions, the nearest entry that DOES exist —
+            // was unreachable code. 404 is the only status that means "no such
+            // headword"; anything else that is not a 200 is still a failure.
+            // The type is written out because a branch is `emptyList()`: left to
+            // infer it would be `List<Nothing>`, and the contract here is a list of
+            // SENSES (or null for a failure) — the member's own explicit type keeps
+            // the cache and the sheet reading the same list.
+            val senses: List<ReaderDictionarySense>? = when {
+                fetched.code == 404 -> emptyList()
+                fetched.code != 200 || body == null -> null
+                else -> when (source) {
                     ReaderDictionarySource.WIKTIONARY -> parse(body)
                     ReaderDictionarySource.FREE -> parseFree(body)
                 }
-                cache[key] = senses
-                senses
             }
+            if (senses != null) cache[key] = senses
+            senses
         }
 
     /**
@@ -280,24 +320,8 @@ internal object ReaderDictionary {
      * Same budget and the same best-effort contract as [getJson] — a lookup that
      * answers after the member has turned the page is not a lookup.
      */
-    private fun getFreeJson(term: String): String? = runCatching {
-        val url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + Uri.encode(term)
-        val conn = URL(url).openConnection() as HttpURLConnection
-        try {
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 4_000
-            conn.readTimeout = 6_000
-            conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("User-Agent", "Curio/1.1 (Android reader dictionary)")
-            if (conn.responseCode == 200) {
-                conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            } else {
-                null
-            }
-        } finally {
-            conn.disconnect()
-        }
-    }.getOrNull()
+    private fun getFreeJson(term: String): Fetch =
+        fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + Uri.encode(term))
 
     /**
      * dictionaryapi.dev's answer, as the sheet draws it.
@@ -335,9 +359,21 @@ internal object ReaderDictionary {
         return out
     }
 
-    /** One GET, best-effort, with a budget a lookup on a page can afford. */
-    private fun getJson(term: String): String? = runCatching {
-        val url = "https://en.wiktionary.org/api/rest_v1/page/definition/" + Uri.encode(term)
+    /** The first door: Wiktionary's own REST definition endpoint. */
+    private fun getJson(term: String): Fetch =
+        fetch("https://en.wiktionary.org/api/rest_v1/page/definition/" + Uri.encode(term))
+
+    /**
+     * ONE GET, BEST-EFFORT, AND IT KEEPS THE STATUS CODE.
+     *
+     * A lookup on a page can afford 4s to connect and 6s to read — one that
+     * answers after the member has turned the page is not a lookup — and the
+     * STATUS is the whole point of this being one function: 404 means "the source
+     * answered, and it has no such word" (see [define]), while code 0 means the
+     * call never happened. A thrown `responseCode` (a dead network) leaves through
+     * the same door as a refused connection.
+     */
+    private fun fetch(url: String): Fetch = runCatching {
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "GET"
@@ -346,15 +382,17 @@ internal object ReaderDictionary {
             conn.setRequestProperty("Accept", "application/json")
             // Wiktionary asks for a real agent, and refusing one is its right.
             conn.setRequestProperty("User-Agent", "Curio/1.1 (Android reader dictionary)")
-            if (conn.responseCode == 200) {
+            val code = conn.responseCode
+            val body = if (code == 200) {
                 conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
             } else {
                 null
             }
+            Fetch(code, body)
         } finally {
             conn.disconnect()
         }
-    }.getOrNull()
+    }.getOrElse { Fetch(0, null) }
 
     /**
      * Wiktionary's answer, as the sheet draws it.

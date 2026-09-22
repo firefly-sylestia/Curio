@@ -1,4 +1,12 @@
 FIX:
+- Reading: a scroll over the reading-progress bar no longer moves it — the bar took any movement as a scrub, so a finger running down the page that passed over it moved your place AND stopped the page from scrolling; it waits for a sideways move, and a downward one belongs to the page.
+- Reading: the highlight dock's colours are a switch — the colour a passage already wears is drawn as taken, and pressing it again takes the highlight back; the cross at the end of the dock is gone.
+- Reading: the dictionary answers for the words it does not have — a word with no entry at all came back as "could not be reached" (the dictionary's own 404 was read as a dead network), so a misspelled or rare word looked like a failure and the nearest-spelling suggestions never appeared; an unknown word and an unreachable dictionary are said differently now, and the dictionary no longer flashes "could not be reached" as it opens.
+- Writing: the journal's paper never takes your colour — "Paint the page too" is gone, so the paper is the theme's and the words are never read against a colour off a wheel; your colour stays on the page's doors and its own controls.
+- Writing: the day keeps the theme's colour — the Today pill and its date steppers no longer wear the page's own colour.
+- Writing: the ink on any colour you pick is measured — the colour sheet's tick and everything that wears your colour on it read dark-on-light or light-on-dark, so no colour you choose can come out unreadable.
+- Writing: the copy box's letter arrows only add — the left arrow gave a letter back and the right one walked the selection along the line, so between them they could never reach past one character; each arrow now takes the letter on its own side of the selection.
+- Home: the menu button is a menu button — the drawer's own hamburger was wearing your face, because a member who wears their blob as their picture has no photo path for it to fall back on.
 - Reading: the side of the screen answers at once — a side tap waited out the double-tap window before it turned the page and a second tap zoomed instead of turning it; a zone tap is answered the moment your finger lifts, and every tap works.
 - Reading: the motion lock no longer locks the touches — a locked page still hears a tap, a hold and a sweep, and only a real drag is held still.
 - Reading: a sheet closes on a flick as well as a pull — a quick downward throw used to drag a few millimetres and spring back; the flick shuts it now, and the pull that always meant "shut" is shorter.
@@ -43,7 +51,6 @@ FIX:
 - Writing: the journal's tool dock is compact and grouped — style, alignment and copy sit behind one door each that expands inside the dock itself, and a tool that is on reads as lit.
 - Writing: the copy tool floats as its own box — four arrow pills, an undo and cut/copy/paste icons, a select-all button and a cross to close it — with the reach arrows in the corners and the voice note door out of the way while it is up.
 - Writing: picking a word works on its own again — the letter reach opens from the row you are writing in, without having to take a row first.
-- Writing: "Paint the page too" paints the page — the switch took the colour but the page still wore the theme's parchment; all three surfaces now wear the day's own paper.
 - Writing: the Today pill, the eye/pen switch and the mood capsule share one capsule style.
 - Settings: the sub-pages' quick tools row and its suggestions are gone.
 
@@ -51,7 +58,6 @@ ADD:
 - Reading: the look you choose is remembered — paper, typeface, type size, leading, margins, paragraph spacing, alignment, orientation, keeping the screen awake and the night dim all come back after a restart.
 - Reading: appearance and reading settings gained the layout controls — line spacing, page margins, paragraph spacing, ragged or justified lines, keeping the screen awake and a night dim that washes the paper without touching the tools.
 - Reading: a reflowable book's page is measured at the leading and margins you set, so its pages break where the page will really end.
-- Writing: a journal's paper can take the colour you gave that day — a switch in the colour sheet beside the colour, kept with the page, so the whole page reads in your colour and the words stay readable on it.
 - Incursion: the list can be ordered — the viewing order, title, year or runtime, each the other way round with one tap, and a list that is not in viewing order leaves its phase headings behind.
 
 ADD:
@@ -96,7 +102,7 @@ ADD:
 - Writing: a journal can have its own colour — pick one of the app's own themes or any colour at all on a wheel, and it is kept with that day: the day wears it down the journal list's spine, on its chip on Home, and on the palette tool in its own tools. Until you change it, a page follows your theme.
 
 FIX:
-- Writing: the text bar is four arrows and nothing else — ↑ ↓ take rows and ← → take letters (the Letters / Rows switch is gone), a new selection starts on the row you are writing in so a reach can be built from the bottom of a page, and every arrow dims when it has nowhere left to go.
+- Writing: the text bar is four arrows and nothing else — ↑ ↓ take rows and ← → take letters (the Letters / Rows switch is gone), a new selection starts on the row you are writing in so a reach can be built from the bottom of a page, and every arrow dims when it has nowhere left to go. Each letter arrow only ever ADDS a letter, on its own side.
 
 ADD:
 - Incursion: a Personal tab where the Essentials tab was — how far into the whole order you are, a bar per line, what each line wants next, the six states tallied, and the figures your statuses add up to (hours watched, hours left, essentials done, longest run); essential rows keep their star and their filter chip.
@@ -730,7 +736,7 @@ ADD:
 - Reading: the page slider is a small floating pill over the page instead of a sheet — the two hold-to-turn arrows, the count following your thumb and a cross to put it away, and a tap on the page closes it too.
 
 FIX:
-- Writing: the journal's colour reaches its own controls — the date pill, the dock's tools and the page's raised paper wear the day's colour instead of the theme's rose.
+- Writing: the journal's colour reaches its own controls — the dock's tools and the page's raised paper wear the day's colour instead of the theme's rose.
 - Writing: the copy box is two rows with nothing to scroll — the reach arrows, Select all and Line along the top, cut, copy, paste, undo and the cross below — and the writing dock steps aside while the box is up.
 - Writing: a bullet sits level with its words — every mark was centred on the line's own box, which sits below where the eye reads a line of text.
 - Reading: the reader's sheets leave quickly, and the notes and highlights lists keep a real panel's height instead of shrinking to a strip.
@@ -766,4 +772,4 @@ ADD:
 FIX:
 - Everything: a page now opens in a quarter of a second instead of half — the slide every plain screen used (the journal, a chapter, a book) was 500ms, which is what made opening the journal feel slow, and the tools that appear under your thumb arrive crisper too.
 - Reading: the PDF renders again in Cooler mode — the low-power pass had told the page renderer to use a bitmap format it refuses, so pages stopped drawing.
-- Writing: a voice note can no longer crash the app while it is being drawn, and the journal page takes your chosen colour again.
+- Writing: a voice note can no longer crash the app while it is being drawn.

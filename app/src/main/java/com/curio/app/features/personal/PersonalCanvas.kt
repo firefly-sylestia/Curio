@@ -85,7 +85,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -2051,11 +2050,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     /**
      * THE LETTER ARROWS. [more] is → and !more is ←.
      *
-     * The first press OPENS the window at one character; from there more extends
-     * the window's far end and less gives a character back. At the row's far end
-     * (and at a single character) the window WALKS instead of sticking, which is
-     * how the old mode kept its arrows meaningful without the reach leaving the
-     * line it belongs to.
+     * EACH ARROW ADDS A LETTER ON ITS OWN SIDE AND NOTHING ELSE (v443): → takes
+     * the letter to the RIGHT of the window, ← the letter to its LEFT. The first
+     * press OPENS the window at one character, wherever the writing is, and every
+     * press after it extends it outward. It never walks and it never shrinks — see
+     * the note in the body for why the old behaviour was wrong.
      */
     fun nudgePageLetters(more: Boolean) {
         // ── v433 — A LETTER REACH CAN START BY ITSELF ───────────────────────
@@ -2069,7 +2068,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // starts at, see [pageStartRow]), and the row arrows are still there to
         // take the reach further up or down the page.
         if (pageRange.isEmpty()) {
-            if (!more || order.isEmpty()) return
+            // v443 — EITHER ARROW CAN OPEN IT. ← used to refuse ("nothing to give
+            // back"), which left half the control dead on a fresh reach for no
+            // reason once both arrows only add.
+            if (order.isEmpty()) return
             val anchor = pageStartRow()
             if (anchor < 0) return
             pageGrowsUp = true
@@ -2081,7 +2083,6 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (text.isEmpty()) return
         val range = pageCharRange
         pageCharRange = if (!pageLettersPicked) {
-            if (!more) return
             val caret = selections[id]?.start ?: 0
             val at = if (caret in 0 until text.length) {
                 caret
@@ -2091,17 +2092,27 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 0
             }
             TextRange(at, (at + 1).coerceAtMost(text.length))
-        } else if (more) {
-            if (range.max < text.length) {
-                TextRange(range.min, range.max + 1)
-            } else {
-                TextRange((range.min - 1).coerceAtLeast(0), range.max)
-            }
         } else {
-            when {
-                range.max - range.min > 1 -> TextRange(range.min, range.max - 1)
-                range.min > 0 -> TextRange(range.min - 1, range.max)
-                else -> TextRange.Zero
+            // ── v443 — BOTH LETTER ARROWS ONLY EVER ADD ──────────────
+            //
+            // The member: *"for the copy arrow the behaviror is unexpected fix
+            // it"*, and their answer to how: *"kee adding letter never walk
+            // shrink"*. → used to WALK the window left along the row once it
+            // reached the row's end, and ← SHRANK it from the right (and at a
+            // single letter walked it the other way) — so the two arrows could
+            // never hand the member more than the one character they started
+            // with, which is the report they filed against them: *"side arrows
+            // … selecting only one letter at a time"*. Each arrow now does the
+            // one thing it says: → takes the letter to the RIGHT of the window,
+            // ← the letter to its LEFT. The window only grows; a wrong reach is
+            // started over by a row arrow, "Line" or "Select all" — all of which
+            // reset it — rather than by an arrow that silently moved it.
+            if (more) {
+                if (range.max < text.length) TextRange(range.min, range.max + 1)
+                else range
+            } else {
+                if (range.min > 0) TextRange(range.min - 1, range.max)
+                else range
             }
         }
     }
@@ -2137,17 +2148,20 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     }
 
     fun canNudgePageLetters(more: Boolean): Boolean {
-        // With nothing picked yet, → is live as long as the row the writing is in
-        // HAS words to reach into, and ← has nothing to give back (v433).
+        // With nothing picked yet, either arrow only has to have a letter to OPEN
+        // a window into — the row the writing is in (v433), and, since v443, both
+        // of them can do it.
         if (pageRange.isEmpty()) {
             val row = order.getOrNull(pageStartRow()) ?: return false
-            return more && !blocks[row]?.text.isNullOrEmpty()
+            return !blocks[row]?.text.isNullOrEmpty()
         }
         val length = pageLetterRowLength()
         if (length == 0) return false
-        if (!pageLettersPicked) return more
+        if (!pageLettersPicked) return true
+        // v443 — AN ARROW IS DEAD ONLY AT THE ROW'S OWN EDGE, because it only ever
+        // ADDS a letter (see [nudgePageLetters]).
         val range = pageCharRange
-        return if (more) range.max < length || range.min > 0 else range.max - range.min > 1 || range.min > 0
+        return if (more) range.max < length else range.min > 0
     }
 
     /** The whole of the anchor row's writing, as the letter reach — the bar's
@@ -5643,6 +5657,13 @@ private fun DockPanelDivider(ink: Color) {
  * press ([PersonalEditorState.nudgePageLetters]). Every arrow DIMS when its axis
  * has nowhere left to go.
  *
+ * v443 — AND THE TWO LETTER ARROWS ONLY ADD. The member: *"for the copy arrow the
+ * behaviror is unexpected fix it"* → *"kee adding letter never walk shrink"*. ← no
+ * longer gives a letter back and neither arrow walks the window along the row
+ * once it reaches the end (see [PersonalEditorState.nudgePageLetters]); each one
+ * takes the letter on its own side of the window, so pressing them counts a clause
+ * out instead of shuffling one letter around.
+ *
  * ── v433 — IT FLOATS, AND IT IS MADE OF PILLS ────────────────────────────
  *
  * The member: *"also the copy floating layout, make the arrow proper pills in the
@@ -5661,7 +5682,10 @@ private fun DockPanelDivider(ink: Color) {
  *  · Select all is a WORD, because the bundled Material Symbols subset carries no
  *    `select_all` (measured — see [safeGlyphName]); cut, copy and undo are their
  *    own icons, and paste is DRAWN for the same measured reason ([PasteGlyph]).
- *  · A CROSS closes the box, and Done is gone with the count that named it.
+ *  · A CROSS closes the box, and Done is gone with the count that named it — the
+ *    box's own cross STAYS in v443: the one the member asked to be rid of is the
+ *    reading surface's own (see `ReaderSelectionBar`), where the highlight's
+ *    colours are the way out of a mark.
  *
  * Undo is the box's own last actions (see the state's own note) — it is not a
  * keystroke undo, and nothing here pretends it is.
@@ -5889,14 +5913,14 @@ internal fun PersonalPageEditBar(
             ) { state.nudgePageRows(up = false) }
             ReachPill(
                 icon = CurioIcons.ArrowBack,
-                label = "Fewer letters",
+                label = "One more letter to the left",
                 accent = accent,
                 ink = ink,
                 enabled = state.canNudgePageLetters(more = false)
             ) { state.nudgePageLetters(more = false) }
             ReachPill(
                 icon = CurioIcons.ArrowForward,
-                label = "One more letter",
+                label = "One more letter to the right",
                 accent = accent,
                 ink = ink,
                 enabled = state.canNudgePageLetters(more = true)
@@ -6077,14 +6101,6 @@ internal fun PersonalToolDock(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
-    /**
-     * v429 — WHETHER THE PAGE'S PAPER TAKES THE COLOUR TOO (see
-     * [JournalPagePaint]). Stored with the page like the colour, and offered in
-     * the same sheet; null draws no switch, exactly as a null [onJournalAccent]
-     * draws no palette door.
-     */
-    journalPagePainted: Boolean = false,
-    onJournalPagePainted: ((Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -6098,8 +6114,6 @@ internal fun PersonalToolDock(
         JournalAccentSheet(
             current = journalAccent,
             onPick = onJournalAccent,
-            painted = journalPagePainted,
-            onPainted = onJournalPagePainted,
             onDismiss = { accentOpen = false }
         )
     }
@@ -7209,8 +7223,7 @@ private fun AlignGlyph(kind: AlignKind) {
  * function, not a theme role: the fill here is a colour somebody chose, not one
  * the theme measured.
  */
-private fun readableOnFill(fill: Color): Color =
-    if (fill.luminance() > 0.55f) Color(0xFF1B1613) else Color(0xFFF7F2E8)
+private fun readableOnFill(fill: Color): Color = journalInkOn(fill)
 
 @Composable
 private fun PersonalToolButton(

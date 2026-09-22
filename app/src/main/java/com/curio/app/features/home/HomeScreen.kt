@@ -1503,7 +1503,8 @@ fun HomeScreen(navController: NavController) {
                     iconTint = aInk,
                     elevation = 3.dp,
                     pillInteraction = avatarPillInteraction,
-                    avatarPath = profileAvatarPath
+                    avatarPath = profileAvatarPath,
+                    showingPicture = true
                 )
             }
             if (homeGlassOn) {
@@ -1632,7 +1633,9 @@ fun HomeScreen(navController: NavController) {
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the
                     // drawer) and falls back to the Person glyph otherwise.
-                    avatarPath = profileAvatarPath
+                    // v443 — and it is the one pill that may wear a face.
+                    avatarPath = profileAvatarPath,
+                    showingPicture = true
                 )
             }
             } // v3xx22 — end of the glass-morph-or-floating-pills branch
@@ -1871,6 +1874,19 @@ private fun TopBarPill(
     // v118 — when set, the avatar photo replaces the glyph; the pill's
     // animated rim still draws on top so the frosted scroll morph reads.
     avatarPath: String? = null,
+    /**
+     * v443 — WHETHER THIS PILL *IS* THE MEMBER'S OWN PICTURE.
+     *
+     * The path above is NOT the test, and treating it as one was the bug: a member
+     * wearing their **blob** as their picture has no path at all
+     * ([AppPreferences.profileAvatarBlobState]), so `hasOwnPicture(null)` is TRUE for
+     * them and a pill that was handed no path — the drawer's hamburger — drew their
+     * face instead of its own glyph. The member: *"the drawer menu icon on home
+     * screen is getting the profile pic"*. So the pill SAYS which of the two it is,
+     * and only the picture pill ever resolves a face (its own glyph is the fallback
+     * for a member who has neither).
+     */
+    showingPicture: Boolean = false,
     // v246 — optional external gesture source: when the caller also wires
     // liquid-glass press feel, both must read the SAME stream.
     pillInteraction: MutableInteractionSource? = null
@@ -1901,7 +1917,8 @@ private fun TopBarPill(
             // v439 — their blob while they are wearing it, else their photo
             // (see [CurioMemberAvatar]): the drawer hero must show the same
             // picture the profile does.
-            if (hasOwnPicture(avatarPath)) {
+            // v443 — AND ONLY THE PICTURE PILL ASKS (see [showingPicture]).
+            if (showingPicture && hasOwnPicture(avatarPath)) {
                 // The picture fills the pill (the Surface clips to the shape);
                 // the rim ring rides on top so the pill keeps its frosted-rim
                 // look while scrolling.
