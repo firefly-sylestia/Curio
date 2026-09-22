@@ -1395,6 +1395,15 @@ fun HomeScreen(navController: NavController) {
                         navController.navigate(
                             CurioRoutes.todo(CurioRoutes.PERSONAL_NEW)
                         ) { launchSingleTop = true }
+                    },
+                    // v449 — and the dictionary's own page, so a word that turns up
+                    // while the member is looking at Home is one tap from its
+                    // meaning (the other door is the reader's ⋯ menu).
+                    onDictionary = {
+                        writeSheetOpen = false
+                        navController.navigate(CurioRoutes.READER_DICTIONARY) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }

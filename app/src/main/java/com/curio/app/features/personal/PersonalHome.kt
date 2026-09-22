@@ -167,7 +167,9 @@ fun CreateEntrySheet(
     onJournal: () -> Unit,
     onBook: () -> Unit,
     onTopicNote: () -> Unit,
-    onTodoList: () -> Unit
+    onTodoList: () -> Unit,
+    /** v449 — the dictionary's own page (see `ReaderDictionaryPage`). */
+    onDictionary: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -222,6 +224,19 @@ fun CreateEntrySheet(
                 accent = personalAccent(),
                 onClick = onTodoList,
                 drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
+            )
+            // ── v449 — AND THE DICTIONARY, WHICH IS NOT WRITING ────────
+            //
+            // The member asked for this page to be reachable from Home's "+" as well
+            // as the reader's ⋯ menu, and it belongs here even though nothing is
+            // written on it: the sheet is the member's own "what shall I do now" door,
+            // and looking a word up is one of the things they do.
+            CreateEntryOption(
+                glyph = CurioIcons.Search,
+                title = "The dictionary",
+                body = "Any word — online, or offline once you download a volume",
+                accent = personalAccent(),
+                onClick = onDictionary
             )
         }
     }

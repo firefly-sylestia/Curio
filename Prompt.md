@@ -379,6 +379,14 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§44 — the dictionary's own page (DONE, v449).** The lookup is a PAGE now (`reader/dictionary`,
+  `ReaderDictionaryPage`) as well as the reader's sheet: the reader's **⋯ menu**'s Dictionary tile and
+  Home's **"+"** sheet (a new `CreateEntrySheet` door) both open it, it is search-first (one field at the
+  top, always), stands taller than the sheet, rides clear of the keyboard (`imePadding`), carries the same
+  five doors with each offline volume downloaded or removed from the page, groups the answer by part of
+  speech, offers the nearest spellings on a miss, and keeps the visit's own list of words looked up. The
+  sheet keeps the SELECTION's door, which is the answer-shaped use it was built for. See the v449 section
+  of `app/AGENTS.md`.
 - **§43 — the dock, the Wide that did not stay, the lock, the ⋯ menu, the Snapshot and back (DONE, v448).**
   Seven items: the highlight dock is a **fixed, bigger toolbar** (42dp discs, 44dp doors, a real gutter) and the
   **dictionary is its own pill above it** naming the word, shown only for a one-word selection; **"Wide" stays

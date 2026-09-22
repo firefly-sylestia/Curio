@@ -379,6 +379,17 @@ object CurioRoutes {
      * page for now.
      */
     const val READER_SETTINGS = "reader/settings"
+    /**
+     * v449 — THE DICTIONARY'S OWN PAGE.
+     *
+     * The reader's dictionary used to live only in its sheet: answer-shaped, drawn
+     * over the page the member was reading, sized to the words they had swept. The
+     * member asked for a page of its own — *"a new of its own dictionary page … more
+     * longer and let user search any word"* — opened from the reader's ⋯ menu and
+     * from Home's "+", so a lookup is not tied to a book. See
+     * `ReaderDictionaryPage`.
+     */
+    const val READER_DICTIONARY = "reader/dictionary"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).

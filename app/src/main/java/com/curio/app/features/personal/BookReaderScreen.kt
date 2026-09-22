@@ -1971,9 +1971,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onNotes = { sheet = ReaderSheet.NOTES },
             onHighlights = { sheet = ReaderSheet.HIGHLIGHTS },
             onDictionary = {
-                dictionarySeed = ""
-                dictionarySearch = true
-                sheet = ReaderSheet.DICTIONARY
+                // ── v449 — THE ⋯ MENU'S DICTIONARY IS THE PAGE ────────────
+                //
+                // The member, on this door: *"when the dictionary is opened from the
+                // 3 dot one [it should be] more longer and let user search any word"*
+                // — and then asked for its own page outright. The sheet keeps the
+                // door it was built for (a SELECTION: it opens on the words that
+                // were swept, and stays over the page they came from), while the ⋯
+                // menu's door leaves the book for the page that is there to search
+                // in.
+                sheet = null
+                navController.navigate(CurioRoutes.READER_DICTIONARY) {
+                    launchSingleTop = true
+                }
             },
             onShare = {
                 sheet = null

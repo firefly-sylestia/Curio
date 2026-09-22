@@ -1360,6 +1360,15 @@ composable(CurioRoutes.COMMUNITY) {
                     )
                 }
             }
+            // v449 — the dictionary's own page: a lookup is not tied to the book in
+            // front of the member, so the reader's ⋯ menu (and Home's "+") open a
+            // PAGE rather than the reader's own sheet. Taller, search-first, and it
+            // wears the reader's paper and ink like the reader's settings do.
+            composable(CurioRoutes.READER_DICTIONARY) {
+                com.curio.app.features.personal.ReaderDictionaryPage(
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable(CurioRoutes.USER_EXPERIMENTS) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     UserExperimentsScreen(navController = navController)
