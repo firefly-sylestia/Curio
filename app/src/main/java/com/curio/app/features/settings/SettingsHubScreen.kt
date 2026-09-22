@@ -1565,7 +1565,7 @@ private val SettingsSections = listOf(
                     // → five taps on Version), under "Sharing".
                     // v461 — the door to the Advanced page (Recording, Experiments
                     // and the Pet designer moved inside it — see "Personalize").
-                    SettingsRowEntry(CurioIcons.Tune, "Advanced", "Recording, experiments and the pet designer", CurioRoutes.SETTINGS_ADVANCED)
+                    SettingsRowEntry(CurioIcons.Settings, "Advanced", "Recording, experiments and the pet designer", CurioRoutes.SETTINGS_ADVANCED)
                     // Dev page hidden — accessible via 5-tap version number in Support
                 )
             )
@@ -1816,6 +1816,11 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
     SettingsNavEntry("online", "Online", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE),
+    // v461 — the Advanced page is a page, so it gets its own chip: the rail is how
+    // a member crosses between sections, and a section that is not on it cannot
+    // be reached from any other one. (The nested doors keep their own chips too —
+    // they still are their own screens, one tap from the rail.)
+    SettingsNavEntry("advanced", "Advanced", CurioIcons.Settings, CurioRoutes.SETTINGS_ADVANCED),
     SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
 )
 

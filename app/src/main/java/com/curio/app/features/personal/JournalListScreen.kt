@@ -556,7 +556,6 @@ private fun MonthHead(month: java.time.LocalDate) {
  *  line and how much is on the page. Tap opens it, a long press offers the
  *  removal — the same habits as every other Curio list. */
 @OptIn(ExperimentalFoundationApi::class)
-@Composable
 /**
  * v461 — ONE DAY, IN A THIRD OF THE PAGE (see the journals list above).
  *

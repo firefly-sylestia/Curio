@@ -157,6 +157,24 @@ definition file**. Do not assume parameter names from memory.
     deletion, read the five lines either side of the cut, and `grep -n` the
     block for anything that has lost its own line.
 
+13. **AN INSERTION TAKES THE ANNOTATION ABOVE IT** — when a new declaration is
+    inserted *before* an existing function, the `@Composable` (or `@OptIn`, or
+    any other) annotation that sat directly above that function now binds to
+    the NEW declaration: **an annotation binds to the next DECLARATION, and a
+    doc comment in between is not a barrier.** The function left below loses its
+    annotation, and if the insertion carries an annotation of its own, the same
+    one appears twice — the build then says `This annotation is not repeatable`
+    and `@Composable invocations can only happen from the context of a
+    @Composable function`, neither of which points at the real mistake. So:
+    **read the two lines above any insertion point**, keep the annotation with
+    the function it belongs to (re-add it explicitly when the insertion moved
+    past it), and make any checker treat *the same annotation twice in one run*
+    as a failure — a scan that accepts "annotation, comment, annotation" (two
+    DIFFERENT annotations may stack) hides this bug exactly. Four of these
+    landed in one session (v458's snapped `@Composable`, v461's `SearchSlide`
+    and the v460 gradient helper, v462's `JournalGridCell` and
+    `AdvancedSection`) — it is the most expensive habit in this codebase.
+
 ### ✅ DO COMMIT AND PUSH AFTER EVERY FIX
 
 After **every completed fix or change**, agents MUST commit and push before

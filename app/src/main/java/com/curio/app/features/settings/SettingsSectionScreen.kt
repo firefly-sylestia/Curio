@@ -246,6 +246,8 @@ val glassBackdrop = rememberLayerBackdrop()
                         SettingsPage.PREFERENCES -> "preferences"
                         SettingsPage.RECORDING -> "recording"
                         SettingsPage.DATA -> "backup"
+                        // v461 — the Advanced page lights its own door on the rail.
+                        SettingsPage.ADVANCED -> "advanced"
                     },
                     onSelect = { navigateToSettingsSection(navController, it) },
                     navController = navController
@@ -1599,7 +1601,6 @@ private fun RecordingSection(highlightKey: String? = null) {
     }
 }
 
-@Composable
 /**
  * v461 — THE ADVANCED PAGE.
  *
