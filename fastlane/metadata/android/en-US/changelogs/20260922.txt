@@ -1,4 +1,15 @@
 ADD:
+- Reading: the dictionary has an offline door — download it once from inside the dictionary sheet (Webster's 1913, public domain, 9 MB) and every word answers with no connection; the sheet's badge row holds all three dictionaries (Offline · Wiktionary · Free) and shows the one you are on, and the ⋯ menu opens the dictionary in a taller panel where you can search any word.
+- Reading: the drawer's star map twinkles, and it draws itself in and out with the drawer — the lines run from each star to the one it joins, and the whole sky gathers and lets go with the panel.
+
+FIX:
+- Reading: a swipe down really closes a sheet — the body's drag had no end of its own, so the panel sat half-way down for the whole settle wait after your finger was gone; it springs back or shuts the instant you let go.
+- Reading: the dictionary's search box is no longer hidden by the keyboard — a sheet lifts clear of the keys.
+- Reading: copying a passage that runs over a line break keeps the words apart — two lines used to arrive glued together, in the copy, in the dictionary's quoted line and in a saved highlight; a hyphen at the line's end is still one word.
+- Writing: the marker and the bullet panels close themselves — the first cross takes the pen or the list off the line AND shuts the panel, and the panel puts itself away when you start typing or move to another line, so the dock is a tool row again.
+- Home: the drawer's selected star glows in its own category colour — a picked lane used to read as a lighter star (the same pale mix, only wider), and the dot no longer swells when you tap it.
+
+ADD:
 - Profile: Edit profile is a page of its own instead of a dialog — a quiet title, your picture with its camera disc and two actions, your name and bio as open fields, your account flat under ACCOUNT, one tap anywhere on the Privacy row, and Cancel / Save changes held at the bottom.
 - Profile: tapping your picture opens it over the page, with the ⋯ there to remove the photo.
 - Profile: your username saves with Save changes — the field checks it as you type, and the terms are the same dialog the account card already shows.

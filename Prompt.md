@@ -6,7 +6,83 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §39 — the Edit profile page, as a full screen
+## 0. THE CURRENT REQUEST — §40 — the dock's panels, the reader's sheets, the dictionary's three doors, and the sky
+
+> the bulletpoint and highlight so tapping it again opens the collapsed options, and then i need
+> to tap that last cross to close it, and theres one at the first to dismiss the picked, so make
+> the close button the first one both dismiss and deselect the pick, and also the collapse auto
+> closes when i start typing or i tap the page. also for dictionary use both the provider add show
+> it a a badge option to switch between, also the buttom sheet can be scrollable and a little up.
+> also the text tap and hold selection is bad, like when the line end and i copy 2 line then the
+> both lines are touching each other with no space. also the online dictionary is bad, add a
+> downloadable dictionary inside the app in the dictionary bottom sheet, but when the dictionary is
+> opened from the 3 dot one it [is] more longer and let user search any word, and also fix the
+> search box hiding below the keyboard for dictionary. and then for the drawer star map graph,
+> animate it with star twinkle, and animate every time it closes and opens, with beautiful mesh
+> like animation dont change the design, just beautifully animate it, also fix the light glow of
+> the category tint when one is selected, and dont grow the dot too much. also the reader dropdown
+> closes fast and good when taping outside but the swipe down to close is buggy it stays as an
+> overlay for some time fix it.
+
+**Decisions confirmed with the member before editing** (the ask round): the offline dictionary is
+**a full one** (~100k headwords, one download, searched offline); the badge order is
+**Offline · Wiktionary · Free, offline first once downloaded**; and the glued-lines copy report is
+**the reader's long-press selection**, not the journal's copy box.
+
+**Files:** `ReaderOfflineDictionary.kt` (new), `BookReaderScreen.kt` (the frame, the sheet),
+`BookPdfText.kt` (the join), `PersonalCanvas.kt` (the dock's panels), `HomeScreen.kt` +
+`CurioNavHost.kt` (the sky). `web/` and `desktop/` untouched.
+
+### 0.1 What was built
+
+1. **The dock's panels** — the marker's "No marker" and the bullet's "Remove list" now clear the
+   pick AND close the panel; the trailing cross is gone from those two (it survives on format,
+   alignment and export, whose first control is a real choice); and a panel closes itself when the
+   focused line changes (which is what tapping the page does) or its text changes (typing).
+2. **The reader's sheets** — the frame takes the IME inset on its root box (so a bottom-aligned
+   sheet lifts clear of the keyboard) and it settles a body drag the instant no finger is left
+   down, on the same flick the head reads; the debounce stays only as a fallback.
+3. **A passage over a line break** — `PdfPageText` joins glyphs with a space where the GLYPHS'
+   geometry says the page broke the line (a moved baseline, or a real gap), never after a hyphen,
+   and never doubling a space that is already there. The page's own `text` and `textBetween`
+   share one builder, so the copy, the context line, a share and a stored highlight all agree.
+4. **The dictionary's three doors** — a badge row (Offline · Wiktionary · Free) with the offline
+   file first once it is there, the sheet re-asking on a door switch (the online doors memoise, the
+   offline one is a local stream), a taller panel for the ⋯ menu's search mode `0.62f` vs `0.55f`,
+   and the download row (progress, licence, Remove) inside the sheet.
+5. **The offline dictionary** — `ReaderOfflineDictionary`: Webster's 1913 (public domain, ~9MB,
+   ~86,000 headwords) streamed from the source's own JSON with `android.util.JsonReader`, a
+   `.part` file renamed into place only when whole, alphabetical early stop, and `null` for "no
+   dictionary" against `emptyList()` for "no such headword".
+6. **The sky** — one `reveal` progress driven by the drawer's own state: the panel eases and fades
+   in, every hairline runs out from its star (the mesh draws itself), both reverse on close; a
+   `withFrameNanos` twinkle runs only while the drawer is open and is read inside the draw block;
+   the picked aura wears the lane's own tint at deeper mixes and tighter radii, and the dot grows
+   18% instead of 50%.
+
+### 0.2 Checks run
+
+- **No Gradle command** (root `AGENTS.md` forbids it here); CI validates on push.
+- `android.util.JsonReader`/`JsonToken` are framework APIs; `DictionaryDoor` keeps the existing
+  `ReaderDictionarySource` and its two-option settings row untouched (no `when` had to change);
+  `withFrameNanos` and the four badge-row imports were added after checking what the file already
+  imported; the download callback writes Compose state (thread-safe) and reports progress in the
+  row's own text rather than adding a progress-bar API that this Material version may not carry.
+- A string/comment-aware bracket-balance pass over all six touched files: balanced.
+
+### 0.3 Still open
+
+- **The offline file is ~9MB, not the 20–30MB guessed** — Webster's 1913 is the full dictionary at
+  that size, which is a better download rather than a smaller dictionary.
+- **A tap on the SAME line's whitespace** does not close a dock panel (only a focus MOVE or
+  typing does): the editor has no page-tap signal of its own yet; if the member wants that exact
+  case, the page's tap handler is where the signal would come from.
+
+---
+
+# (previous session, kept for the state it records)
+
+## 0. §39 — the Edit profile page, as a full screen
 
 > this ia the desin specification of edit profile and instead of dialog box make it a full screen
 > with this style kee the backgorud and color theme aware and kee the backgroud plain thi sis the
@@ -303,6 +379,15 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§40 — the dock's panels, the reader's sheets, the dictionary's three doors, and the sky (DONE, v445).**
+  The marker and bullet panels close themselves (the first cross takes the pick off the line AND shuts
+  the panel; typing or moving lines puts it away); a reader sheet rides above the keyboard and its
+  swipe-down settles the instant the finger leaves; a passage over a line break keeps its words apart
+  (the copy, the context line, a highlight); the dictionary carries all three doors as a badge row
+  with a **downloadable offline dictionary** (Webster's 1913, public domain, ~9MB, streamed and
+  searched locally) and a taller panel when the ⋯ menu opens it to search any word; and the drawer's
+  star map twinkles, draws itself in and out with the panel, wears its own category tint when a lane
+  is picked, and no longer swells the dot. See §0–§0.3 above and the v445 section of `app/AGENTS.md`.
 - **§39 — Edit profile as a full screen, to the member's own design spec (DONE, v444).** The
   identity editor is a PAGE now (`profile/edit`, `ProfileEditScreen`) instead of a dialog: a
   small way back over a large quiet title and one supporting sentence, the picture centred with

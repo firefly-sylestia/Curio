@@ -56,8 +56,50 @@ internal class PdfPageText(
 ) {
     /** The page as one string — what a search runs against and what a stored
      *  highlight's own words are taken from. */
-    val text: String by lazy(LazyThreadSafetyMode.NONE) {
-        glyphs.joinToString("") { it.text }
+    val text: String by lazy(LazyThreadSafetyMode.NONE) { joined(0, glyphs.size - 1) }
+
+    /**
+     * v444 — A LINE ENDS IN A SPACE, NOT IN NOTHING.
+     *
+     * The member: *"the text ta and hold selection is bad, like when the line end
+     * and i copy 2 line then the both lines are touching each other with no
+     * space"*. Glyphs arrive in drawing order and each holds its OWN text, and the
+     * extractor materialises a SPACE only when the page actually drew one as its
+     * own run — which a line break is not. So joining them with nothing produced
+     * `…the end of the lineand then the next…`: two lines of a passage glued into
+     * one word, in everything that reads a selection (the copy, the dictionary's
+     * context line, a share, a stored highlight's own words).
+     *
+     * A break is decided by the GLYPHS' OWN GEOMETRY, which is what the page's
+     * points are for: a glyph that sits on a different baseline than the one
+     * before it, or that starts a real gap to its right, was separated on the page
+     * and is separated here. Two rules keep it honest:
+     *
+     *  · **A hyphen is left alone.** A word broken across lines (`under-` /
+     *    `standing`) is ONE word, and a space there would invent a word the page
+     *    never printed.
+     *  · **A space that IS there is never doubled**, and neither is one that is
+     *    about to be: the extractor's own spaces are respected in both directions.
+     */
+    private fun joined(first: Int, last: Int): String {
+        if (glyphs.isEmpty()) return ""
+        val from = first.coerceIn(0, glyphs.size - 1)
+        val to = last.coerceIn(from, glyphs.size - 1)
+        val out = StringBuilder()
+        var previous: PdfGlyph? = null
+        for (index in from..to) {
+            val glyph = glyphs[index]
+            val before = previous
+            if (before != null && !before.text.endsWith(" ") && !glyph.text.startsWith(" ")) {
+                val line = maxOf(before.height, glyph.height).coerceAtLeast(1f)
+                val broke = kotlin.math.abs(glyph.y - before.y) > line * 0.6f
+                val gapped = glyph.x - (before.x + before.width) > line * 0.35f
+                if ((broke || gapped) && !before.text.endsWith("-")) out.append(' ')
+            }
+            out.append(glyph.text)
+            previous = glyph
+        }
+        return out.toString()
     }
 
     /**
@@ -142,9 +184,8 @@ internal class PdfPageText(
 
     /** The words between two glyph indices, which is what a highlight stores. */
     fun textBetween(first: Int, last: Int): String {
-        val from = first.coerceIn(0, (glyphs.size - 1).coerceAtLeast(0))
-        val to = last.coerceIn(from, (glyphs.size - 1).coerceAtLeast(0))
-        return glyphs.subList(from, to + 1).joinToString("") { it.text }.trim()
+        if (glyphs.isEmpty()) return ""
+        return joined(first, last).trim()
     }
 
     /**

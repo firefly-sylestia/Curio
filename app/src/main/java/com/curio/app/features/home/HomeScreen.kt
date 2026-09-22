@@ -204,6 +204,7 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
+import androidx.compose.runtime.withFrameNanos
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlinx.coroutines.delay
@@ -2490,7 +2491,20 @@ private val DrawerGlassHeroHeight = 140.dp
 // pill bar), so its content is called from CurioNavHost: internal instead
 // of private. Its panel helpers below stay private.
 @Composable
-internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
+internal fun HomeDrawerContent(
+    onNavigate: (String) -> Unit,
+    /**
+     * v444 — WHETHER THE DRAWER IS OPEN, so the sky can arrive and leave with it.
+     *
+     * The member: *"animate every time it closes and opens, with beautiful mesh
+     * like animation, don't change the design, just beautifully animate it"*. The
+     * star map is composed with the drawer, so without this it had no way to know
+     * that the drawer was on its way OUT — its own light-up played on the way in
+     * and then the whole panel simply slid off. The drawer's own state is the one
+     * thing that knows both halves (see `CurioNavHost`).
+     */
+    open: Boolean = true
+) {
     val context = LocalContext.current
     val displayName = AppPreferences.displayNameState
     // v174 — the drawer hero becomes a dreamy pre-dawn sky instead of the
@@ -3015,7 +3029,8 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
         DrawerLaneStarMap(
             lanes = mapLanes,
             selected = selected,
-            onSelect = { selected = it }
+            onSelect = { selected = it },
+            open = open
         )
         // v427 — NO COUNTER UNDER THE SKY. A line reading "1 of 338 lanes
         // explored" under a map is a meter wearing a caption: the stars already
@@ -3113,6 +3128,8 @@ private fun DrawerLaneStarMap(
     lanes: List<LaneGridItem>,
     selected: CategoryId?,
     onSelect: (CategoryId?) -> Unit,
+    /** v444 — the drawer's own state: the sky plays in with it and out with it. */
+    open: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     if (lanes.isEmpty()) return
@@ -3133,6 +3150,43 @@ private fun DrawerLaneStarMap(
     LaunchedEffect(lanes.size) {
         lit.snapTo(0f)
         lit.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+    }
+    // ── v444 — THE SKY ARRIVES AND LEAVES WITH THE DRAWER ─────────────
+    //
+    // The member: *"animate every time it closes and opens, with beautiful mesh
+    // like animation don't change the design"*. One progress drives all of it:
+    // the whole panel eases up a hair as it fades in, every hairline runs out from
+    // its own star toward the one it joins (so the mesh DRAWS itself rather than
+    // appearing finished), and the two are reversed together on the way out. The
+    // design is untouched — same stars, same places, same colours.
+    val reveal = remember { Animatable(if (open) 1f else 0f) }
+    LaunchedEffect(open) {
+        reveal.animateTo(
+            targetValue = if (open) 1f else 0f,
+            animationSpec = tween(
+                durationMillis = if (open) 760 else 300,
+                easing = FastOutSlowInEasing
+            )
+        )
+    }
+    // ── v444 — AND IT TWINKLES WHILE IT IS UP ────────────────────────
+    //
+    // A sky nobody is looking at must not spend the battery: the clock only runs
+    // while the drawer is OPEN, writes one float, and that float is read INSIDE the
+    // draw block — so a twinkle costs draw passes and never a recomposition of the
+    // map, its stars or the page behind it.
+    var beat by remember { mutableStateOf(0f) }
+    LaunchedEffect(open) {
+        if (!open) {
+            beat = 0f
+            return@LaunchedEffect
+        }
+        while (true) {
+            withFrameNanos { now ->
+                val seconds = now / 1_000_000_000.0
+                beat = ((seconds % 6.0) * (2.0 * kotlin.math.PI / 6.0)).toFloat()
+            }
+        }
     }
     var sizePx by remember { mutableStateOf(IntSize.Zero) }
     Box(
@@ -3169,7 +3223,21 @@ private fun DrawerLaneStarMap(
                 }
             }
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                // v444 — the arrival itself: a breath of scale under the fade, so
+                // the sky settles into place as it comes in and gives the same
+                // motion back as it leaves. Drawn in the layer, so the map is never
+                // re-laid-out for it.
+                .graphicsLayer {
+                    val grown = reveal.value
+                    alpha = grown
+                    val breathing = 0.965f + 0.035f * grown
+                    scaleX = breathing
+                    scaleY = breathing
+                }
+        ) {
             val hub = Offset(size.width / 2f, size.height / 2f)
             fun at(index: Int) = starPoint(slots[index], hub, size.width, size.height)
             // ── v427 — WHAT A LIT STAR'S GLOW REACHES, in pixels. The painter
@@ -3178,18 +3246,26 @@ private fun DrawerLaneStarMap(
             //    instead of disappearing under it. ──
             fun bornOf(index: Int): Float {
                 val wait = (index * 0.012f).coerceAtMost(0.55f)
-                return ((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f)
+                // v444 — and the whole sky is dressed by the drawer's own progress,
+                // so a close takes every star with it.
+                return (((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f) * reveal.value)
+                    .coerceIn(0f, 1f)
             }
             fun corePxOf(index: Int): Float {
                 val born = bornOf(index)
                 if (born <= 0f) return 0f
                 val lane = lanes[index]
                 val picked = lane.id == selected
+                // v444 — AND THE PICKED STAR BARELY GROWS (the member: *"dont grow
+                // the dot too much"*): the aura around it is what answers the tap
+                // now (see the bloom below), so the disc itself moves 18% rather
+                // than half again, and an untouched lane's point moves the same
+                // way instead of swelling past its explored neighbours.
                 val core = if (lane.explored) {
                     val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
-                    (2.2f + 3.4f * fraction) * born * (if (picked) 1.5f else 1f)
+                    (2.2f + 3.4f * fraction) * born * (if (picked) 1.18f else 1f)
                 } else {
-                    (if (picked) 3.6f else 2.6f) * born
+                    (if (picked) 3.05f else 2.6f) * born
                 }
                 return core.dp.toPx()
             }
@@ -3262,10 +3338,15 @@ private fun DrawerLaneStarMap(
                 //    on every recomposition and through the whole light-up. ──
                 val bow = minOf(span * 0.10f, 6.dp.toPx())
                 val side = if ((link.first + link.second) % 2 == 0) 1f else -1f
-                val control = (from + to) / 2f + Offset(-dir.y, dir.x) * (bow * side)
+                // v444 — THE MESH DRAWS ITSELF: each hairline runs out from its own
+                // star toward the one it joins as the drawer comes in, which is
+                // what makes the map arrive as a constellation being drawn rather
+                // than as a finished chart being shown (see [reveal]).
+                val tip = from + (to - from) * reveal.value
+                val control = (from + tip) / 2f + Offset(-dir.y, dir.x) * (bow * side)
                 val hair = Path().apply {
                     moveTo(from.x, from.y)
-                    quadraticBezierTo(control.x, control.y, to.x, to.y)
+                    quadraticBezierTo(control.x, control.y, tip.x, tip.y)
                 }
                 drawPath(
                     path = hair,
@@ -3298,19 +3379,34 @@ private fun DrawerLaneStarMap(
                     // inner ring and the hot core. The falloff is what makes a
                     // star read as LIT rather than as a dot with a circle round
                     // it (member: "make the glow better").
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.20f else 0.10f), corePx * 3.2f, centre)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.40f else 0.22f), corePx * 2.0f, centre)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.64f else 0.44f), corePx * 1.35f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.97f), corePx, centre)
+                    // v444 — THE PICKED AURA IS THE LANE'S OWN COLOUR, NOT A PALE
+                    // WASH OF IT (the member: *"fix the light glow of the category
+                    // tint when one is selected"*). The old picked steps were the
+                    // same mixes as an unpicked star's, only wider, so a selected
+                    // lane read as a LIGHTER star rather than as a lit one — a bigger
+                    // circle of nearly the page's own colour round a dot. They are
+                    // deeper now (0.34/0.58/0.82 where the untouched steps are
+                    // 0.10/0.22/0.44) and tighter (2.6/1.7/1.2 of the core instead of
+                    // 3.2/2.0/1.35), so the glow is the category's tint and the dot
+                    // stays the dot. `flick` is the twinkle, and it moves the RADIUS
+                    // only — a star breathes, it does not change colour.
+                    val flick = 1f + 0.07f * sin(beat + index * 1.9f)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.34f else 0.10f), corePx * 2.6f * flick, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.58f else 0.22f), corePx * 1.7f * flick, centre)
+                    drawCircle(lerp(page, lane.accent, if (picked) 0.82f else 0.44f), corePx * 1.2f * flick, centre)
+                    drawCircle(lerp(page, lane.accent, 0.97f), corePx * (if (picked) 1.04f else 1f), centre)
                 } else if (picked) {
                     // A lane you have not started still answers a tap: it lights
                     // in its own colour at the smallest lit size, so the readout
                     // under the map and the star agree about which one was
                     // picked.
                     val corePx = corePxOf(index)
-                    drawCircle(lerp(page, lane.accent, 0.24f), corePx * 2.9f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.48f), corePx * 1.8f, centre)
-                    drawCircle(lerp(page, lane.accent, 0.62f), corePx * 1.25f, centre)
+                    // v444 — the same rule for a lane you have not started: the
+                    // aura carries the colour and the point stays a point.
+                    val flick = 1f + 0.07f * sin(beat + index * 1.9f)
+                    drawCircle(lerp(page, lane.accent, 0.36f), corePx * 2.5f * flick, centre)
+                    drawCircle(lerp(page, lane.accent, 0.58f), corePx * 1.6f * flick, centre)
+                    drawCircle(lerp(page, lane.accent, 0.74f), corePx * 1.15f * flick, centre)
                     drawCircle(lerp(page, lane.accent, 0.95f), corePx, centre)
                 } else {
                     // Unexplored: a SOLID dim point — present, but plainly not

@@ -672,7 +672,11 @@ fun CurioNavHost(
                 onNavigate = { route ->
                     drawerScope.launch { drawerState.close() }
                     navController.navigate(route) { launchSingleTop = true }
-                }
+                },
+                // v444 — the drawer's own state, so the star map can play itself
+                // in and out WITH the panel (the TARGET is what says "on its way",
+                // which the settled value would only say once it had arrived).
+                open = drawerState.targetValue != DrawerValue.Closed
             )
         },
         gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning

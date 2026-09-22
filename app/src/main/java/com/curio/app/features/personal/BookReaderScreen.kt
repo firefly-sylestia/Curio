@@ -60,6 +60,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
@@ -345,6 +346,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // the words worth offering and for the sentence to quote (see
     // [ReaderDictionary.wordsIn] and [readerContextFor]).
     var dictionarySeed by remember { mutableStateOf("") }
+    // v444 — WHICH DOOR OPENED THE DICTIONARY. The ⋯ menu's own door is a
+    // SEARCH (a taller sheet, its field the point of it), while a sweep or a
+    // held passage opens the same sheet to answer for the words in hand (see
+    // [ReaderDictionarySheet]'s `searchMode`).
+    var dictionarySearch by remember { mutableStateOf(false) }
 
     /**
      * v389 — THE PAGE IS THE SWITCH.
@@ -1538,6 +1544,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         // call), so the bar does not have to hand the word over —
                         // and the selection stays up behind the sheet, so closing
                         // it puts the member back on the words they asked about.
+                        dictionarySearch = false
                         sheet = ReaderSheet.DICTIONARY
                     },
                     onMore = {
@@ -1834,7 +1841,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             },
             onNotes = { sheet = ReaderSheet.NOTES },
             onHighlights = { sheet = ReaderSheet.HIGHLIGHTS },
-            onDictionary = { sheet = ReaderSheet.DICTIONARY },
+            onDictionary = {
+                dictionarySeed = ""
+                dictionarySearch = true
+                sheet = ReaderSheet.DICTIONARY
+            },
             onShare = {
                 sheet = null
                 shareReaderPlace(context, book?.title.orEmpty(), positionLabel, selection?.text.orEmpty())
@@ -1849,6 +1860,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // ── THE DICTIONARY ───────────────────────────────────────────
         ReaderSheet.DICTIONARY -> ReaderDictionarySheet(
             palette = palette,
+            searchMode = dictionarySearch,
             // A selection that IS one word arrives ready to look up; a PASSAGE
             // arrives with the field EMPTY, because its own words are the chips
             // under it — seeding one of them would be the reader guessing which
@@ -1940,6 +1952,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // which word the member meant (see [ReaderDictionary.wordsIn]).
             onDictionary = {
                 dictionarySeed = paragraph.text
+                dictionarySearch = false
                 marking = null
                 sheet = ReaderSheet.DICTIONARY
             },
@@ -5291,7 +5304,21 @@ private fun ReaderSheetFrame(
     LaunchedEffect(Unit) {
         snapshotFlow { drag }.debounce(CurioMotion.SETTLE_DEBOUNCE_MS).collect { settle() }
     }
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            // ── v444 — AND THE SHEET RIDES ABOVE THE KEYBOARD ───────────
+            //
+            // The member: *"fix the search box hiding below the keyboard for
+            // dictionary"*. Every sheet in the reader sits on the bottom of the
+            // screen, so a sheet with a FIELD in it had its field under the keys
+            // the moment they came up. The inset is taken HERE rather than on the
+            // sheet's own surface: the sheet is bottom-aligned inside this box, so
+            // shrinking the box lifts the whole panel clear of the keyboard — and
+            // the wrap/cap floors below are measured against what is actually
+            // left, so a tall sheet never measures itself into the keys.
+            .imePadding()
+    ) {
         // ── v434 — AS TALL AS IT NEEDS, UP TO A CAP ─────────────────────
         //
         // A fixed half-screen left a short sheet half empty and gave a long one
@@ -5342,6 +5369,27 @@ private fun ReaderSheetFrame(
                 // The body's over-scroll and the sheet's own drag are one
                 // gesture (see [pull]).
                 .nestedScroll(pull)
+                // ── v444 — THE FINGER LEAVING IS THE END OF THE DRAG ─────────
+                //
+                // The member: *"the swipe down to close is buggy it stays as an
+                // overlay for some time"*. The body's drag has no "end" of its
+                // own — a nested scroll reports travel and stops — so the only
+                // thing that ever settled it was the debounce timer below, which
+                // meant the sheet SAT half-way down for the whole wait after the
+                // finger was already gone. This watches the raw pointer stream
+                // and settles the instant no finger is left down, so a swipe that
+                // was a dismissal is one (on the same flick the head already
+                // reads) and one that was not springs straight back.
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(
+                                androidx.compose.ui.input.pointer.PointerEventPass.Final
+                            )
+                            if (drag > 0f && event.changes.none { it.pressed }) settle()
+                        }
+                    }
+                }
                 // THE SHEET SWALLOWS A TAP, so tapping INSIDE it never dismisses
                 // it: the scrim below is a sibling, and a tap nothing in the sheet
                 // claims would reach it and shut the sheet the member is using.
@@ -6117,12 +6165,48 @@ private sealed interface ReaderLookup {
  * lives in [ReaderDictionary]; this is only its door.
  */
 @Composable
+/**
+ * v444 — WHICH DOOR ANSWERS, as the sheet's badge row.
+ *
+ * The member: *"for dictionary use both the providers and show it as a badge
+ * option to switch between"*, then *"offline first once downloaded"*. The two
+ * online doors used to be an either/or SETTING (one of them, chosen in reading
+ * settings), which is why a word the chosen one does not carry read as a dead
+ * end. They are doors of one sheet now, side by side with the downloaded
+ * dictionary, and the sheet shows the answer of the door the member is on — so
+ * switching is one tap rather than a trip to settings, and the offline file is
+ * the door that is already answered before any network is asked.
+ */
+private enum class DictionaryDoor(val label: String) {
+    OFFLINE("Offline"),
+    WIKTIONARY("Wiktionary"),
+    FREE("Free");
+
+    /** The online door this badge stands for, or null for the local file. */
+    val online: ReaderDictionarySource?
+        get() = when (this) {
+            OFFLINE -> null
+            WIKTIONARY -> ReaderDictionarySource.WIKTIONARY
+            FREE -> ReaderDictionarySource.FREE
+        }
+}
+
 private fun ReaderDictionarySheet(
     palette: ReaderPalette,
     /** The word to look up, when the selection was one word (blank otherwise). */
     initial: String,
     /** The passage a lookup came from: its words are offered, its line quoted. */
     passage: String,
+    /**
+     * v444 — OPENED TO SEARCH, rather than to answer for the page.
+     *
+     * The member: *"when the dictionary is opened from the 3 dot one it [should
+     * be] more longer and let user search any word"*. The ⋯ menu's door is for
+     * looking something up, so that sheet stands taller (`minHeightFraction`
+     * below) and its field is the point of it — a passage-driven sheet, opened
+     * from a sweep, keeps the shorter panel it had.
+     */
+    searchMode: Boolean = false,
     onDismiss: () -> Unit
 ) {
     // ── v442 — A PASSAGE SUGGESTS ITS OWN WORDS ─────────────────────────
@@ -6143,7 +6227,37 @@ private fun ReaderDictionarySheet(
     var asked by remember { mutableStateOf("") }
     // The spellings the dictionary offered when the word itself had no entry.
     var guesses by remember { mutableStateOf<List<String>>(emptyList()) }
-    LaunchedEffect(word) {
+    // ── v444 — THE DOORS, AND THE ONE THAT LIVES ON THE PHONE ──────────
+    val context = LocalContext.current
+    val doorScope = rememberCoroutineScope()
+    var offlineReady by remember { mutableStateOf(ReaderOfflineDictionary.isReady(context)) }
+    var downloading by remember { mutableStateOf(false) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
+    // The door the sheet OPENS on: the local file once it is there, else whichever
+    // online door reading settings already named (so nobody's habit changes).
+    var door by remember {
+        mutableStateOf(
+            if (offlineReady) {
+                DictionaryDoor.OFFLINE
+            } else when (ReaderLook.dictionary) {
+                ReaderDictionarySource.FREE -> DictionaryDoor.FREE
+                ReaderDictionarySource.WIKTIONARY -> DictionaryDoor.WIKTIONARY
+            }
+        )
+    }
+    /**
+     * The lookup, against the door the member is on.
+     *
+     * The offline door answers from the file (and says `null` when there is no
+     * file — the sheet offers the download rather than pretending the word does
+     * not exist); the online doors answer through [ReaderDictionary], which
+     * memoises them, so flipping back and forth between badges is free.
+     */
+    suspend fun ask(term: String): List<ReaderDictionarySense>? {
+        val online = door.online ?: return ReaderOfflineDictionary.define(context, term)
+        return ReaderDictionary.define(term, online)
+    }
+    LaunchedEffect(word, door) {
         // The word AS WRITTEN is not always the word to ask for: a sweep carries
         // its punctuation and its possessive (see [ReaderDictionary.headword]).
         val term = ReaderDictionary.headword(word)
@@ -6157,7 +6271,7 @@ private fun ReaderDictionarySheet(
         // The typing pause, not every letter: a definition is a network call.
         delay(320)
         val found = withContext(Dispatchers.IO) {
-            runCatching { ReaderDictionary.define(term) }.getOrNull()
+            runCatching { ask(term) }.getOrNull()
         }
         if (found == null) {
             // Unreachable is NOT "no such word" — the two read differently (see
@@ -6212,11 +6326,162 @@ private fun ReaderDictionarySheet(
         }
         looking = false
     }
-    ReaderSheetFrame("Dictionary", palette, onDismiss) {
+    ReaderSheetFrame(
+        title = "Dictionary",
+        palette = palette,
+        onDismiss = onDismiss,
+        // v444 — a sheet you SEARCH in stands taller than one that answers for the
+        // words you just swept (the member: *"the bottom sheet can be scrollable
+        // and a little up"*, and *"when opened from the 3 dot … more longer"*).
+        minHeightFraction = if (searchMode) 0.62f else 0.55f
+    ) {
         // v434 — wrap-sized, because the sheet's own body scrolls now (see
         // [ReaderSheetFrame]); a `weight(1f)` here would have measured to
         // nothing inside that scroll.
         Column(modifier = Modifier.fillMaxWidth()) {
+            // ── v444 — THE DOORS, AS A BADGE ROW ────────────────────────
+            //
+            // One badge per dictionary, side by side, the chosen one lit. A door
+            // with a dictionary behind it reads plainly; the offline one is
+            // dimmed until its file is downloaded (and says so under the row).
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                DictionaryDoor.entries.forEach { option ->
+                    val chosen = option == door
+                    val live = option != DictionaryDoor.OFFLINE || offlineReady
+                    Surface(
+                        onClick = { door = option },
+                        shape = RoundedCornerShape(50),
+                        color = if (chosen) {
+                            palette.accent.copy(alpha = 0.18f)
+                        } else {
+                            palette.ink.copy(alpha = 0.06f)
+                        },
+                        contentColor = palette.ink
+                    ) {
+                        Text(
+                            option.label,
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
+                            ),
+                            color = palette.ink.copy(
+                                alpha = when {
+                                    chosen -> 1f
+                                    live -> 0.75f
+                                    else -> 0.45f
+                                }
+                            ),
+                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+            // ── THE OFFLINE DICTIONARY'S OWN ROW ───────────────────────
+            //
+            // Nothing is fetched until the member asks for it, and once it is
+            // there the row is where it can be let go again. The source and its
+            // licence are stated where the tap is, because a file this app will
+            // keep for good is worth naming (see [ReaderOfflineDictionary]).
+            if (!offlineReady) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CurioIcon(
+                        CurioIcons.Download,
+                        null,
+                        tint = palette.ink.copy(alpha = 0.6f),
+                        size = 16.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Offline dictionary",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = palette.ink
+                            )
+                        )
+                        Text(
+                            if (downloading) {
+                                "Downloading\u2026 ${(downloadProgress * 100f).toInt()}%"
+                            } else {
+                                "Webster's 1913 \u00b7 public domain \u00b7 " +
+                                    ReaderOfflineDictionary.DOWNLOAD_SIZE
+                            },
+                            style = TextStyle(fontSize = 11.sp, color = palette.ink.copy(alpha = 0.55f))
+                        )
+                    }
+                    if (!downloading) {
+                        Surface(
+                            onClick = {
+                                downloading = true
+                                downloadProgress = 0f
+                                doorScope.launch {
+                                    val saved = ReaderOfflineDictionary.download(context) { ratio ->
+                                        downloadProgress = ratio
+                                    }
+                                    downloading = false
+                                    offlineReady = saved
+                                    // A finished download is the door the member
+                                    // wanted; the sheet says so by opening on it.
+                                    if (saved) door = DictionaryDoor.OFFLINE
+                                }
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = palette.accent,
+                            contentColor = Color.White
+                        ) {
+                            Text(
+                                "Download",
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                            )
+                        }
+                    }
+                }
+            } else if (door == DictionaryDoor.OFFLINE) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Offline \u00b7 Webster's 1913 \u00b7 public domain",
+                        style = TextStyle(fontSize = 11.sp, color = palette.ink.copy(alpha = 0.55f)),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Surface(
+                        onClick = {
+                            ReaderOfflineDictionary.remove(context)
+                            offlineReady = false
+                            if (door == DictionaryDoor.OFFLINE) door = DictionaryDoor.WIKTIONARY
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = palette.ink.copy(alpha = 0.06f),
+                        contentColor = palette.ink
+                    ) {
+                        Text(
+                            "Remove",
+                            style = TextStyle(fontSize = 11.sp),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
             Surface(
                 shape = RoundedCornerShape(50),
                 color = palette.ink.copy(alpha = 0.06f),

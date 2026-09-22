@@ -6154,6 +6154,22 @@ internal fun PersonalToolDock(
     LaunchedEffect(state.captionFocusedId) {
         if (state.captionFocusedId != null) openGroup = null
     }
+    // ── v444 — A PANEL IS FOR THE LINE YOU OPENED IT ON ───────────────────
+    //
+    // The member: *"the collapse auto closes when I start typing or I tap the
+    // page"*. A panel of choices standing under the dock while the member writes
+    // is furniture: they made their choice the moment the line changed or a
+    // letter went in, and the dock should be a tool row again. Two signals, both
+    // the state's own: the FOCUS moving to another line (which is what tapping
+    // the page does) and the TEXT of the focused line changing (typing). Applying
+    // a marker or a list style does neither — it writes the mask, not the words —
+    // so the panel the member is choosing from is never closed out from under
+    // the choice they just made.
+    val focusedLine = state.focusedId
+    val focusedWords = focusedLine?.let { state.text(it) }.orEmpty()
+    LaunchedEffect(focusedLine, focusedWords) {
+        openGroup = null
+    }
     // v389 — TEXT HISTORY, the dock's FIRST tool.
     //
     // The writing pages had it everywhere else in Curio but here, so the one
@@ -6620,6 +6636,17 @@ internal fun PersonalToolDock(
                                     // inside a marked sentence. With a selection
                                     // it clears the mark outright.
                                     state.applyHighlight("")
+                                    // ── v444 — AND THE FIRST CROSS IS THE WAY OUT ──
+                                    //
+                                    // The member: *"I need to tap that last cross to
+                                    // close it, and there's one at the first to
+                                    // dismiss the picked — so make the close button
+                                    // the first one, both dismiss and deselect the
+                                    // pick"*. Taking the pen off IS the end of what
+                                    // the panel was open for, so this one control
+                                    // does both and the trailing cross is gone from
+                                    // this panel (see the panel's own footer).
+                                    openGroup = null
                                 }
                             ) {
                                 CurioIcon(CurioIcons.Close, null, size = 18.dp)
@@ -6652,7 +6679,14 @@ internal fun PersonalToolDock(
                                 label = "Remove list",
                                 active = active and (FLAG_BULLET or FLAG_CHECKBOX) == 0,
                                 accent = accentInk, ink = ink,
-                                onClick = { state.applyMarker(null) }
+                                onClick = {
+                                    // v444 — the same one-cross rule as the marker's:
+                                    // taking the list off the line ends what the panel
+                                    // was opened for, so it closes with it (see the
+                                    // marker door's note).
+                                    state.applyMarker(null)
+                                    openGroup = null
+                                }
                             ) {
                                 CurioIcon(CurioIcons.Close, null, size = 18.dp)
                             }
@@ -6682,13 +6716,26 @@ internal fun PersonalToolDock(
                         null -> Unit
                     }
                     Spacer(Modifier.width(4.dp))
-                    PersonalToolButton(
-                        label = "Close",
-                        active = false,
-                        accent = accentInk, ink = ink,
-                        onClick = { openGroup = null }
-                    ) {
-                        CurioIcon(CurioIcons.Close, null, size = 17.dp)
+                    // ── v444 — AND ONLY THE PANELS THAT NEED ONE WEAR A CROSS ──
+                    //
+                    // Format, alignment and export open with a real CHOICE, so
+                    // their cross is the way out. The marker and the bullet open
+                    // with a cross of their own (take the pen off / remove the
+                    // list), which IS the way out — a second cross at the end would
+                    // be the same button twice (the member's own report: *"I need to
+                    // tap that last cross to close it"*).
+                    val panelNeedsClose = openGroup == PersonalDockGroup.FORMAT ||
+                        openGroup == PersonalDockGroup.ALIGN ||
+                        openGroup == PersonalDockGroup.EXPORT
+                    if (panelNeedsClose) {
+                        PersonalToolButton(
+                            label = "Close",
+                            active = false,
+                            accent = accentInk, ink = ink,
+                            onClick = { openGroup = null }
+                        ) {
+                            CurioIcon(CurioIcons.Close, null, size = 17.dp)
+                        }
                     }
                 }
             }
