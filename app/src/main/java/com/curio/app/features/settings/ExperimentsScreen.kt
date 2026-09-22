@@ -423,6 +423,28 @@ fun ExperimentsScreen(navController: NavController) {
             // undo gesture alone) and the stored bitmask. Nothing hidden fires
             // on a writing page any more, and a better version starts from a
             // clean slate.
+            // ── v456 — THE SHARE HUB'S DOOR, ON THE DEV PAGE ─────────────
+            //
+            // The member: *"make the share hub hide from settings and its only
+            // accessible from the dev settings"*. The Hub is a gallery of every
+            // share-card design drawn at full size — a page for looking at the
+            // app's own output while that output is being worked on, which is
+            // what this page is for (the source-fetch lab beside it answers the
+            // same kind of question). It left Settings entirely rather than being
+            // duplicated: one door, and this is it. It still lets a design be
+            // picked and a card shared from here, exactly as before.
+            item { SettingsSectionHeading("Sharing") }
+            item {
+                SettingsOptionCard {
+                    SettingsOptionRow(
+                        CurioIcons.Share,
+                        "Share hub",
+                        "Every share-card design at full size, ready to pick and share"
+                    ) {
+                        navController.navigate(CurioRoutes.SHARE_HUB) { launchSingleTop = true }
+                    }
+                }
+            }
             item {
                 SettingsOptionCard {
                     SettingsOptionInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change")

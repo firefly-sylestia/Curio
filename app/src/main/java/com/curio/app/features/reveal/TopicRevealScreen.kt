@@ -5584,11 +5584,41 @@ private fun PosterNotesSheet(
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // ── v455 — A FILM'S OWN FACTS, AND NO KEY ASKED FOR ────────────────────
+    //
+    // The member: *"the movies doesnt load, without tmdb or obdmdb key, do
+    // something about it please"*. This sheet was the shape of that: a film
+    // showed its authored line and NOTHING the providers knew about it, because
+    // every film fact in the app came from TMDB or OMDb, both keyed, while a
+    // series beside it was fully dressed by TVMaze. [WikidataFilmFetch] is the
+    // keyless door that closes the gap — the runtime, the rating, the genres,
+    // the director and the cast, from Wikidata and the film's own Wikipedia
+    // article, with no credential of any kind.
+    //
+    // Asked only for a FILM (a song's sheet shares this composable and has its
+    // own doors) and only under the app's own artwork/network consent, which is
+    // the gate every other fetch on this screen keeps. The answer is memoised in
+    // the door, so reopening the sheet costs nothing.
+    var filmFacts by remember(topic.name, kind) {
+        mutableStateOf<WikidataFilmFetch.Facts?>(null)
+    }
+    LaunchedEffect(topic.name, kind, fetchConsent) {
+        filmFacts = if (kind == "Movie" && fetchConsent) {
+            WikidataFilmFetch.facts(topic.name)
+        } else {
+            null
+        }
+    }
+    val knownFacts = filmFacts
     // The reveal card shows the teaser; the sheet is where the longer word lives,
     // so a topic with no authored synopsis says its teaser here rather than
-    // leaving the card out.
+    // leaving the card out. v455 — and when the topic carries NEITHER, the
+    // film's own article is the description rather than an empty section: a
+    // curated topic almost always has its words, but a film added from a
+    // catalogue does not have to.
     val about = topic.synopsis?.takeIf { it.isNotBlank() }
         ?: topic.teaser.takeIf { it.isNotBlank() }
+        ?: knownFacts?.plot?.takeIf { it.isNotBlank() }
     val label = when (kind) {
         "Anime" -> "ANIME NOTES"
         "Song" -> "SONG NOTES"
@@ -5607,7 +5637,22 @@ private fun PosterNotesSheet(
     val meta = buildString {
         append(kind.uppercase())
         topic.episodeCount?.let { append(" \u00b7 $it episodes") }
+        // v455 — the film's own record joins the meta line: year, runtime, the
+        // score and its genres, in the same ` · ` idiom the rest of the sheet
+        // uses. Drawn only from what a provider actually stated (see
+        // [WikidataFilmFetch.Facts.factLine]), so a title nothing answered for
+        // reads exactly as it did before.
+        if (kind == "Movie") {
+            knownFacts?.factLine?.takeIf { it.isNotBlank() }?.let { append("  \u00b7  $it") }
+        }
     }
+    // Who made it, when Wikidata names them. Both lines are optional and both
+    // ellipsise: a six-name cast must never push the poster out of the header.
+    val directedBy = knownFacts?.director.orEmpty().takeIf { it.isNotBlank() }
+    val castLine = knownFacts?.cast.orEmpty()
+        .take(4)
+        .joinToString(", ")
+        .takeIf { it.isNotBlank() }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -5691,6 +5736,31 @@ private fun PosterNotesSheet(
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = ink
                     )
+                    // v455 — THE FILM'S OWN CREDIT LINE AND CAST, under the
+                    // meta row: the two facts a member recognises a film by
+                    // that no curated topic states. Quiet on purpose (the
+                    // sheet's editorial rule: important things get space, not
+                    // another card), so they are one muted line each, and
+                    // absent entirely when the door had nothing.
+                    if (directedBy != null) {
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            "Directed by $directedBy",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (castLine != null) {
+                        Text(
+                            castLine,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 
@@ -5773,6 +5843,13 @@ private fun FilmInfoSection(
             AppPreferences.setSheetArtUrl(context, seriesArtKey, resolved)
         }
     }
+    // v455 — the film's own record, keyless (see [WikidataFilmFetch]). Under the
+    // same consent as the poster above, and remembered by the door, so the card
+    // and the sheet it opens share one read.
+    var filmFacts by remember(topic.name) { mutableStateOf<WikidataFilmFetch.Facts?>(null) }
+    LaunchedEffect(topic.name, fetchConsent) {
+        filmFacts = if (fetchConsent) WikidataFilmFetch.facts(topic.name) else null
+    }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -5783,6 +5860,21 @@ private fun FilmInfoSection(
             posterUrl = paletteUrl,
             onClick = onOpenSheet
         )
+        // v455 — THE FILM'S OWN FACT LINE, under its poster. This section's own
+        // doc has always said "poster card with film details", and until now
+        // there were no details to draw: every film fact in the app came from a
+        // KEYED door (TMDB, OMDb), so a build without one could show a poster
+        // and nothing about the film. [WikidataFilmFetch] states year, runtime,
+        // score and genres with no key at all; the row appears only when it had
+        // something to say.
+        filmFacts?.factLine?.takeIf { it.isNotBlank() }?.let { line ->
+            Text(
+                line,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
     }
 }
 

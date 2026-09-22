@@ -1543,7 +1543,14 @@ private val SettingsSections = listOf(
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
-                    SettingsRowEntry(CurioIcons.Share, "Share hub", "Browse every design, pick a topic, share a card", CurioRoutes.SHARE_HUB),
+                    // v456 — THE SHARE HUB IS A DEV DOOR NOW. The member:
+                    // *"make the share hub hide from settings and its only
+                    // accessible from the dev settings"*. It is a gallery for
+                    // looking at every share-card design at once, which is a
+                    // thing you want while a design is being worked on — not a
+                    // row a member needs beside Appearance. The page itself is
+                    // untouched and still one tap away: see the Dev page (Support
+                    // → five taps on Version), under "Sharing".
                     SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS)
                     // Dev page hidden — accessible via 5-tap version number in Support
                 )
@@ -1792,7 +1799,6 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("recording", "Recording", CurioIcons.Mic, CurioRoutes.SETTINGS_RECORDING),
     SettingsNavEntry("categories", "Categories", CurioIcons.DragHandle, CurioRoutes.MANAGE_CATEGORIES),
     SettingsNavEntry("history", "Topic history", CurioIcons.History, CurioRoutes.TOPIC_HISTORY),
-    SettingsNavEntry("share", "Share hub", CurioIcons.Share, CurioRoutes.SHARE_HUB),
     SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
     SettingsNavEntry("online", "Online", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE),

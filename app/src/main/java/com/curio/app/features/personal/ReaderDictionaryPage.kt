@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -94,6 +95,21 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     // Where the answer came from, so the words the member just fell in love with are
     // one tap away (see the file's note).
     var history by remember { mutableStateOf<List<String>>(emptyList()) }
+    // ── v456 — THE WORD WHOSE SHEET IS OPEN ─────────────────────────────
+    //
+    // The answer is a panel now (see the note where the senses used to be drawn),
+    // so the page has to remember WHICH word opened it. It is cleared the moment
+    // the sheet shuts, and set the moment a lookup starts.
+    var sheetWord by remember { mutableStateOf<String?>(null) }
+    // ── AND A WORD CAN BE ASKED FOR TWICE ──────────────────────────────
+    //
+    // Closing the sheet clears [sheetWord], and `word` alone cannot say "again":
+    // a tap on the word already sitting in the field changes no state at all, so
+    // the lookup effect below would never re-run and the sheet would never come
+    // back. This is the counter that makes a repeat a real request — bumped by
+    // every deliberate ask (a word in the list, a suggestion, a word from the
+    // history) and part of the effect's keys.
+    var askSeq by remember { mutableIntStateOf(0) }
     // ── The doors, and the volumes that live on the phone ────────────────
     var ready by remember {
         mutableStateOf(
@@ -169,13 +185,18 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     // v453 — the VERSION is a key too: switching the badge asks the other
     // dictionary for the same word rather than showing the old answer beside a
     // badge claiming it.
-    LaunchedEffect(word, door, version) {
+    LaunchedEffect(word, door, version, askSeq) {
         val term = ReaderDictionary.headword(word)
         if (term.isBlank()) {
             lookup = DictionaryPageLookup.Idle
             guesses = emptyList()
+            sheetWord = null
             return@LaunchedEffect
         }
+        // v456 — THE WORD OPENS ITS OWN SHEET AS IT IS ASKED. It opens on the
+        // looking-up line rather than after the answer, so the tap has an
+        // immediate effect and the member watches the panel fill in.
+        sheetWord = term
         lookup = DictionaryPageLookup.Asking(term)
         // The typing pause: a definition is a call (or a scan of a file).
         delay(320)
@@ -214,6 +235,17 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                // ── v456 — AND THE PAGE'S OWN FOOT IS A REAL INSET ────────
+                //
+                // The member: *"the buttom area seems to have some glitch"*.
+                // The navigation bar's height was taken by a zero-width SPACER
+                // drawn over the bottom of the page, so the scroll ran underneath
+                // an invisible strip: the last row of the word list slid behind
+                // it, and a fling ended in a band of nothing with no edge to
+                // explain it. The inset is a real one on the scroll's own column
+                // now — the content stops above the bar instead of disappearing
+                // under it — and the overlay is gone.
+                .navigationBarsPadding()
                 // The page rides the keyboard, so the field and what it answered are
                 // never under the keys.
                 .imePadding()
@@ -491,38 +523,24 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         }
                     }
                 } else if (wanted != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            wanted.source + " \u00b7 " + wanted.blurb,
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                color = palette.ink.copy(alpha = 0.55f)
-                            ),
-                            modifier = Modifier.weight(1f)
+                    // ── v456 — AND THE PAGE DOES NOT OFFER TO REMOVE IT ──────
+                    //
+                    // The member: *"from dictionary dont show the provider
+                    // removing in dictionary age"*. A page whose whole job is to
+                    // SEARCH is the wrong place for a destructive control: the
+                    // Remove button sat one mistaken tap away from the word list,
+                    // beside a purely informational line, and freeing 11MB is not
+                    // something a member reaches for while looking a word up. What
+                    // the page keeps is the fact — which volume is answering, and
+                    // what it is — and nothing else. Removing a volume still exists
+                    // where managing one belongs: the reader's dictionary sheet.
+                    Text(
+                        wanted.source + " \u00b7 " + wanted.blurb,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = palette.ink.copy(alpha = 0.55f)
                         )
-                        Surface(
-                            onClick = {
-                                ReaderOfflineDictionary.remove(context, wanted)
-                                val now = ready + (wanted to false)
-                                ready = now
-                                // v452 — the door stays put while it still has a volume.
-                                door = if (door.volumes.any { now[it] == true }) {
-                                    DictionaryPageDoor.OFFLINE
-                                } else {
-                                    DictionaryPageDoor.WIKTIONARY
-                                }
-                            },
-                            shape = RoundedCornerShape(50),
-                            color = palette.ink.copy(alpha = 0.06f),
-                            contentColor = palette.ink
-                        ) {
-                            Text(
-                                "Remove",
-                                style = TextStyle(fontSize = 12.sp),
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
-                        }
-                    }
+                    )
                 }
 
                 // ── v452 — THE DOOR'S OTHER VOLUMES ─────────────────────
@@ -575,151 +593,30 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                     }
                 }
 
-                // ── v453 — WHICH DICTIONARY IS ANSWERING ────────────────
+                // ── v456 — WHICH DICTIONARY ANSWERS LEFT THIS PAGE ──────
                 //
-                // One badge per volume that is ON THE PHONE, in the door's own
-                // order of quality (WordNet, then the complete 1913, then the
-                // abridged one), and the answer above belongs to the badge you are
-                // on — so "which dictionary is this from" is never a guess, and the
-                // other one is one tap away. Nothing is shown for an online door:
-                // there is no version to choose between.
-                if (shelf.size > 1) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        shelf.forEach { volume ->
-                            val chosen = volume == version
-                            Surface(
-                                onClick = { version = volume },
-                                shape = RoundedCornerShape(50),
-                                color = if (chosen) {
-                                    palette.accent.copy(alpha = 0.18f)
-                                } else {
-                                    palette.ink.copy(alpha = 0.06f)
-                                },
-                                contentColor = palette.ink
-                            ) {
-                                Text(
-                                    volume.source,
-                                    style = TextStyle(
-                                        fontSize = 12.sp,
-                                        fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
-                                    ),
-                                    color = palette.ink.copy(alpha = if (chosen) 1f else 0.75f),
-                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                // The row of version badges stood here, straight under the door
+                // badges, and it read as the same furniture twice (the member:
+                // *"the badge to switch is kinda weird"*). Which dictionary a word
+                // came from is a fact about the ANSWER, so it travels with the
+                // answer: the version switch is one row inside the word's own
+                // sheet now, labelled, where the senses it belongs to are (see
+                // [DictionaryWordSheet]). Nothing was dropped — every volume on
+                // the phone is still reachable, one tap away.
 
-                // ── THE ANSWER ───────────────────────────────────────────
-                when (val state = lookup) {
-                    DictionaryPageLookup.Idle -> Unit
-                    is DictionaryPageLookup.Asking -> Text(
-                        "Looking up \u201c" + state.term + "\u201d\u2026",
-                        style = TextStyle(fontSize = 14.sp, color = palette.ink.copy(alpha = 0.5f))
-                    )
-                    is DictionaryPageLookup.Unreachable -> Text(
-                        "The dictionary could not be reached. A volume you have downloaded " +
-                            "answers without a connection \u2014 see the badges above.",
-                        style = TextStyle(fontSize = 14.sp, color = palette.ink.copy(alpha = 0.7f))
-                    )
-                    is DictionaryPageLookup.Answer -> Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            state.term,
-                            style = TextStyle(
-                                fontSize = 26.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = palette.ink
-                            )
-                        )
-                        if (state.senses.isEmpty()) {
-                            Text(
-                                "Nothing for \u201c" + state.term + "\u201d in this dictionary.",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = palette.ink.copy(alpha = 0.7f)
-                                )
-                            )
-                        }
-                        state.senses.forEach { sense ->
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Text(
-                                    sense.partOfSpeech.uppercase(),
-                                    style = TextStyle(
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        letterSpacing = 1.2.sp,
-                                        color = palette.accent
-                                    )
-                                )
-                                sense.definitions.forEach { line ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(9.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 7.dp)
-                                                .size(5.dp)
-                                                .clip(CircleShape)
-                                                .background(palette.accent.copy(alpha = 0.6f))
-                                        )
-                                        Text(
-                                            line,
-                                            style = TextStyle(
-                                                fontFamily = readerTypeFamily(ReaderLook.typeFace),
-                                                fontSize = 16.sp,
-                                                color = palette.ink
-                                            ),
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ── AND THE SPELLINGS IT THINKS YOU MEANT ───────────────
-                if (guesses.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(7.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        guesses.forEach { guess ->
-                            Surface(
-                                onClick = { word = guess },
-                                shape = RoundedCornerShape(50),
-                                color = palette.ink.copy(alpha = 0.06f),
-                                contentColor = palette.ink
-                            ) {
-                                Text(
-                                    guess,
-                                    style = TextStyle(fontSize = 13.sp),
-                                    modifier = Modifier.padding(
-                                        horizontal = 12.dp,
-                                        vertical = 7.dp
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
+                // ── v456 — THE ANSWER IS A SHEET, NOT A BLOCK OF PAPER ───
+                //
+                // The member: *"fix the look and open the meanings in buttom
+                // sheet"*. The senses used to be drawn inline, between the browse
+                // rail and the words themselves — which pushed the dictionary down
+                // the page every time a word was read, and left a definition and
+                // the list it came from fighting for the same scroll. A word's
+                // meanings are a THING THE MEMBER ASKED FOR, so they get a panel:
+                // the reader's own sheet ([ReaderSheetFrame], the one every other
+                // reader sheet uses — the same paper, the same drag-and-flick
+                // close, the same keyboard inset), opened on the word and holding
+                // its senses, its version switch and its spelling suggestions (see
+                // [DictionaryWordSheet]).
 
                 // ── AND THE WORDS YOU HAVE ALREADY BEEN TO ──────────────
                 if (history.isNotEmpty()) {
@@ -745,7 +642,10 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         ) {
                             history.forEach { seen ->
                                 Surface(
-                                    onClick = { word = seen },
+                                    onClick = {
+                                        word = seen
+                                        askSeq++
+                                    },
                                     shape = RoundedCornerShape(50),
                                     color = palette.ink.copy(alpha = 0.06f),
                                     contentColor = palette.ink
@@ -848,7 +748,10 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                                             ReaderDictionary.headword(word),
                                             ignoreCase = true
                                         ),
-                                        onClick = { word = head }
+                                        onClick = {
+                                            word = head
+                                            askSeq++
+                                        }
                                     )
                                 }
                             }
@@ -858,14 +761,30 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                 Spacer(Modifier.height(10.dp))
             }
         }
-        // The bar under the page keeps the last row of the scroll clear of the
-        // member's navigation bar.
-        Spacer(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-        )
+        // v456 — the bottom overlay that used to stand here is gone (see the
+        // column's own `navigationBarsPadding` above); the word's meanings are the
+        // page's last child now, drawn over it as a sheet.
+        val openWord = sheetWord
+        if (openWord != null) {
+            DictionaryWordSheet(
+                word = openWord,
+                state = lookup,
+                guesses = guesses,
+                shelf = shelf,
+                version = version,
+                palette = palette,
+                onVersion = { chosen -> version = chosen },
+                onGuess = { suggestion ->
+                    word = suggestion
+                    askSeq++
+                },
+                onDismiss = {
+                    sheetWord = null
+                    lookup = DictionaryPageLookup.Idle
+                    guesses = emptyList()
+                }
+            )
+        }
     }
 }
 
@@ -942,6 +861,213 @@ private enum class DictionaryPageDoor(
 
     /** The volume whose row this page shows first (the door's best one). */
     val volume: ReaderOfflineDictionary.Volume? get() = volumes.firstOrNull()
+}
+
+/**
+ * v456 — A WORD'S MEANINGS, IN THE READER'S OWN SHEET.
+ *
+ * The member: *"fix the look and open the meanings in buttom sheet"*. The senses
+ * used to be drawn INLINE on the dictionary page, between the browse rail and the
+ * words — so reading one pushed the dictionary itself down the page, and the two
+ * scrolls fought for the same drag.
+ *
+ * Measured against the app's own rules for a sheet, that was the wrong shape:
+ *  · a word's meanings are a THING THE MEMBER ASKED FOR, so they belong in a panel
+ *    they can dismiss rather than in the middle of a page they are browsing;
+ *  · and the panel is the reader's own frame ([ReaderSheetFrame]), which is what
+ *    makes it close the way every other reader sheet does — the flick, the
+ *    measured travel, the motion system's clock — instead of being a second,
+ *    differently-behaving sheet in the same app.
+ *
+ * WHAT IT HOLDS, and why each one is here rather than on the page:
+ *  · **The version switch** — which dictionary is answering, and the one-tap way
+ *    to the other. It belongs beside the senses it explains (the member's own
+ *    complaint was that the row read as odd sitting under the door badges), and
+ *    it is shown only when there is more than one volume to choose between: an
+ *    online door has no versions, and a single volume has nothing to switch to.
+ *  · **The senses** themselves, in the reader's own type.
+ *  · **The spellings it thinks you meant** — a suggestion is only meaningful
+ *    beside the miss that produced it, so it travels with the answer.
+ */
+@Composable
+private fun DictionaryWordSheet(
+    word: String,
+    state: DictionaryPageLookup,
+    guesses: List<String>,
+    /** The offline volumes that are actually on the phone — the versions to switch between. */
+    shelf: List<ReaderOfflineDictionary.Volume>,
+    version: ReaderOfflineDictionary.Volume?,
+    palette: ReaderPalette,
+    onVersion: (ReaderOfflineDictionary.Volume) -> Unit,
+    onGuess: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ReaderSheetFrame(
+        title = word,
+        palette = palette,
+        onDismiss = onDismiss,
+        // The reader's own floor: a panel that wraps to two lines reads as a
+        // strip rather than as an answer.
+        minHeightFraction = 0.45f
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // ── WHICH DICTIONARY IS ANSWERING ───────────────────────────
+            //
+            // Labelled, because an unlabelled row of two names under a word reads
+            // as a category rather than as a choice — and shaped as the pills the
+            // rest of the reader uses, so it is the same object as every other
+            // badge in the app.
+            if (shelf.size > 1) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    Text(
+                        "SHOWING",
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 1.2.sp,
+                            color = palette.ink.copy(alpha = 0.5f)
+                        )
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        shelf.forEach { volume ->
+                            val chosen = volume == version
+                            Surface(
+                                onClick = { onVersion(volume) },
+                                shape = RoundedCornerShape(50),
+                                color = if (chosen) {
+                                    palette.accent.copy(alpha = 0.18f)
+                                } else {
+                                    palette.ink.copy(alpha = 0.06f)
+                                },
+                                contentColor = palette.ink
+                            ) {
+                                Text(
+                                    volume.source,
+                                    style = TextStyle(
+                                        fontSize = 12.sp,
+                                        fontWeight = if (chosen) {
+                                            FontWeight.SemiBold
+                                        } else {
+                                            FontWeight.Normal
+                                        }
+                                    ),
+                                    color = palette.ink.copy(alpha = if (chosen) 1f else 0.75f),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            when (state) {
+                DictionaryPageLookup.Idle -> Unit
+                is DictionaryPageLookup.Asking -> Text(
+                    "Looking up \u201c" + state.term + "\u201d\u2026",
+                    style = TextStyle(fontSize = 15.sp, color = palette.ink.copy(alpha = 0.5f))
+                )
+                is DictionaryPageLookup.Unreachable -> Text(
+                    "The dictionary could not be reached. A volume you have downloaded " +
+                        "answers without a connection \u2014 the badges on the page offer them.",
+                    style = TextStyle(fontSize = 15.sp, color = palette.ink.copy(alpha = 0.75f))
+                )
+                is DictionaryPageLookup.Answer -> Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (state.senses.isEmpty()) {
+                        Text(
+                            "Nothing for \u201c" + state.term + "\u201d in this dictionary.",
+                            style = TextStyle(
+                                fontSize = 15.sp,
+                                color = palette.ink.copy(alpha = 0.75f)
+                            )
+                        )
+                    }
+                    state.senses.forEach { sense ->
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                sense.partOfSpeech.uppercase(),
+                                style = TextStyle(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    letterSpacing = 1.2.sp,
+                                    color = palette.accent
+                                )
+                            )
+                            sense.definitions.forEach { line ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(9.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 8.dp)
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(palette.accent.copy(alpha = 0.6f))
+                                    )
+                                    Text(
+                                        line,
+                                        style = TextStyle(
+                                            fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                                            fontSize = 16.sp,
+                                            color = palette.ink
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── AND THE SPELLINGS IT THINKS YOU MEANT ───────────────────
+            //
+            // A tap asks the suggestion immediately (`askSeq`), so the same word
+            // the list already holds still opens the sheet again.
+            if (guesses.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    guesses.forEach { guess ->
+                        Surface(
+                            onClick = { onGuess(guess) },
+                            shape = RoundedCornerShape(50),
+                            color = palette.ink.copy(alpha = 0.06f),
+                            contentColor = palette.ink
+                        ) {
+                            Text(
+                                guess,
+                                style = TextStyle(fontSize = 13.sp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /** What this page is showing: its own states, for its own size. */

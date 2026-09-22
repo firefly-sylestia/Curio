@@ -5386,7 +5386,7 @@ private fun ReaderHoldButton(
  * everything inside the sheet.
  */
 @Composable
-private fun ReaderSheetFrame(
+internal fun ReaderSheetFrame(
     title: String,
     palette: ReaderPalette,
     onDismiss: () -> Unit,

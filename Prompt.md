@@ -6,7 +6,61 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §50 — the Felicity motion system, and Home's recents go tap-only
+## 0. THE CURRENT REQUEST — §51 — the keyless film door, a word's meanings in a sheet, the Share hub on the Dev page, and Felicity credited
+
+> in dictionary, the buttom area seem sto have some glitch, also the badge to switch is kinda weird.. make the share hub hide from settings and its only
+> accessible from the dev settings. akso from dictionary dont show the provider removing in dictionary age, and fix the look and open the meanings in
+> buttom sheet. then a full remvam of the invcursion ui, and still the movies doesnt load, without tmdb or obdmdb key, do something about it please.
+> also is the imlemetaion of previous one is fully done? push the revious one
+>
+> also add felicity redits in readme and a info for the help
+
+**Asked before touching anything, because the request both removed and fixed the same area:** the Incursion question (*"a full removal"*) and which movie
+surface fails. The answers: **"not removal full redesigning"** — so the Incursion UI is a REDESIGN, not a deletion, and nothing of it is removed — and
+**"All of them"** for the movies, so every film surface has to work with no key. **The previous CL was pushed first, as asked** (`ac806765`, the run before
+it green). **Is the previous one fully done?** Phases 1 and 2 of the motion work are shipped and green; phase 3 shipped the panel clock with Material's own
+~140 `ModalBottomSheet`s gated on Material3 1.5 (recorded in `MOTION_PLAN.md` §4 and marked in `CurioTheme`); phase 4's arrivals rule is live on Home's
+recents, the Cabinet grid and the journals list.
+
+**Files:** **new** `features/reveal/WikidataFilmFetch.kt`; `features/incursion/IncursionSources.kt`; `features/reveal/TopicRevealScreen.kt`;
+`features/personal/ReaderDictionaryPage.kt`; `features/personal/BookReaderScreen.kt` (`ReaderSheetFrame` → `internal`);
+`features/settings/SettingsHubScreen.kt` + `ExperimentsScreen.kt`; `features/support/SupportScreen.kt`; `README.md`; `app/AGENTS.md`; this file.
+
+### 0.1 What was built
+
+1. **A FILM'S FACTS EXIST WITH NO KEY.** `WikidataFilmFetch` = Wikipedia decides WHICH work (the bracket rule), Wikidata states the facts (`P2047`
+   runtime, `P136` genres, `P57` director, `P161` cast, `P444` score, `P577` year, `P31` film-vs-show, `P18` as the image fallback), with ONE batched
+   `wbgetentities` read for every referenced label, a 9s whole-record budget, and answers AND misses memoised per title+year. Wired: `IncursionSources`'
+   keyless stage (in FRONT of the article door — it is the only keyless door with facts as well as prose), its artwork race, the reveal's film card
+   (`factLine` under the poster) and the film sheet (the fact line in its meta row, *Directed by* + the cast, and the article's prose as the about-text
+   only when the topic has no synopsis or teaser). A runtime stated in seconds (`Q11574`) is divided; every early exit is a branch, never a non-local return.
+2. **A WORD'S MEANINGS ARE A SHEET.** `DictionaryWordSheet` on the reader's own `ReaderSheetFrame` (now `internal`) — the same paper, drag, flick,
+   keyboard inset and motion clock as every other reader sheet. The **version switch moved into it**, labelled "SHOWING" (the member's *"the badge to
+   switch is kinda weird"*: it stood directly under the door badges and read as the same furniture twice), and it is shown only when more than one volume
+   is on the phone. `askSeq` is the new page state that lets a word be asked for TWICE — closing the sheet clears `sheetWord`, and `word` alone cannot say
+   "again".
+3. **THE PAGE'S FOOT IS A REAL INSET, AND IT NO LONGER REMOVES A DICTIONARY.** The nav bar's height was taken by a zero-width SPACER drawn OVER the
+   page, so the scroll ran under an invisible strip (the member's *"the buttom area seems to have some glitch"*); it is `navigationBarsPadding()` on the
+   scroll's own column now. The Remove control left the page (a search surface is the wrong place for a destructive one-tap) and the volume's fact line
+   stayed; removing still lives in the reader's dictionary sheet.
+4. **THE SHARE HUB IS A DEV DOOR.** Both Settings entries are gone — the "Personalize" row AND the settings nav rail's `share` entry, because a hidden page
+   still offered by the rail is not hidden — and the Hub sits on the **Dev page** under a new "Sharing" heading.
+5. **FELICITY IS CREDITED.** The README's open-source list was EMPTY and now leads with Felicity (what was taken, file by file, with the licence position —
+   AGPL-3.0 both sides, so the port is licence-clean — and a pointer to `MOTION_PLAN.md`), then the app's other real doors and foundations. In the app it is
+   a row in **Support & diagnostics → About Curio**.
+
+### 0.2 Still open
+
+- **The Incursion redesign — the one piece of §51 not done.** The member asked for it and, asked what kind of change it is, answered *"not removal full
+  redesigning"*. `features/incursion/IncursionScreen.kt` is 2,451 lines (header, progress bar, filter row, list + grid, group headers, phase chips, entry
+  rows/tiles, the detail sheet, the nav bar) and no direction was given beyond "redesign" — so the session ended by asking for it rather than guessing.
+  **Do not start it without that direction:** a wrong guess here is a full cycle on the app's largest screen, and the page is not broken, it is unfashioned.
+- **Phase 3's remaining half:** Material's own sheets stay on Material 3's clock until Material3 1.5 is stable (the scheme is designed in `MOTION_PLAN.md` §4,
+  the one line it wants is marked in `CurioTheme`).
+- **The audit's UNVERIFIED leads** (`app/APP_AUDIT.md`) — touch targets, icon-only content descriptions, `Surface(onClick)` pressed states, and whether any
+  `Color.White` is left in a themed surface. Countable, each with the command to re-check it.
+
+## 0z. §50 (finished — kept for reference) — the Felicity motion system, and Home's recents go tap-only
 
 > the tap and hold is buggy in home screen recent topics, even after when im not holding and im releasing it continues the holding and its buggy,
 > ykw remove the tap and hold action from home screen recents anthen do a full plan to improve aps transtions oening animations and evetything

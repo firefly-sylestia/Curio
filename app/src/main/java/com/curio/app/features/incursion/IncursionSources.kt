@@ -5,6 +5,7 @@ import com.curio.app.data.IncursionEntry
 import com.curio.app.features.personal.ComicVineFetch
 import com.curio.app.features.reveal.OmdbFetch
 import com.curio.app.features.reveal.TmdbFetch
+import com.curio.app.features.reveal.WikidataFilmFetch
 import com.curio.app.features.reveal.WikipediaSummary
 import com.curio.app.features.reveal.stripNaming
 import java.util.Collections
@@ -110,6 +111,17 @@ internal object IncursionSources {
         )
         // ── Stage two: the keyless net, reached only when stage one was empty ─
         val answer = keyed ?: race(
+            // ── v455 — THE KEYLESS FACTS DOOR GOES FIRST ────────────────────
+            // [WikidataFilmFetch] is the only keyless door that states a title's
+            // FACTS as well as its prose — the plot, the runtime, the rating, the
+            // genres and the director — where the article door behind it has a
+            // summary and nothing else. With no TMDB or OMDb key (stage one's
+            // pair) this is therefore the door that decides what a row's card
+            // says, and it is the answer to the member's own report: *"the movies
+            // doesnt load, without tmdb or odbmdb key"*. It is asked FIRST of the
+            // net, and the other two stay behind it: a fact-bearing answer beats
+            // a prose-only one only because it can carry both.
+            { wikidata(name, entry.year) },
             { wikipedia(name, entry.year) },
             { comicVine(name) }
         )
@@ -141,6 +153,10 @@ internal object IncursionSources {
         race(
             { OmdbFetch.posterUrl(name, entry.year, isSeries) },
             { wikipediaImage(name, entry.year) },
+            // v455 — the keyless pair's own image, which also holds the item's
+            // Commons file (`P18`) for a page whose summary carries no thumbnail
+            // at all — the one case the article door behind it cannot dress.
+            { WikidataFilmFetch.posterUrl(name, entry.year) },
             { ComicVineFetch.movie(name)?.coverUrl?.takeIf { it.isNotBlank() } }
         )
     }
@@ -191,6 +207,28 @@ internal object IncursionSources {
     /** A Wikipedia article's lead image, for a row nothing else could dress. */
     private fun wikipediaImage(name: String, year: Int?): String? =
         WikipediaSummary.leadImage(name, year, WikipediaSummary.Kind.FILM)
+
+    /**
+     * Wikidata + Wikipedia's keyless record — the plot, the runtime, the rating,
+     * the genres and the director, with no credential of any kind (see
+     * [WikidataFilmFetch]).
+     *
+     * `rated` is deliberately left empty: Wikidata states a certificate only for
+     * some regions and never in the one form a sheet prints, and a wrong "PG-13"
+     * on a film that is not is worse than no certificate at all. Missing facts
+     * stay missing rather than zeroed, which is what keeps [Record.isEmpty]
+     * meaningful for this door too.
+     */
+    private suspend fun wikidata(name: String, year: Int?): Record? {
+        val facts = WikidataFilmFetch.facts(name, year) ?: return null
+        val found = Record(
+            description = facts.plot,
+            rating = facts.rating,
+            runtime = facts.runtime,
+            genres = facts.genres
+        )
+        return found.takeIf { !it.isEmpty }
+    }
 
     /** Comic Vine's film record, as a description (and the key for its artwork). */
     private fun comicVine(name: String): Record? {
