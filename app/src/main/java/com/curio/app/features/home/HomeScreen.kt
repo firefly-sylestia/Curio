@@ -502,14 +502,18 @@ fun HomeScreen(navController: NavController) {
             val homeStickyProgress by remember {
                 derivedStateOf { (homeScroll.value / homeCollapsePx).coerceIn(0f, 1f) }
             }
+            // ── v450 — THE RESERVATION IS THE COMPACT BAR'S, ALWAYS ───────
+            //
+            // The glass header is ONE state now (`CurioGlassToolbarMorph` pins
+            // `eased = 1f` — see its note), so the page must start under the
+            // COMPACT bar at every scroll position. Returning the tall hero's
+            // height here (lerped by `progress`, which no longer drives the
+            // header) would leave a hero-sized hole above the content that
+            // nothing ever fills.
             val glassHeaderReserve = if (
                 AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
             ) {
-                androidx.compose.ui.unit.lerp(
-                    HomeGlassToolbarFullHeight,
-                    HomeCompactHeaderHeight + statusTopDp,
-                    FastOutSlowInEasing.transform(homeStickyProgress)
-                )
+                HomeCompactHeaderHeight + statusTopDp
             } else HomeGlassToolbarFullHeight
             // v241 — LOCAL GLASS CAPTURE: everything BEHIND the floating
             // top-bar pills records into its own layer; pills are a SIBLING
@@ -622,6 +626,74 @@ fun HomeScreen(navController: NavController) {
             // user asked for the morph collapse on Home again).
             if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
                 Spacer(Modifier.height(glassHeaderReserve))
+                // ── v450 — THE STATS LIVE ON THE PAGE NOW ─────────────────
+                //
+                // The glass header is ONE bar (the compact one) at every
+                // scroll position — see `CurioGlassToolbarMorph` — so the
+                // Streak · Cabinet · Topics row it used to carry in its
+                // fading FULL state would never be read again. It is drawn
+                // HERE instead, on the page's own rose pane, where it sits
+                // still and scrolls with everything else. Nothing was taken
+                // away from Home: the row moved from a header that only
+                // showed it at the top of the page to the page itself.
+                val statsFill = lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    settingsRoseAccent(),
+                    if (isCurioDarkTheme()) 0.14f else 0.20f
+                )
+                val statsInk = MaterialTheme.colorScheme.onSurface
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = statsFill,
+                    contentColor = statsInk,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HeroStatSegment(
+                            glyph = "local_fire_department",
+                            value = "$streakDays",
+                            label = "Streak",
+                            tint = statsInk,
+                            ink = statsInk,
+                            modifier = Modifier.weight(1f),
+                            onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(30.dp),
+                            color = statsInk.copy(alpha = 0.22f)
+                        )
+                        HeroStatSegment(
+                            glyph = CurioIcons.Inventory2,
+                            value = "$totalSaved",
+                            label = "Cabinet",
+                            tint = statsInk,
+                            ink = statsInk,
+                            modifier = Modifier.weight(1f),
+                            onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(30.dp),
+                            color = statsInk.copy(alpha = 0.22f)
+                        )
+                        HeroStatSegment(
+                            glyph = CurioIcons.AutoAwesome,
+                            value = "$topicsTotal",
+                            label = "Topics",
+                            tint = statsInk,
+                            ink = statsInk,
+                            modifier = Modifier.weight(1f),
+                            onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
+                        )
+                    }
+                }
             } else {
             Box(
                 modifier = Modifier

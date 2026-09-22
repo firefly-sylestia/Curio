@@ -43,7 +43,15 @@ fun CurioBackButton(
     // pass a transparent container with a frosted-plate modifier and the
     // hero ink; every other screen keeps the default surfaceVariant circle.
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    // ── v450 — THE GLYPH IS THE ACCENT ─────────────────────────────────
+    //
+    // The member: *"more unification and polish of button and pills icon
+    // colors"* — and, asked what the rule should be: **all glyphs in the
+    // accent**. The back chevron is the app's most repeated pill glyph, so its
+    // DEFAULT is the accent role rather than plain ink; a screen that really
+    // needs its own colour (the detail hero's frosted controls) still passes
+    // one explicitly, so nothing that was deliberately recoloured changes.
+    contentColor: Color = MaterialTheme.colorScheme.primary,
     // Optional floating shadow — the entry-detail hero's scroll-reactive
     // sticky bar grows this with scroll progress so the popped pills visibly
     // float off the page; every other screen keeps the flat 0dp default.

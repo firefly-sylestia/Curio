@@ -170,7 +170,10 @@ fun CurioGlassToolbar(
                     } else {
                         lerp(container, curioPillTintLift(), 0.38f)
                     },
-                    contentColor = ink,
+                    // v450 — the chevron takes the pill family's accent glyph
+                    // (the [CurioBackButton] default); the words in a pill stay
+                    // ink, the glyphs are the accent.
+                    contentColor = MaterialTheme.colorScheme.primary,
                     shadowElevation = 3.dp,
                     disableRipple = true
                 )
@@ -338,7 +341,24 @@ fun CurioGlassToolbarMorph(
         if (dark) 0.14f else 0.20f
     )
     val ink = MaterialTheme.colorScheme.onSurface
-    val eased = FastOutSlowInEasing.transform(progress.coerceIn(0f, 1f))
+    // ── v450 — ONE STATE, ALWAYS: THE COMPACT BAR ───────────────────────
+    //
+    // The member, on the glass header of Home and Profile: *"glitchy scroll and 2
+    // differnt state so kee it 1 simplify and smooth"*, and, asked which one to
+    // keep: **the compact bar, always**. The bar used to cross-fade between a FULL
+    // hero (title, subtitle, an action row and a rose stat card) and a compact
+    // identity row while the finger scrubbed a `progress` between them — two
+    // contents, two alpha ramps and an animated height, all in the same 80dp of
+    // screen, which is precisely what a scroll reads as a glitch. There is ONE row
+    // now: it is the compact one, at every scroll position, and the full state is
+    // pinned to its hidden end (`eased = 1f`) instead of being scrubbed through —
+    // so the fade is never seen, the height never lerps, and the bar simply rides
+    // the scroll with nothing left to swap.
+    //
+    // `progress` is still taken (and still reported by the screens' scroll
+    // listeners) so nothing else has to change shape, but it no longer drives a
+    // visual state: one bar, one height, one look.
+    val eased = 1f
     val compactH = with(LocalDensity.current) { compactHeight.toPx() }
     // v3xx43 — the status-bar strip belongs to the BAR (it fills it), so the
     // collapsed height is the compact row PLUS that inset. Without this the
@@ -399,11 +419,20 @@ fun CurioGlassToolbarMorph(
                     .size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
+                    // ── v450 — ONE COLOUR FOR EVERY PILL GLYPH ────────────
+                    //
+                    // The member: *"more unification and polish of button and pills
+                    // icon colors"*, and, asked what the rule should be: **all
+                    // glyphs in the accent**. A pill's GLYPH is the accent role
+                    // (which is the same accent the app's own buttons wear, in light
+                    // and dark alike), while the words inside the pill stay ink — so
+                    // a row of pills reads as one family instead of a mix of ink,
+                    // muted and one-off hues.
                     CurioIcon(
                         name = CurioIcons.Menu,
                         contentDescription = "Open menu",
                         size = 19.dp,
-                        tint = pillInk
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -423,7 +452,9 @@ fun CurioGlassToolbarMorph(
                 ),
                 containerColor = if (dark) lerp(container, Color.Black, 0.15f)
                 else lerp(container, curioPillTintLift(), 0.38f),
-                contentColor = pillInk,
+                // The glyph in the accent, the same as the menu pill beside it
+                // (see the note there).
+                contentColor = MaterialTheme.colorScheme.primary,
                 shadowElevation = 3.dp,
                 disableRipple = true
             )
@@ -597,11 +628,13 @@ fun CurioGlassToolbarMorph(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
+                        // The fire is the accent and the days are ink: one rule for
+                        // every glyph in a pill (the member's own answer).
                         CurioIcon(
                             name = "local_fire_department",
                             contentDescription = "Streak",
                             size = 15.dp,
-                            tint = ink
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             "$streakCount",
@@ -639,7 +672,7 @@ fun CurioGlassToolbarMorph(
                             name = CurioIcons.Edit,
                             contentDescription = "Edit profile",
                             size = 19.dp,
-                            tint = ink
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

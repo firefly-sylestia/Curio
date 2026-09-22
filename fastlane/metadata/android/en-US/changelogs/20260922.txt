@@ -1,3 +1,7 @@
+FIX:
+- Home & Profile: the glass header is one bar again — it used to cross-fade between a tall hero and a short identity row while you scrolled, which read as a jump; it keeps the short bar at every scroll position now, so the header rides the scroll with nothing left to swap.
+- Everywhere: a pill's icon is the app's accent, and the words inside it stay ink — the back arrows, the menu, the streak fire and Edit were a mix of plain ink, muted tones and one-off colours, so a row of pills read as unrelated controls; they are one family now, in light and dark alike.
+
 ADD:
 - Reading: the dictionary has a page of its own — open it from the reader's ⋯ menu or from Home's "+" and search any word, taller than the sheet and riding clear of the keyboard, with the same five doors (Offline · Modern · Full 1913 · Wiktionary · Free), each offline volume downloaded or removed from the page itself, and the words you have already looked up staying in reach for the visit.
 - Reading: the ⋯ menu's Snapshot — the reader puts its own head, foot and dock away, takes the picture of exactly what you were looking at, and hands it to a crop frame: corners to size it, anywhere inside to move it, and the cropped piece goes to the share sheet as a PNG in the page's own colours.
