@@ -85,7 +85,6 @@ import kotlinx.coroutines.withContext
  *    history for the visit, so walking back to the word before last is a tap rather
  *    than a retype. Nothing is written to disk for it.
  */
-@Composable
 /**
  * v462 — THE BROWSED WORDS' WINDOW, AND WHY IT IS A CEILING, NOT A HEIGHT.
  *
@@ -112,6 +111,16 @@ private val DictionaryWordsWindow = 340.dp
  */
 private val DictionaryFootClearance = 104.dp
 
+// ── v462 — THE ANNOTATION BELONGS TO THE PAGE AND MUST STAY HERE ───────────
+//
+// The two constants above were inserted between this function and its
+// `@Composable`, which the compiler reported at the FIRST of them ("not
+// applicable to target 'top level property with backing field'") plus thirty
+// cascading "@Composable invocations can only happen from the context of a
+// @Composable function" errors inside the page itself. **Do not insert anything
+// above this line without moving the annotation down with it** — the v462 rule in
+// the root AGENTS.md is this exact mistake.
+@Composable
 internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

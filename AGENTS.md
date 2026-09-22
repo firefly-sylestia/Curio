@@ -170,10 +170,30 @@ definition file**. Do not assume parameter names from memory.
     the function it belongs to (re-add it explicitly when the insertion moved
     past it), and make any checker treat *the same annotation twice in one run*
     as a failure — a scan that accepts "annotation, comment, annotation" (two
-    DIFFERENT annotations may stack) hides this bug exactly. Four of these
-    landed in one session (v458's snapped `@Composable`, v461's `SearchSlide`
-    and the v460 gradient helper, v462's `JournalGridCell` and
-    `AdvancedSection`) — it is the most expensive habit in this codebase.
+    DIFFERENT annotations may stack) hides this bug exactly.
+
+    **The shape when the stolen annotation lands on a PROPERTY**, which is what
+    a `private val` insertion directly under it produces, reports as: `This
+    annotation is not applicable to target 'top level property with backing
+    field'` — at the FIRST inserted declaration — followed by thirty-odd
+    `@Composable invocations can only happen from the context of a @Composable
+    function` errors INSIDE the function that lost it. Neither line names the
+    insertion. The checker must therefore flag BOTH shapes: the same annotation
+    twice in one run, AND an annotation whose next declaration is a
+    `val`/`var`/`const val` (a *local* `@Suppress` on a local `val`, and a local
+    `@Composable fun`, are legal and must not be flagged).
+
+    Five of these landed in one session (v458's snapped `@Composable`, v461's
+    `SearchSlide` and the v460 gradient helper, v462's `JournalGridCell` and
+    `AdvancedSection`, and v462's `ReaderDictionaryPage` — the last one AFTER
+    this rule was written, which is the point: **the rule only works if the
+    scan runs after the edit**, on the whole tree, not on the file you were
+    reading). It is the most expensive habit in this codebase.
+
+    **The habit that prevents all of it:** before writing an insertion whose
+    anchor is a declaration, `grep -n -B2` that anchor — if either line above
+    is an annotation, put the annotation back on the anchor inside the SAME
+    `str_replace`, or anchor on something above the annotation instead.
 
 ### ✅ DO COMMIT AND PUSH AFTER EVERY FIX
 
