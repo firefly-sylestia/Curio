@@ -338,6 +338,10 @@ object CurioRoutes {
     const val SETTINGS_APPEARANCE = "settings/appearance"
     const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_RECORDING = "settings/recording"
+    // v461 — Advanced: the doors a member rarely needs (voice-note quality, the
+    // experiments shelf, the pet designer) gathered behind one row, so the hub's
+    // own list is the settings people actually change.
+    const val SETTINGS_ADVANCED = "settings/advanced"
     const val SETTINGS_DATA = "settings/data"
     // v3xx — the account + Online Mode page (sign-in and sync).
     const val SETTINGS_ONLINE = "settings/online"

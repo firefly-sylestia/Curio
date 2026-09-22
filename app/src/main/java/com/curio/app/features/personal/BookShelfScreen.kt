@@ -205,10 +205,31 @@ fun BookShelfScreen(navController: NavController) {
                 items(items = reading, key = { it.id }) { book ->
                     BookShelfCard(
                         book = book,
+                        // v461 — the same mark Home's chip wears, in the same
+                        // corner: pinning happens HERE, so the shelf has to be
+                        // able to say which book holds the pin — otherwise the
+                        // only way to find out was to leave the shelf and look at
+                        // Home's row.
+                        pinned = book.id == AppPreferences.pinnedBookIdState,
+                        // ── v461 — A BOOK YOU CAN OPEN OPENS ─────────────────
+                        //
+                        // The member: *"a way for user to open the added book
+                        // directly without going through the book detail"*. The
+                        // card went to the book's PAGE because that page is where
+                        // a file gets attached — but once a book HAS a document,
+                        // the page in the middle of the tap is a detour between a
+                        // reader and their own reading. So the tap asks the same
+                        // question the detail page's read pill asks (`BookFiles
+                        // .documentOf`) and lands in the reader when there is
+                        // something to read, in the detail page when there is
+                        // not — which is exactly where the file can be attached.
                         onClick = {
-                            navController.navigate(CurioRoutes.bookDetail(book.id)) {
-                                launchSingleTop = true
+                            val target = if (BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()) {
+                                CurioRoutes.reader(book.id)
+                            } else {
+                                CurioRoutes.bookDetail(book.id)
                             }
+                            navController.navigate(target) { launchSingleTop = true }
                         },
                         onLongPress = { pendingDelete = book }
                     )
@@ -224,10 +245,16 @@ fun BookShelfScreen(navController: NavController) {
                 items(items = finished, key = { it.id }) { book ->
                     BookShelfCard(
                         book = book,
+                        pinned = book.id == AppPreferences.pinnedBookIdState,
+                        // The same rule for a finished book: a document opens, an
+                        // empty one asks for its file first (see the reading row).
                         onClick = {
-                            navController.navigate(CurioRoutes.bookDetail(book.id)) {
-                                launchSingleTop = true
+                            val target = if (BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()) {
+                                CurioRoutes.reader(book.id)
+                            } else {
+                                CurioRoutes.bookDetail(book.id)
                             }
+                            navController.navigate(target) { launchSingleTop = true }
                         },
                         onLongPress = { pendingDelete = book }
                     )
@@ -258,25 +285,92 @@ fun BookShelfScreen(navController: NavController) {
         )
     }
 
+    // ── v461 — A HELD BOOK OFFERS ITS OWN ACTIONS ────────────────────────────
+    //
+    // A hold used to mean one thing — *Remove?* — which made the destructive door
+    // the only door a hold had, on a grid whose cards are too small to carry a row
+    // of buttons. It is the book's own action list now, and the removal is a row
+    // inside it rather than the question the whole panel asked: **Open in reader**
+    // (when the book has a document — the same test the tap makes), **Pin to Home**
+    // / **Unpin from Home** (see `AppPreferences.pinnedBookIdState`), and Remove,
+    // which is the only one that says what it costs.
     pendingDelete?.let { book ->
+        val hasFile = BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()
+        val pinned = AppPreferences.pinnedBookIdState == book.id
+        val pinContext = LocalContext.current
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Remove ${book.title}?") },
+            title = { Text(book.title.ifBlank { "This book" }) },
             text = {
-                Text("The book and every chapter review written in it leaves your shelf.")
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    val id = book.id
-                    pendingDelete = null
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            runCatching { PersonalRepositoryHolder.repo.deleteBook(id) }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    if (hasFile) {
+                        BookActionRow(CurioIcons.MenuBook, "Open in reader") {
+                            pendingDelete = null
+                            navController.navigate(CurioRoutes.reader(book.id)) {
+                                launchSingleTop = true
+                            }
                         }
                     }
-                }) { Text("Remove", color = MaterialTheme.colorScheme.error) }
+                    BookActionRow(
+                        CurioIcons.PushPin,
+                        if (pinned) "Unpin from Home" else "Pin to Home"
+                    ) {
+                        if (pinned) {
+                            AppPreferences.clearPinnedBook(pinContext, book.id)
+                        } else {
+                            AppPreferences.setPinnedBookId(pinContext, book.id)
+                        }
+                        pendingDelete = null
+                    }
+                    BookActionRow(CurioIcons.Delete, "Remove from shelf", danger = true) {
+                        val id = book.id
+                        pendingDelete = null
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                runCatching { PersonalRepositoryHolder.repo.deleteBook(id) }
+                            }
+                        }
+                    }
+                }
             },
-            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("Keep") } }
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("Close") } }
+        )
+    }
+}
+
+/**
+ * ONE ROW OF A HELD BOOK'S ACTIONS (v461) — a glyph, a verb, and a print the
+ * finger can land on.
+ *
+ * The rows live in an `AlertDialog`'s body rather than its button slot because an
+ * action list is not a yes/no question: the dialog has three doors now and the
+ * destructive one must be able to sit last, in its own colour, with air around
+ * it. [danger] is that colour and nothing else — the wording already says what
+ * the row does.
+ */
+@Composable
+private fun BookActionRow(
+    glyph: String,
+    label: String,
+    danger: Boolean = false,
+    onClick: () -> Unit
+) {
+    val ink = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        CurioIcon(glyph, label, tint = ink.copy(alpha = 0.9f), size = 20.dp)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            color = ink
         )
     }
 }
@@ -323,6 +417,8 @@ private fun ShelfSectionHead(label: String, count: Int) {
 @Composable
 private fun BookShelfCard(
     book: PersonalBookEntity,
+    /** v461 — this is the book pinned to Home's shelf door (see the pin). */
+    pinned: Boolean = false,
     onClick: () -> Unit,
     onLongPress: () -> Unit
 ) {
@@ -365,6 +461,32 @@ private fun BookShelfCard(
                         CurioIcon(
                             CurioIcons.Check,
                             "Finished",
+                            tint = personalOnAccent(),
+                            size = 13.dp
+                        )
+                    }
+                }
+            }
+            // ── v461 — AND THE PIN WEARS ITS OWN DISC, MIRRORING THE TICK ────
+            //
+            // The tick owns the cover's top-right; the pin takes the top-left, in
+            // the same size, the same accent and the same on-accent ink — one
+            // family of marks on a card, so neither reads as decoration. It is the
+            // ONLY place a pin can be set or taken off (see the held-card actions
+            // above), which is exactly why the shelf has to show it.
+            if (pinned) {
+                Surface(
+                    shape = CircleShape,
+                    color = accent,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(6.dp)
+                        .size(22.dp)
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            CurioIcons.PushPin,
+                            "Pinned to Home",
                             tint = personalOnAccent(),
                             size = 13.dp
                         )

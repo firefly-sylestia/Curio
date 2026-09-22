@@ -133,6 +133,16 @@ object AppPreferences {
     // own screens and their entry points in Settings).
     private const val KEY_HOME_PAGES_ROW = "home_pages_row"    // Pages row (default on)
     private const val KEY_HOME_SHELF_ROW = "home_shelf_row"    // My shelf row (default on)
+
+    // ── v461 — THE ONE BOOK PINNED TO HOME'S SHELF DOOR ────────────────────
+    //
+    // The member: *"how about when added a pdf in book, user can pin it in home
+    // screen shelf door and it shows with the small in icon"*. ONE book, not a
+    // list: the shelf door is a strip of chips, and the point of a pin is that the
+    // book you are actually reading is always the first thing in it — a set of
+    // pins would just be the shelf again, in a worse order. Empty means nothing is
+    // pinned, which is the default the app has always had.
+    private const val KEY_PINNED_BOOK = "pinned_book_id"
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
     private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
@@ -1246,6 +1256,10 @@ object AppPreferences {
     var homeShelfRowState by mutableStateOf(true)
         private set
 
+    /** The book pinned to Home's shelf door, or "" when nothing is pinned. */
+    var pinnedBookIdState by mutableStateOf("")
+        private set
+
     // Pastel color mode (v7.5) — a user toggle that softens every category
     // accent (fills become pastel with deep-matching ink in light mode,
     // muted deep pastels in dark) and pastel-izes the mixed-deck blends and
@@ -2129,6 +2143,27 @@ object AppPreferences {
     fun initHomeRows(context: Context) {
         homePagesRowState = getHomePagesRow(context)
         homeShelfRowState = getHomeShelfRow(context)
+        // The pin rides this seeding rather than a call site of its own: it is a
+        // fact about HOME's shelf door, it has to be read at exactly the same
+        // moments (startup, a backup restore), and a fourth seeding call is a
+        // fourth chance to forget one.
+        pinnedBookIdState = getPinnedBookId(context)
+    }
+
+    /** The pinned book's id, or "" — see [KEY_PINNED_BOOK]. */
+    fun getPinnedBookId(context: Context): String =
+        prefs(context).getString(KEY_PINNED_BOOK, "").orEmpty()
+
+    /** Pins [bookId] to Home's shelf door. One pin at a time: pinning replaces. */
+    fun setPinnedBookId(context: Context, bookId: String) {
+        prefs(context).edit().putString(KEY_PINNED_BOOK, bookId).apply()
+        pinnedBookIdState = bookId
+    }
+
+    /** Takes the pin off [bookId] — a no-op if a different book holds it. */
+    fun clearPinnedBook(context: Context, bookId: String) {
+        if (getPinnedBookId(context) != bookId) return
+        setPinnedBookId(context, "")
     }
 
     /** Whether the app renders dark right now — resolves "system" via the

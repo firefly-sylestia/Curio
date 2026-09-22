@@ -138,7 +138,12 @@ enum class SettingsPage(val title: String, val subtitle: String) {
     // dialog's bubble opt-in row (the Notifications section is gone).
     PREFERENCES("Preferences", "Search, explore, and pet behavior"),
     RECORDING("Recording", "Voice-note quality, dictation and offline transcription"),
-    DATA("Backup & restore", "Keep your captures safe")
+    DATA("Backup & restore", "Keep your captures safe"),
+    // v461 — the page the hub's own list stops needing: the three doors a member
+    // touches once and then forgets are here instead of beside Appearance. The
+    // member's scope call was *"re-cut, move rarely-used rows into one Advanced
+    // page"* — this is that page.
+    ADVANCED("Advanced", "Rarely needed doors and early features")
 }
 
 /**
@@ -162,6 +167,7 @@ internal fun SettingsPageContent(
             SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
             SettingsPage.RECORDING -> RecordingSection(highlightKey)
             SettingsPage.DATA -> DataSection(navController, highlightKey)
+            SettingsPage.ADVANCED -> AdvancedSection(navController, highlightKey)
         }
     }
 }
@@ -1590,6 +1596,55 @@ private fun RecordingSection(highlightKey: String? = null) {
             currentModelId = AppPreferences.offlineModelIdState,
             onDismiss = { showModelDialog = false }
         )
+    }
+}
+
+@Composable
+/**
+ * v461 — THE ADVANCED PAGE.
+ *
+ * Three doors that used to sit in the hub's first card, beside Appearance and
+ * Preferences: **Recording** (voice-note quality, dictation, offline
+ * transcription), **Experiments** (try a feature before it ships) and the **Pet
+ * designer**. None of them is something a member changes more than once — they are
+ * setup, not settings — and each one pushed the rows people DO change further
+ * down the list, which is the "really confusing to find" the member reported.
+ *
+ * The rows navigate to the same screens they always did (nothing was rebuilt, and
+ * nothing lost its deep-search key — they are `adv-*` now so the hub's own search
+ * still lands on the right page): an Advanced page that quietly dropped a door
+ * would be worse than the long list it replaced.
+ */
+@Composable
+private fun AdvancedSection(navController: NavController, highlightKey: String? = null) {
+    SettingsRowPulse(highlightKey == "adv-recording") {
+        SettingsOptionRow(
+            CurioIcons.Mic,
+            "Recording",
+            "Voice-note quality, dictation and offline transcription"
+        ) {
+            navController.navigate(CurioRoutes.SETTINGS_RECORDING) { launchSingleTop = true }
+        }
+    }
+    SettingsOptionDivider()
+    SettingsRowPulse(highlightKey == "adv-experiments") {
+        SettingsOptionRow(
+            CurioIcons.AutoAwesome,
+            "Experiments",
+            "Try features before they ship"
+        ) {
+            navController.navigate(CurioRoutes.USER_EXPERIMENTS) { launchSingleTop = true }
+        }
+    }
+    SettingsOptionDivider()
+    SettingsRowPulse(highlightKey == "adv-pet") {
+        SettingsOptionRow(
+            CurioIcons.Pets,
+            "Pet designer",
+            "Draw your own Curie"
+        ) {
+            navController.navigate(CurioRoutes.PET_DESIGNER) { launchSingleTop = true }
+        }
     }
 }
 

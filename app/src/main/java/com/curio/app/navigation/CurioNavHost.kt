@@ -1276,6 +1276,14 @@ fun CurioNavHost(
                     SettingsSectionScreen(navController = navController, page = SettingsPage.RECORDING)
                 }
             }
+            // v461 — Advanced, registered like every other settings section so it
+            // arrives with the settings family's own shared-element motion (see
+            // `SettingsSharedScope`).
+            composable(CurioRoutes.SETTINGS_ADVANCED) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SettingsSectionScreen(navController = navController, page = SettingsPage.ADVANCED)
+                }
+            }
             composable(CurioRoutes.SETTINGS_DATA) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     BackupToolsScreen(navController = navController)

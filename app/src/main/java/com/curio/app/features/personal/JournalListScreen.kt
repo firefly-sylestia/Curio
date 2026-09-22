@@ -29,6 +29,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -434,17 +438,35 @@ fun JournalListScreen(navController: NavController) {
             val months = ordered.groupBy { journal ->
                 journal.dateMillis.toLocalDate().withDayOfMonth(1)
             }
-            LazyColumn(
+            // ── v461 — THE COLLECTION READS AS A COLLECTION ─────────────────
+            //
+            // The member: *"in collections use 3 grid for books etc"*. The shelf
+            // has been a **three-column grid** since it was built
+            // (`BookShelfScreen`, `GridCells.Fixed(3)`), and the journals — the
+            // other half of the same collection — were still one wide row per day,
+            // so the two screens did not read as the same place. This is the same
+            // three columns, with a cell per day instead of a row (see
+            // [JournalGridCell]).
+            //
+            // The month heads keep the full width (`GridItemSpan(maxLineSpan)`),
+            // which is what keeps the grouping legible in a grid — a month label
+            // squeezed into one third of the page would read as a cell.
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 months.forEach { (month, pages) ->
-                    item(key = "month-$month") { MonthHead(month = month) }
+                    item(
+                        key = "month-$month",
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) { MonthHead(month = month) }
                     items(items = pages, key = { it.id }) { journal ->
-                        JournalRow(
+                        JournalGridCell(
                             journal = journal,
-                            // v389 — a row opens ITS OWN page: a journal day the
+                            // v389 — a cell opens ITS OWN page: a journal day the
                             // editor, a to-do list the checklist page, a note on a
                             // topic the topic page. See personalRouteFor.
                             onClick = {
@@ -456,7 +478,9 @@ fun JournalListScreen(navController: NavController) {
                         )
                     }
                 }
-                item("tail") { Spacer(Modifier.height(60.dp)) }
+                item("tail", span = { GridItemSpan(maxLineSpan) }) {
+                    Spacer(Modifier.height(60.dp))
+                }
             }
         }
         }
@@ -532,6 +556,114 @@ private fun MonthHead(month: java.time.LocalDate) {
  *  line and how much is on the page. Tap opens it, a long press offers the
  *  removal — the same habits as every other Curio list. */
 @OptIn(ExperimentalFoundationApi::class)
+@Composable
+/**
+ * v461 — ONE DAY, IN A THIRD OF THE PAGE (see the journals list above).
+ *
+ * The row it replaces said more, because a full width had room to: a preview line,
+ * a time, a checklist. A third of a phone is about 15 characters wide, so this
+ * keeps what a day IS and drops what only fits in a row — **the day (the figure
+ * the collection is made of), the title, the mood, and how much was written**.
+ * The preview and the checklist are not lost, they moved to where a page is
+ * actually read: the day's own screen, one tap away.
+ *
+ * The accent spine stays, turned across the top: a coloured day must still be
+ * findable down the grid without opening it (see [journalDoorAccent]), and a
+ * vertical spine in a narrow cell eats the width the title needs.
+ */
+@Composable
+private fun JournalGridCell(
+    journal: PersonalNoteEntity,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val mood = journal.moodEnum
+    val words = remember(journal.id, journal.updatedAtMillis) { journal.doc.wordsLabel() }
+    val press = rememberCurioPressSource(pressedScale = 0.97f)
+    // Resolved in the COMPOSABLE scope, never inside the draw lambda below (a
+    // `drawBehind` block is a draw pass, where no @Composable may be called).
+    val spine = journalDoorAccent(journal.accentArgb)
+    val day = journal.dateMillis.toLocalDate()
+    val shape = RoundedCornerShape(18.dp)
+    Surface(
+        shape = shape,
+        color = journalPaper(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .curioCardShadow(shape)
+            .then(press.modifier)
+            .combinedClickable(
+                interactionSource = press.interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick,
+                onLongClick = onLongPress
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .drawBehind {
+                    val barHeight = 3.dp.toPx()
+                    drawRoundRect(
+                        color = spine,
+                        size = androidx.compose.ui.geometry.Size(size.width, barHeight),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(barHeight / 2f)
+                    )
+                }
+                .padding(horizontal = 12.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // The day: the one figure a day exists to say (v389e's rule — its own
+            // ink, never the accent's lighter shade).
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    day.dayOfMonth.toString(),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FrauncesFontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = ink
+                )
+                Text(
+                    day.month.name.lowercase().take(3)
+                        .replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.55f)
+                )
+                if (mood != null) {
+                    Spacer(Modifier.weight(1f))
+                    CurioIcon(
+                        personalMoodGlyph(mood),
+                        mood.label,
+                        tint = ink.copy(alpha = 0.6f),
+                        size = 14.dp
+                    )
+                }
+            }
+            Text(
+                journal.title.ifBlank { "Untitled day" },
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = if (journal.title.isBlank()) ink.copy(alpha = 0.5f) else ink,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                // A cell has no room for the time: the count is what a glance at
+                // the collection is asking ("how much did I write that day").
+                words,
+                style = MaterialTheme.typography.labelSmall,
+                color = ink.copy(alpha = 0.45f)
+            )
+        }
+    }
+}
+
 @Composable
 private fun JournalRow(
     journal: PersonalNoteEntity,

@@ -389,6 +389,16 @@ fun PersonalChipsRow(
     // empty state lasts exactly as long as that write.
     val scope = rememberCoroutineScope()
     var shelving by remember { mutableStateOf(false) }
+    // v461 — the pin (see the shelf row below): read once here, because the badge
+    // and the sort must never disagree about which book is pinned.
+    val pinnedBookId = AppPreferences.pinnedBookIdState
+    val shelfBooks = remember(books, pinnedBookId) {
+        if (pinnedBookId.isBlank()) {
+            books
+        } else {
+            books.sortedByDescending { it.id == pinnedBookId }
+        }
+    }
     val suggestedBooks by produceState(
         initialValue = emptyList<BookCatalog.Hit>(),
         books.isEmpty()
@@ -533,10 +543,26 @@ fun PersonalChipsRow(
                     )
                 }
             }
-            items(items = books.take(CHIP_ROW_LIMIT), key = { it.id }) { book ->
-                BookChip(book = book, onClick = {
-                    navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
-                })
+            // ── v461 — THE PINNED BOOK LEADS THE ROW ─────────────────────────────
+            //
+            // The member: *"how about when added a pdf in book, user can pin it in
+            // home screen shelf door and it shows with the small in icon"*. A pin
+            // that only ADDED a badge would still leave the book behind whatever
+            // six books came first, which is the one thing a pin is for — so the
+            // pinned id is sorted to the front here (on the whole list, before
+            // `take`), and the chip that wears the pin is the chip that is first.
+            //
+            // `remember`ed on the list AND the id, so a pin change re-sorts
+            // without rebuilding the chips: `sortedByDescending` on `false < true`
+            // is the entire sort.
+            items(items = shelfBooks.take(CHIP_ROW_LIMIT), key = { it.id }) { book ->
+                BookChip(
+                    book = book,
+                    pinned = book.id == pinnedBookId,
+                    onClick = {
+                        navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
+                    }
+                )
             }
         }
     }
@@ -908,6 +934,8 @@ private fun JournalChip(
 @Composable
 private fun BookChip(
     book: PersonalBookEntity,
+    /** v461 — whether this book is the one pinned to Home's shelf door. */
+    pinned: Boolean = false,
     onClick: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
@@ -928,6 +956,32 @@ private fun BookChip(
                 corner = 0.dp,
                 modifier = Modifier.fillMaxSize()
             )
+            // ── v461 — THE PIN'S OWN MARK ────────────────────────────────────
+            //
+            // A small disc in the cover's own corner: the app's accent under the
+            // theme's on-accent ink, on a `push_pin` glyph. It is deliberately
+            // SMALL and in the corner a cover's own art never needs — the point of
+            // a pin mark is that the shelf door says "this one is the one you are
+            // reading" at a glance, not that it decorates the chip.
+            if (pinned) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .size(22.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            CurioIcons.PushPin,
+                            "Pinned to Home",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            size = 13.dp
+                        )
+                    }
+                }
+            }
             // The footer: one line, its own height, OPAQUE so the cover cannot
             // bleed through the title it is naming.
             Surface(

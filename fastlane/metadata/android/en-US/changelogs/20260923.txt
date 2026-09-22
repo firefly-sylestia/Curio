@@ -1,4 +1,9 @@
 ADD:
+- Books: a book with a document opens straight into the reader — tapping its card used to land on the book's page first, so the page in the middle of a reader and their own reading is gone (a book with no file still opens its page, which is where a file gets attached).
+- Books: hold a book on the shelf and it offers its own actions — Open in reader, Pin to Home, and Remove — instead of the removal being the only thing a hold could say.
+- Home: pin a book to the shelf row and it leads the row wearing a small pin, so the book you are actually reading is always the first chip; the shelf shows the same mark, because that is where the pin is set.
+- Journals: the collection reads as a 3-up grid, like the book shelf — same month headings, three days across.
+- Settings: an Advanced page gathers the doors you rarely need — Recording, Experiments and the Pet designer moved there, so Appearance and Preferences are what the settings list actually shows.
 - The intro ends with an online step: what signing in gives you (your captures, journals and shelf on another phone, friends, and posting what a topic made you think about), with a Sign in door — and everything in Curio still works without an account.
 - Settings: Home's writing rows each have their own switch — turn the pages row off, the shelf row off, or both, without touching your journals or your books.
 

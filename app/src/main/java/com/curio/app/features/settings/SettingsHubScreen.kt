@@ -1407,6 +1407,7 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     CurioRoutes.SETTINGS_PREFERENCES -> SettingsPage.PREFERENCES
     CurioRoutes.SETTINGS_RECORDING -> SettingsPage.RECORDING
     CurioRoutes.SETTINGS_DATA -> SettingsPage.DATA
+    CurioRoutes.SETTINGS_ADVANCED -> SettingsPage.ADVANCED
     CurioRoutes.EXPERIMENTS -> null // standalone screen, not a section page
     CurioRoutes.USER_EXPERIMENTS -> null // standalone screen
     else -> null
@@ -1534,9 +1535,20 @@ private val SettingsSections = listOf(
                     // v27 — Notifications is gone: every notification control
                     // (daily reminder, live notification, explore bubble)
                     // lives in Preferences now.
-                    SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore, and pet behavior", CurioRoutes.SETTINGS_PREFERENCES),
-                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality, dictation and offline transcription", CurioRoutes.SETTINGS_RECORDING),
-                    SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER),
+                    SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore, and notification", CurioRoutes.SETTINGS_PREFERENCES),
+                    // ── v461 — RECORDING, EXPERIMENTS AND THE PET DESIGNER MOVED ──
+                    //
+                    // The member: *"maybe simplifying settings, like yk some are
+                    // realy confusing to find"*, and to the scope question
+                    // **"re-cut, move rarely-used rows into one Advanced page"**.
+                    // These three were the offenders: two of them are setup rather
+                    // than settings (you choose a voice-note quality once, you draw
+                    // your pet once) and Experiments is a try-before-ship door —
+                    // and all three sat BETWEEN the member and the rows they do
+                    // change, so Appearance and Preferences were the only rows near
+                    // the top. They live on the Advanced page now, one row away
+                    // (see the Safety & support card below and `AdvancedSection`).
+                    // Nothing was dropped: every door still exists, one tap deeper.
                     // v26 — Experiments is hidden from Settings (it opens via
                     // the five-tap version trick in Support); these two moved
                     // in here from the old Explore section so they stay one
@@ -1551,7 +1563,9 @@ private val SettingsSections = listOf(
                     // row a member needs beside Appearance. The page itself is
                     // untouched and still one tap away: see the Dev page (Support
                     // → five taps on Version), under "Sharing".
-                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS)
+                    // v461 — the door to the Advanced page (Recording, Experiments
+                    // and the Pet designer moved inside it — see "Personalize").
+                    SettingsRowEntry(CurioIcons.Tune, "Advanced", "Recording, experiments and the pet designer", CurioRoutes.SETTINGS_ADVANCED)
                     // Dev page hidden — accessible via 5-tap version number in Support
                 )
             )

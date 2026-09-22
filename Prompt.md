@@ -33,7 +33,14 @@ from the state rather than from memory.
 - **Home's two rows, each its own switch** — `AppPreferences.homePagesRowState` / `homeShelfRowState` (both default on, seeded by `initHomeRows` from the same three places `initThemeMode` is), read directly by `PersonalChipsRow` and by the two switches in Settings → Preferences. Hiding a row hides the row, never the data.
 - **The intro's online step** (`OnlineSlide`) — sits before setup, one Sign in door that finishes the intro first and opens the account page over Home, and says what sharing your thoughts means.
 
-**Still open from the same batch:** **pin a book to Home's shelf door with its small icon** (a stored pin + the chip's own affordance — needs a read of `BookChip` first); **open an added book straight into the reader** instead of through the detail page (`BookShelfScreen`: the `onClick` that goes to `bookDetail`, and the `AddBookSheet.onAdded` flow); the **journal list's 3-up grid** (`JournalListScreen.kt:437`, still a `LazyColumn`) and the shelf/journal **open-close motion**; and the **Settings re-cut** — the member's call is *re-cut + one **Advanced** page + remove what's concluded*, and the verified inventory for the removal half is already recorded above.
+**Also landed in the same pass ("do the rest plis"):**
+
+- **A book you can open opens** — the shelf card's tap asks `BookFiles.documentOf(...)` and goes to the reader when a document is attached, to the detail page when it is not (which is where a file gets attached).
+- **A held book has actions** — Open in reader / Pin to Home / Remove, instead of one destructive question; the pin is ONE id (`pinned_book_id`), sorts the pinned book to the front of Home's shelf row, and wears the same corner disc on the chip and the shelf card.
+- **The journals are a 3-up grid** (`JournalGridCell`), matching the shelf; month heads keep the full span.
+- **Settings is re-cut with an Advanced page** — Recording, Experiments and the Pet designer moved there (routes, page, content and the nav host all wired), so the hub shows the rows members actually change.
+
+**Deliberately NOT done, with the reason on the record:** (1) **removing the concluded experiment flags** — nine preferences the UI still reads but nothing can write; each read site has to be walked before deleting, and a settings row removed on a guess is a feature someone loses quietly; (2) **a nav-transition change for the shelf/journals** — both routes already inherit the app's own transition, and the reachable candidates left for *"the open and close is clanky"* (the filter panel's `pillArrive`/`pillLeave`, the create launcher's single-progress scale) are already on `CurioMotion`, so a change there would be a guess rather than a fix — worth one sentence from the member about which part of the open/close feels wrong.
 
 ---
 
