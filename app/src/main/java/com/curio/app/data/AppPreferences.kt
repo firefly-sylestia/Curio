@@ -1594,6 +1594,22 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
+    // v455 — THE MOTION SYSTEM (experiment, default OFF): the app's screens
+    // move with the vocabulary ported from Felicity (firefly-sylestia/Felicity,
+    // AGPL-3.0 — the same licence this app carries) — Material Motion's
+    // SHARED AXIS, in the shape Felicity's own seekable transitions define it:
+    // a screen drifts a QUARTER of the width and cross-fades (never a full
+    // slide), a modal-ish screen opens along Z (scale + fade, opposite
+    // direction on the way back), a peer switch is a pure fade, and the
+    // gesture's own progress SEEKS the transition (navigation-compose does
+    // this natively), so the drag tracks the finger instead of playing a
+    // fixed clip. With it on, the app's old page motion (the per-route
+    // CurioMotion durations in CurioNavHost) is not used at all, and the old
+    // screen-reveal experiment stands down — see `ui/theme/CurioMotionSystem.kt`
+    // for the tokens and the plan in `MOTION_PLAN.md`.
+    var motionSystemState by mutableStateOf(false)
+        private set
+
     // v454 — LITE MODE (default OFF): one switch that makes the app cheaper
     // on weaker hardware — refraction/blur everywhere is skipped, the
     // always-running decorative clocks (shimmer, twinkle, breathe, pulse)
@@ -1980,6 +1996,7 @@ object AppPreferences {
         profileAvatarBlobState = isProfileAvatarBlob(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         liteModeState = isLiteModeEnabled(context)
+        motionSystemState = isMotionSystemEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
@@ -2416,6 +2433,7 @@ object AppPreferences {
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_LITE_MODE = "lite_mode_v1"
+    private const val KEY_MOTION_SYSTEM = "motion_system_v1"
     private const val KEY_FORCE_GLASS = "force_glass_override"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
@@ -2690,6 +2708,16 @@ object AppPreferences {
     fun setLiteModeEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LITE_MODE, enabled).apply()
         liteModeState = enabled
+    }
+
+    // ── The motion system (v455, experiment, default OFF) ─────────────
+    /** Whether the Felicity-derived screen motion is in charge. */
+    fun isMotionSystemEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MOTION_SYSTEM, false)
+
+    fun setMotionSystemEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MOTION_SYSTEM, enabled).apply()
+        motionSystemState = enabled
     }
 
     // v293 — Force-override: bypass device capability checks for liquid glass.

@@ -223,6 +223,19 @@ fun ExperimentsScreen(navController: NavController) {
             item {
                 SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        // v455 — THE MOTION SYSTEM (see ui/theme/CurioMotionSystem.kt
+                        // and app/MOTION_PLAN.md). It belongs in this card: the
+                        // two switches both answer "how does a screen change",
+                        // and only one of them can be in charge — turning this
+                        // on stands the screen reveal down (see
+                        // `screenRevealActive`), and turning it off puts the
+                        // reveal back exactly as it was left.
+                        ExperimentSwitchRow(
+                            "Smoother transitions",
+                            "Experimental: screens move with the shared-axis vocabulary ported from Felicity — a screen drifts a quarter of the width while cross-fading, a modal-style push comes forward along depth, peer switches cross-fade — and the back gesture seeks the animation under your finger instead of playing a fixed clip. Replaces the app's older page motion while it is on.",
+                            AppPreferences.motionSystemState
+                        ) { AppPreferences.setMotionSystemEnabled(context, it) }
+                        CurioSettingsDivider()
                         ExperimentSwitchRow(
                             "Screen reveal transitions",
                             "Experimental: opening a screen plays the same soft circular reveal as the light/dark flip, growing from where you tapped. Off keeps the current page transitions.",

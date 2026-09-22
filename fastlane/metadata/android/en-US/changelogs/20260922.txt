@@ -1,4 +1,10 @@
 ADD:
+- Experiments: "Smoother transitions" — a new way for the app's screens to move, ported from Felicity: a page drifts a quarter of the screen while the two cross-fade (a hand-off, not a slide), a modal-style page comes forward out of depth, peer switches cross-fade, and the BACK GESTURE seeks the animation under your finger instead of playing a fixed clip. It replaces the app's older page motion while it is on; the old feel returns the moment you turn it off. Off by default, under Experiments → Motion.
+
+FIX:
+- Home: the recents rows no longer react to a hold — a hold that outlived the finger could keep the action menu up after letting go; the rows simply open the topic now, and the held actions (write about it, remove from recents, open a saved entry) are on the Recents page's own rows, where the feed is managed.
+
+ADD:
 - Appearance: Lite mode — one switch that makes the app lighter on slower phones: the glass surfaces stop refracting and the idle effects (the shimmer over loading cards, the splash's breathing mark, the drawer sky's twinkle, the Incursion mark, the resting die, the pet's glances and ear flicks) hold still. Nothing moves, disappears or restyles itself, the pet still breathes and blinks, and every switch it holds down comes back exactly as you left it.
 
 FIX:
