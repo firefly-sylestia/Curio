@@ -198,6 +198,7 @@ import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
+import com.curio.app.ui.theme.isLiteMode
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.pastelAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -3204,7 +3205,9 @@ private fun DrawerLaneStarMap(
     // map, its stars or the page behind it.
     var beat by remember { mutableStateOf(0f) }
     LaunchedEffect(drawerOpen) {
-        if (!drawerOpen) {
+        // v454 — Lite mode parks the twinkle: an open sky that holds still is
+        // the same drawing, it just stops asking for a frame every 16ms.
+        if (!drawerOpen || isLiteMode) {
             beat = 0f
             return@LaunchedEffect
         }

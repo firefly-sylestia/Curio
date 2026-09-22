@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.isAmbientMotionOn
 
 /**
  * v3xx50 — Curio's SKELETON system: quiet card-shaped placeholders that hold
@@ -44,6 +45,11 @@ import androidx.compose.ui.unit.dp
  *  composition), so a sweeping skeleton never recomposes. */
 @Composable
 private fun Modifier.curioShimmerSweep(shape: RoundedCornerShape): Modifier {
+    // v454 — Lite mode: the placeholders keep their shape and colour but the
+    // sweep does not run. A waiting state is still a waiting state without a
+    // highlight travelling across it, and this is one of the app's
+    // always-on clocks (it runs the whole time a list is loading).
+    if (!isAmbientMotionOn) return this.clip(shape)
     val transition = rememberInfiniteTransition(label = "curioShimmer")
     val progress = transition.animateFloat(
         initialValue = 0f,

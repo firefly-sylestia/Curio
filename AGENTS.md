@@ -458,6 +458,7 @@ real destination the project's Site URL answers instead, whose default is
 
 - [app/AGENTS.md](app/AGENTS.md) — Active Curio Android app module
 - [auth-web/AGENTS.md](auth-web/AGENTS.md) — Curio account web (Supabase email links, password reset, account desk)
+- [app/APP_AUDIT.md](app/APP_AUDIT.md) — App audit: fixed defects, Lite-mode gating rules, and the deliberately separate UNVERIFIED leads
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
 - [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)

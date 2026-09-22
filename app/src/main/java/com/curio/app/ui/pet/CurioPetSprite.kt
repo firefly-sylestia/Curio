@@ -47,6 +47,7 @@ import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
 import com.curio.app.data.PetFaceMoods
+import com.curio.app.ui.theme.isAmbientMotionOn
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -411,11 +412,18 @@ fun CurioPetSprite(
         bobPhase = 0f
         blinkPhase = 0f
     }
-    val breathePhase = bobPhase
+    // v454 — Lite mode keeps the pet's two readable cues (the body bob and the
+    // blink, both fed by the single clock above) and parks the flourishes that
+    // only decorate the idle: the chest breath, the slow glance and the ear
+    // flick. A pet that still breathes and blinks is alive; one that also
+    // glances around every few seconds is ambience, and ambience is what Lite
+    // mode is for. (This is deliberately NOT the static-pose path below —
+    // that one freezes the pet to a single drawing frame.)
+    val breathePhase = if (isAmbientMotionOn) bobPhase else 0f
     // Slow glance and ear flick share the low-cost ambient phase. Their
     // existing guards still prevent them during movement, sleep, or thinking.
-    val glancePhase = bobPhase
-    val flickPhase = bobPhase
+    val glancePhase = if (isAmbientMotionOn) bobPhase else 0f
+    val flickPhase = if (isAmbientMotionOn) bobPhase else 0f
     // One-shot celebration hop — keyed so the Quests/Home screens can fire
     // it on quest claims and level-ups.
     val hop = remember { Animatable(0f) }

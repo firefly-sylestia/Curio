@@ -31,12 +31,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CurioAlivePreferences
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.isAmbientMotionOn
 
 @Composable
 fun ScreenEntrance(content: @Composable () -> Unit) {
@@ -152,7 +154,9 @@ fun rememberBreathingScale(
     active: Boolean = true,
     amplitude: Float = 0.03f
 ): Float {
-    if (!active) return 1f
+    // v454 — an ambient clock: it exists to be looked at, so Lite mode parks
+    // it at rest rather than paying for a frame it cannot be seen to earn.
+    if (!active || !isAmbientMotionOn) return 1f
     val transition = rememberInfiniteTransition(label = "breathe")
     val scale by transition.animateFloat(
         initialValue = 1f - amplitude,
@@ -174,6 +178,8 @@ fun rememberShimmerBrush(
     shimmerColor: Color = Color.White.copy(alpha = 0.15f),
     baseColor: Color = Color.Transparent
 ): Brush {
+    // v454 — Lite mode: no sweep at all (the surface keeps its base colour).
+    if (!isAmbientMotionOn) return SolidColor(baseColor)
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnim by transition.animateFloat(
         initialValue = -1f,
@@ -198,6 +204,9 @@ fun rememberRotatingReveal(
     rotationPeriodMs: Int = 12000,
     pulseAmplitude: Pair<Float, Float> = 0.85f to 1.10f
 ): Pair<Float, Float> {
+    // v454 — Lite mode: hold still at the loop's resting pose (no rotation,
+    // unit scale) — the surface is unchanged, it simply is not spinning.
+    if (!isAmbientMotionOn) return 0f to 1f
     val transition = rememberInfiniteTransition(label = "rotatingReveal")
     val rotation by transition.animateFloat(
         initialValue = 0f,
@@ -239,6 +248,7 @@ fun rememberAnimatedScaleOnPress(
 
 @Composable
 fun rememberPulseScale(active: Boolean): Float {
+    if (!isAmbientMotionOn) return 1f
     val transition = rememberInfiniteTransition(label = "pulse")
     val scale by transition.animateFloat(
         initialValue = 1f,

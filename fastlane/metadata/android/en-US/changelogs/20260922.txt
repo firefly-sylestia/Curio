@@ -1,4 +1,10 @@
 ADD:
+- Appearance: Lite mode — one switch that makes the app lighter on slower phones: the glass surfaces stop refracting and the idle effects (the shimmer over loading cards, the splash's breathing mark, the drawer sky's twinkle, the Incursion mark, the resting die, the pet's glances and ear flicks) hold still. Nothing moves, disappears or restyles itself, the pet still breathes and blinks, and every switch it holds down comes back exactly as you left it.
+
+FIX:
+- Performance: the app stops working when nothing is happening — a scroll rail's thumb woke every frame to find nothing to move, reading the page's scroll state sixty times a second on any screen that shows one; and the glass surfaces now take one look at a single switch instead of each deciding for itself. With Lite mode on, that glass pass is skipped entirely.
+
+ADD:
 - Appearance: liquid glass reaches the reading surface — the reader's floating pills (the way out, the book's name, search, the foot's five buttons, the search bar, the listen and motion-lock pills, the pinned page count and the page scrubber) now refract the page under them instead of sitting on a solid fill; the glass follows the same Liquid glass switch, and a pill that is "on" (a held page, a voice reading) refracts through its own accent tint.
 - Everywhere: the round back pill refracts on every page that uses the glass, with no per-page setup — it is the app's most repeated control and it was solid everywhere.
 

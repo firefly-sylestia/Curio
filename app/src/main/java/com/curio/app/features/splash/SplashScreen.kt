@@ -6,7 +6,6 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +47,7 @@ import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.ui.theme.rememberAmbientTransition
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
@@ -105,8 +106,10 @@ fun SplashScreen(navController: NavHostController) {
     )
 
     // ── Breathing logo — scale pulse only, never positional movement ──────
-    val breatheTransition = rememberInfiniteTransition(label = "splashBreathe")
-    val breatheScale by breatheTransition.animateFloat(
+    // v454 — Lite mode sets the logo down at rest. The splash's arrival fade
+    // and its loading lines are state, not ambience, so they still play.
+    val breatheTransition = rememberAmbientTransition("splashBreathe")
+    val breatheScale by (breatheTransition?.animateFloat(
         initialValue = 1f,
         targetValue = 1.035f,
         animationSpec = infiniteRepeatable(
@@ -114,7 +117,7 @@ fun SplashScreen(navController: NavHostController) {
             repeatMode = RepeatMode.Reverse
         ),
         label = "splashBreatheScale"
-    )
+    ) ?: remember { mutableFloatStateOf(1f) })
 
     // ── Rotating curiosity loading lines ──────────────────────────────────
     val loadingLines = listOf(

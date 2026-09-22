@@ -1620,6 +1620,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
     SettingsDeepRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
     SettingsDeepRow(CurioIcons.Wallpaper, "Glyph backdrop", "Subtle or deep background glyphs", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-glyph-backdrop"),
+    SettingsDeepRow(CurioIcons.Bolt, "Lite mode", "Skips glass and idle effects for a smoother app on slower phones", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-lite-mode"),
     SettingsDeepRow(CurioIcons.Contrast, "Paper", "White page with cream cards, or the reverse", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-paper"),
     // v411 — the three old rows (Material theme / Hero / Adaptive Hero) are
     // ONE door now: the Color theme sheet. The deep search points at that

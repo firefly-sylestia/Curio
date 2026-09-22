@@ -1594,6 +1594,16 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
+    // v454 — LITE MODE (default OFF): one switch that makes the app cheaper
+    // on weaker hardware — refraction/blur everywhere is skipped, the
+    // always-running decorative clocks (shimmer, twinkle, breathe, pulse)
+    // hold still, and transitions run shorter. It is deliberately NOT a
+    // "turn the app ugly" switch: layouts, colours, state and every actual
+    // transition stay exactly as they are, so nothing reads as broken —
+    // only the motion that exists just to be looked at stops.
+    var liteModeState by mutableStateOf(false)
+        private set
+
     // v242 — LIQUID GLASS TUNING: user-adjustable multipliers for the glass
     // recipe (Appearance → Liquid glass). 1f = the tuned default; 0f turns
     // the effect off; up to 2f doubles it.
@@ -1969,6 +1979,7 @@ object AppPreferences {
         profileAvatarPathState = getProfileAvatarPath(context)
         profileAvatarBlobState = isProfileAvatarBlob(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
+        liteModeState = isLiteModeEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
@@ -2404,6 +2415,7 @@ object AppPreferences {
   private const val KEY_MUTED_CONVERSATIONS = "social_muted_conversations"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
+    private const val KEY_LITE_MODE = "lite_mode_v1"
     private const val KEY_FORCE_GLASS = "force_glass_override"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
@@ -2668,6 +2680,16 @@ object AppPreferences {
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
         liquidGlassPillsState = enabled
+    }
+
+    // ── Lite mode (v454, default OFF) ───────────────────────────────
+    /** Whether the cheaper no-glass, still-motion profile is on. */
+    fun isLiteModeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LITE_MODE, false)
+
+    fun setLiteModeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LITE_MODE, enabled).apply()
+        liteModeState = enabled
     }
 
     // v293 — Force-override: bypass device capability checks for liquid glass.

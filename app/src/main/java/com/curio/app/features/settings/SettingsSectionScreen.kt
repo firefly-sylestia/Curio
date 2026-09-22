@@ -358,6 +358,22 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         SettingsOptionDivider()
+        // v454 — LITE MODE. A performance profile, so it lives in Appearance
+        // beside the other "how does the app render itself" rows. Default
+        // OFF: it changes nothing until it is turned on, and it is reversible
+        // at any time — every switch it holds down (the glass toggle and the
+        // motion it parks) is a preference that comes back exactly as it was.
+        SettingsRowPulse(highlightKey == "appearance-lite-mode") {
+            CompactSwitchRow(
+                CurioIcons.Bolt,
+                "Lite mode",
+                "Skips glass and idle effects to keep the app smooth on slower phones",
+                AppPreferences.liteModeState
+            ) {
+                AppPreferences.setLiteModeEnabled(context, it)
+            }
+        }
+        SettingsOptionDivider()
         // v409 — WHICH SURFACE LEADS, for the theme that still has the choice:
         // Adaptive Hero. "White page" is a white page with cream cards;
         // "Cream page" reverses it to the pre-v409 pair. Both are the same

@@ -6,7 +6,52 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §48 — a dictionary you can walk, a theme grid, and the audit
+## 0. THE CURRENT REQUEST — §49 — Lite mode, and the loops that were running for nothing
+
+> now without the liquid glass, the app lags a little. do something about it check properly if useless things running, and introduce a lite
+> mode off by default which makes the app less laggy disables useless animation without making it clanky. also why the reader liquid glass
+> is on when the option liquid glass is off. what u found in audit save it in n file
+
+**Then, mid-work:** *"no no the liquid glass is fine continue"* — read as the answer to the reader-glass question (**leave the reader's
+glass as it ships**, it is the reader's own identity and not a bug) and as *carry on with Lite mode*. Nothing in the reader's glass was
+removed; the only place Lite mode touches glass is when the member has switched Lite mode ON themselves.
+
+**Files:** `data/AppPreferences.kt` (`liteModeState`, `KEY_LITE_MODE`), **new** `ui/theme/CurioLiteMode.kt`
+(`isLiteMode`, `isAmbientMotionOn`, `rememberAmbientTransition`), `ui/components/LiquidGlassPills.kt` (the one glass gate),
+`CurioAnimations.kt`, `CurioSkeleton.kt`, `CurioScrollIndicator.kt`, `CurioIcons.kt` (`Bolt`), `CurioPetSprite.kt`,
+`features/splash/SplashScreen.kt`, `features/home/HomeScreen.kt`, `features/spin/SpinScreen.kt`,
+`features/incursion/IncursionSurfaces.kt`, `features/settings/SettingsSectionScreen.kt` (+`SettingsHubScreen.kt`),
+**new** `app/APP_AUDIT.md`.
+
+### 0.1 What was built
+
+1. **LITE MODE, OFF BY DEFAULT (Appearance).** One switch; the gating rule is written into the file and is the whole design:
+   **gate what only exists to be looked at** (ambient clocks, refraction passes), **never gate what carries meaning** (a transition, a
+   sheet, a press, a state change, a progress bar, a page turn). That second half is the member's *"without making it clanky"*.
+2. **THE GLASS GATE IS ONE LINE.** `isLiquidGlassRequested()` — the predicate every one of the ~33 glass sites already funnels through
+   (`Modifier.liquidGlassCapsule` returns `this` without it, `curioAmbientGlass` too, the toolbars branch on it). Only the pass is
+   skipped: each site's non-glass branch is its old solid fill, so nothing vanishes and no layout moves.
+3. **THE AMBIENT CLOCK DOOR.** `rememberAmbientTransition(label)` returns `null` when parked; the splash mark, the drawer sky's twinkle,
+   the Incursion mark, Spin's idle die and the pet's flourishes park. **The pet keeps its bob and blink** (only breath/glance/ear-flick
+   stop) so it still reads alive. Spin's orbit, the shuffle glyph, every transition and every recording pulse stay — they are state.
+4. **A REAL PERF BUG, FOUND BY ASKING WHAT IS RUNNING.** `CurioScrollIndicator`'s drain loop woke **every frame** for as long as the
+   indicator existed just to find `pendingDelta == 0` — 60 wake-ups a second on an idle knob, on every screen with a rail. It parks on
+   `snapshotFlow { pendingDelta }.first { it != 0f }` now.
+5. **THE AUDIT IS A FILE.** `app/APP_AUDIT.md`: what was found and fixed, the Lite-mode rules, an **UNVERIFIED** list with the exact
+   re-checkable command beside each lead, and an honest **not audited at all** list (accessibility, RTL, empty/error states, realtime on
+   a bad line, battery).
+
+### 0.2 Open, deliberately
+
+- **The reader's glass with the app switch off** — reported, then the member said the glass is fine; recorded in `APP_AUDIT.md` §3.5
+  rather than changed.
+- **§48's word-page sheet** (the per-version answer moving into a bottom sheet) — still the one piece of that request not built.
+- The UNVERIFIED leads in `APP_AUDIT.md` §3 (touch targets, icon-only descriptions, `Surface(onClick)` pressed states, `Color.White` in
+  themed surfaces, `while (true)` timings) are leads, not findings. Say the word and they become a focused pass.
+
+---
+
+## 0d. §48 — a dictionary you can walk, a theme grid, and the audit (DONE, v453 — pushed with §49)
 
 > make the theme select 2 grid based with beautiful view fix the dictionary page search box always open show it as a search pill to the
 > right and show the dictionary words by alphabetical order, and only opening the word shows both of the version with badge to switch,
@@ -503,7 +548,8 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§48 — the browsable dictionary, the theme grid, the chat ink, and a full app audit (DONE, v453 — COMMITTED, NOT PUSHED per the member's own "dont push it yet").** Asked which list "alphabetical order" meant and where the version badge goes: the answers were *"the
+- **§49 — "without the liquid glass, the app lags a little … introduce a lite mode off by default … also why the reader liquid glass is on when the option liquid glass is off. what u found in audit save it in n file" (DONE, v454 — pushed with §48).** Lite mode is a *performance* profile (Appearance, default OFF): the glass pass is skipped at the one predicate every glass site already asks, and the decorative clocks park through `rememberAmbientTransition`. Meaning-carrying motion is never gated (that is the *"without making it clanky"* half). A real find on the way: `CurioScrollIndicator`'s drain loop woke every frame on an idle knob; it parks on the delta now. The audit lives in **`app/APP_AUDIT.md`**, split into fixed / UNVERIFIED leads (with the command to re-check each) / not audited at all. The reader's glass with the app switch off: **the member said the glass is fine**, so it was left alone and recorded.
+- **§48 — the browsable dictionary, the theme grid, the chat ink, and a full app audit (DONE, v453 — pushed together with §49).** Asked which list "alphabetical order" meant and where the version badge goes: the answers were *"the
   dictionary from the home screen shows the full words it have, like a physical dictionary"* and *"dictionary page inside the word page in a
   bottom sheet"*. Built: **the dictionary page browses** (`headwords` per letter — one bucket per letter, sorted case-insensitively, nothing read
   until a letter is stood on), the **search is a 50dp pill at the right of the head** whose glyph becomes the cross that closes it, a word row

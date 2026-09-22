@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.first
 import kotlin.math.abs
 
 /**
@@ -113,19 +115,29 @@ fun CurioVerticalScrollIndicator(
     // v26c — the drain loop: every frame, apply whatever the knob has
     // accumulated (capped relative to the list's scrollable range so a flick
     // can't burst), then reset. Frame-paced, so it sleeps between frames.
+    //
+    // v454 — AND IT SLEEPS WHEN THERE IS NOTHING TO DRAIN. The loop used to
+    // wake on every frame for as long as the indicator existed, just to read
+    // the scroll state and find `pendingDelta == 0` — 60 wake-ups a second on
+    // an idle knob, on any screen that shows a scroll rail. It now parks on
+    // the accumulated delta and only resumes when a drag actually put
+    // something there, which is what "frame-paced" was always meant to cost:
+    // one frame per gesture, not one per frame forever.
     val currentOnScrollBy by rememberUpdatedState(onScrollBy)
     LaunchedEffect(state) {
         while (true) {
+            snapshotFlow { pendingDelta }.first { it != 0f }
             withFrameNanos { }
             val s = state ?: continue
             val scrollable = (s.contentSize - s.viewportSize).toFloat()
-            if (scrollable <= 0f) continue
+            if (scrollable <= 0f) {
+                pendingDelta = 0f
+                continue
+            }
             val cap = maxOf(MinFrameDeltaPx, scrollable * FrameDeltaFraction)
             val delta = pendingDelta.coerceIn(-cap, cap)
-            if (delta != 0f) {
-                pendingDelta = 0f
-                currentOnScrollBy(delta)
-            }
+            pendingDelta = 0f
+            currentOnScrollBy(delta)
         }
     }
 

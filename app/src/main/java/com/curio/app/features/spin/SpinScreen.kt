@@ -177,6 +177,7 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.themedButtonFill
 import com.curio.app.ui.theme.themedButtonInk
+import com.curio.app.ui.theme.rememberAmbientTransition
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.toHsl
@@ -3929,8 +3930,12 @@ private fun SpinButton(
                     } else {
                         // Gentle idle breathe on the resting die — a slow,
                         // even pulse so the settled dice stays alive.
-                        val idleBreathe = rememberInfiniteTransition(label = "diceIdle")
-                        val breathe by idleBreathe.animateFloat(
+                        // v454 — ambience, so Lite mode rests it at zero. The
+                        // orbit below is left alone: that one reports the
+                        // shuffle in progress, and losing it would be the
+                        // app lying about what it is doing.
+                        val idleBreathe = rememberAmbientTransition("diceIdle")
+                        val breathe by (idleBreathe?.animateFloat(
                             initialValue = 0f,
                             targetValue = 1f,
                             animationSpec = infiniteRepeatable(
@@ -3938,7 +3943,7 @@ private fun SpinButton(
                                 repeatMode = RepeatMode.Reverse
                             ),
                             label = "diceIdleBreathe"
-                        )
+                        ) ?: remember { mutableFloatStateOf(0f) })
                         CurioIcon(
                             CurioIcons.Casino, null,
                             tint = glyphInk,

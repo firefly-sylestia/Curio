@@ -106,7 +106,27 @@ fun canUseLiquidGlass(@Suppress("UNUSED_PARAMETER") context: Context): Boolean =
  * silently nothing.
  */
 fun isLiquidGlassRequested(): Boolean =
-    AppPreferences.liquidGlassPillsState
+    AppPreferences.liquidGlassPillsState && isLiteGlassAllowed
+
+/**
+ * v454 — LITE MODE holds the glass switch down too.
+ *
+ * Refraction is the single most expensive thing this app draws: a per-frame
+ * blur + lens pass over a live capture of the content behind the pill (and
+ * every level of a glass stack pays its own). Lite mode exists so a weaker
+ * phone can keep up, and every glass surface is optional decoration around
+ * content that is fully readable without it — so the gate lives HERE, at the
+ * one question every glass site already asks ([isLiquidGlassRequested]),
+ * rather than at 33 call sites that would each have to remember it.
+ *
+ * Only the PASS is skipped, never the pill: each site's non-glass branch is
+ * the solid elevated fill it had before glass ever existed (that is what the
+ * toggle being OFF has always done), so nothing vanishes and no layout moves
+ * — the surfaces simply stop being translucent. The switch in Appearance is
+ * untouched, so leaving Lite mode restores exactly the glass that was chosen.
+ */
+private val isLiteGlassAllowed: Boolean
+    get() = !AppPreferences.liteModeState
 
 /**
  * Whether the glass treatment is active (toggle ON, Android 12+, AND
@@ -118,7 +138,7 @@ fun isLiquidGlassRequested(): Boolean =
  * once by CurioNavHost. Falls back to SDK check only if context unavailable.
  */
 fun isLiquidGlassPillsActive(): Boolean {
-    if (!AppPreferences.liquidGlassPillsState) return false
+    if (!isLiquidGlassRequested()) return false
     if (android.os.Build.VERSION.SDK_INT < 31) return false
     val ctx = CurioGlassPills.appContext
     return if (ctx != null) canUseLiquidGlass(ctx) else true

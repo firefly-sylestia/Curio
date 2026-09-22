@@ -160,6 +160,8 @@ object CurioIcons {
     const val Pause = "pause"
     const val Stop = "stop"
     const val Timer = "timer"
+    // v454 — Lite mode's row in Appearance.
+    const val Bolt = "bolt"
     const val KeyboardArrowDown = "keyboard_arrow_down"
     const val KeyboardArrowUp = "keyboard_arrow_up"
     const val ArrowUpward = "arrow_upward"
