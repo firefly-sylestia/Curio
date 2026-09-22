@@ -1178,10 +1178,6 @@ private fun ThemeModeChip(
     }
 }
 
-/** v23 — the search-engine step: which engine the Explore button opens in
- *  the browser. Mirrors the theme step's ink-glass chip language. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
 /**
  * v461 — THE ONLINE STEP.
  *
@@ -1271,6 +1267,13 @@ private fun OnlineSlide(onSignIn: () -> Unit) {
     }
 }
 
+// ── v461 — SEARCHSLIDE'S OWN DOC AND ANNOTATIONS, BACK ON SEARCHSLIDE ───────
+// The online step was inserted above this function, and the insertion took the
+// three lines that had been sitting here (`@OptIn`, `@Composable` and the v23
+// doc) with it — the v458 trap again: **an annotation binds to the next
+// DECLARATION**, so a block inserted between an annotation and its function takes
+// the annotation. They are written here, with the step above them.
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SearchSlide() {
     val context = LocalContext.current

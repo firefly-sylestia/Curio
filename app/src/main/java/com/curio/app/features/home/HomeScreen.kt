@@ -3659,9 +3659,7 @@ private fun DrawerBrainStat(
 /** v174 — the drawer hero's celestial palette: a dreamy pre-dawn sky. Light
  *  mode is a pale seafoam gradient with deep seafoam ink; dark mode is a
  *  deep twilight teal with warm cream ink ("looking at a peaceful sky just
- *  before sunrise"). Returns (skyTop, skyBottom, readableInk). */
-@Composable
-/**
+ *  before sunrise"). Returns (skyTop, skyBottom, readableInk). *//**
  * v460 — THE ONE SHAPE A GLOW ON THIS SURFACE MAY HAVE.
  *
  * Every light in the drawer's sky (the wash the whole map stands in, and each
@@ -3719,6 +3717,17 @@ private const val GlowReach = 0.72f
 /** How finely an eased glow brush is sampled (see [glowStops]). */
 private const val GlowSteps = 18
 
+// ── v461 — THE ANNOTATION BELONGS TO THIS FUNCTION AND MUST STAY HERE ──────
+//
+// v460's own edit put its helper's doc ABOVE this line, which pushed the
+// `@Composable` that had been sitting here down onto `glowStops` — the v458 trap
+// repeating verbatim: **`@Composable` binds to the next DECLARATION, and a KDoc
+// block in between is not a barrier**. The build said so plainly ("Functions
+// which invoke @Composable functions must be marked with the @Composable
+// annotation" at this function, plus two "@Composable invocations can only happen
+// from the context of a @Composable function" where `glowStops` is called from
+// `remember { }`). Read this line before inserting anything above it.
+@Composable
 private fun drawerSkyColors(): Triple<Color, Color, Color> {
     return if (isCurioDarkTheme()) {
         Triple(Color(0xFF12313A), Color(0xFF1D4750), Color(0xFFF4F1E7))
