@@ -28,6 +28,10 @@ from the state rather than from memory.
 - **The ISBN itself** stays everywhere a lens was never needed: `BookCoverFetch`'s keyless Google Books search still resolves a book's ISBN for the LibraryThing/Open Library cover row, and the source lab still probes those URLs. Only the camera path to an ISBN is gone.
 - **`CurioIcons.Screenshot`** ("photo_camera") stays — it is a glyph in the category-icon pool, not the scanner's.
 
+### 0.4 The red build that was waiting on the last round (fixed before answering)
+
+The single quick `gh run list` before this push found the run for §52's second commit (`b80785de`) **failed**. It was §52's own defect, and it was one line of placement: a `@Composable` sat between `PersonalChipsRow`'s KDoc and the snapshot object's KDoc, so it **bound to `internal object PersonalShelfSnapshot`** (*"This annotation is not applicable to target 'standalone object'"*) and left the row **unmarked** — which cascaded into eight *"@Composable invocations can only happen from the context of a @Composable function"* errors under it, the first at the `backdrop` default, because a default expression in a `@Composable` function is a composable context. The object keeps the v457 doc, the row gets its own doc and its annotation back, and the same shape (**an annotation whose next line is a KDoc**) was then searched for across the tree: none left. The scanner removal went out first (`f4bafcdb`) and this fix carries the previous round's features to a green build.
+
 ### 0.3 Still open from the previous request (§52)
 
 - The star map's glow, twinkle and arrival are CI-green, but **the glow itself is the member's to walk on a device**.

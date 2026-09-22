@@ -301,20 +301,6 @@ private fun CreateEntryOption(
 }
 
 /**
- * The Home row: what the member is writing, as chips — the newest journals under
- * the Pages door, the books under My shelf — a fixed-height row that never
- * reflows as the library grows.
- *
- * v413 — NO `onWrite` PARAMETER ANY MORE. It existed for the empty state's one
- * chip ("No pages yet / Start your first one", which opened the writing sheet),
- * and that chip is a row of days now, each opening the journal on its own date.
- * The writing sheet keeps its real door: Home's floating "+"
- * (`PersonalCreateLauncher` → `writeSheetOpen`), which is where a member actually
- * starts a page. The parameter was deleted with its only caller rather than left
- * behind as a dead one.
- */
-@Composable
-/**
  * v457 — WHAT THE WRITING PAGES PAINT ON THEIR FIRST FRAME.
  *
  * The member: *"many ui elements have loading unloading behaviors
@@ -340,6 +326,20 @@ internal object PersonalShelfSnapshot {
     @Volatile var books: List<PersonalBookEntity> = emptyList()
 }
 
+/**
+ * The Home row: what the member is writing, as chips — the newest journals under
+ * the Pages door, the books under My shelf — a fixed-height row that never
+ * reflows as the library grows.
+ *
+ * v413 — NO `onWrite` PARAMETER ANY MORE. It existed for the empty state's one
+ * chip ("No pages yet / Start your first one", which opened the writing sheet),
+ * and that chip is a row of days now, each opening the journal on its own date.
+ * The writing sheet keeps its real door: Home's floating "+"
+ * (`PersonalCreateLauncher` → `writeSheetOpen`), which is where a member actually
+ * starts a page. The parameter was deleted with its only caller rather than left
+ * behind as a dead one.
+ */
+@Composable
 fun PersonalChipsRow(
     navController: NavController,
     /**
