@@ -69,6 +69,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.compose.DefaultNavTransitions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -186,6 +187,15 @@ import com.curio.app.ui.theme.sharedAxisZEnter
 import com.curio.app.ui.theme.sharedAxisZExit
 import com.curio.app.ui.theme.sharedAxisZPopEnter
 import com.curio.app.ui.theme.sharedAxisZPopExit
+// v455 phase 2 — the SEEKED pop (navigation 2.10's predictive parameters):
+// the same shapes as the pops above, on the linear curve, so the back gesture
+// scrubs the page under the finger instead of playing a fixed clip.
+import com.curio.app.ui.theme.predictivePopEnterFade
+import com.curio.app.ui.theme.predictivePopEnterX
+import com.curio.app.ui.theme.predictivePopEnterZ
+import com.curio.app.ui.theme.predictivePopExitFade
+import com.curio.app.ui.theme.predictivePopExitX
+import com.curio.app.ui.theme.predictivePopExitZ
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -1034,6 +1044,50 @@ fun CurioNavHost(
                             animationSpec = tween(CurioMotion.Durations.Pop, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Pop))
                     }
+                }
+            },
+            // ── v455 phase 2 — THE SEEKED POP ─────────────────────────────
+            //
+            // A predictive-back gesture SAMPLES its transition at the finger's
+            // own progress (navigation 2.10's predictive hooks). Felicity's
+            // rule is exactly this: `LinearInterpolator` while the animator is
+            // being seeked, `DecelerateInterpolator` when it runs free — so
+            // these two lambdas repeat the pop shapes above on the linear
+            // `Track` curve, and the released pop keeps the `Settle` curve.
+            // The result is a page that moves 1:1 with the hand and then
+            // settles, instead of one that runs ahead of it and then waits.
+            //
+            // With the motion system OFF the app must behave exactly as it did
+            // — which is what the library's own defaults are, so they are what
+            // is handed back (`DefaultNavTransitions`, the same object the
+            // parameters default to).
+            predictivePopEnterTransition = { swipeEdge ->
+                if (!curioMotionSystemOn) {
+                    DefaultNavTransitions.predictivePopEnterTransition.invoke(this, swipeEdge)
+                } else when {
+                    // The same classification as `popEnterTransition` above:
+                    // the shared-element routes fade, the modal routes come
+                    // back along Z, everything else drifts.
+                    isTabSwitch(initialState, targetState) -> predictivePopEnterFade()
+                    initialState.destination.route == CurioRoutes.REVEAL -> predictivePopEnterFade()
+                    isPetDesignerRoute(initialState) -> predictivePopEnterFade()
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        predictivePopEnterFade()
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> predictivePopEnterZ()
+                    else -> predictivePopEnterX(swipeEdge)
+                }
+            },
+            predictivePopExitTransition = { swipeEdge ->
+                if (!curioMotionSystemOn) {
+                    DefaultNavTransitions.predictivePopExitTransition.invoke(this, swipeEdge)
+                } else when {
+                    isTabSwitch(initialState, targetState) -> predictivePopExitFade()
+                    initialState.destination.route == CurioRoutes.REVEAL -> predictivePopExitFade()
+                    isPetDesignerRoute(initialState) -> predictivePopExitFade()
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        predictivePopExitFade()
+                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> predictivePopExitZ()
+                    else -> predictivePopExitX(swipeEdge)
                 }
             }
         ) {

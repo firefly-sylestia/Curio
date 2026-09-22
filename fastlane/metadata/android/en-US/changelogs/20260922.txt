@@ -1,4 +1,7 @@
 ADD:
+- Experiments: "Smoother transitions" now seeks — the back gesture moves the page with your finger and only settles when you let go, instead of playing a fixed clip; and the reader's sheets (the dictionary, the ⋯ menu, notes, highlights, contents) open on the same clock and curve as a screen, so a sheet and a page arriving read as one app.
+
+ADD:
 - Experiments: "Smoother transitions" — a new way for the app's screens to move, ported from Felicity: a page drifts a quarter of the screen while the two cross-fade (a hand-off, not a slide), a modal-style page comes forward out of depth, peer switches cross-fade, and the BACK GESTURE seeks the animation under your finger instead of playing a fixed clip. It replaces the app's older page motion while it is on; the old feel returns the moment you turn it off. Off by default, under Experiments → Motion.
 
 FIX:

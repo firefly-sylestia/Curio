@@ -107,6 +107,15 @@ object CurioMotionSystem {
     const val CHANGE_MS: Int = 400
 
     /**
+     * The slow end of the clock (phase 3): the largest thing a surface can do
+     * — a full-height sheet, a screen's worth of content settling. Felicity
+     * has no third duration; this is the gap between its 300 and 500 stretched
+     * to something a *panel* can travel in, and it stays inside the same curve
+     * so it is the same language, only longer.
+     */
+    const val SLOW_MS: Int = 600
+
+    /**
      * `DecelerateInterpolator(3f)` — Android computes
      * `1 - (1 - t)^(2 * factor)`, so factor 3 is `1 - (1 - t)^6`: a hard,
      * fast opening move that spends most of its time arriving. That curve is
@@ -114,6 +123,25 @@ object CurioMotionSystem {
      * 500ms nav does not read as slow.
      */
     val Settle: Easing = Easing { t -> 1f - (1f - t).let { it * it * it * it * it * it } }
+
+    // ── Phase 3 — PANELS (a sheet is a screen that does not change route) ──
+
+    /**
+     * How long a panel takes to arrive: the same clock as a screen, because a
+     * sheet IS a screen's worth of content coming into view. Lite mode's twin
+     * is shorter, like [NavMs].
+     */
+    val PanelEnterMs: Int
+        get() = if (isLiteMode) 320 else NAV_MS
+
+    /**
+     * How long a panel takes to leave. Deliberately shorter than the arrival:
+     * a member who dismissed a sheet has already decided, and the app should
+     * not hold the page hostage to a 500ms goodbye (the same reasoning behind
+     * the app's own enter/exit pair).
+     */
+    val PanelExitMs: Int
+        get() = if (isLiteMode) 200 else 300
 
     /**
      * The seeked curve (Felicity's `LinearInterpolator` branch): when a
@@ -201,6 +229,71 @@ fun sharedAxisZPopExit(): ExitTransition =
     ) + fadeOut(
         animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Settle),
     )
+
+// ── The SEEKED pop (phase 2) ───────────────────────────────────────────
+//
+// Felicity's fourth rule, wired at last: while a gesture is driving the
+// transition, progress must be the FINGER's progress — its own
+// `getProgress()` swaps `DecelerateInterpolator` for `LinearInterpolator` the
+// moment the animator is being seeked. Compose Navigation exposes exactly that
+// seam (navigation 2.10's `predictivePopEnterTransition` /
+// `predictivePopExitTransition`, which are sampled by the back gesture's own
+// progress), so these six factories repeat the pop shapes of X, Z and F with
+// [CurioMotionSystem.Track] instead of [CurioMotionSystem.Settle].
+//
+// The shapes are NOT duplicated logic — they are the same shapes, and the two
+// must stay in step: a seeked pop that drifted a different distance from the
+// released one would visibly jump the moment the finger let go. If a shape
+// changes, change it in both places.
+//
+// `swipeEdge` is the gesture's own edge (0 = the left edge, 1 = the right),
+// which is the only thing that says WHICH way the page has to leave: a
+// left-edge swipe drags the page to the right, so it exits as an X with
+// `forward = false` and the page underneath comes from the left.
+
+private fun edgeForward(swipeEdge: Int): Boolean = swipeEdge == 1
+
+/** The page on top, leaving toward the edge being swiped. */
+fun predictivePopExitX(swipeEdge: Int): ExitTransition =
+    slideOutHorizontally(
+        targetOffsetX = { full ->
+            val d = (full * CurioMotionSystem.DRIFT).toInt()
+            if (edgeForward(swipeEdge)) -d else d
+        },
+        animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track),
+    ) + fadeOut(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
+
+/** The page underneath, arriving from the other side. */
+fun predictivePopEnterX(swipeEdge: Int): EnterTransition =
+    slideInHorizontally(
+        initialOffsetX = { full ->
+            val d = (full * CurioMotionSystem.DRIFT).toInt()
+            if (edgeForward(swipeEdge)) d else -d
+        },
+        animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track),
+    ) + fadeIn(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
+
+/** A modal-style screen, seeked: it shrinks away as the finger moves. */
+fun predictivePopExitZ(): ExitTransition =
+    scaleOut(
+        targetScale = CurioMotionSystem.SCALE_IN,
+        animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track),
+    ) + fadeOut(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
+
+/** The page under a modal-style screen, seeked. */
+fun predictivePopEnterZ(): EnterTransition =
+    scaleIn(
+        initialScale = CurioMotionSystem.SCALE_OUT,
+        animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track),
+    ) + fadeIn(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
+
+/** A peer hand-off, seeked. */
+fun predictivePopExitFade(): ExitTransition =
+    fadeOut(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
+
+/** A peer hand-off, seeked, arriving. */
+fun predictivePopEnterFade(): EnterTransition =
+    fadeIn(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Track))
 
 // ── Shared axis F: the peer fade ───────────────────────────────────────
 //

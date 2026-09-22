@@ -39,7 +39,8 @@ by the finger.** Not a slide, not a bounce.
 | Shared axis **Z** | `sharedAxisZEnter/Exit`, `sharedAxisZPopEnter/PopExit`; used by `isDetailRoute` / `isPopScreenRoute` | **shipped** |
 | Shared axis **F** (fade) | `sharedAxisFadeEnter/Exit`; tab switches, the settings family (the rail's pill is the shared element), Topic Reveal, the Pet Designer, splash → home | **shipped** |
 | The settle curve | `CurioMotionSystem.Settle` = `1 − (1−t)⁶` | **shipped** |
-| The **seeked** curve | `CurioMotionSystem.Track` = linear — handed to navigation's predictive-pop parameters in phase 2 | **token shipped, not yet wired** |
+| The **seeked** curve | `CurioMotionSystem.Track` = linear — handed to navigation's predictive-pop parameters (`predictivePop*X/Z/Fade`) | **shipped (phase 2)** |
+| Panels (phase 3) | `PanelEnterMs` / `PanelExitMs` on `Settle`, adopted by the reader's `ReaderSheetFrame`; Material's own sheets wait for M3 1.5 | **part shipped** |
 | Item ADD | `Modifier.curioItemIn(key, order)` — drawn in the draw phase, staggered | **shipped**, adopted on Home's recents rows |
 | Item REMOVE | not ported (see §5) | — |
 | `FlipItemAnimator` | not ported (see §5) | — |
@@ -81,21 +82,49 @@ by the finger.** Not a slide, not a bounce.
 `CurioMotionSystem.kt` + the four NavHost transitions + the reveal stand-down + the
 Experiments switch + the item-entrance primitive on Home's recents.
 
-**Phase 2 — the predictive-pop overload (NEXT, needs a dependency bump).**
-`navigation-compose` 2.10.0 added `predictivePopEnterTransition` /
-`predictivePopExitTransition`. Wiring them means passing the same X/Z shapes with
-`easing = CurioMotionSystem.Track` (linear), which is exactly Felicity's
-"linear while seeked" rule — today the gesture seeks the *settle* curve, so the
-content moves ahead of the finger at the start of the drag.
-**Before bumping:** the version catalog must move `navigationCompose` 2.9.8 → 2.10.1
-*and* the pairing with the Compose BOM (`composeBom = 2026.05.01`) has to be checked —
-a nav library newer than the BOM can link against compose APIs the runtime does not
-have, which fails on a device and not in CI. Verify on a device before shipping.
+**Phase 2 — the predictive-pop overload (SHIPPED, v455).**
+`navigation-compose` moved 2.9.8 → **2.10.1** and the NavHost now passes
+`predictivePopEnterTransition` / `predictivePopExitTransition`, whose lambdas repeat the
+X / Z / fade pop shapes on the **linear** `CurioMotionSystem.Track` curve — Felicity's
+"linear while seeked, decelerate when free" rule, at last wired. The gesture therefore
+moves the page 1:1 with the finger and only *settles* on release. With the experiment
+OFF the lambdas hand back `DefaultNavTransitions.predictivePopEnterTransition` /
+`…ExitTransition` (the library's own defaults — exactly the behaviour of not passing
+them).
+**The pairing was verified before the bump** (this is the part that has to be right):
+`navigation-compose:2.10.1` declares `compose.animation/ui/runtime 1.10.5`, and the
+BOM `composeBom = 2026.05.01` pins **1.11.2** — the resolved compose is *newer* than the
+library asks for, which is the safe direction (the reverse links against APIs the
+runtime does not have, and that fails on a device, not in CI). The API names and
+signatures were read from `navigation-compose`'s own public API surface: the predictive
+parameters are `AnimatedContentTransitionScope<NavBackStackEntry>.(swipeEdge: Int) ->
+EnterTransition/ExitTransition`.
 
-**Phase 3 — sheets and dialogs.** A sheet is a screen that does not change route.
-Felicity's Z is the natural fit (depth, not sideways travel) and this is where the app
-still uses per-sheet durations. Do it one sheet family at a time, and keep
-`CurioMotion`'s pill clock for the *furniture inside* the sheet.
+**Phase 3 — sheets and dialogs (PART SHIPPED, v455; the rest is GATED ON MATERIAL 3).**
+A sheet is a screen that does not change route.
+
+* **Shipped:** the panel clock — `CurioMotionSystem.PanelEnterMs` (= `NavMs`, so a sheet
+  and a screen arrive together) and `PanelExitMs` (deliberately shorter: a member who
+  dismissed a sheet has decided), both on the `Settle` curve. The reader's
+  `ReaderSheetFrame` is re-timed with them — the app's largest custom panel family
+  (dictionary, ⋯ menu, notes, highlights, contents, marks) — while its *structure* is
+  untouched: it still travels by its own measured height, and a finger on the sheet is
+  still never interpolated. OFF keeps the pill clock's 190/130ms pair, which was tuned
+  for small floating pills.
+* **GATED, and the exact blocker:** the app has ~140 `ModalBottomSheet` call sites whose
+  show/hide motion we do **not** own — Material 3 animates them itself through
+  `MaterialTheme.motionScheme` (`ModalBottomSheet.kt` asks for `DefaultSpatial` /
+  `FastEffects`). Handing the theme a scheme of ours would re-time every one of them at
+  once, in one line, with no call site touched. **In Material3 1.4.0 (this BOM)
+  `MotionScheme`, `LocalMotionScheme`, `MaterialExpressiveTheme` and the
+  `MaterialTheme(motionScheme = …)` parameter are all `internal`** — the public API is
+  1.5+, and 1.5 is not stable yet (1.5.0-alpha28 at the time of writing).
+  **When M3 1.5 goes stable:** write the scheme (six methods; each a `tween` on
+  `CurioMotionSystem.Settle` at the 300 / `NavMs` / `SLOW_MS` clocks, spatial and
+  effects on the *same* clock so a panel and its scrim arrive as one object), pass it in
+  the one `MaterialTheme(...)` call in `CurioTheme` when the experiment is on, and hand
+  `MotionScheme.standard()` over when it is off. Do not reach for 1.5.0-alpha to get
+  this early: it is the app's top-level theme.
 
 **Phase 4 — the item animators app-wide.** `curioItemIn` is on Home's recents only.
 Adopt it on the Cabinet grid, the journals list and the topic database, then decide

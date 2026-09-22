@@ -178,6 +178,10 @@ import com.curio.app.ui.components.rememberCurioGlassScreen
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
+// v455 phase 3 — the reader's sheets take the motion system's clock and curve
+// when the experiment is on (see the note in [ReaderSheetFrame]).
+import com.curio.app.ui.theme.CurioMotionSystem
+import com.curio.app.ui.theme.curioMotionSystemOn
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
@@ -5437,11 +5441,29 @@ private fun ReaderSheetFrame(
     // (The cap stays as the fallback for the one frame before measurement, when
     // there is no height to travel by yet.)
     var measuredHeight by remember { mutableIntStateOf(0) }
+    // ── v455 phase 3 — A SHEET IS A SCREEN THAT DOES NOT CHANGE ROUTE ─────
+    //
+    // With the motion system on, this panel's clock and curve come from it
+    // instead of the pill clock: the same `1 − (1−t)⁶` the screens move on, at
+    // the same 500ms, so opening a sheet and opening a page read as one app.
+    // The pill clock's own 190/130ms pair stays the one used when the
+    // experiment is off — those numbers were tuned for small floating pills, and
+    // a panel is not a pill.
+    //
+    // Note what is NOT here: the sheet's STRUCTURE. It still travels by exactly
+    // its own measured height (v439's fix) and the drag still drives `drag`
+    // directly with no clock at all — a finger on the sheet must never be
+    // interpolated. Only the released motion is re-timed.
+    val enterMs = if (curioMotionSystemOn) CurioMotionSystem.PanelEnterMs else CurioMotion.ENTER_MS.toInt()
+    val enterEase = if (curioMotionSystemOn) CurioMotionSystem.Settle else CurioMotion.Enter
+    val exitMs = if (curioMotionSystemOn) CurioMotionSystem.PanelExitMs else CurioMotion.EXIT_MS.toInt()
+    val exitEase = if (curioMotionSystemOn) CurioMotionSystem.Settle else CurioMotion.Exit
+    // The spring-back of an abandoned pull keeps its own OFF-branch curve
+    // (`Enter`, exactly as it shipped) — which is why this is a third value
+    // rather than a reuse of `exitEase`.
+    val settleEase = if (curioMotionSystemOn) CurioMotionSystem.Settle else CurioMotion.Enter
     LaunchedEffect(Unit) {
-        appear.animateTo(
-            1f,
-            tween(durationMillis = CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
-        )
+        appear.animateTo(1f, tween(durationMillis = enterMs, easing = enterEase))
     }
     var drag by remember { mutableFloatStateOf(0f) }
     // ── v442 — A SHEET SHUTS THE WAY A SHEET SHUTS EVERYWHERE ────────────
@@ -5484,10 +5506,7 @@ private fun ReaderSheetFrame(
         if (closing[0]) return
         closing[0] = true
         scope.launch {
-            appear.animateTo(
-                0f,
-                tween(durationMillis = CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)
-            )
+            appear.animateTo(0f, tween(durationMillis = exitMs, easing = exitEase))
             onDismiss()
         }
     }
@@ -5511,7 +5530,10 @@ private fun ReaderSheetFrame(
         }
         scope.launch {
             val anim = Animatable(drag)
-            anim.animateTo(0f, tween(durationMillis = CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)) {
+            // v455 — the spring-back of an abandoned pull rides the same clock
+            // as the sheet itself (see `exitMs`/`exitEase` above), so a pull
+            // that comes back and a pull that shuts it read as one gesture.
+            anim.animateTo(0f, tween(durationMillis = exitMs, easing = settleEase)) {
                 drag = value
             }
         }

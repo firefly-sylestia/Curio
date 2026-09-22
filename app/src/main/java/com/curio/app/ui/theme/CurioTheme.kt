@@ -588,6 +588,17 @@ fun CurioTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        // v455 phase 3 — NO `motionScheme` HERE, AND WHY (MOTION_PLAN.md §4).
+        //
+        // Material 3 resolves a component's timing through the theme's motion
+        // scheme, so handing one over would re-time every ModalBottomSheet
+        // (~140 call sites), dialog, chip and menu in the app at once. In
+        // **Material3 1.4.0** (this BOM) `MotionScheme`, `LocalMotionScheme`,
+        // `MaterialExpressiveTheme` and this very `motionScheme` parameter are
+        // all `internal` — the public API arrives in 1.5, which is not stable
+        // yet (1.5.0-alpha28 at the time of writing). The scheme itself is
+        // designed and waiting in MOTION_PLAN.md §4 phase 3: when 1.5 lands,
+        // this is the one line it goes in.
         typography  = CurioTypography,
         shapes      = CurioShapes,
         content = {

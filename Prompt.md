@@ -41,6 +41,25 @@ with **no experiment switch** on it. The member's answer: *"It's there — I jus
 5. **THE SWITCH IS AN EXPERIMENT, DEFAULT OFF** (Experiments → Motion → "Smoother transitions"), matching the house rule that a behaviour swap is
    opt-in and one tap from the old feel. The interaction layer (`CurioMotion`'s springs and pill clock) is deliberately NOT moved — see the plan.
 
+### 0.2b Phases 2 and 3 (same request, immediately after)
+
+**The red CL was fixed first:** the v455 run failed on **one line** — a KDoc in `CurioMotionSystem.kt` contained a shell glob
+(`transitions/…*`), and **Kotlin block comments NEST**, so the glob opened a comment that was never closed; every symbol in the file then read
+as unresolved across three files. Fixed, pushed as `96ec47ad`, and the lesson is written into the file itself.
+
+1. **PHASE 2 SHIPPED.** `navigationCompose` 2.9.8 → **2.10.1**, and the NavHost now passes `predictivePopEnterTransition` /
+   `predictivePopExitTransition` — six new `predictivePop*X/Z/Fade` factories repeat the pop shapes on the **linear** `Track` curve (Felicity's
+   "linear while seeked"). Verified BEFORE the bump, from the artefacts: nav 2.10.1 needs compose **1.10.5**, the BOM pins **1.11.2** — the safe
+   direction. OFF hands back `DefaultNavTransitions.*` (the library's own defaults).
+2. **PHASE 3, PART SHIPPED.** The panel clock (`PanelEnterMs` = `NavMs`, `PanelExitMs` shorter, both on `Settle`) and the reader's
+   `ReaderSheetFrame` re-timed with it — structure untouched (it still travels by its own measured height and the drag is still never
+   interpolated), OFF keeping the pill clock's 190/130ms pair.
+3. **PHASE 3, THE PART THAT CANNOT BE DONE YET — WITH THE REASON.** The ~140 `ModalBottomSheet` sites are animated by Material 3 itself via
+   `MaterialTheme.motionScheme`; **in M3 1.4.0 `MotionScheme`, `LocalMotionScheme`, `MaterialExpressiveTheme` and the `motionScheme` parameter are
+   all `internal`** (read from the 1.4.0 sources jar, not the docs), and the public API is 1.5+, still alpha. The scheme is designed in
+   `MOTION_PLAN.md` §4 phase 3 and the one line it goes in is marked in `CurioTheme`. **No Material3 alpha was pulled** — that is the app's
+   top-level theme.
+
 ### 0.2 Open (all in `MOTION_PLAN.md` §4–5)
 
 - **Phase 2** is the predictive-pop overload: `navigationCompose` 2.10's `predictivePopEnterTransition`/`predictivePopExitTransition` with the
@@ -595,6 +614,7 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§50b — "cl failed and then start phase 2 and phase 3" (DONE, v455b — pushed).** The CL failed on a **shell glob inside a KDoc** (Kotlin block comments nest → an unclosed comment → every symbol in `CurioMotionSystem.kt` unresolved elsewhere); fixed and pushed. **Phase 2:** `navigationCompose` 2.9.8 → 2.10.1 and the predictive-pop transitions wired on the linear `Track` curve — the back gesture now seeks the page — with the compose/BOM pairing *verified from the POMs before the bump* (nav wants 1.10.5, the BOM pins 1.11.2) and `DefaultNavTransitions.*` handed back when the experiment is off. **Phase 3:** the panel clock shipped (`PanelEnterMs`/`PanelExitMs` on `Settle`) and the reader's `ReaderSheetFrame` re-timed with it, structure untouched; Material's own ~140 `ModalBottomSheet`s are **gated on Material3 1.5** — in 1.4.0 `MotionScheme`/`LocalMotionScheme`/`MaterialExpressiveTheme`/the `motionScheme` parameter are all internal, and no alpha was pulled for the app's top-level theme. The scheme is designed in `MOTION_PLAN.md` §4 and the one line it wants is marked in `CurioTheme`.
 - **§50 — "the tap and hold is buggy in home screen recent topics … remove the tap and hold action from home screen recents … do a full plan to improve aps transtions oening animations … [the Felicity repo] … make this a new option for smoother animation in experiments, and no old app animation will be used" (DONE, v455 — pushed).** Asked first about the theme grid (it was already live — v453's two-column sheet; the member just had not opened the row) and checked the previous CL (Lite mode: **green**). Then: **Home's recents are tap-only** — the hold is removed rather than re-tuned, and the radial menu with it; and **the motion system** shipped as phase 1 of `app/MOTION_PLAN.md`: shared axis X (a quarter-width drift + crossfade, 500ms), Z for modal pushes, a pure fade wherever a shared element is the animation, the `1 − (1−t)⁶` settle curve, and Felicity's item ADD as `Modifier.curioItemIn`. With the switch on, the old `CurioMotion.Durations` nav branches are unreachable and the screen reveal stands down. **Switch:** Experiments → Motion → "Smoother transitions", default OFF per the house experiment rule; the interaction layer (pill clock) is deliberately untouched and recorded as the next step. Phase 2 (navigation 2.10's predictive-pop overloads + the Compose-BOM pairing check on a device) is deferred with the reason written down.
 - **§49 — "without the liquid glass, the app lags a little … introduce a lite mode off by default … also why the reader liquid glass is on when the option liquid glass is off. what u found in audit save it in n file" (DONE, v454 — pushed with §48).** Lite mode is a *performance* profile (Appearance, default OFF): the glass pass is skipped at the one predicate every glass site already asks, and the decorative clocks park through `rememberAmbientTransition`. Meaning-carrying motion is never gated (that is the *"without making it clanky"* half). A real find on the way: `CurioScrollIndicator`'s drain loop woke every frame on an idle knob; it parks on the delta now. The audit lives in **`app/APP_AUDIT.md`**, split into fixed / UNVERIFIED leads (with the command to re-check each) / not audited at all. The reader's glass with the app switch off: **the member said the glass is fine**, so it was left alone and recorded.
 - **§48 — the browsable dictionary, the theme grid, the chat ink, and a full app audit (DONE, v453 — pushed together with §49).** Asked which list "alphabetical order" meant and where the version badge goes: the answers were *"the
