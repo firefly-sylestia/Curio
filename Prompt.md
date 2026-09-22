@@ -379,6 +379,23 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§41 — download polish, Edit profile in the reader's floating pills, and the dictionary data question (PARTLY DONE, v446).**
+  **Done:** the offline dictionary's download row carries a real 4dp progress bar under its percentage
+  (two boxes, the reader's own ink and accent); Edit profile was re-skinned onto the reader's chrome
+  objects — a round way-back and a floating `Edit profile` capsule at the head, Cancel / Save changes
+  as floating pills of the same 50dp height at the foot, and the spec's supporting sentence moved into
+  the body; and the page gained real badges (`EditBadge`) — ACCOUNT says `Curio` / `Signed out`, the
+  locked EMAIL says `Locked`, and the username's one state line is a badge in error or accent.
+  **Still open (not built):** (1) the dictionary's own PAGE — a route opened from the reader's ⋯ menu
+  and one more entry from Home's `+` sheet, taller/standalone, allowed to search any word; (2) the
+  data swap the member asked for ("wordnet and fuller please") — the two sources were checked and
+  **both are ZIP releases, not the single raw file the current Webster's 1913 door needs**
+  (`globalwordnet/english-wordnet`'s `english-wordnet-*-json.zip`; `fluhus/wordnet-to-json`'s release
+  asset; the full OPTED 1913 is a 183k-article dump). A parser for either must be written against the
+  real bytes, which is its own pass: the honest answer to *"is the current better or are there more
+  better ones"* is that **Webster's 1913 (shipped) is still the cleanest licence-safe single file**,
+  WordNet/OEWN is the one that carries modern vocabulary (attribution required, zip release), and
+  Wordset has the nicest data but **states no licence**, which is why it was not shipped.
 - **§40 — the dock's panels, the reader's sheets, the dictionary's three doors, and the sky (DONE, v445).**
   The marker and bullet panels close themselves (the first cross takes the pick off the line AND shuts
   the panel; typing or moving lines puts it away); a reader sheet rides above the keyboard and its

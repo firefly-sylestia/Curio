@@ -3,6 +3,8 @@ ADD:
 - Reading: the drawer's star map twinkles, and it draws itself in and out with the drawer — the lines run from each star to the one it joins, and the whole sky gathers and lets go with the panel.
 
 FIX:
+- Reading: the offline dictionary's download says how far along it is — the row carries a bar under its percentage, so a slow connection reads as progress instead of a stuck number.
+- Profile: Edit profile wears the reader's floating pills — the page's name rides a floating capsule beside a round way back, and Cancel and Save changes float at the bottom instead of sitting in a band; the account's state, a locked email and a username's verdict are badges in their own colours.
 - Reading: a swipe down really closes a sheet — the body's drag had no end of its own, so the panel sat half-way down for the whole settle wait after your finger was gone; it springs back or shuts the instant you let go.
 - Reading: the dictionary's search box is no longer hidden by the keyboard — a sheet lifts clear of the keys.
 - Reading: copying a passage that runs over a line break keeps the words apart — two lines used to arrive glued together, in the copy, in the dictionary's quoted line and in a saved highlight; a hyphen at the line's end is still one word.

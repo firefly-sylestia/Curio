@@ -81,7 +81,6 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.AvatarCropDialog
-import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioMemberAvatar
 import com.curio.app.ui.components.hasOwnPicture
 import com.curio.app.ui.theme.CurioIcon
@@ -324,12 +323,17 @@ fun ProfileEditScreen(navController: NavController) {
     val edge = wideContentEdgePadding()
     val initial = name.trim().firstOrNull()?.uppercase().orEmpty()
 
-    // The page's own sheet: a person's name, a bio line, and one handle rule —
-    // the numbers are the spec's, not invented here.
-    val titleStyle = MaterialTheme.typography.headlineMedium.copy(
-        fontSize = 31.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 0.sp
+    // v446 — THE PAGE WEARS THE READER'S FLOATING PILLS.
+    //
+    // The member: *"in edit profile make the edit profile be that floating header
+    // pill style lke pdf raeder, and same floating cancel and save pill"*. So the
+    // head is the reader's own object — a 50dp way-back circle and a capsule
+    // carrying the page's name, both lifted 10dp off the paper — and the foot is
+    // two floating pills of the same height rather than a band across the bottom.
+    // The type stays the spec's (quiet, one face, nothing every-heading-bold).
+    val pillTitleStyle = MaterialTheme.typography.bodyMedium.copy(
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold
     )
     val leadStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp)
     val valueStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -360,23 +364,52 @@ fun ProfileEditScreen(navController: NavController) {
                 .statusBarsPadding()
                 .imePadding()
         ) {
-            // ── THE HEAD — a small way back, a large quiet title, one line. ──
-            Column(
-                Modifier
+            // ── THE HEAD — a floating pill row, the reader's own language. ──
+            //
+            // Out is its own circle, the page's name keeps the middle, and both
+            // hover clear of the paper on the same lift, so this page reads as a
+            // reading surface rather than a settings form.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = edge, end = edge, top = EditSpace.XS)
             ) {
-                CurioBackButton(onClick = { navController.popBackStack() })
-                Spacer(Modifier.height(EditSpace.L))
-                Text("Edit profile", style = titleStyle, color = ink)
-                Spacer(Modifier.height(EditSpace.XS))
-                Text(
-                    "Your identity.",
-                    style = leadStyle,
-                    color = muted
-                )
+                Surface(
+                    onClick = { navController.popBackStack() },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 10.dp,
+                    modifier = Modifier.size(50.dp)
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            CurioIcons.ArrowBack,
+                            "Go back",
+                            tint = ink.copy(alpha = 0.85f),
+                            size = 21.dp
+                        )
+                    }
+                }
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 10.dp,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .padding(horizontal = 18.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text("Edit profile", style = pillTitleStyle, color = ink)
+                    }
+                }
             }
-            Spacer(Modifier.height(EditSpace.XL))
+            Spacer(Modifier.height(EditSpace.M))
 
             // ── THE BODY — one column, generous gaps, no boxes in boxes. ──
             Column(
@@ -387,6 +420,10 @@ fun ProfileEditScreen(navController: NavController) {
                     .padding(horizontal = edge),
                 verticalArrangement = Arrangement.spacedBy(EditSpace.XL)
             ) {
+                // The spec's one supporting sentence, kept as a quiet line above
+                // the picture now that the name lives in the pill.
+                Text("Your identity.", style = leadStyle, color = muted)
+
                 // ── The picture ──
                 Column(
                     Modifier.fillMaxWidth(),
@@ -481,7 +518,11 @@ fun ProfileEditScreen(navController: NavController) {
                     Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(EditSpace.S)
                 ) {
-                    EditSectionHeading("Account")
+                    EditSectionHeading(
+                        "Account",
+                        badge = if (account.signedIn) "Curio" else "Signed out",
+                        badgeTint = if (account.signedIn) settingsCardAccentInk() else null
+                    )
                     if (account.signedIn) {
                         val email = account.email
                         if (!email.isNullOrBlank()) {
@@ -516,14 +557,14 @@ fun ProfileEditScreen(navController: NavController) {
                         }
                         val noticeFailed = handleProblem != null || handleFailed
                         if (notice != null) {
-                            Text(
+                            EditBadge(
                                 text = notice,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (noticeFailed) {
+                                tint = if (noticeFailed) {
                                     MaterialTheme.colorScheme.error
                                 } else {
-                                    muted
-                                }
+                                    settingsCardAccentInk()
+                                },
+                                uppercase = false
                             )
                         }
                         // The terms, as a supporting line — never another card.
@@ -664,7 +705,12 @@ fun ProfileEditScreen(navController: NavController) {
                 Spacer(Modifier.height(EditSpace.S))
             }
 
-            // ── THE FOOT — quiet Cancel, solid berry Save, held at the bottom. ──
+            // ── THE FOOT — quiet Cancel and solid berry Save, as FLYING PILLS. ──
+            //
+            // Same 50dp height, same 50% radius roundness and the same lift the
+            // head wears, so leaving and saving belong to the page's own object
+            // family instead of a band across its bottom.
+            //
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -675,12 +721,13 @@ fun ProfileEditScreen(navController: NavController) {
             ) {
                 Surface(
                     onClick = { navController.popBackStack() },
-                    shape = RoundedCornerShape(22.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surface,
                     contentColor = ink,
+                    shadowElevation = 8.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(52.dp)
+                        .height(50.dp)
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
@@ -693,12 +740,13 @@ fun ProfileEditScreen(navController: NavController) {
                 Surface(
                     onClick = { commit() },
                     enabled = !saving,
-                    shape = RoundedCornerShape(22.dp),
+                    shape = RoundedCornerShape(50),
                     color = accent,
                     contentColor = accentInk,
+                    shadowElevation = 8.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(52.dp)
+                        .height(50.dp)
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -891,16 +939,59 @@ private fun EditRule() {
 /** A section's own name: small, spaced, quiet. Never bold — the spec's
  *  "don't make every heading bold; Curio should feel quiet". */
 @Composable
-private fun EditSectionHeading(text: String) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = 1.4.sp
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+private fun EditSectionHeading(
+    text: String,
+    badge: String? = null,
+    badgeTint: Color? = null
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = text.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 1.4.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (badge != null) {
+            Spacer(Modifier.width(8.dp))
+            EditBadge(badge, badgeTint)
+        }
+    }
+}
+
+/**
+ * A SMALL BADGE — the member's *"giving some items proer badge colors etc"*.
+ *
+ * One object for every state a line can be in: a tint at 12% as the fill and the
+ * tint itself for the words, so a "Taken" handle, a locked email and a claimed
+ * username are told apart at a glance without any of them shouting. The text is
+ * uppercased for a LABEL (a section's badge); a state line passes
+ * [uppercase] = false, because a sentence has no business being shouted.
+ */
+@Composable
+private fun EditBadge(
+    text: String,
+    tint: Color? = null,
+    uppercase: Boolean = true
+) {
+    val base = tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = base.copy(alpha = 0.12f),
+        contentColor = base
+    ) {
+        Text(
+            text = if (uppercase) text.uppercase() else text,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.8.sp
+            ),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+        )
+    }
 }
 
 /** The field's own name — NAME, BIO, USERNAME, EMAIL. */
@@ -1006,12 +1097,11 @@ private fun EditFlatValue(label: String, value: String, locked: Boolean = false)
                 modifier = Modifier.weight(1f)
             )
             if (locked) {
-                CurioIcon(
-                    name = CurioIcons.Lock,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 15.dp
-                )
+                // The lock is a BADGE now, not a bare glyph beside a value: the
+                // member asked for proper badge colours, and "Locked" says why
+                // where a padlock alone only says so to the eye that knows.
+                Spacer(Modifier.width(8.dp))
+                EditBadge("Locked")
             }
         }
         Spacer(Modifier.height(12.dp))

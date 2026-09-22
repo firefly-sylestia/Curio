@@ -6452,6 +6452,34 @@ private fun ReaderDictionarySheet(
                         }
                     }
                 }
+                // ── v446 — AND IT SAYS HOW FAR ALONG IT IS ─────────────
+                //
+                // The member's own follow-up: *"show the offline dictionary's
+                // download progress as a real bar"*. A percentage that only
+                // ticks every few hundred kilobytes reads as a stuck number on a
+                // phone connection, so the row carries a bar too — drawn from two
+                // boxes (the track, then the fill sized to the fraction) rather
+                // than a progress-indicator API, so the reader's own paper and
+                // accent decide its look on every Material version this app builds
+                // against.
+                if (downloading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(palette.ink.copy(alpha = 0.10f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(downloadProgress.coerceIn(0f, 1f))
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(50))
+                                .background(palette.accent)
+                        )
+                    }
+                }
             } else if (door == DictionaryDoor.OFFLINE) {
                 Row(
                     modifier = Modifier
