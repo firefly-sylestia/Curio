@@ -496,7 +496,7 @@ internal object ReaderOfflineDictionary {
             out.add(ReaderDictionarySense(label, definitions.toList()))
         }
         out
-    }
+    }.getOrNull()
 
     // ── Plumbing ─────────────────────────────────────────────────────────────
 
