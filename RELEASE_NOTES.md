@@ -63,6 +63,18 @@ A real reader, a writing suite that grew up, and a community room that behaves. 
 - Network is optional: it is used for topic images, optional cover and detail lookups, and the community features you choose to use.
 - Open source on GitHub, free forever.
 
+## 🛠️ Since the 1.3.0 Hotfix
+
+- **Reader polish** - Reworked the dictionary page with a cleaner floating alphabet, adaptive word list sizing, better scrolling, and smoother reader interactions.
+- **Bookshelf shortcuts** - Pinned books can open directly into their files, while shelf holds now offer a clear **View book page** action. Home book chips and shelf cards now follow the same destination rules.
+- **Discovery & posters** - Improved TMDB poster accuracy, including year-aware searches and better fallback handling for films and series.
+- **Themes & glass UI** - Refined named dark themes, contrast and accent ink, profile/settings surfaces, and Home's atmospheric star-map glow.
+- **Share cards** - Improved long-text fitting, 9:16 layouts, resize controls, and typography so generated cards stay readable and balanced.
+- **Writing & voice** - Refined voice-note waveform rendering and removed hidden gesture-only writing tools in favour of visible controls.
+- **Settings & feedback** - Added the Advanced settings area and improved the feedback experience so active forms can appear directly from Home.
+- **Stability** - Fixed multiple reader, writing, navigation, CI, and build issues while tightening interaction behaviour across the app.
+
+
 ## 📲 Install
 
 - Works on Android 8.0 and up.
