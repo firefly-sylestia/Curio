@@ -1,4 +1,9 @@
+ADD:
+- The intro ends with an online step: what signing in gives you (your captures, journals and shelf on another phone, friends, and posting what a topic made you think about), with a Sign in door — and everything in Curio still works without an account.
+- Settings: Home's writing rows each have their own switch — turn the pages row off, the shelf row off, or both, without touching your journals or your books.
+
 FIX:
+- Writing: Android's own Select all takes the whole page — the doors that never reach the app's own toolbar (an IME's select-all, the paste menu) used to take only the row the cursor was in.
 - Films & Incursion: the artwork is the real poster now — with a TMDB key in the build, TMDB answers FIRST instead of being the last door behind the free ones (iTunes' square covers, TVMaze stills and Wikipedia lead images), and a title's own year is searched for rather than ignored, so a remake's poster stops landing on the original. A build with no key is unchanged.
 - Films & Incursion: a credential TMDB refuses no longer takes the posters with it — a read token that has been rotated, expired or pasted into the wrong box is retried once with the API key beside it instead of ending every look-up.
 - Home: the drawer's star map has no edges left in dark mode and is visible in light mode — the sky's glow was four hard stops, which the eye reads as rings on a dark page, and one strength for both themes left it invisible on a light one; the falloff is smooth now and its strength is the theme's own.

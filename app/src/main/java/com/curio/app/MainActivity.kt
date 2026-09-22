@@ -165,6 +165,10 @@ class MainActivity : ComponentActivity() {
         VoskModels.pruneRemovedModels(this)
 
         AppPreferences.initThemeMode(this)
+        // v461 — and Home's two writing rows, from the same place and for the same
+        // reason: a switch that is only read from prefs would leave the row on
+        // screen until the next launch.
+        AppPreferences.initHomeRows(this)
         // Load the persisted explore-session flow state (active session +
         // recently explored/unexplored lists) before any screen reads it.
         ExploreSessionStore.seed(this)

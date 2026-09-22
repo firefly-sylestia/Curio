@@ -122,6 +122,17 @@ object AppPreferences {
     // favorite SETS (unordered), so the timestamps live in their own map.
     private const val KEY_LIKED_AT = "liked_at"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
+
+    // ── v461 — HOME'S TWO WRITING ROWS, EACH ON ITS OWN SWITCH ─────────────
+    //
+    // The member: *"ability to turn off journal shelf etc"*, and to the follow-up
+    // (which row a switch should hide) they answered **"each row its own
+    // switch"** — so these are two flags, not one. Both DEFAULT TRUE: a member
+    // who never touches them has exactly the Home they had before, and turning a
+    // row off hides the row, not the data (the journals and the shelf keep their
+    // own screens and their entry points in Settings).
+    private const val KEY_HOME_PAGES_ROW = "home_pages_row"    // Pages row (default on)
+    private const val KEY_HOME_SHELF_ROW = "home_shelf_row"    // My shelf row (default on)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
     private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
@@ -1225,6 +1236,16 @@ object AppPreferences {
     var themeModeState by mutableStateOf(THEME_LIGHT)
         private set
 
+    // ── v461 — Home's writing rows, as reactive state (see the KEY_HOME_* note
+    //    above). Seeded by [initHomeRows], read by `PersonalChipsRow`, written by
+    //    the two switches in Settings. A flag that is only ever read from prefs
+    //    would leave the row on screen until the next launch, which is exactly
+    //    the "switch does nothing" report this project keeps learning from.
+    var homePagesRowState by mutableStateOf(true)
+        private set
+    var homeShelfRowState by mutableStateOf(true)
+        private set
+
     // Pastel color mode (v7.5) — a user toggle that softens every category
     // accent (fills become pastel with deep-matching ink in light mode,
     // muted deep pastels in dark) and pastel-izes the mixed-deck blends and
@@ -2077,6 +2098,37 @@ object AppPreferences {
     fun setThemeMode(context: Context, mode: String) {
         prefs(context).edit().putString(KEY_THEME_MODE, mode).apply()
         themeModeState = mode
+    }
+
+    // ── v461 — HOME'S WRITING ROWS ──────────────────────────────────────────
+
+    /** Whether Home shows the pages row (true unless the member turned it off). */
+    fun getHomePagesRow(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_PAGES_ROW, true)
+
+    fun setHomePagesRow(context: Context, on: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_PAGES_ROW, on).apply()
+        homePagesRowState = on
+    }
+
+    /** Whether Home shows the shelf row (true unless the member turned it off). */
+    fun getHomeShelfRow(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HOME_SHELF_ROW, true)
+
+    fun setHomeShelfRow(context: Context, on: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HOME_SHELF_ROW, on).apply()
+        homeShelfRowState = on
+    }
+
+    /**
+     * Seeds both flags from prefs at startup — the twin of [initThemeMode], and
+     * called from the same three places (the activity, a backup restore and the
+     * backup manager's own re-seed), so a restored backup's rows are honoured
+     * without a restart.
+     */
+    fun initHomeRows(context: Context) {
+        homePagesRowState = getHomePagesRow(context)
+        homeShelfRowState = getHomeShelfRow(context)
     }
 
     /** Whether the app renders dark right now — resolves "system" via the

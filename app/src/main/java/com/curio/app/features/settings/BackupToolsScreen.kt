@@ -155,6 +155,8 @@ fun BackupToolsScreen(navController: NavController) {
                 try {
                     val result = CurioBackupManager.restore(context, uri)
                     com.curio.app.data.AppPreferences.initThemeMode(context)
+                    // v461 — a restored backup re-seeds Home's rows too.
+                    com.curio.app.data.AppPreferences.initHomeRows(context)
                     backupStatus = true to
                         "Restored ${result.captureCount} capture(s), your settings and sound recordings."
                 } catch (e: Exception) {

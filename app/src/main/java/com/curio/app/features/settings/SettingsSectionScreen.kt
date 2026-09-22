@@ -1181,6 +1181,40 @@ private fun PreferencesSection(highlightKey: String? = null) {
             }
         }
 
+        // ── v461 — HOME'S TWO WRITING ROWS, EACH ON ITS OWN SWITCH ──────
+        //
+        // The member: *"ability to turn off journal shelf etc"* — and, asked
+        // which row a switch should hide, **"each row its own switch"**. They sit
+        // here rather than on the Appearance page because what they change is the
+        // HOME PAGE's shape, and this is the page that already owns how the app
+        // behaves day to day (the explore timer, the reminders, the writing goal).
+        //
+        // No local `remember` state on purpose: the flags are Compose state in
+        // [AppPreferences] itself, so reading them here is already reactive — a
+        // local copy is how a switch and the thing it controls drift apart.
+        SettingsOptionDivider()
+        SettingsRowPulse(highlightKey == "pref-home-pages") {
+            CompactSwitchRow(
+                CurioIcons.Note,
+                "Pages row on Home",
+                "Your journals, under the greeting",
+                AppPreferences.homePagesRowState
+            ) { enabled ->
+                AppPreferences.setHomePagesRow(context, enabled)
+            }
+        }
+        SettingsOptionDivider()
+        SettingsRowPulse(highlightKey == "pref-home-shelf") {
+            CompactSwitchRow(
+                CurioIcons.MenuBook,
+                "Shelf row on Home",
+                "Your books, under the pages",
+                AppPreferences.homeShelfRowState
+            ) { enabled ->
+                AppPreferences.setHomeShelfRow(context, enabled)
+            }
+        }
+
         // ── v440 — THE JOURNAL'S OWN TWO: A GOAL, AND A NUDGE ────────
         //
         // The member's own pick from the settings list: *"Word count goal with a

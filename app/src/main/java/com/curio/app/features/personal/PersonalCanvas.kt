@@ -1589,6 +1589,37 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 }
             }
         }
+        // ── v461 — AND THE PLATFORM'S SELECT ALL MEANS THE PAGE HERE TOO ──────
+        //
+        // The member, of this very surface: *"the way our app does select all rows,
+        // why cant i do the same with select all with android it still sometimes
+        // does only 1 row oy or sometimes misses some rows"*. The app's own door
+        // already means the page (the copy bar's Select all, and the toolbar
+        // override below, which answers `selectPage()` whenever the page is more
+        // than one field). What was left were the doors that never reach the
+        // toolbar at all — an **IME's own Select all**, the **paste menu's**, and a
+        // keyboard's action where the FIELD answers instead of the menu — and all
+        // of them arrive exactly here, as a selection over the row's own words.
+        //
+        // So they are caught at the one place every door has to pass through. The
+        // signature is narrow on purpose, and it is what tells the platform's
+        // action apart from a hand: **the whole row is selected AND the selection
+        // before it was a CARET.** A drag cannot look like that — it reports every
+        // step on the way, so by the time it covers the row the previous selection
+        // is already a range — while Select all arrives in one move from wherever
+        // the caret was sitting. A page that IS one field is left alone, because
+        // there the platform's own selection is the whole entry already (handles,
+        // cut and replace-by-typing included), which is the v389e rule this
+        // finishes rather than replaces.
+        val before = selections[id]
+        val caughtEveryWord = value.selection.min == 0 &&
+            value.selection.max == newText.length &&
+            newText.isNotEmpty()
+        if (caughtEveryWord && before?.collapsed != false && !pageIsOneField()) {
+            selectPage()
+            publish()
+            return
+        }
         selections[id] = value.selection
         compositions[id] = value.composition
         publish()

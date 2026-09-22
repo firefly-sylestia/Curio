@@ -123,12 +123,16 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun OnboardingScreen(navController: NavController) {
-    // Intro slides + theme step + search step + permission setup (v7.100
-    // adds the theme picker; v23 adds the search-engine step).
-    val pagerState = rememberPagerState(pageCount = { OnboardingSlides.size + 3 })
+    // Intro slides + theme step + search step + ONLINE step + permission setup
+    // (v7.100 adds the theme picker; v23 the search-engine step; v461 the online
+    // step — the member: *"add online in intro, with log in in that, and exlaing
+    // you can share your thoughts"*). The online step sits BEFORE setup, because
+    // signing in is something to offer while the member is still being shown
+    // around, and the permission cards are the last thing they should be asked.
+    val pagerState = rememberPagerState(pageCount = { OnboardingSlides.size + 4 })
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val isLastSlide = pagerState.currentPage == OnboardingSlides.size + 2
+    val isLastSlide = pagerState.currentPage == OnboardingSlides.size + 3
 
     // ── Setup-step permission state ───────────────────────────────────
     var notificationGranted by remember { mutableStateOf(hasNotificationPermission(context)) }
@@ -309,6 +313,22 @@ fun OnboardingScreen(navController: NavController) {
                                 }
                             }
                             OnboardingSlides.size + 2 -> {
+                                MorphEntrance {
+                                    OnlineSlide(
+                                        onSignIn = {
+                                            // Finish the intro FIRST (it marks
+                                            // itself complete and hands the member
+                                            // Home), then open the account page
+                                            // over it — so the way back from
+                                            // signing in is the app, never the
+                                            // intro again.
+                                            finishOnboarding(context, navController)
+                                            navController.navigate(CurioRoutes.SETTINGS_ONLINE)
+                                        }
+                                    )
+                                }
+                            }
+                            OnboardingSlides.size + 3 -> {
                                 // Final step: permission setup, not an intro slide.
                                 SetupSlide(
                                     notificationGranted = notificationGranted,
@@ -350,9 +370,9 @@ fun OnboardingScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.Center
             ) {
                 if (!isLastSlide) {
-                    // One pill per intro slide + one for the theme step + one
-                    // for the search step.
-                    (0..OnboardingSlides.size + 1).forEach { index ->
+                    // One pill per intro slide + one for each of the three
+                    // custom steps (theme, search, online).
+                    (0..OnboardingSlides.size + 2).forEach { index ->
                         val selected = pagerState.currentPage == index
                         PageDot(
                             selected = selected,
@@ -1161,6 +1181,96 @@ private fun ThemeModeChip(
 /** v23 — the search-engine step: which engine the Explore button opens in
  *  the browser. Mirrors the theme step's ink-glass chip language. */
 @OptIn(ExperimentalLayoutApi::class)
+@Composable
+/**
+ * v461 — THE ONLINE STEP.
+ *
+ * The member: *"add online in intro, with log in in that, and exlaing you can
+ * share your thoughts"*. The intro explained the deck, the theme and the search
+ * engine, and said nothing about the half of the app that only exists once there
+ * is an account — so a member met the Social tab as a stranger with no idea why
+ * they would want one. It is deliberately the same shape as the theme and search
+ * steps (kicker, headline, one paragraph in the editorial face) with ONE door,
+ * and it never blocks: the screen is skippable like every other step, and
+ * [onSignIn] finishes the intro before it opens the account page, so nothing here
+ * can strand a member inside the tour.
+ */
+@Composable
+private fun OnlineSlide(onSignIn: () -> Unit) {
+    val fill = settingsRoseAccent()
+    val ink = settingsReadableInk(fill)
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        val compact = maxHeight < 380.dp
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "ONLINE",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp
+                ),
+                color = ink.copy(alpha = 0.75f),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
+
+            Text(
+                text = "Sign in and share your thoughts",
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = ink,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
+
+            Text(
+                text = "Everything in Curio works without an account. Sign in and it also \u2014 keep your captures, journals and shelf with you on another phone, add friends, and post what a topic made you think about: a take, a quote or a whole page, to the people who are into the same things.",
+                style = CurioEditorialBody.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 27.sp
+                ),
+                color = ink.copy(alpha = 0.82f),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(if (compact) 14.dp else 20.dp))
+
+            Button(
+                onClick = onSignIn,
+                shape = RoundedCornerShape(26.dp),
+                contentPadding = PaddingValues(horizontal = 26.dp, vertical = 14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = "Sign in",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                text = "You can do this later from Settings \u2192 Online mode",
+                style = MaterialTheme.typography.bodySmall,
+                color = ink.copy(alpha = 0.62f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 @Composable
 private fun SearchSlide() {
     val context = LocalContext.current

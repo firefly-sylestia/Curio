@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
@@ -400,7 +401,11 @@ fun PersonalChipsRow(
     }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        PinnedDoorRow(
+        // v461 — EACH ROW WEARS ITS OWN SWITCH (Settings → Home). The condition
+        // is the whole call, so a hidden row costs one boolean and leaves nothing
+        // behind: no plate, no gap, no empty state — the row below simply moves up
+        // (the Column's `spacedBy(10.dp)` is the only spacing between them).
+        if (AppPreferences.homePagesRowState) PinnedDoorRow(
             backdrop = backdrop,
             door = {
                 DoorChip(
@@ -469,7 +474,7 @@ fun PersonalChipsRow(
                 })
             }
         }
-        PinnedDoorRow(
+        if (AppPreferences.homeShelfRowState) PinnedDoorRow(
             backdrop = backdrop,
             door = {
                 DoorChip(
