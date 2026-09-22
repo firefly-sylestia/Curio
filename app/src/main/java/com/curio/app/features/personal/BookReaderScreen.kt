@@ -6164,7 +6164,6 @@ private sealed interface ReaderLookup {
  * is the one thing a reader wants from a one-word selection. The lookup itself
  * lives in [ReaderDictionary]; this is only its door.
  */
-@Composable
 /**
  * v444 — WHICH DOOR ANSWERS, as the sheet's badge row.
  *
@@ -6191,6 +6190,7 @@ private enum class DictionaryDoor(
     FREE("Free", online = ReaderDictionarySource.FREE)
 }
 
+@Composable
 private fun ReaderDictionarySheet(
     palette: ReaderPalette,
     /** The word to look up, when the selection was one word (blank otherwise). */

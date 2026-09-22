@@ -2567,7 +2567,7 @@ internal fun HomeDrawerContent(
             // -- Drawer hero — the GLASS toolbar bar (style on) or the torn
             // celestial sky banner (rows vanish at the seam) --------------
             if (drawerGlassOn) {
-                DrawerGlassHero(displayName = displayName)
+                DrawerGlassHero(displayName = displayName, open = open)
             } else {
             Box(
                 modifier = Modifier
@@ -2779,7 +2779,9 @@ internal fun HomeDrawerContent(
  *  pill). The menu rows scroll beneath it exactly like the torn hero. */
 @Composable
 private fun DrawerGlassHero(
-    displayName: String
+    displayName: String,
+    /** v444 — the drawer's own state, so the sky plays in with it and out with it. */
+    open: Boolean = true
 ) {
     val context = LocalContext.current
     val dark = isCurioDarkTheme()
