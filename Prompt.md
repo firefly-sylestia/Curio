@@ -6,302 +6,186 @@ from the state rather than from memory.
 
 ---
 
-## 1. The request (this session)
+## 1. The request (this session) — §37
 
-> also remove useless docs node module which not needed, ask me first, and also fix the git
-> files messing look https://github.com/Alain00/blobatar also can we use this profile avatar
-> style for social instead of those bad drawing? read the repo docs etc and how to implement,
-> and then we will go back to the journal dock also the pdf reader the header of the search and
-> back and title floating pill its too much close to the status bar, also separate the search
-> and the back and title pill, search icon is just a circle pill and when opened it merges
-> smoothly with the header for search.
+> the 3 dot for reader its too empty spae and not proper spaced, fix its weird look, add at
+> sunset customisation to be able to set the tiem, the zoom lock is bad it also locks the
+> touches fix it, and also the side tap gesture its slow doesnt work faster receives one ta
+> and doesnt work anymore and doesnt work sometimes fix it, imrpove the discoonary that it
+> suggest work explanation from the selected para, make the word detection better it detects
+> the work even theres a comma or something or a mis type. and still the buttom sheet closing
+> is bad, and the highlight dock is bad fix it too. weird shado and doesnt match the dock,
+> also theupper header animation is clanky
 
-Four asks, one of which (the journal dock) is explicitly for a LATER session.
+Nine things, all on the reading surface:
 
-## 2. Findings before anything was touched
+1. **The ⋯ menu** — too much empty space, badly spaced; fix its weird look.
+2. **Night dim "at sunset"** — the member must be able to SET THE TIME.
+3. **The motion lock** — it also locks the touches.
+4. **The side tap zones** — slow, one tap then dead, sometimes nothing at all.
+5. **The dictionary** — suggest word explanations from the selected paragraph.
+6. **Word detection** — survive a comma, a possessive, a typo.
+7. **The bottom sheet's close** — still bad.
+8. **The highlight dock** — a weird shadow, and it does not match the dock.
+9. **The header's animation** — clanky.
 
-### 2.1 The root-of-repo clutter
+Touched: `features/personal/BookReaderScreen.kt` (11,145 lines), `ReaderDictionary.kt`
+(the lookup itself), `ReaderSettingsScreen.kt` (the second surface that sets the dim).
+`web/` and `desktop/` untouched, per root `AGENTS.md`.
 
-- `node_modules/` at the repo ROOT (876 KB, untracked, ignored by git) holding `iceberg-js`,
-  `jose`, `tslib`.
-- A root `package.json` declaring exactly ONE dependency, `@supabase/server`, which **nothing
-  in the repo imports** — `auth-web/api/*.js` uses plain `fetch`, and `auth-web` has its own
-  `package.json`. Plus BOTH `package-lock.json` and `pnpm-lock.yaml`: two package managers for
-  one unused dependency.
-- In git: `docs/ANALYSIS.md` (a COMMITTED copy of the root `ANALYSIS.md`, which `.gitignore`
-  deliberately keeps out of commits) and `docs/art/svgviewer-output (15).svg` / `(16).svg`
-  (leftover SVG-viewer exports; only `web/`'s `Constellation.tsx` mentions the names in prose).
+## 2. What was actually wrong (found by reading, not by guessing)
 
-### 2.2 Summoning the portrait set
-
-`features/community/SocialAvatar.kt` — 1341 lines: `PORTRAITS` (20 hand-drawn characters) +
-`ICONS` (8 cozy objects), `drawSocialAvatar(style, ring)`, the picker tile
-`AvatarPickerIcon`, and `SocialAvatar(style, …)` called from 11 sites. `profiles.avatar_style`
-is an index into that list, clamped against `SOCIAL_AVATAR_STYLE_COUNT = 28` on every read and
-write. The picker itself appeared in Edit profile (`SocialAvatarPickerRow`) and in
-`CurioAccountIdentityCard` behind `includeAvatarPicker`.
-
-### 2.3 The reader's head
-
-`ReaderTopPill` is a `Surface(shape = RoundedCornerShape(50))` with `.statusBarsPadding()` and
-8dp of vertical padding — and the reader **hides the status bar** (`WindowInsetsCompat.Type.statusBars()`
-is hidden for as long as it is on screen), so that padding collapses to 0 and the pill settles
-8dp from the very edge of the glass. The search glyph lives INSIDE the same capsule as the back
-button and the title, and opening it swaps the whole row for `ReaderSearchBar` with a plain
-slide-down.
+1. **⋯ menu** — v437 gave EVERY reader sheet a 45% floor of the screen
+   (`ReaderSheetFrame.minHeightFraction`). A floor is right for a LIST (it grows, and two
+   kept marks would otherwise read as a broken panel) but the ⋯ grid is six FIXED tiles of
+   the same height whatever happens, so 45% was two thirds empty paper. The tiles' gutter
+   was 8dp, which nearly closed once their labels were the widest thing in the row.
+2. **The dim** — v440's "At sunset" was the phone's own dark theme (`isCurioDarkTheme`).
+   That answers `dimAuto = true/false` and nothing else; the member asked for the time.
+3. **The motion lock** — the guard consumed EVERY event in which any finger had moved at
+   all (`it.position != it.previousPosition`). A finger that taps or holds is never
+   perfectly still, so the first pixel of jitter was consumed; a consumed move cancels
+   `detectTapGestures` (and its pending long press), which is how the chrome could not be
+   brought back, the mark dock could not open and a sweep reported nothing on a locked page.
+4. **The side taps** — the zones were answered by the reading surface's own
+   `detectTapGestures`, which ALSO owns the double tap (`readerDoubleTapZoom`). A detector
+   waiting to see whether a second tap follows cannot answer the first one until the
+   double-tap window passes (⇒ "slow"), and a second tap inside that window was read as the
+   FIRST HALF of a double tap (⇒ "receives one tap and doesnt work anymore"). Where a child
+   claimed the gesture first, nobody heard it (⇒ "doesnt work sometimes").
+5. **The dictionary** — the sheet had a single word field and nothing else: a swept
+   PASSAGE had no word in it, and the hold dock seeded it by picking the passage's first
+   letter-bearing token, which was the reader guessing which word the member meant.
+6. **Word detection** — `define()` asked Wiktionary for the selection VERBATIM, so
+   `"Einstein,"` or `"word."` was asked for as a headword that does not exist, and a typo
+   was a dead end with no spelling offered.
+7. **Sheet close** — the only door out was DISTANCE (108dp of deliberate dragging), so the
+   gesture everyone makes on a sheet (a quick downward flick) dragged a few millimetres and
+   sprang back. The distance was also a long way to pull for a panel a few rows tall.
+8. **The highlight dock** — its fill was `palette.surface` (F5F0E8) floating over
+   `palette.paper` (FBF6EC), about two per cent apart, so the only part of the capsule the
+   eye could see was a shadow spread over pale paper on every side. It is the same defect
+   v441 fixed on the page slider, one surface over.
+9. **The header** — its exit carried THREE transitions at all times (fade + drift +
+   `shrinkHorizontally` toward the right edge), so merely HIDING the chrome collapsed the
+   name capsule into the corner while it was leaving upward.
 
 ## 3. Decisions, all confirmed before editing
 
-Asked four questions (root deletions; which "mess" meant; port vs endpoint for the faces;
-picker + seed). Answers:
+Three questions were asked (the rest had one reading each):
 
-1. Remove the root `node_modules/`, the root `package.json` + both lockfiles,
-   `docs/ANALYSIS.md`, and both `docs/art/svgviewer-output (15|16).svg`.
-2. "The git files messing look" = the root manifest clutter.
-3. **Port blobatar's core to Kotlin** (not the HTTP endpoint) — the recommendation, and the
-   only shape that also serves a notification's off-screen bitmap.
-4. **Remove the portrait picker entirely**, and seed a face from **username if set, else the
-   account id**.
+1. **"At sunset" with a settable time** → the member chose **two times, FROM / UNTIL**
+   (not a preset list, not a single time).
+2. **The dictionary from a selected passage** → **chips + a context line** (chips for the
+   words, and the sentence the answered word stood in quoted beside the meanings).
+3. **The ⋯ sheet** → *"scrink it but dont make it too lose to th buttom"* — a smaller
+   panel, still standing clear of the foot of the glass.
+
+No new feature was added toggleable-or-not: every one of the nine is a fix or a refinement
+of behaviour that already shipped, except the dim's FROM/UNTIL pair, which lives inside the
+existing "At sunset" mode rather than as a new capability of its own (root `AGENTS.md`'s
+"ask: toggleable or not" applies to ADDING a measure).
 
 ## 4. What was built
 
-### 4.1 `features/community/Blobatar.kt` (new, ~950 lines) — the port
+### 4.1 `ReaderDictionary.kt` — the lookup
 
-A faithful Kotlin port of blobatar gen-2's core: `hash.ts` (normalize → murmur3-fmix seed state
-→ per-key streams), `traits.ts`, `color.ts` (OKLCh ↔ sRGB, WCAG luminance, `ensureContrast`,
-the six authored tones, `FLOORS`), `shape.ts` (superellipse / Catmull-Rom blob / rounded polygon
-/ box / droplet taper, each traced straight into a Compose `Path`), `styles/compose.ts`
-(`faceFit` and the shared body/eyes) and `styles/shapes.ts` + `styles/blob.ts` (the ten weighted
-silhouettes and their band table). `BlobatarArt(seed)` resolves and traces ONE face (built in the
-constructor, so a redraw is two `drawPath`s); `blobatarSeed(userId, username)` is the rule.
+- **`headword(raw)`** — one function that turns what the sweep actually caught into the
+  word to ask for: any run of `EDGE_PUNCTUATION` off both ends (both quote families, both
+  dash families, brackets, the sentence's punctuation — never the hyphen or the apostrophe,
+  which are letters' business INSIDE a word) plus the possessive tail (`Einstein's` →
+  `Einstein`, with a three-letter stem minimum so `it's`/`he's` keep their own page).
+  `define()` now asks for `headword(word)`, so a comma or a possessive can no longer make a
+  real word look unknown.
+- **`suggest(term)`** — Wiktionary's own `opensearch` (the same keyless family the
+  definitions come from, so no second service to trust) for the spellings nearest what was
+  asked. Word-shaped answers only, the word asked for is never echoed back, and misses are
+  memoised like the senses are.
+- **`wordsIn(passage)`** — the words a passage is worth asking about: sentence-split
+  (`SENTENCE`), five letters up, `STOP_WORDS` excluded, never the same word twice, capped at
+  `MAX_SUGGESTIONS`. Each carries the sentence it stood in (`ReaderDictionaryWord`).
 
-### 4.2 The verification (the part worth repeating)
+### 4.2 `BookReaderScreen.kt` — the reader
 
-The port could not be compiled by Gradle here, so it was verified directly:
+- **The dictionary sheet** offers the passage's words as chips and quotes the sentence
+  (`readerContextFor`). A miss now asks for the nearest spellings and takes the first that
+  HAS a definition, labelled under "Did you mean" so the member can see which word answered.
+  A one-word selection still arrives ready to look up; a PASSAGE arrives with the field
+  EMPTY, because seeding one of its words would be the reader guessing.
+- **The motion lock wears in** — nothing is consumed until the finger has travelled the
+  touch slop (the same rule the magnified page already used), so on a locked page a tap
+  raises the tools, a hold opens the dock and a sweep can report a word, while a real drag or
+  a second finger is still swallowed whole (consuming is what keeps the page still — an
+  ignored drag would be taken by the column or pager underneath).
+- **`Modifier.readerZoneTaps`** — the side zones answered by their own gesture handler,
+  placed INNERMOST in the chain so it sees the finger lift before the surface's double-tap
+  detector, and it CONSUMES the up it answered so that wait is cancelled: one tap, one page
+  turn, never a zoom. Three guards make it a tap and only a tap: a consumed down (a real
+  control) is skipped, a press past the long-press threshold is the sweep's, and a gesture
+  something else consumed mid-flight never reaches the lift. Wired into all four surfaces
+  (the reflowed text, the PDF column, the PDF page, the paged flow), each with the space its
+  own taps are measured in.
+- **The sheet's close** — the finger's own travel per millisecond is measured on the head's
+  drag AND in the body's nested scroll (`flickPeak`/`flickAt`, plain arrays: nothing draws
+  them), and a throw past `dismissFling` (620dp/s) shuts the sheet without the pull having to
+  reach the distance; the distance itself is 96dp now (was 108). A pull that does not reach
+  either springs straight back on the exit clock, and a re-entrancy guard means the flick and
+  the settle after it cannot both dismiss the same sheet. **No `onPostFling` override** — the
+  velocity handler is a second, engine-versioned way to learn what the finger's clock already
+  says.
+- **The ⋯ menu** passes `minHeightFraction = 0.30f` (still a real panel, clear of the foot),
+  the tile rows get 14dp of air with a wider 10dp gutter between tiles and a breath under the
+  last row.
+- **The highlight dock** wears the reader's own pill body — an OPAQUE
+  `lerp(surface, ink, 0.06f)` fill with a hairline `lerp(surface, ink, 0.16f)` edge, the same
+  28dp radius and 8dp lift the page slider wears (v441). Being opaque, the shadow cannot bleed
+  through it; `animateContentSize` deleted with it (the bar is full width and its height never
+  changes, so it cost a layout pass per frame for nothing).
+- **The header** has one exit per reason: the sideways shrink (toward the End) belongs to the
+  SEARCH opening alone — which is what makes the bar read as growing out of the corner the
+  search icon lives in — and every other exit (a tap on the page hiding the chrome) is the
+  plain pill leave. Both clock on the ENTER clock so the head and the search bar are one
+  movement rather than two panels changing places. The foot and the head are now written as
+  `CurioMotion.pillArrive()` / `pillLeave()` tokens instead of their numbers.
+- **The dim's window** — `ReaderLook.dimFromMinute` / `dimUntilMinute` (minutes since
+  midnight, default 20:00 → 06:00) with `dimWindowContains()` reading a window that runs over
+  midnight as the normal evening case and equal ends as "all day". The reader ticks its clock
+  every 30s while the mode is on (`LaunchedEffect(ReaderLook.dimAuto)`), because a member
+  reading at 19:59 with the dim due at 20:00 would otherwise keep a bright page for minutes.
+  Both new fields are in `rememberKey()` and in the store (`reader_dim_from`/`reader_dim_until`).
+- **`ReaderClockRow` / `ReaderClockDialog`** — one row, one label (`readerClockLabel`, "20:00")
+  and one Material `TimePicker` dialog, `internal` in this file so the appearance sheet and
+  reading settings wear the same pair and can never disagree about what "at sunset" means.
 
-- blobatar's own modules were run under Node (`--experimental-strip-types`) to dump the
-  reference for 43 seeds — three per silhouette (seeds found by scanning `seed-1…seed-40000`)
-  plus the avalanche and NFC cases.
-- The REAL `Blobatar.kt` was copied verbatim with its package renamed and its androidx imports
-  dropped, compiled with a downloaded `kotlinc` against a small recording stub of the Compose
-  types it touches, and dumped the same values.
-- A comparer diffed **430 values — all match**: hue, tone, silhouette, body geometry, every
-  radius, the face region, petals, the droplet taper, both eyes (position, radii, squareness,
-  lean), the three palette hexes after the contrast walks, and the full traced path geometry
-  (compared to the 2-decimal rounding upstream applies to its SVG strings).
+### 4.3 `ReaderSettingsScreen.kt`
 
-This also settled two things by construction: the file **compiles** (so the local functions, the
-visibility and the `min`-shaped names resolve) and the seeds really do avalanche (`alain` vs
-`alaim` are unrelated faces, and NFC-normalised `é` and `e\u0301` agree).
-
-### 4.3 The rest
-
-- `SocialAvatar.kt` rewritten as a thin wrapper (`SocialAvatar(seed, …)`, the presence dot,
-  `drawBlobatar`); the 28-style cast, `AvatarPickerIcon`, `SocialAvatarPickerRow` and
-  `includeAvatarPicker` deleted.
-- All 11 call sites migrated to `blobatarSeed(...)` (`CommunityScreen`, `CommunityCardScreen`,
-  `ModerationScreen`, `CommunityCommentsSheet`, `SocialProfileScreen`, `SocialComponents` ×2,
-  `FriendsScreen`, `DirectMessageScreen` ×3).
-- `SocialNotifications.NotificationAvatars` re-keyed by seed, capped, painting the same
-  `BlobatarArt`.
-- `SocialApi`'s `SOCIAL_AVATAR_STYLE_COUNT` doc rewritten: it is now a BOUND on a retired
-  column, not a count of styles. `avatar_style` itself is deliberately untouched.
-- Reader: `ReaderChromeTopFloor` (18dp) + `Modifier.readerChromeTopInset()` (display cut-out +
-  that floor), worn by the head, the search bar and the pinned page count; `ReaderTopPill` is a
-  `Row` of the name capsule (`weight(1f)`) and a 50dp `CircleShape` search pill; the two states
-  animate as one move (`expandHorizontally(End)` in as the name `shrinkHorizontally(Start)` out).
-- Docs: a v435 section in `app/AGENTS.md`, ADD/FIX/REMOVE bullets in the current changelog.
+The same `ReaderClockRow` pair under the same segment, with the clock dialog hoisted into the
+screen's composable scope (it is a Dialog, not a panel in the column).
 
 ## 5. Checks run
 
-- No Gradle command: this environment forbids compile / build / lint (`AGENTS.md`).
-- **The blobatar port WAS compiled and diffed** — see §4.2. That is stronger than a Gradle
-  compile for this file, because it checks the numbers too.
-- The reader change and the call-site migration were read through by hand; every removed symbol
-  was grepped repo-wide to confirm nothing still references it.
+- **No Gradle command**: this environment forbids compile / build / lint (root `AGENTS.md`).
+  Validation is CI on push.
+- Verified by reading the real definitions before use: `CurioMotion.pillArrive/pillLeave`
+  (`fromTop`), `ReaderSheetFrame`'s parameter list, `ReaderZoneAction`, `readerZoneActionAt`
+  and every call site of `readerZoneTaps`; confirmed `CurioIcons.Schedule` is a real bundled
+  glyph (it is in `historyHeroSymbols()`), that `TimePicker`/`rememberTimePickerState` need no
+  local `@OptIn` (the module opts into `ExperimentalMaterial3Api` in `build.gradle.kts`), and
+  that `waitForUpOrCancellation`'s package is right (`RichTextEditor.kt` imports the same one).
+- **Every new import checked against the file's own use**; `Velocity` was removed with the
+  `onPostFling` override that used it, `SystemClock` added for the flick's clock.
+- **A bracket-balance pass over all three files** (string/comment aware): zero unbalanced
+  brackets, which is the one syntax fault a large hand-edit can hide.
+- Progress persisted in Prompt.md (this file) and to be recorded in `app/AGENTS.md`.
 
-## 6. Still open — the §28 backlog (read this before starting)
+## 6. Still open
 
-Shipped from §28 already: the two build fixes, the marker pens + bullet styles as dock panels,
-leaf/crystal removed, the heart/dash centring, the dock's thickness, the quote/bullet shade
-split, and blobatar's MIT notice. Everything below is NOT done.
-
-1. **The copy box's width and its dead end.** Two reports, one area
-   (`PersonalCanvas.kt`: `PersonalPageEditBar` / `ReachPill` / `ActionPill` / `CopyChip`).
-   (a) "i will have to scroll to see all options" — the box's row is wider than a phone, so
-   the last chips are off-screen. (b) "using cut when selected all removed that line and i cant
-   type anything again in the body, coz i dont get any option to" — cutting the whole page
-   leaves the document with no block to put a caret in, so there is nothing to type into and no
-   visible way back. **The fix must guarantee an editable block after the document empties**
-   (an empty block is the invariant the editor rests on) and focus it.
-2. **The POSITION of the marker glyphs.** I corrected the two shapes that were objectively
-   off-centre (heart, dash), but `drawPersonalMarker` centres on `lineHeight / 2` — the LINE
-   BOX's centre, not the text's visual centre — and the report was "weird positioning not
-   matching with the text". If the whole roster still reads high or low against the words, the
-   fix is that axis, not the shapes. Needs the member to say which way it sits.
-3. **The journal colour does not reach the page or its buttons** — "still the journal page and
-   ts buttons dont get the color by chnaging it". v428 terraced `JournalAccentSheet` →
-   `journalAccent`/`journalPagePainted` → `LocalJournalPagePaint`, and v431 claimed the paint
-   reached all three surfaces; the report says it still does not. Investigate from
-   `JournalAccent.kt` + `LocalJournalPagePaint`'s consumers before changing anything.
-4. **The reader's page scrubber as a small floating control** — "the page scrobble slider it
-   needs to be similair to the dock small floaating without the buttom sheet so its easier to
-   do the page scrbbing faster". Today a tap on the foot pill's count opens `ReaderScrubberSheet`
-   (a bottom sheet). It should be the dock-like pill instead.
-All six are now DONE (see §29 for the last of them), and the member's answers closed each
-ambiguity:
-
-1. **Copy box** — *"two row and hide the dock just show the copy doc when thats on"*. Two rows
-   now (reach above, actions below), nothing scrolls, and the writing dock's `AnimatedVisibility`
-   tests `!editor.pageEditBarOpen`. **The cut-everything dead end is DONE (v438)**: the member's
-   rule (*"Always one empty line to type in"*) is now a state invariant — `publish()` is the one
-   way an edit lands, and `keepLineToTypeIn()` gives the page an empty, focused, caret-bearing
-   line whenever nothing in it can be typed into. Every mutation went through
-   `onDocChanged(doc())` → `publish()` (44 sites), and `removeBlock`'s own duplicate guard was
-   folded into the shared one.
-2. **Marker axis** — answered: **"Too low, below the words"**. `PERSONAL_MARKER_AXIS_LIFT = 0.06f`
-   is applied to `lineHeight` in `drawPersonalMarker` (done).
-3. **The journal's colour** — answered with all three places (paper, dock tools, date/title
-   chrome). Fixed: `journalPaperRaised()` tints toward the page's own colour, the dock lights
-   with `journalDoorAccent(journalAccent)`, and `JournalTopBar` takes the argb as a parameter
-   (it stands OUTSIDE the paint provider). **The page's PAPER still needs "Paint the page too"
-   on — the v429 option was kept deliberately; if the member wants the paper to follow the colour
-   by default, that is a one-line flip and needs their word.**
-4. **The page scrubber** — answered: *"a buttom pill floating at the buttom with the slider and
-   hides when tap on page, also a way to close it"*. `ReaderScrubPill` + `scrubOpen` (done);
-   the sheet and its enum member are gone.
-5. **blobatar's idle animation** — **always on**, and now PORTED: `BlobatarIdle` /
-   `BlobatarPose` (the breathe, bob, blink, glance and eye-wrap loops, from upstream's own seeds)
-   plus `BlobatarClock` + `BlobatarIdleClock()` hosted once at the app root, and
-   `rememberCurioMotionEnabled` for Android's "remove animations". No expressions and no hover —
-   neither exists in Curio.
-6. `SocialApi.updateAvatarStyle` is now unreferenced (dead but harmless); it goes with the
-   `avatar_style` column if the member ever wants that dropped — a schema change, which needs
-   their word. **Both §28 and §29 asked whether the portrait change needs SQL: no. Nothing to
-   paste, and no migration.**
-7. **§29's own asks (the reader's polish)** — the ⋯ grid smaller (68dp tiles, 24dp glyph), the
-   sheets fast (200ms in / 120ms out, an 80ms settle) with `minHeightFraction` keeping the
-   notes/highlights lists a real panel, the head settling on a smooth fade, and the head/search
-   morph sharing one 220ms clock. All done.
-
-## 7. §31 — the plan, decided and ordered (NOT YET BUILT)
-
-The member answered five questions; every decision below is theirs, not a guess.
-**Do these in this order**, because the first two are migrations and a half-done
-migration is worse than none (it is the same "animations are still bad" report).
-
-**STATUS (v439): 7.1 DONE, 7.2 DONE, 7.3 PARTLY DONE, 7.4 and 7.5 and 7.6 NOT BUILT.**
-What landed: the token set (as an EXTENSION of the existing public `CurioMotion`,
-never a rewrite — read 7.1's warning below), `pillArrive()/pillLeave()/popArrive()/
-popLeave()` spent across the reader's head, foot, search, scrubber, selection bar and
-settings page and across the journal's undo pill, mic, copy box, dock, voice capsule
-and pinned line, plus press feedback on `ReaderChromeButton` and `ReaderPillButton`
-(the two controls the reader is actually built from). Still open: 7.4's one
-pill/dock language (the copy box is still two rows), 7.5's one empty state, and 7.6's
-motion lock + Zoom slider removal.
-
-### 7.1 One motion token set (do FIRST — everything else refers to it)
-
-**READ THIS BEFORE TOUCHING IT: `ui/theme/CurioMotion.kt` ALREADY EXISTS AND IS
-PUBLIC.** It holds `Springs.*`, `Durations.*`, `ConfettiParticleCount` and
-`MinSpinTurns`, which ~30 call sites across `CurioAnimations`, `CurioNavHost`,
-`CurioConfetti`, `CurioPressFeedback` and the card components compile against. v439
-extended it; a `write_file` here is how the file got briefly destroyed. Check
-`git status` shows `M` (not `??`) before writing a file you believe is new.
-
-
-A single place (suggested: `ui/theme/CurioMotion.kt`) holding named durations and
-easings — enter (~220ms, `FastOutSlowInEasing`), exit (~140ms, `FastOutLinearInEasing`),
-emphasized (~320ms) — with a documented rule: **no surface may invent its own
-milliseconds.** Today the numbers are scattered: the reader's sheets 200/120, the
-reader's head 220/160, its search 180/140, the journal dock 180-220, the copy box
-160/120, the page slider 170/130. Migrate every one of them.
-
-### 7.2 One arrival for every floating pill (the member's own top pick)
-
-Every floating pill — the reader's head and foot, its search bar, the journal dock,
-the copy box, the page slider, the new motion lock — arrives and leaves the SAME
-way: a fade on the token's clock plus a small settle (6-of-height drift, as the
-head already does). The reader's sheets and chrome are the two the member named as
-still bad, so those are the ones to get right first.
-
-### 7.3 Press feedback everywhere
-
-A small press-squish on the controls that have none: the reader's chrome buttons
-(`ReaderChromeButton`), the ⋯ tiles (`ReaderMenuTile`), the settings rows. The
-journal dock's tools already have it (`expressiveCardPress`-style) — find the one
-helper the journal uses and reuse it rather than writing a second.
-
-**STATUS (v439 final): 7.4 DONE (the copy box), 7.5 DONE (bounded, see below), and the
-two zoomed-gesture bugs from §7.7 FIXED.**
-
-- **7.4** — the copy box is one row with the reach behind a labelled door that grows
-  inside the same pill (the dock's own pattern). See the v439 section in
-  `app/AGENTS.md`.
-- **7.5** — `CurioEmptyLine` (an em dash) is the one bare-list empty state. **Bounded
-  on purpose:** an empty SCREEN keeps its headline/subtext/door and a message that
-  tells the member how to fix the emptiness stays, because both are content rather
-  than a state. Converted: the comments sheet, the card screen's replies, the text
-  history panel.
-- **§7.7's two gesture bugs** — root cause found by inspection, NOT another flag: the
-  page consumed a tap's own wobble as a pan, which cancels `detectTapGestures` (both
-  the tap and a pending long press). `pinchToZoom` now wears in at the touch slop.
-  **Note the drift this exposed:** `readerZoomThisPage`'s doc already promised the slop
-  rule and nothing implemented it.
-
-### 7.4 One pill/dock language
-
-One capsule spec shared by the journal's dock, the copy box, the reader's foot pill
-and the motion lock: the SAME height (46dp), the same radius rule (28dp when the
-pill grows a panel, a real capsule when it does not), the same lift (12dp). **The
-copy box is the member's own example of the failure** (*"the copy paste tool bar two
-row ui is bad and not like that dock ui"*): its two rows are a second toolbar, not
-the dock's one-row-plus-panel shape, so it must be rebuilt as ONE row with its
-actions behind a door that grows INSIDE the pill (`PersonalDockGroup` is the
-existing pattern to copy).
-
-### 7.5 One empty state
-
-The em dash wherever a list is empty — journal list, Cabinet, highlights, notices —
-instead of a sentence each place writes for itself. `ReaderMarksSection` (v438) is
-the first one; find the rest by searching for "Nothing" / "No … yet".
-
-**STATUS (v439 cont.): 7.6 IS DONE.** Built exactly as written below: both Zoom rows
-out, `ReaderLook.motionLock` in (and in `rememberKey()`), the pill on the page's
-bottom-right above the foot, and the guard at the top of `pinchToZoom`'s event loop
-(the one handler every reader gesture passes through) plus `readerDoubleTapZoom`.
-**The two traps it recorded were both kept**: consume movement but never the first
-down, and the flag in `rememberKey()`. Also done in the same pass, and not from
-this plan: the member's blob as their own profile picture (§32).
-
-### 7.6 The motion lock, and the Zoom slider goes
-
-The member: *"in pdf only remove that zoom slider and add the motion lock pill which
-restrits that drag to move and pinch to zoom it locks in the state the user left the
-zoom position"*, then chose **freeze pan AND pinch, and remember it**. So:
-
-- Remove the Zoom row from `ReaderAppearanceSheet` AND `ReaderSettingsScreen`, and
-drop `showZoom` from both signatures and their call sites.
-- `ReaderLook.motionLock: Boolean`, persisted — **and it MUST be added to
-`ReaderLook.rememberKey()` or it will silently never save** (the v434 rule).
-- The pill: floating, PDF only, bottom RIGHT corner above the foot pill (bottom
-≈84dp, end ≈14dp), and hidden while the page slider is up (they would overlap).
-- The lock itself: the guard belongs in the PDF's gesture path — the `pinchToZoom`
-handler AND the pan it folds in (`readerZoomDocument` / `readerZoomedPan`), not in
-the drawing. A tap must still turn the page.
-
-### 7.7 Still open, unchanged by the answers above
-
-1. **Zoomed-in long-press selection, and the tools not returning on a single tap.**
-   The same root cause, and the v434 band-aid (`ReaderTouch.selecting`) did not
-   cover the tap path. Fix at the gesture seam, not with another flag.
-2. **"Fix the highlighht pill selecter in pdf"** — confirm WHICH part: the pens'
-   row, or the pill that opens it.
-3. ~~**The gestures box**: hide the floating panel while an area is being adjusted, a
-   way to hide the PANEL (not the backdrop), and a way to bring it back to edit.~~
-   **DONE (v440, §34).**
-4. **The journal's paper following its colour by default** — still needs the word
-   (the "Paint the page too" switch).
+- **The journal's paper following its colour by default** — the "Paint the page too" switch is
+  still deliberate; making it the default needs the member's word.
+- **Read-aloud is done (§35)**; the dictionary provider question from §34 is closed by §37's
+  own answer (Wiktionary stays, and it now suggests spellings and reads the passage).
+- **No SQL change and no migration anywhere in §37** — every change is UI, gesture, dictionary
+  or motion, and the two new look fields are SharedPreferences keys like the rest of `ReaderLook`.
 
 ## User prompts
 
@@ -309,6 +193,17 @@ the drawing. A tap must still turn the page.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§37 — the nine reader fixes, above (DONE, v442).** The ⋯ sheet sized to its own tiles; the
+  dim's FROM/UNTIL window with one shared clock row and picker; the motion lock's wear-in so a
+  locked page still hears a tap, a hold and a sweep; the side taps answered by their own
+  innermost handler (fast, repeatable, and never read as a double tap); the dictionary
+  suggesting the passage's words as chips with the sentence quoted, plus spelling suggestions
+  on a miss; `headword()` so a comma, a possessive or a stray quote no longer hides a real
+  word; the sheet shutting on a flick as well as a distance, with a longer pull needed nowhere;
+  the highlight dock wearing the reader's own opaque pill body instead of a shadow over
+  near-identical paper; and the header's exit reduced to one motion per reason, written as
+  `CurioMotion` tokens. **No SQL, no migration.** See §4 above and the v442 section of
+  `app/AGENTS.md`.
 - **§36 — the journal's open animation, and the page slider's arrows + shadow (DONE, v441, pushed as `03bd2e44` and the v441 commit).**
   1. **"the animation open nimation of journal is clanky and the pass u did for motion i
      think that also cause this" — the member was right about the second half and right
@@ -402,27 +297,24 @@ prompt stays below it.)*
   Reader: **night dim on a schedule** (`ReaderLook.dimAuto` — "At sunset" = the phone's own
   dark theme, which is what a phone set to automatic switches at sunset; Android has no
   sunset to ask for and computing one needs the location, which this app holds for nothing
-  else); **pages left in the chapter** in the progress card (a book with pages answers from
-  `ReaderOutlineEntry.page`, a reflowed book from `TextPagedReader`, and a page-less flow
-  says nothing rather than a made-up zero). Journal: **filter by mood / colour / length**
-  (mood and colour are columns; the length counts are taken once per (list, bucket) on
-  `Dispatchers.Default` and only while a length is on — a word count decodes a document);
-  **a writing goal with its own evening nudge** (`AppPreferences.getJournalGoal`,
-  `JournalGoalReminderScheduler` + `JournalGoalReminderReceiver` + manifest, and the day's
-  rail in the journals head); **"open today's page"** (`rememberJournalDoor` — today's page
-  if the day was written, a new one if it was blank, or the last page opened; the editor
-  records the last id as a page loads). **No SQL change and no migration anywhere in §34.**
-  **STILL OPEN:** *read-aloud with a speed and voice picker* (a `TextToSpeech` subsystem — the
-  app has none today) and *dictionary provider choice* — **that one needs the member**:
-  Curio's dictionary is ONLINE-ONLY (Wiktionary, keyless, `ReaderDictionary`), there is no
-  bundled dictionary in the app, and shipping one means shipping a dictionary asset
-  (size + licensing). Also unchanged: which part "the highlight pill selector in a pdf"
-  means (they answered "the row of pens after a long press" — that bar already carries all
-  five pens, the note, the bookmark, the dictionary, ⋯ and the cross in `ReaderSelectionBar`,
-  so it needs a device pass rather than more code).
+  else — **superseded by §37's FROM/UNTIL window**); **pages left in the chapter** in the
+  progress card (a book with pages answers from `ReaderOutlineEntry.page`, a reflowed book
+  from `TextPagedReader`, and a page-less flow says nothing rather than a made-up zero).
+  Journal: **filter by mood / colour / length** (mood and colour are columns; the length
+  counts are taken once per (list, bucket) on `Dispatchers.Default` and only while a length
+  is on — a word count decodes a document); **a writing goal with its own evening nudge**
+  (`AppPreferences.getJournalGoal`, `JournalGoalReminderScheduler` + `JournalGoalReminderReceiver`
+  + manifest, and the day's rail in the journals head); **"open today's page"**
+  (`rememberJournalDoor` — today's page if the day was written, a new one if it was blank, or
+  the last page opened; the editor records the last id as a page loads). **No SQL change and
+  no migration anywhere in §34.**
+  **STILL OPEN:** *read-aloud with a speed and voice picker* — **done in §35**.
+  *dictionary provider choice* — **closed by §37** (Wiktionary stays; it now suggests
+  spellings and reads the selected passage). Also closed: which part "the highlight pill
+  selector in a pdf" means — §37 answered it (the dock after a selection, fixed above).
 - **§32 — "continue and still the pdf reader buttom sheet close is weirdly slow ... do the motion token set and one arrival for every floating pill ... and in pdf reader, a high charge save turns on" (DONE, v439).** Built: the sheet close now travels its OWN height (the "weirdly slow" was 60%-of-screen travel on a 200dp sheet, not the clock — see `app/AGENTS.md` v439); the pill clock added to `CurioMotion` and spent across the reader's and journal's floating furniture; the back button is its own 50dp circle pill; press feedback on the reader's two control builders; and **low power reading** (`ReaderLook.lowPower`, on by default, a real "Power" row in the reader's settings — RGB_565 pages, a 1.5× upscale cap, `beyondViewportPageCount = 0`, and `cacheDir/book-images` pruned as the reader closes). **Also fixed the red build that was pushed as `147a2516`**: `PersonalPage.kt:722` had an orphan `else MaterialTheme.colorScheme.background` left by v438's edit — the file's own paper is `journalPaper()`. No SQL change for anything in either round.
 
-- **§31 — the reader's polish round two (PARTLY DONE, plan in §7).** Done from it: back
+- **§31 — the reader's polish round two (PARTLY DONE).** Done from it: back
   no longer exits the reader (`BackHandler`), the settings head wears the reader's top
   floor, the night dim covers the tools, the ⋯ tiles are a glyph-only capsule with the
   name outside it, an empty marks list is an em dash, one word gets the whole selection
@@ -430,7 +322,7 @@ prompt stays below it.)*
   deliberately NOT pushed** (the member's instruction). Not built: the motion-lock pill +
   removing the Zoom slider, the copy box's restyle to the dock's language, the motion
   token set / one-arrival / press-feedback passes, one empty state everywhere, and the
-  two zoomed-gesture bugs. The member's five answers are recorded in §7.
+  two zoomed-gesture bugs. **(All of those landed in v439–v442.)**
 - **§30 — the writing page always keeps a line to type in (DONE).** The member's rule from §28,
   implemented at the state level rather than inside the copy box: one `publish()` choke point and
   one `keepLineToTypeIn()` guard, so cut, the row tools and the gesture tools cannot empty a page.

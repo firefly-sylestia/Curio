@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -41,6 +42,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
@@ -79,6 +81,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -87,6 +90,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -179,6 +185,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
@@ -333,8 +340,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // surface simply reports what the finger swept.
     var selection by remember { mutableStateOf<ReaderSelection?>(null) }
     // v434 — WHAT THE DICTIONARY OPENS ON when it was asked for from the mark
-    // dock rather than from a sweep (see [ReaderMarkSheet]). A sweep hands its
-    // own word over instead (see the dictionary sheet's `initial`).
+    // dock rather than from a sweep (see [ReaderMarkSheet]). v442 — it carries
+    // the PASSAGE, not a word picked out of it: the sheet reads the passage for
+    // the words worth offering and for the sentence to quote (see
+    // [ReaderDictionary.wordsIn] and [readerContextFor]).
     var dictionarySeed by remember { mutableStateOf("") }
 
     /**
@@ -1404,11 +1413,28 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // input, so a tap still reaches the page it is dimming.
         // ── v440 — AND THE DIM'S OWN WHEN (see [ReaderLook.dimAuto]) ──
         //
-        // "At sunset" is the phone's own dark theme, which is what a phone set to
-        // automatic switches at sunset — so the dim follows the sky without this
-        // app ever asking for a location. Read HERE, in the composable scope, and
-        // never inside a lambda: [isCurioDarkTheme] is @Composable.
-        val nightDim = if (ReaderLook.dimAuto && !isCurioDarkTheme()) 0f else ReaderLook.dim
+        // v442 — AND THE WINDOW IS THE MEMBER'S NOW. v440 hung "at sunset" on the
+        // phone's own dark theme, which follows the sky without this app ever
+        // asking for a location — but the member asked for the other half of that
+        // ("add at sunset customisation to be able to set the tiem"), and chose
+        // **from / until**. So the dim comes on inside the window they set and
+        // stays off outside it, and the window is remembered with the rest of the
+        // look (see [ReaderLook.dimFromMinute]).
+        //
+        // The clock is TICKED rather than read once: a member reading at 19:59 with
+        // the dim due at 20:00 would otherwise keep the page bright until something
+        // else recomposed the reader (which, with the chrome gone, can be minutes).
+        // A half-minute tick is plenty for a dim and costs one Int comparison.
+        var readerClock by remember { mutableIntStateOf(readerMinuteOfDay()) }
+        LaunchedEffect(ReaderLook.dimAuto) {
+            if (!ReaderLook.dimAuto) return@LaunchedEffect
+            while (true) {
+                readerClock = readerMinuteOfDay()
+                delay(30_000)
+            }
+        }
+        val dimDue = !ReaderLook.dimAuto || ReaderLook.dimWindowContains(readerClock)
+        val nightDim = if (dimDue) ReaderLook.dim else 0f
         if (nightDim > 0f) {
             Box(
                 modifier = Modifier
@@ -1803,12 +1829,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // ── THE DICTIONARY ───────────────────────────────────────────
         ReaderSheet.DICTIONARY -> ReaderDictionarySheet(
             palette = palette,
-            // A selection that IS one word arrives ready to look up; otherwise
-            // the seed the mark dock left (see [dictionarySeed]) or an empty
-            // field waiting for the member to type (see [ReaderSelectionBar]).
-            initial = dictionarySeed.ifBlank {
-                selection?.text?.trim()?.takeIf { !it.contains(' ') }.orEmpty()
-            },
+            // A selection that IS one word arrives ready to look up; a PASSAGE
+            // arrives with the field EMPTY, because its own words are the chips
+            // under it — seeding one of them would be the reader guessing which
+            // word the member meant (see [ReaderDictionary.wordsIn]).
+            initial = dictionarySeed.trim()
+                .ifBlank { selection?.text?.trim().orEmpty() }
+                .takeIf { it.isNotBlank() && !it.contains(' ') }
+                .orEmpty(),
+            // The passage a lookup came from — the mark dock's seed, or the words
+            // just swept on the page — for the suggestions and the context line.
+            passage = dictionarySeed.ifBlank { selection?.text.orEmpty() },
             onDismiss = {
                 sheet = null
                 dictionarySeed = ""
@@ -1883,14 +1914,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // The member: "the dock that appears after i tap and hold well it
             // doesnt have the tools we had before for selections". A passage
             // chosen by holding a page is the same passage a sweep chooses, so
-            // its dock offers the same doors: the dictionary (seeded from the
-            // first real word of the passage) and sharing the words themselves.
+            // its dock offers the same doors: the dictionary and sharing the
+            // words themselves. v442 — the dictionary is handed the WHOLE
+            // passage: picking its first word out here was the reader guessing
+            // which word the member meant (see [ReaderDictionary.wordsIn]).
             onDictionary = {
                 dictionarySeed = paragraph.text
-                    .split(' ', '\n', '\t')
-                    .firstOrNull { part -> part.trim().any { it.isLetter() } }
-                    .orEmpty()
-                    .trim('\u201C', '\u201D', '"', ',', '.', ';', ':', '(', ')', '\'', '\u2019')
                 marking = null
                 sheet = ReaderSheet.DICTIONARY
             },
@@ -2151,7 +2180,14 @@ private fun TextReader(
             // THE PAGE ANSWERS A TAP. The blocks below answer their own (a long
             // press marks a passage, a tap puts the chrome back), and this one
             // catches the presses that land in the gaps between them.
-            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
+            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) }
+            // ── v442 — AND A SIDE TAP IS ANSWERED BEFORE IT ──────────────
+            //
+            // Placed AFTER the detector above on purpose: the innermost handler
+            // is the one that sees the finger lift first, so a zone tap gets its
+            // answer at once and the double-tap wait above can never hold it back
+            // or eat the next tap (see [readerZoneTaps]).
+            .readerZoneTaps { point, area -> onTap(point, area) },
         // v434 — the side air is the MEMBER's now (see [ReaderLook.pageMargin]).
         contentPadding = PaddingValues(
             start = ReaderLook.pageMargin.dp,
@@ -2473,6 +2509,16 @@ private fun PdfScrollReader(
                         }
                     )
                 }
+                // ── v442 — AND THE SIDE TAPS ARE THEIRS, AT ONCE ────────────
+                //
+                // The column's own taps are said in the SCREEN's space (it rides
+                // a horizontal scroll), so the zone is measured there too — see
+                // [readerZoneTaps].
+                .readerZoneTaps(
+                    key = viewport,
+                    at = { point -> Offset(point.x - across.value, point.y) },
+                    screen = { viewport }
+                ) { point, area -> onTap(point, area) }
                 // ── v430 — THE WHOLE SCREEN IS THE GESTURE ────────────────────
                 //
                 // The member: *"why the zoom is based on pages it should be for
@@ -2645,6 +2691,18 @@ private fun PdfScrollReader(
                             onLongPress = { if (words == null) onLongPress(page) }
                         )
                     }
+                    // ── v442 — A SIDE TAP ON A SHEET, AT ONCE ──────────────
+                    //
+                    // The sheet's own frame is the DOCUMENT's ruler, so its tap is
+                    // translated into the screen's space exactly as the tap above
+                    // is — and the key is the page, never the translation, so a
+                    // tap is never cancelled by the layout moving under it (see
+                    // [readerZoneTaps]).
+                    .readerZoneTaps(
+                        key = page to viewport,
+                        at = { point -> point + where - surfaceOrigin },
+                        screen = { viewport }
+                    ) { point, area -> onTap(point, area) }
                     .onGloballyPositioned { coords -> where = coords.positionInRoot() },
                 contentAlignment = Alignment.Center
             ) {
@@ -2911,7 +2969,9 @@ private fun TextPagedReader(
             }
             .then(pagerZoom)
             .onSizeChanged { room = it }
-            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) },
+            .pointerInput(Unit) { detectTapGestures(onTap = { at -> onTap(at, size) }) }
+            // v442 — the side tap answers at once (see [readerZoneTaps]).
+            .readerZoneTaps { point, area -> onTap(point, area) },
         // v394 — PAGES SIT FLUSH. A gutter between self-made pages read as one
         // book cut into cards (user report: "the pages are not continuosn
         // connected"); with no gap a turn is a slide of the paper itself.
@@ -3394,6 +3454,11 @@ private fun PageReader(
                         // has nothing to select (see PdfPageTextLayer).
                         onLongPress = { if (words == null) onLongPress(page) }
                     )
+                }
+                // v442 — the side tap answers at once, ahead of the double tap
+                // this detector is holding its breath for (see [readerZoneTaps]).
+                .readerZoneTaps(key = page to viewport.value) { point, area ->
+                    onTap(point, area)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -3878,19 +3943,36 @@ private fun ReaderChrome(
         // rather than as the head leaving (see the search block below).
         AnimatedVisibility(
             visible = visible && search == null,
-            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
-                slideInVertically(
-                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
-                ) { height -> CurioMotion.settle(height) },
-            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
-                slideOutVertically(
-                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
-                ) { height -> CurioMotion.settle(height) } +
-                shrinkHorizontally(
-                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit),
-                    shrinkTowards = Alignment.End,
-                    clip = false
-                ),
+            // ── v442 — ONE ARRIVAL, AND ONE EXIT PER REASON ────────────────
+            //
+            // The member: *"the upper header animation is clanky"*. The head had
+            // three transitions on the way out AT ALL TIMES — a fade, a drift and a
+            // sideways shrink toward the right edge — so simply HIDING the chrome
+            // (a tap on the page, the commonest thing in the reader) collapsed the
+            // name capsule into the corner WHILE it was leaving upward: two motions
+            // for one intent, and the one gesture where the head should just go
+            // away is where the movement looked busiest.
+            //
+            // The shrink belongs to exactly ONE moment: the search opening, where
+            // it is what makes the bar read as growing out of the corner the search
+            // icon lives in (v435's merge). So the head is asked which exit this is,
+            // and the merging one runs on the ENTER clock — the same clock the bar
+            // is arriving on — so the two are one movement rather than two panels
+            // changing places (v437's one-clock rule, applied to the hand-off).
+            enter = CurioMotion.pillArrive(fromTop = true),
+            exit = if (search != null) {
+                fadeOut(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Exit)) +
+                    slideOutVertically(
+                        tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
+                    ) { height -> CurioMotion.settle(height) } +
+                    shrinkHorizontally(
+                        tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Exit),
+                        shrinkTowards = Alignment.End,
+                        clip = false
+                    )
+            } else {
+                CurioMotion.pillLeave(fromTop = true)
+            },
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
             ReaderTopPill(title = title, palette = palette, onClose = onClose, onSearch = onSearch)
@@ -3926,9 +4008,12 @@ private fun ReaderChrome(
                     expandFrom = Alignment.End,
                     clip = false
                 ),
-            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
+            // v442 — and it gives the row back on the same clock the head
+            // returns on, so closing the search is one hand-off and not a beat of
+            // empty row (see the head's note above).
+            exit = fadeOut(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Exit)) +
                 shrinkHorizontally(
-                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter),
+                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter),
                     shrinkTowards = Alignment.End,
                     clip = false
                 ),
@@ -3971,14 +4056,12 @@ private fun ReaderChrome(
             // plus this pill's own six-of-height drift from the edge it lives on.
             // It used to travel HALF ITS HEIGHT, which is the one place in the
             // reader whose motion read as a slide rather than a settle.
-            enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
-                slideInVertically(
-                    tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)
-                ) { height -> -CurioMotion.settle(height) },
-            exit = fadeOut(tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Exit)) +
-                slideOutVertically(
-                    tween(CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)
-                ) { height -> -CurioMotion.settle(height) },
+            //
+            // v442 — written as the tokens themselves rather than as their
+            // numbers, so the head and the foot can never drift apart (rule 1 of
+            // the pill clock, see [CurioMotion.pillArrive]).
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             ReaderBottomPill(
@@ -4727,10 +4810,24 @@ private fun ReaderMenuSheet(
     onSettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ReaderSheetFrame("More in this book", palette, onDismiss) {
+    // ── v442 — SIZED TO ITS OWN TILES, AND CLEAR OF THE BOTTOM ───────
+    //
+    // The member: *"the 3 dot for reader its too empty spae and not proper
+    // spaced, fix its weird look"*, and, asked which way to go: "scrink it but
+    // dont make it too lose to th buttom". The 45% floor every sheet wears (see
+    // [ReaderSheetFrame]) is right for a LIST of marks, which grows — but a grid
+    // of six fixed tiles is six tiles tall whatever else happens, so the panel
+    // was two thirds empty paper with a row of pills at the top of it.
+    //
+    // So this sheet's floor is the height its own grid needs (30% of the screen on
+    // a phone — still a real panel, still standing clear of the foot of the glass,
+    // which is the other half of what the member asked for) and its rows are given
+    // air: a wider gap between the tiles, a wider one between the rows, and a
+    // breath under the last row so nothing sits jammed against the panel's edge.
+    ReaderSheetFrame("More in this book", palette, onDismiss, minHeightFraction = 0.30f) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             ReaderTileRow(
                 tiles = listOf(
@@ -4748,6 +4845,7 @@ private fun ReaderMenuSheet(
                 ),
                 palette = palette
             )
+            Spacer(Modifier.height(4.dp))
         }
     }
 }
@@ -4767,7 +4865,9 @@ private class ReaderTile(
 private fun ReaderTileRow(tiles: List<ReaderTile>, palette: ReaderPalette) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // v442 — the tiles keep a real gutter between them: at 8dp two 46dp pills
+        // nearly touched once their labels were the widest thing in the row.
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         tiles.forEach { tile ->
             ReaderMenuTile(tile = tile, palette = palette, modifier = Modifier.weight(1f))
@@ -5009,6 +5109,15 @@ private fun ReaderSheetFrame(
      * and a sheet with more to say still grows to the 60% cap and scrolls inside it.
      * Pass a different fraction for a specific sheet; pass 0 only if a sheet is ever
      * meant to be a strip.
+     *
+     * ── v442 — AND THE ONE EXCEPTION IS A FIXED GRID ────────────────
+     *
+     * The member: *"the 3 dot for reader its too empty spae and not proper spaced,
+     * fix its weird look"*. A floor is right for a LIST — a list grows, and a floor
+     * is what stops two kept marks reading as a broken panel — but the ⋯ menu is six
+     * fixed tiles and is the same height whatever happens, so 45% of the screen was
+     * two thirds empty paper. [ReaderMenuSheet] passes **0.30f**: still a real panel
+     * standing clear of the foot of the glass, never a strip.
      */
     minHeightFraction: Float = 0.45f,
     content: @Composable () -> Unit
@@ -5034,8 +5143,33 @@ private fun ReaderSheetFrame(
         )
     }
     var drag by remember { mutableFloatStateOf(0f) }
+    // ── v442 — A SHEET SHUTS THE WAY A SHEET SHUTS EVERYWHERE ────────────
+    //
+    // The member, again: *"still the buttom sheet closing is bad"*. Two things
+    // were wrong with it, and neither was the clock:
+    //
+    //  · **A flick did not count.** The only door out was DISTANCE — 108dp of
+    //    deliberate dragging — so the gesture everyone actually makes on a sheet,
+    //    a quick downward flick, dragged a few millimetres and sprang back. The
+    //    finger's own travel per millisecond is measured now — in the head's drag
+    //    and in the body's nested scroll — and a throw past `dismissFling` below
+    //    shuts the sheet without the pull having to reach the distance.
+    //  · **The distance was a long way to pull** for a panel only a few rows tall,
+    //    so it is 96dp now — and a pull that does not reach it springs straight
+    //    back on the exit clock rather than sitting half-way down.
+    //
+    // A re-entrancy guard rides with them, so the flick and the settle that
+    // follows it cannot both dismiss the same sheet.
+    val closing = remember { booleanArrayOf(false) }
     // The drag that means "shut", in the sheet's own pixels.
-    val dismissPull = remember(density) { with(density) { 108.dp.toPx() } }
+    val dismissPull = remember(density) { with(density) { 96.dp.toPx() } }
+    // The speed that means "shut" on its own — a flick, not a drag.
+    val dismissFling = remember(density) { with(density) { 620.dp.toPx() } }
+    // The pull's own speed and the moment it was last measured. Plain arrays, not
+    // Compose state: nothing draws these, and a state write on every frame of a
+    // drag would recompose the whole sheet for a number the eye never sees.
+    val flickPeak = remember { floatArrayOf(0f) }
+    val flickAt = remember { longArrayOf(0L) }
     val body = rememberScrollState()
     /**
      * Shut, and QUICKLY.
@@ -5046,6 +5180,8 @@ private fun ReaderSheetFrame(
      * a performance of it going.
      */
     fun close() {
+        if (closing[0]) return
+        closing[0] = true
         scope.launch {
             appear.animateTo(
                 0f,
@@ -5056,11 +5192,22 @@ private fun ReaderSheetFrame(
     }
     /** Put the sheet back where it was — unless the pull was far enough to shut it. */
     fun settle() {
-        if (drag > dismissPull) {
+        // FAR ENOUGH, OR FAST ENOUGH (v442). The member's gesture is a quick
+        // downward throw, and a throw that travelled a few millimetres still meant
+        // "shut this" — so the peak speed the finger reached counts as a dismissal
+        // on its own, exactly as it does on the handle (see the note on
+        // [dismissFling]).
+        if (drag > dismissPull || (drag > 0f && flickPeak[0] > dismissFling)) {
             close()
             return
         }
-        if (drag <= 0f) return
+        if (drag <= 0f) {
+            // Nothing was pulled: whatever speed this gesture reached belonged to a
+            // drag that came back, and must not be spent on the next one.
+            flickPeak[0] = 0f
+            flickAt[0] = 0L
+            return
+        }
         scope.launch {
             val anim = Animatable(drag)
             anim.animateTo(0f, tween(durationMillis = CurioMotion.EXIT_MS.toInt(), easing = CurioMotion.Enter)) {
@@ -5086,6 +5233,16 @@ private fun ReaderSheetFrame(
                 source: NestedScrollSource
             ): Offset {
                 if (available.y > 0f) {
+                    // v442 — the speed of the pull, read from the finger's own clock
+                    // (the nested scroll reports travel and no velocity). The PEAK
+                    // is what counts: a throw is fastest in its last frame.
+                    val now = SystemClock.uptimeMillis()
+                    val at = flickAt[0]
+                    if (at != 0L) {
+                        val since = (now - at).coerceAtLeast(1L)
+                        flickPeak[0] = maxOf(flickPeak[0], available.y / since * 1000f)
+                    }
+                    flickAt[0] = now
                     drag = (drag + available.y).coerceAtLeast(0f)
                     return Offset(0f, available.y)
                 }
@@ -5098,6 +5255,11 @@ private fun ReaderSheetFrame(
                 }
                 return Offset.Zero
             }
+
+            // NOTE, v442: there is deliberately NO `onPostFling` here. The speed
+            // read above is what dismisses a flick on the body; the velocity
+            // handler is a second, engine-versioned way to learn the same thing,
+            // and the reader does not need two (see the note on [dismissFling]).
         }
     }
     // A body drag has no "end" of its own to hang the settle on, and the nested
@@ -5174,12 +5336,33 @@ private fun ReaderSheetFrame(
                     modifier = Modifier
                         .fillMaxWidth()
                         .pointerInput(Unit) {
+                            // ── v442 — AND THE HANDLE KNOWS HOW FAST IT IS MOVING ──
+                            //
+                            // `detectVerticalDragGestures` reports travel and no
+                            // velocity, so the speed is read from the finger's own
+                            // clock: the last frame's travel over the time it took
+                            // (see [dismissFling]). A finger that STOPS before it
+                            // lifts reports ~0 and simply springs back, which is
+                            // what a deliberate half-drag is.
+                            var lastAt = 0L
+                            var speed = 0f
                             detectVerticalDragGestures(
+                                onDragStart = {
+                                    lastAt = 0L
+                                    speed = 0f
+                                },
                                 onDragEnd = {
-                                    if (drag > dismissPull) close() else drag = 0f
+                                    if (drag > dismissPull || speed > dismissFling) close()
+                                    else drag = 0f
                                 },
                                 onDragCancel = { drag = 0f },
-                                onVerticalDrag = { _, travel ->
+                                onVerticalDrag = { change, travel ->
+                                    val now = change.uptimeMillis
+                                    if (lastAt != 0L) {
+                                        val since = (now - lastAt).coerceAtLeast(1L)
+                                        speed = travel / since * 1000f
+                                    }
+                                    lastAt = now
                                     drag = (drag + travel).coerceAtLeast(0f)
                                 }
                             )
@@ -5284,6 +5467,8 @@ private fun ReaderAppearanceSheet(
     onDismiss: () -> Unit
 ) {
     var moreInks by remember { mutableStateOf(false) }
+    // v442 — WHICH END OF THE DIM'S WINDOW IS BEING SET (see [ReaderClockRow]).
+    var clockPick by remember { mutableStateOf("") }
     ReaderSheetFrame("Appearance", palette, onDismiss) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -5475,8 +5660,13 @@ private fun ReaderAppearanceSheet(
                 onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
             )
             // v440 — WHEN the dim comes on (see [ReaderLook.dimAuto]): always, or
-            // only once the phone is in its own dark theme, which is where a phone
-            // set to automatic crosses sunset.
+            // inside a window of the member's own.
+            //
+            // v442 — AND THE WINDOW IS THEIRS TO SET. "At sunset" used to be the
+            // phone's dark theme; it is now the two times below it, which is what
+            // the member asked for ("add at sunset customisation to be able to set
+            // the tiem"). The rows appear only while that mode is on, so the
+            // surface does not carry a control that governs nothing.
             ReaderSegmentRow(
                 segments = listOf(
                     ReaderSegment("Dim always", CurioIcons.DarkMode),
@@ -5486,6 +5676,18 @@ private fun ReaderAppearanceSheet(
                 palette = palette,
                 onSelect = { at -> ReaderLook.dimAuto = at == 1 }
             )
+            if (ReaderLook.dimAuto) {
+                ReaderClockRow(
+                    label = "Dim from",
+                    minuteOfDay = ReaderLook.dimFromMinute,
+                    palette = palette
+                ) { clockPick = "from" }
+                ReaderClockRow(
+                    label = "Dim until",
+                    minuteOfDay = ReaderLook.dimUntilMinute,
+                    palette = palette
+                ) { clockPick = "until" }
+            }
             ReaderSliderRow(
                 label = "Night dim",
                 value = ReaderLook.dim,
@@ -5501,6 +5703,20 @@ private fun ReaderAppearanceSheet(
                 trailingLabel = "More dim"
             )
         }
+    }
+
+    // ── v442 — AND THE CLOCK ITSELF (see [ReaderClockRow]) ──────────────
+    if (clockPick.isNotBlank()) {
+        val settingFrom = clockPick == "from"
+        ReaderClockDialog(
+            palette = palette,
+            minuteOfDay = if (settingFrom) ReaderLook.dimFromMinute else ReaderLook.dimUntilMinute,
+            onDismiss = { clockPick = "" },
+            onPick = { minute ->
+                if (settingFrom) ReaderLook.dimFromMinute = minute
+                else ReaderLook.dimUntilMinute = minute
+            }
+        )
     }
 }
 
@@ -5860,18 +6076,38 @@ internal fun ReaderAlignGlyph(justified: Boolean, tint: Color, iconSize: Dp = 18
 @Composable
 private fun ReaderDictionarySheet(
     palette: ReaderPalette,
+    /** The word to look up, when the selection was one word (blank otherwise). */
     initial: String,
+    /** The passage a lookup came from: its words are offered, its line quoted. */
+    passage: String,
     onDismiss: () -> Unit
 ) {
-    var word by remember { mutableStateOf(initial) }
+    // ── v442 — A PASSAGE SUGGESTS ITS OWN WORDS ─────────────────────────
+    //
+    // The member: *"improve the discoonary that it suggest work explanation from
+    // the selected para"*, and, asked how: "chips + context line". A selection
+    // that is a whole passage has no single word in it to look up, so the sheet
+    // reads the passage for the words worth asking about
+    // ([ReaderDictionary.wordsIn]) and offers them as chips — and the word being
+    // answered right now also brings the SENTENCE it stood in, so the meaning
+    // arrives beside the line that raised the question.
+    val candidates = remember(passage) { ReaderDictionary.wordsIn(passage) }
+    var word by remember(initial, passage) {
+        mutableStateOf(initial.ifBlank { candidates.firstOrNull()?.word.orEmpty() })
+    }
     var senses by remember { mutableStateOf<List<ReaderDictionarySense>?>(null) }
     var looking by remember { mutableStateOf(false) }
     var asked by remember { mutableStateOf("") }
+    // The spellings the dictionary offered when the word itself had no entry.
+    var guesses by remember { mutableStateOf<List<String>>(emptyList()) }
     LaunchedEffect(word) {
-        val term = word.trim()
+        // The word AS WRITTEN is not always the word to ask for: a sweep carries
+        // its punctuation and its possessive (see [ReaderDictionary.headword]).
+        val term = ReaderDictionary.headword(word)
         if (term.isBlank()) {
             senses = null
             asked = ""
+            guesses = emptyList()
             return@LaunchedEffect
         }
         looking = true
@@ -5880,8 +6116,41 @@ private fun ReaderDictionarySheet(
         val found = withContext(Dispatchers.IO) {
             runCatching { ReaderDictionary.define(term) }.getOrNull()
         }
-        senses = found ?: emptyList()
-        asked = term
+        if (found == null) {
+            // Unreachable is NOT "no such word" — the two read differently (see
+            // [ReaderDictionary.define]).
+            senses = null
+            asked = term
+            guesses = emptyList()
+        } else if (found.isNotEmpty()) {
+            senses = found
+            asked = term
+            guesses = emptyList()
+        } else {
+            // ── A MISS IS USUALLY A SPELLING (v442) ─────────────────────
+            //
+            // The member: *"or a mis type"*. The nearest page names are asked
+            // for, and the first one that HAS a definition simply answers —
+            // labelled, so the member can see which word answered for which.
+            val near = withContext(Dispatchers.IO) {
+                runCatching { ReaderDictionary.suggest(term) }.getOrNull().orEmpty()
+            }
+            var bestWord = ""
+            var bestSenses: List<ReaderDictionarySense>? = null
+            for (candidate in near) {
+                val answer = withContext(Dispatchers.IO) {
+                    runCatching { ReaderDictionary.define(candidate) }.getOrNull()
+                }
+                if (answer != null && answer.isNotEmpty()) {
+                    bestWord = candidate
+                    bestSenses = answer
+                    break
+                }
+            }
+            senses = bestSenses ?: emptyList()
+            asked = if (bestSenses != null) bestWord else term
+            guesses = near
+        }
         looking = false
     }
     ReaderSheetFrame("Dictionary", palette, onDismiss) {
@@ -5936,7 +6205,55 @@ private fun ReaderDictionarySheet(
                     )
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            // ── v442 — THE WORDS THE PASSAGE OFFERS ────────────────────
+            if (candidates.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                ReaderSheetLabel("From the passage", palette)
+                Spacer(Modifier.height(7.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    candidates.forEach { candidate ->
+                        ReaderDictionaryChip(
+                            label = candidate.word,
+                            live = candidate.word.equals(asked, ignoreCase = true),
+                            palette = palette
+                        ) { word = candidate.word }
+                    }
+                }
+            }
+
+            // ── AND THE WORD IT THINKS YOU MEANT ───────────────────────
+            //
+            // Shown whenever a lookup had to be answered by a neighbour: the
+            // typo is the member's to see, and the row is the door to the other
+            // spellings rather than a dead end.
+            if (guesses.isNotEmpty()) {
+                Spacer(Modifier.height(10.dp))
+                ReaderSheetLabel("Did you mean", palette)
+                Spacer(Modifier.height(7.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    guesses.forEach { guess ->
+                        ReaderDictionaryChip(
+                            label = guess,
+                            live = guess.equals(asked, ignoreCase = true),
+                            palette = palette
+                        ) { word = guess }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
             val list = senses
             when {
                 looking -> Box(
@@ -5946,23 +6263,42 @@ private fun ReaderDictionarySheet(
                     CircularProgressIndicator(color = palette.accent, modifier = Modifier.size(22.dp))
                 }
 
-                list == null -> Box(Modifier.fillMaxWidth())
+                // A NULL IS NOT AN EMPTY LIST: unreachable and "no such word"
+                // are two different answers (see [ReaderDictionary.define]).
+                list == null -> Text(
+                    "The dictionary could not be reached.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = palette.ink.copy(alpha = 0.7f)
+                )
 
-                list.isEmpty() -> Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    Text(
-                        "Nothing for \u201C$asked\u201D.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = palette.ink.copy(alpha = 0.7f)
-                    )
-                }
+                list.isEmpty() -> Text(
+                    "Nothing for \u201C$asked\u201D.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = palette.ink.copy(alpha = 0.7f)
+                )
 
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    // ── v442 — AND THE LINE IT CAME FROM ───────────────
+                    //
+                    // The member's own pick for a passage lookup: a meaning read
+                    // beside the sentence the word stood in is the difference
+                    // between a dictionary and an answer.
+                    val context = remember(passage, asked) { readerContextFor(passage, asked) }
+                    if (context.isNotBlank()) {
+                        Text(
+                            context,
+                            style = TextStyle(
+                                fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                                fontSize = 14.sp,
+                                lineHeight = 21.sp,
+                                fontStyle = FontStyle.Italic,
+                                color = palette.ink.copy(alpha = 0.65f)
+                            )
+                        )
+                    }
                     list.forEach { sense ->
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             ReaderSheetLabel(sense.partOfSpeech.ifBlank { "Entry" }, palette)
@@ -5983,6 +6319,64 @@ private fun ReaderDictionarySheet(
             }
         }
     }
+}
+
+/**
+ * v442 — ONE OF THE PASSAGE'S WORDS, AS A CHIP.
+ *
+ * The word being answered right now wears an opaque accent blend rather than a
+ * wash, so "which word are these meanings for" survives a pale paper (the same
+ * rule the reader's other pills follow).
+ */
+@Composable
+private fun ReaderDictionaryChip(
+    label: String,
+    live: Boolean,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (live) lerp(palette.surface, palette.accent, 0.30f)
+        else palette.ink.copy(alpha = 0.07f)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = if (live) FontWeight.SemiBold else FontWeight.Medium
+            ),
+            color = if (live) palette.ink else palette.ink.copy(alpha = 0.8f),
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+        )
+    }
+}
+
+/** One sentence of [passage], split the way a reader reads them. Compiled once. */
+private val ReaderSentenceSplit = Regex("(?<=[.!?])\\s+")
+
+/** What a word looks like inside a sentence, for the context line's own search. */
+private val ReaderHeadwordShape = Regex("[A-Za-z][A-Za-z'\\-]{3,}")
+
+/**
+ * v442 — THE SENTENCE A LOOKED-UP WORD STOOD IN.
+ *
+ * Blank when the word is not in the passage at all (a typed word, a suggestion
+ * from another spelling): a context line that quoted the wrong sentence would be
+ * worse than no context line, which is the one thing a quoted line must never do.
+ */
+private fun readerContextFor(passage: String, term: String): String {
+    if (passage.isBlank() || term.isBlank()) return ""
+    val wanted = ReaderDictionary.headword(term).lowercase()
+    if (wanted.isEmpty()) return ""
+    for (sentence in ReaderSentenceSplit.split(passage)) {
+        val holds = ReaderHeadwordShape.findAll(sentence).any { found ->
+            ReaderDictionary.headword(found.value).lowercase() == wanted
+        }
+        if (holds) return sentence.replace(Regex("\\s+"), " ").trim()
+    }
+    return ""
 }
 
 /**
@@ -7598,15 +7992,30 @@ private fun ReaderSelectionBar(
     // the member asked for the toolbar every phone has ("use similiar capsule
     // style wide floating ui for selected text too, current one is too small so
     // similiar to what samsung uses"). One row, a full-radius capsule, one lift,
-    // icons only, and `animateContentSize` so going from a word to a sentence is a
-    // resize rather than a swap.
+    // icons only.
+    //
+    // ── v442 — AND IT WEARS THE DOCK'S OWN BODY ───────────────────────
+    //
+    // The member: *"the highlight dock is bad fix it too. weird shado and doesnt
+    // match the dock"*. It was the palette's `surface` floating over the `paper` —
+    // two colours about two per cent apart — so the only part of the capsule the
+    // eye could see was a shadow spread over pale paper on every side: the exact
+    // smudge the page slider wore before v441, still sitting over a page the member
+    // is reading. It now speaks the same language the reader's other floating
+    // pills do: an OPAQUE body (a blend of the surface toward the ink, so it is a
+    // body wherever the shadow falls, and — being opaque — the shadow cannot bleed
+    // through it), a hairline edge, and the same 8dp lift and 28dp radius the dock
+    // uses. `animateContentSize` is gone with it: the bar is full width and its
+    // height never changes, so it animated nothing and only asked for a layout pass
+    // on every arrival.
+    val body = lerp(palette.surface, palette.ink, 0.06f)
+    val edge = lerp(palette.surface, palette.ink, 0.16f)
     Surface(
-        shape = RoundedCornerShape(50),
-        color = palette.surface,
-        shadowElevation = 10.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize()
+        shape = RoundedCornerShape(28.dp),
+        color = body,
+        shadowElevation = 8.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, edge),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -7887,24 +8296,52 @@ internal object ReaderLook {
     var dim by mutableStateOf(0f)
 
     /**
-     * v440 — WHEN THE NIGHT DIM COMES ON: always, or when it is dark out.
+     * v440 — WHEN THE NIGHT DIM COMES ON: always, or inside a window.
      *
      * The member asked for a night dim that works on a schedule rather than by
-     * hand (*"Night dim on a schedule (auto at sunset, not just manual)"*). Android
-     * has no sunset of its own to ask, and computing one would mean asking for the
-     * LOCATION — a permission this app does not hold and has no other use for —
-     * while the phone already knows: **the system's dark theme is what a phone set
-     * to automatic switches at sunset**, [isCurioDarkTheme] is exactly that switch
-     * (system-dark when the member's theme is "System", and their own choice when
-     * they forced one), and it is the same signal every other surface in the app
-     * answers to.
+     * hand (*"Night dim on a schedule (auto at sunset, not just manual)"*), and
+     * then, after living with it:
      *
-     * So the row is a two-way choice rather than a second switch, and the DEFAULT
-     * is [dimAlways]: every member who had a dim before this keeps exactly the dim
-     * they had, at exactly the level they set, at every hour — the automatic one is
-     * there for the member who asked for it.
+     *     "add at sunset customisation to be able to set the tiem"
+     *
+     * v440 answered that with the phone's own dark theme (which is what a phone set
+     * to automatic switches at sunset, so no location permission is ever needed).
+     * v442 answers it the way they asked for it: **a window the member sets** —
+     * [dimFromMinute] to [dimUntilMinute] — because a member reading at 19:00 in
+     * winter is not reading at 19:00 in summer, and the page they are on is the page
+     * that is too bright, not the system chrome.
+     *
+     * The DEFAULT window is the evening one (20:00 → 06:00), which is where the
+     * dim's own switch used to leave it, and the default MODE stays "Dim always":
+     * every member who had a dim before this keeps exactly the dim they had, at
+     * exactly the level they set, at every hour.
      */
     var dimAuto by mutableStateOf(false)
+
+    /** When the dim's window OPENS — minutes since midnight (see [dimAuto]). */
+    var dimFromMinute by mutableStateOf(20 * 60)
+
+    /** And when it closes again. May be smaller than [dimFromMinute]: a window
+     *  that runs over midnight is the normal evening case, and
+     *  [dimWindowContains] reads it as one. */
+    var dimUntilMinute by mutableStateOf(6 * 60)
+
+    /**
+     * v442 — IS THE CLOCK INSIDE THE DIM'S WINDOW?
+     *
+     * A window that RUNS OVER MIDNIGHT is the normal case (on at 20:00, off at
+     * 06:00), so the test is not `from until until` alone: inside is anything from
+     * the opening minute onward OR anything before the closing minute. Equal ends
+     * mean the member set no window at all, which reads as "all day" rather than as
+     * a zero-length window that would silently switch the dim off.
+     */
+    fun dimWindowContains(minuteOfDay: Int): Boolean {
+        val from = dimFromMinute.coerceIn(0, READER_MINUTES_IN_DAY - 1)
+        val until = dimUntilMinute.coerceIn(0, READER_MINUTES_IN_DAY - 1)
+        if (from == until) return true
+        return if (from < until) minuteOfDay in from until until
+        else minuteOfDay >= from || minuteOfDay < until
+    }
 
     /**
      * v440 — WHICH DICTIONARY ANSWERS A LOOKUP (see [ReaderDictionarySource]).
@@ -8012,6 +8449,10 @@ internal object ReaderLook {
         // v434 rule): a field left out of here saves every other setting and
         // silently forgets this one.
         dimAuto.toString(),
+        // v442 — and the window it comes on in: a field left out of here saves
+        // every other setting and silently forgets this one (the v434 rule).
+        dimFromMinute.toString(),
+        dimUntilMinute.toString(),
         // v440 — and which dictionary the lookups go to (the v434 rule).
         dictionary.key,
         speakSpeed.toString(),
@@ -8081,6 +8522,11 @@ internal object ReaderLookStore {
     private const val DIM = "reader_dim"
     private const val LOW_POWER = "reader_low_power"
     private const val DIM_AUTO = "reader_dim_auto"
+    // v442 — the dim's own window, in minutes since midnight (see
+    // [ReaderLook.dimWindowContains]). A minute rather than an hour, because the
+    // member sets a TIME and a clock picker offers minutes.
+    private const val DIM_FROM = "reader_dim_from"
+    private const val DIM_UNTIL = "reader_dim_until"
     private const val DICTIONARY = "reader_dictionary"
     private const val SPEAK_SPEED = "reader_speak_speed"
     private const val SPEAK_VOICE = "reader_speak_voice"
@@ -8117,6 +8563,10 @@ internal object ReaderLookStore {
             ReaderLook.keepScreenOn = prefs.getBoolean(KEEP_ON, ReaderLook.keepScreenOn)
             ReaderLook.dim = prefs.getFloat(DIM, ReaderLook.dim).coerceIn(0f, 0.6f)
             ReaderLook.dimAuto = prefs.getBoolean(DIM_AUTO, ReaderLook.dimAuto)
+            ReaderLook.dimFromMinute =
+                prefs.getInt(DIM_FROM, ReaderLook.dimFromMinute).coerceIn(0, 24 * 60 - 1)
+            ReaderLook.dimUntilMinute =
+                prefs.getInt(DIM_UNTIL, ReaderLook.dimUntilMinute).coerceIn(0, 24 * 60 - 1)
             ReaderLook.dictionary = ReaderDictionarySource.fromKey(
                 prefs.getString(DICTIONARY, ReaderLook.dictionary.key)
             )
@@ -8149,6 +8599,8 @@ internal object ReaderLookStore {
                 .putBoolean(KEEP_ON, ReaderLook.keepScreenOn)
                 .putFloat(DIM, ReaderLook.dim)
                 .putBoolean(DIM_AUTO, ReaderLook.dimAuto)
+                .putInt(DIM_FROM, ReaderLook.dimFromMinute)
+                .putInt(DIM_UNTIL, ReaderLook.dimUntilMinute)
                 .putString(DICTIONARY, ReaderLook.dictionary.key)
                 .putFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
                 .putString(SPEAK_VOICE, ReaderLook.speakVoice)
@@ -8988,6 +9440,76 @@ internal object ReaderTouch {
     var selecting by mutableStateOf(false)
 }
 
+/**
+ * v442 — THE SIDE TAP, ANSWERED AT ONCE.
+ *
+ * The member: *"the side tap gesture its slow doesnt work faster receives one tap
+ * and doesnt work anymore and doesnt work sometimes fix it"*. Three symptoms, one
+ * cause, and it was never the zone arithmetic — it was WHERE the tap was heard.
+ *
+ * A tap on a reading surface is answered by the surface's own [detectTapGestures],
+ * which ALSO owns the double tap (the pinch-at-one-point — see
+ * [readerDoubleTapZoom] and [readerDoubleTapDocument]). A detector waiting to see
+ * whether a second tap follows cannot answer the first one until the double-tap
+ * window has passed, so a tap in a side zone was late by construction (the
+ * "slow"), and a second tap inside that window was read as the FIRST HALF of a
+ * double tap and zoomed the page instead of turning it (the "receives one tap and
+ * doesnt work anymore"). Where a child of the surface claimed the gesture first,
+ * nobody heard it at all (the "doesnt work sometimes").
+ *
+ * A zone tap is not ambiguous: the member asked for the SIDE OF THE SCREEN to act,
+ * and it acts the moment the finger lifts. This handler is placed INNERMOST in its
+ * chain, so it processes the up before the surface's own tap detector does, and it
+ * CONSUMES the up it answered — which is what cancels the double-tap detector's
+ * wait, so one tap is one page turn and never a zoom. Everything else about the
+ * gesture is left alone: only a tap whose point falls in a zone is claimed, and
+ * only when nothing else in the reader already owns the gesture.
+ *
+ * The gesture must still BE a tap, which is three guards and all of them matter:
+ *  · a down a real control (a chrome button, a chip) already claimed is skipped by
+ *    `awaitFirstDown()`'s own `requireUnconsumed`, so the foot pill's buttons never
+ *    also fire the bottom zone;
+ *  · a press held past the long-press threshold is the SWEEP's, not a tap's, so it
+ *    is dropped on the timeout rather than on the lift;
+ *  · and a gesture something else consumed mid-flight (a scroll, a page turn of the
+ *    pager's own, a pinch) never reaches the lift at all, because
+ *    `waitForUpOrCancellation` answers null for a consumed change.
+ *
+ * @param key re-arms the handler when the thing the tap is measured against
+ *  changes (a page's number, the screen's size). It is deliberately NOT the
+ *  translation function: a handler keyed on a value that moves while the finger is
+ *  down would cancel a tap in flight, which is its own "doesnt work sometimes".
+ * @param at where a tap in this handler's own space is **on the screen**. A
+ *  magnified sheet's frame is the document's ruler, not the screen's, and the
+ *  column rides a horizontal scroll (see the call sites in [PdfScrollReader]).
+ * @param screen the size the zones are measured against, when it is not this
+ *  handler's own size (a column wider than the screen). Blank falls back to the
+ *  handler's own measured size, which is right for every full-screen surface.
+ */
+private fun Modifier.readerZoneTaps(
+    key: Any? = Unit,
+    at: (Offset) -> Offset = { it },
+    screen: () -> IntSize = { IntSize.Zero },
+    onTap: (Offset, IntSize) -> Unit
+): Modifier = pointerInput(key) {
+    awaitEachGesture {
+        val down = awaitFirstDown()
+        if (!ReaderLook.tapZones) return@awaitEachGesture
+        // A press that outlives the long press is the sweep's (see the note above).
+        val up = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+            waitForUpOrCancellation()
+        } ?: return@awaitEachGesture
+        if (ReaderTouch.multi || ReaderTouch.selecting) return@awaitEachGesture
+        val area = screen().let { if (it.width > 0 && it.height > 0) it else size }
+        val point = at(down.position)
+        if (readerZoneActionAt(point, area) == ReaderZoneAction.OFF) return@awaitEachGesture
+        onTap(point, area)
+        // Consumed, so the surface's own tap detector drops the tap it was holding
+        // back for a possible double tap: one tap, one answer.
+        up.consume()
+    }
+}
+
 private fun Modifier.pinchToZoom(
     /**
      * What the gesture is bound to. A page whose SHAPE arrives after it was
@@ -9035,6 +9557,9 @@ private fun Modifier.pinchToZoom(
         // HAS CLAIMED IT YET (see the wear-in below). Both per-gesture.
         var travelled = 0f
         var claimedPan = false
+        // v442 — the motion lock's own travel, for the same wear-in (see the
+        // lock's branch below). Also per-gesture.
+        var held = 0f
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
@@ -9054,11 +9579,42 @@ private fun Modifier.pinchToZoom(
             // column or the pager underneath from taking it instead, which is how
             // a locked page stays exactly where the member left it).
             if (ReaderLook.motionLock) {
-                // (`position != previousPosition` rather than
-                // `positionChanged()`: that helper does not exist in this
-                // Compose version — a reference to it fails the build.)
-                if (pressed.size >= 2 ||
-                    event.changes.any { it.position != it.previousPosition }
+                // ── v442 — AND A LOCKED PAGE STILL HEARS A TAP ──────────────
+                //
+                // The lock used to swallow every event in which any finger had
+                // moved at all — and a finger that taps or holds still is never
+                // perfectly still, so the first pixel of jitter consumed the move
+                // and every tap detector threw the gesture away with it: on a
+                // locked page the tools could not be brought back, a long press
+                // could not open the mark dock and a sweep could not report a
+                // word (member: *"the zoom lock is bad it also locks the touches
+                // fix it"*).
+                //
+                // The page WEARS IN here exactly like the magnified page below:
+                // nothing is consumed until the finger has actually travelled
+                // the touch slop, so a tap and a hold are left alone and only a
+                // real drag (or a second finger) is swallowed whole. Consuming
+                // is still what keeps a locked page still — a drag the handler
+                // merely ignored would be taken by the column or the pager under
+                // it and the page would move anyway.
+                //
+                // (`position - previousPosition` rather than `positionChanged()`:
+                // that helper does not exist in this Compose version.)
+                held += event.changes
+                    .sumOf { change ->
+                        (change.position - change.previousPosition).getDistance().toDouble()
+                    }
+                    .toFloat()
+                if (pressed.size >= 2) {
+                    // A pinch's second finger must not read as a tap when it
+                    // lifts (see [ReaderTouch.multi]).
+                    ReaderTouch.multi = true
+                }
+                // A sweep in flight is the selection's, not the lock's: the
+                // member asked for the pan to be frozen, not for words to stop
+                // being selectable (see [ReaderTouch.selecting]).
+                if (!ReaderTouch.selecting &&
+                    (pressed.size >= 2 || held >= viewConfiguration.touchSlop)
                 ) {
                     event.changes.forEach { it.consume() }
                 }
@@ -9162,6 +9718,7 @@ private fun Modifier.pinchToZoom(
                 declined = false
                 travelled = 0f
                 claimedPan = false
+                held = 0f
                 last = null
             }
         } while (event.changes.any { it.pressed })
@@ -9573,6 +10130,122 @@ private fun readerZoomedPan(
     val roomX = ((drawn.width * to - box.width) / 2f).coerceAtLeast(0f)
     val roomY = ((drawn.height * to - box.height) / 2f).coerceAtLeast(0f)
     return Offset(nextX.coerceIn(-roomX, roomX), nextY.coerceIn(-roomY, roomY))
+}
+
+// ── v442 — THE READER'S OWN CLOCK ───────────────────────────────────────────
+//
+// One minute count, one label and one picker, shared by both surfaces the night
+// dim is set on (the appearance sheet and reading settings), so the two can never
+// disagree about what "at sunset" means. The dim itself lives in the reader's own
+// body, ticked half a minute at a time (see the night-dim block there).
+
+/** How many minutes a day holds. The dim's window is stored in these units. */
+internal const val READER_MINUTES_IN_DAY = 24 * 60
+
+/** The reader's clock, in minutes since midnight, from the phone's own time. */
+internal fun readerMinuteOfDay(): Int =
+    // `java.time` and not `Calendar`: minSdk 26 ships it, and it cannot be misread.
+    java.time.LocalTime.now().let { now -> now.hour * 60 + now.minute }
+
+/** "20:00" — a time as the reader wears one. */
+internal fun readerClockLabel(minuteOfDay: Int): String {
+    val safe = minuteOfDay.coerceIn(0, READER_MINUTES_IN_DAY - 1)
+    return "%02d:%02d".format(Locale.US, safe / 60, safe % 60)
+}
+
+/**
+ * v442 — ONE END OF THE DIM'S WINDOW, AS A ROW.
+ *
+ * The reader's own furniture: a capsule that names the end and shows the time, and
+ * whose tap opens the clock. Used by the appearance sheet and by reading settings,
+ * which is why it is `internal` and lives here rather than in either of them.
+ */
+@Composable
+internal fun ReaderClockRow(
+    label: String,
+    minuteOfDay: Int,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = palette.ink.copy(alpha = 0.06f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CurioIcon(CurioIcons.Schedule, null, tint = palette.accent, size = 17.dp)
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = palette.ink.copy(alpha = 0.8f),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                readerClockLabel(minuteOfDay),
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = palette.accent
+            )
+        }
+    }
+}
+
+/**
+ * v442 — AND THE CLOCK ITSELF, ON THE READER'S OWN PAPER.
+ *
+ * A real Material dial rather than a pair of steppers, because the member asked
+ * for a TIME and a dial is how a time is set — wrapped in the reader's paper and
+ * type so it belongs to the page it dims (see [ReaderClockRow]).
+ */
+@Composable
+internal fun ReaderClockDialog(
+    palette: ReaderPalette,
+    minuteOfDay: Int,
+    onDismiss: () -> Unit,
+    onPick: (Int) -> Unit
+) {
+    val picker = rememberTimePickerState(
+        initialHour = (minuteOfDay / 60).coerceIn(0, 23),
+        initialMinute = (minuteOfDay % 60).coerceIn(0, 59),
+        is24Hour = true
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = palette.paper,
+        title = {
+            Text(
+                "Set the time",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace)
+                ),
+                color = palette.ink
+            )
+        },
+        text = { TimePicker(state = picker) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onPick(picker.hour * 60 + picker.minute)
+                    onDismiss()
+                }
+            ) {
+                Text("Set", color = palette.accent)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = palette.ink.copy(alpha = 0.7f))
+            }
+        }
+    )
 }
 
 // @Composable because the default ink asks [isCurioDarkTheme] what the app is

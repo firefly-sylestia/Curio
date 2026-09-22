@@ -95,6 +95,8 @@ internal fun ReaderSettingsScreen(
     onBack: () -> Unit
 ) {
     var moreInks by remember { mutableStateOf(false) }
+    // v442 — WHICH END OF THE DIM'S WINDOW IS BEING SET (see [ReaderClockRow]).
+    var clockPick by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -309,9 +311,17 @@ internal fun ReaderSettingsScreen(
                     onSelect = { at -> ReaderLook.keepScreenOn = at == 0 }
                 )
                 // v440 — WHEN the dim comes on (member: *"Night dim on a schedule
-                // (auto at sunset, not just manual)"*): always, or only once the
-                // phone itself is in its dark theme — which is where a phone set
-                // to automatic crosses sunset (see [ReaderLook.dimAuto]).
+                // (auto at sunset, not just manual)"*): always, or inside a window
+                // of the member's own.
+                //
+                // ── v442 — AND THE WINDOW IS THEIRS TO SET ─────────────
+                //
+                // "At sunset" used to be the phone's own dark theme; it is the two
+                // times below it now, which is what the member asked for (*"add at
+                // sunset customisation to be able to set the tiem"*) — see
+                // [ReaderLook.dimFromMinute] for why, and [ReaderClockRow] for the
+                // rows themselves (the appearance sheet wears the same pair, so the
+                // two surfaces can never disagree).
                 ReaderSegmentRow(
                     segments = listOf(
                         ReaderSegment("Dim always", CurioIcons.DarkMode),
@@ -321,6 +331,34 @@ internal fun ReaderSettingsScreen(
                     palette = palette,
                     onSelect = { at -> ReaderLook.dimAuto = at == 1 }
                 )
+                if (ReaderLook.dimAuto) {
+                    ReaderClockRow(
+                        label = "Dim from",
+                        minuteOfDay = ReaderLook.dimFromMinute,
+                        palette = palette
+                    ) { clockPick = "from" }
+                    ReaderClockRow(
+                        label = "Dim until",
+                        minuteOfDay = ReaderLook.dimUntilMinute,
+                        palette = palette
+                    ) { clockPick = "until" }
+                    if (clockPick.isNotBlank()) {
+                        val settingFrom = clockPick == "from"
+                        ReaderClockDialog(
+                            palette = palette,
+                            minuteOfDay = if (settingFrom) {
+                                ReaderLook.dimFromMinute
+                            } else {
+                                ReaderLook.dimUntilMinute
+                            },
+                            onDismiss = { clockPick = "" },
+                            onPick = { minute ->
+                                if (settingFrom) ReaderLook.dimFromMinute = minute
+                                else ReaderLook.dimUntilMinute = minute
+                            }
+                        )
+                    }
+                }
                 ReaderSliderRow(
                     label = "Night dim",
                     value = ReaderLook.dim,

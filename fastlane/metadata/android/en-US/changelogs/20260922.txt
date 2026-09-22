@@ -1,4 +1,13 @@
 FIX:
+- Reading: the side of the screen answers at once — a side tap waited out the double-tap window before it turned the page and a second tap zoomed instead of turning it; a zone tap is answered the moment your finger lifts, and every tap works.
+- Reading: the motion lock no longer locks the touches — a locked page still hears a tap, a hold and a sweep, and only a real drag is held still.
+- Reading: a sheet closes on a flick as well as a pull — a quick downward throw used to drag a few millimetres and spring back; the flick shuts it now, and the pull that always meant "shut" is shorter.
+- Reading: the highlight dock is a pill, not a shadow — its fill was almost the same colour as the page under it, so the only part of it you could see was its shadow.
+- Reading: the header's animation is one motion — hiding the chrome no longer shrank the title sideways while it left; that shrink belongs to the search opening alone.
+- Reading: the ⋯ menu is sized to its own tiles — it was two thirds empty paper with the tiles crowded into the top.
+- Reading: "At sunset" is the times you set — a dim window from one time until another (20:00 to 06:00 by default), with a clock picker in the appearance sheet and in reading settings.
+- Reading: the dictionary reads the passage you selected — its notable words are offered as chips with the sentence the word came from, and a word with no entry is offered the nearest spellings.
+- Reading: a word's meaning survives how it was written — "Einstein," and "word's" are looked up as the word itself.
 - Reading: the page slider's arrows keep up with a fast hand — a tap stepped from the page the last turn had already been sent to instead of the page it had left behind, so four quick taps earned one page and then nothing until the turn settled.
 - Reading: the page slider is a pill, not a shadow — its fill was almost the same colour as the page it floated over, so the only part of it you could see was its shadow; it is a true capsule now, with the count in a fixed slot so the track never changes size under your finger.
 

@@ -43,6 +43,23 @@ internal data class ReaderDictionarySense(
 )
 
 /**
+ * v442 — A WORD A PASSAGE SUGGESTS, AND THE SENTENCE IT CAME FROM.
+ *
+ * A selection that is a whole passage has no single word to look up, so the sheet
+ * OFFERS the words worth asking about instead of an empty field (the member:
+ * *"improve the dictionary that it suggest word explanation from the selected
+ * para"*). The sentence rides along because a meaning read beside the line it
+ * appeared in is the difference between a dictionary and an answer (the member's
+ * own pick: "chips + context line").
+ */
+internal data class ReaderDictionaryWord(
+    /** The cleaned headword, with the passage's punctuation already off it. */
+    val word: String,
+    /** The one sentence the word stands in, for the sheet's context line. */
+    val sentence: String
+)
+
+/**
  * v440 — WHICH DICTIONARY ANSWERS.
  *
  * Two online doors, chosen by the member in reading settings. It is a two-way
@@ -67,7 +84,134 @@ internal object ReaderDictionary {
     private const val MAX_SENSES = 4
     private const val MAX_GROUPS = 4
 
+    /** At most this many offered words from one passage, and this many spellings. */
+    private const val MAX_SUGGESTIONS = 8
+    private const val MAX_GUESSES = 4
+
     private val cache = ConcurrentHashMap<String, List<ReaderDictionarySense>>()
+
+    /** Spelling suggestions, memoised like the senses are (see [suggest]). */
+    private val guesses = ConcurrentHashMap<String, List<String>>()
+
+    /**
+     * v442 — THE HEADWORD OUT OF WHAT WAS ACTUALLY SELECTED.
+     *
+     * A sweep over a page does not stop politely at the end of a word: it carries
+     * the comma, the full stop, the quote, the bracket that happens to sit beside
+     * it, and sometimes the possessive ("Einstein's"). None of those are part of
+     * the word, and asking Wiktionary for "Einstein," is asking for a headword
+     * that does not exist — which is exactly the member's report (*"make the word
+     * detection better it detects the word even theres a comma or something"*).
+     *
+     * So the edges are stripped — any run of punctuation at either end, the
+     * typographic quotes and dashes included — while everything INSIDE the word is
+     * left alone, because a hyphen and an apostrophe are real parts of real words
+     * (`well-known`, `don't`). The possessive tail goes too: "Einstein's" is looked
+     * up as "Einstein", which is the headword that has the answer.
+     */
+    internal fun headword(raw: String): String {
+        var term = raw.trim()
+        while (term.isNotEmpty() && term.first() in EDGE_PUNCTUATION) term = term.drop(1)
+        while (term.isNotEmpty() && term.last() in EDGE_PUNCTUATION) term = term.dropLast(1)
+        term = term.trim()
+        // A possessive or a plural possessive: the apostrophe and what follows it
+        // are the selection's grammar, not the word's spelling.
+        val tail = term.indexOfLast { it == '\'' || it == '\u2019' }
+        // A three-letter stem minimum: "Einstein's" is a headword's possessive,
+        // while "it's" and "he's" are contractions whose own page has the answer.
+        if (tail > 2 && term.substring(tail + 1).lowercase() in POSSESSIVE_TAILS) {
+            term = term.substring(0, tail)
+        }
+        return term.trim()
+    }
+
+    /**
+     * v442 — WHAT ELSE IT MIGHT HAVE BEEN.
+     *
+     * A lookup that finds nothing is usually a spelling, and a reader who mistyped
+     * a word while sweeping a page should not have to guess which letter was wrong
+     * (the member: *"or a mis type"*). Wiktionary's own search is the honest door
+     * for that — it is the same keyless family the definitions come from, and it
+     * answers with the page names nearest what was asked, which is a spell-check
+     * built from the dictionary itself rather than a second service to trust.
+     *
+     * Only word-shaped answers are offered, the word asked for is never echoed
+     * back as a "suggestion", and misses are memoised like the senses.
+     */
+    internal suspend fun suggest(term: String): List<String> =
+        withContext(Dispatchers.IO) {
+            val asked = headword(term).lowercase()
+            if (asked.isEmpty() || asked.length > 48) return@withContext emptyList()
+            guesses[asked]?.let { return@withContext it }
+            val body = runCatching {
+                val url = "https://en.wiktionary.org/w/api.php?action=opensearch&format=json" +
+                    "&namespace=0&limit=" + MAX_GUESSES + "&search=" + Uri.encode(asked)
+                val conn = URL(url).openConnection() as HttpURLConnection
+                try {
+                    conn.requestMethod = "GET"
+                    conn.connectTimeout = 4_000
+                    conn.readTimeout = 6_000
+                    conn.setRequestProperty("Accept", "application/json")
+                    conn.setRequestProperty("User-Agent", "Curio/1.1 (Android reader dictionary)")
+                    if (conn.responseCode == 200) {
+                        conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    } else {
+                        null
+                    }
+                } finally {
+                    conn.disconnect()
+                }
+            }.getOrNull()
+            val parsed = if (body == null) {
+                emptyList()
+            } else {
+                val out = ArrayList<String>()
+                val names = runCatching { JSONArray(body).optJSONArray(1) }.getOrNull()
+                var i = 0
+                while (names != null && i < names.length() && out.size < MAX_GUESSES) {
+                    val name = headword(names.optString(i))
+                    i += 1
+                    if (name.length < 2) continue
+                    if (!name.all { it.isLetter() || it == '-' || it == '\'' }) continue
+                    if (name.lowercase() == asked) continue
+                    if (out.any { it.equals(name, ignoreCase = true) }) continue
+                    out.add(name)
+                }
+                out
+            }
+            guesses[asked] = parsed
+            parsed
+        }
+
+    /**
+     * v442 — THE WORDS A PASSAGE IS WORTH ASKING ABOUT.
+     *
+     * A selected passage offers its NOTABLE words: long enough to be worth a
+     * definition (five letters up), not one of the words that carry a sentence
+     * rather than mean anything in it, and never the same word twice — so a
+     * paragraph about one idea suggests the few words around it rather than eight
+     * copies of the same one. The sheet draws them as chips (see
+     * [ReaderDictionarySheet]) and each one carries the sentence it stood in.
+     */
+    internal fun wordsIn(passage: String): List<ReaderDictionaryWord> {
+        if (passage.isBlank()) return emptyList()
+        val out = LinkedHashMap<String, ReaderDictionaryWord>()
+        for (match in SENTENCE.findAll(passage)) {
+            val sentence = match.value.replace(WHITESPACE, " ").trim()
+            if (sentence.isEmpty()) continue
+            for (found in WORD.findAll(sentence)) {
+                val word = headword(found.value)
+                val key = word.lowercase()
+                if (word.length < 5) continue
+                if (key in STOP_WORDS) continue
+                if (out.containsKey(key)) continue
+                if (out.size >= MAX_SUGGESTIONS) break
+                out[key] = ReaderDictionaryWord(word, sentence)
+            }
+            if (out.size >= MAX_SUGGESTIONS) break
+        }
+        return out.values.toList()
+    }
 
     /**
      * What [word] means, from the source the member chose (see
@@ -100,8 +244,10 @@ internal object ReaderDictionary {
         source: ReaderDictionarySource
     ): List<ReaderDictionarySense>? =
         withContext(Dispatchers.IO) {
-            val term = word.trim().lowercase()
-            if (term.isBlank() || term.length > 48) return@withContext null
+            // v442 — the word as it WAS WRITTEN is not always the word to ask
+            // for: the selection carries its punctuation (see [headword]).
+            val term = headword(word).lowercase()
+            if (term.isEmpty() || term.length > 48) return@withContext null
             if (!term.all { it.isLetter() || it == '-' || it == '\'' }) return@withContext null
             // The cache is keyed by SOURCE and term: the same word has a different
             // answer in each dictionary, and a shared key would hand one source's
@@ -261,4 +407,61 @@ internal object ReaderDictionary {
         .replace("&gt;", ">")
         .replace(Regex("\\s+"), " ")
         .trim()
+
+    /**
+     * Everything that is not part of a word when it sits at one of its EDGES:
+     * the sentence's punctuation, both quote families, both dash families and the
+     * brackets. Deliberately not the hyphen or the apostrophe — those are letters'
+     * business inside a word (see [headword]).
+     */
+    private const val EDGE_PUNCTUATION =
+        "\"'\u2018\u2019\u201C\u201D.,;:!?()[]{}\u00AB\u00BB/\\*_~`|<>–—… "
+
+    /** The tails that are a word's grammar rather than its spelling. */
+    private val POSSESSIVE_TAILS = setOf("s", "es")
+
+    /**
+     * A word as the sweep may find it — `[A-Za-z]`, and an apostrophe or hyphen
+     * INSIDE it. Four characters minimum, so the short words a sentence is made of
+     * are not offered as lookups.
+     */
+    private val WORD = Regex("[A-Za-z][A-Za-z'\\-]{3,}")
+
+    /** One sentence at a time, for the context line beside a meaning. */
+    private val SENTENCE = Regex("[^.!?]+[.!?]*")
+
+    private val WHITESPACE = Regex("\\s+")
+
+    /**
+     * The words that carry a sentence rather than mean anything in it: offering
+     * "there" or "would" as a lookup would spend the chips on the page's grammar.
+     * Kept to the commonest function words and the reading-verbs a passage of prose
+     * is built from, so the list stays short enough to read and long enough to hide
+     * the noise.
+     */
+    private val STOP_WORDS = setOf(
+        "about", "after", "again", "against", "almost", "along", "already",
+        "although", "always", "among", "another", "anything", "around",
+        "because", "became", "become", "before", "behind", "being", "below",
+        "beside", "better", "between", "beyond", "bring", "came", "cannot",
+        "could", "course", "doing", "down", "during", "each", "either",
+        "enough", "even", "ever", "every", "everything", "except", "father",
+        "felt", "first", "found", "from", "going", "gone", "great", "having",
+        "here", "herself", "himself", "house", "however", "inside", "instead",
+        "into", "itself", "just", "knew", "know", "later", "least", "leave",
+        "less", "life", "like", "little", "long", "looked", "made", "make",
+        "many", "maybe", "might", "more", "most", "mother", "much", "must",
+        "myself", "near", "never", "next", "nothing", "often", "once",
+        "only", "other", "others", "ought", "over", "place", "please",
+        "quite", "rather", "really", "right", "said", "same", "seem",
+        "seemed", "shall", "should", "since", "some", "something",
+        "sometimes", "soon", "still", "such", "sure", "take", "taken",
+        "than", "that", "their", "them", "themselves", "then", "there",
+        "these", "they", "thing", "things", "think", "this", "those",
+        "though", "thought", "three", "through", "time", "together",
+        "toward", "under", "until", "upon", "very", "want", "well", "went",
+        "were", "what", "when", "where", "whether", "which", "while",
+        "whole", "whose", "will", "with", "within", "without", "would",
+        "your", "yourself"
+    )
 }
