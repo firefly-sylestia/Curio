@@ -559,17 +559,17 @@ fun PersonalChipsRow(
                 BookChip(
                     book = book,
                     pinned = book.id == pinnedBookId,
-                    // ── v461 — A CHIP OPENS THE SAME THING ITS CARD DOES ──────
+                    // ── v462 — A CHIP OPENS THE SAME THING ITS CARD DOES ──────
                     //
-                    // The shelf's card lands in the reader when the book has a
-                    // document (see `BookShelfScreen`), and this row is a shortcut
-                    // INTO that shelf — so a chip that went to the book's page
-                    // while the card went to the words would be two answers to one
-                    // tap. Same test, same destinations.
+                    // The shelf's card now opens straight to the reader ONLY for the
+                    // pinned book (see `BookShelfScreen`), and this row is a shortcut
+                    // INTO that shelf — so it follows the same rule: the pinned book
+                    // (which already leads this row) goes to the reader, every other
+                    // chip goes to the book's page. Same test, same destinations.
                     onClick = {
-                        val target = if (
+                        val opensToReader = book.id == pinnedBookId &&
                             BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()
-                        ) {
+                        val target = if (opensToReader) {
                             CurioRoutes.reader(book.id)
                         } else {
                             CurioRoutes.bookDetail(book.id)

@@ -211,20 +211,21 @@ fun BookShelfScreen(navController: NavController) {
                         // only way to find out was to leave the shelf and look at
                         // Home's row.
                         pinned = book.id == AppPreferences.pinnedBookIdState,
-                        // ── v461 — A BOOK YOU CAN OPEN OPENS ─────────────────
+                        // ── v462 — ONLY THE PINNED BOOK OPENS STRAIGHT TO ITS FILE ─
                         //
-                        // The member: *"a way for user to open the added book
-                        // directly without going through the book detail"*. The
-                        // card went to the book's PAGE because that page is where
-                        // a file gets attached — but once a book HAS a document,
-                        // the page in the middle of the tap is a detour between a
-                        // reader and their own reading. So the tap asks the same
-                        // question the detail page's read pill asks (`BookFiles
-                        // .documentOf`) and lands in the reader when there is
-                        // something to read, in the detail page when there is
-                        // not — which is exactly where the file can be attached.
+                        // The member: *"the book direct file open should only happen
+                        // when it's pinned. and from my shelf page I should be able to
+                        // open it by detail screen if I want to"*. The direct-to-reader
+                        // shortcut is now the pinned book's privilege alone — the pin
+                        // is the member saying *this is the one I'm reading, take me
+                        // in*. Every other tap lands on the book's own page, which is
+                        // both where the reading is opened by choice and where a file
+                        // is attached. The hold menu (below) still offers the reader
+                        // for any book that has a document.
                         onClick = {
-                            val target = if (BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()) {
+                            val opensToReader = book.id == AppPreferences.pinnedBookIdState &&
+                                BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()
+                            val target = if (opensToReader) {
                                 CurioRoutes.reader(book.id)
                             } else {
                                 CurioRoutes.bookDetail(book.id)
@@ -246,10 +247,13 @@ fun BookShelfScreen(navController: NavController) {
                     BookShelfCard(
                         book = book,
                         pinned = book.id == AppPreferences.pinnedBookIdState,
-                        // The same rule for a finished book: a document opens, an
-                        // empty one asks for its file first (see the reading row).
+                        // The same rule for a finished book: only the pinned book
+                        // opens straight to the reader; every other tap goes to the
+                        // book's page (see the reading row).
                         onClick = {
-                            val target = if (BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()) {
+                            val opensToReader = book.id == AppPreferences.pinnedBookIdState &&
+                                BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()
+                            val target = if (opensToReader) {
                                 CurioRoutes.reader(book.id)
                             } else {
                                 CurioRoutes.bookDetail(book.id)
@@ -309,6 +313,16 @@ fun BookShelfScreen(navController: NavController) {
                             navController.navigate(CurioRoutes.reader(book.id)) {
                                 launchSingleTop = true
                             }
+                        }
+                    }
+                    // v462 — the way to the detail page from a tap-and-hold, now that
+                    // a plain tap only reaches the reader for the pinned book. The
+                    // member asked to still be able to "open it by detail screen if I
+                    // want to with tap and hold options" — this is that door.
+                    BookActionRow(CurioIcons.Info, "View book page") {
+                        pendingDelete = null
+                        navController.navigate(CurioRoutes.bookDetail(book.id)) {
+                            launchSingleTop = true
                         }
                     }
                     BookActionRow(
