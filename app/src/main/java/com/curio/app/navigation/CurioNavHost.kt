@@ -118,6 +118,7 @@ import com.curio.app.features.personal.TodoScreen
 import com.curio.app.features.personal.TopicNoteScreen
 import com.curio.app.features.personal.PersonalPhotoOverlay
 import com.curio.app.features.personal.rememberPersonalPhotoOverlayState
+import com.curio.app.features.profile.ProfileEditScreen
 import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
@@ -1215,6 +1216,12 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.PROFILE) {
                 ProfileScreen(navController = navController)
+            }
+            // v444 — the identity editor, as a PAGE of its own (it was a dialog
+            // on the profile page). A plain forward push, so it arrives with the
+            // nav host's own calm slide + fade and needs nothing special here.
+            composable(CurioRoutes.PROFILE_EDIT) {
+                ProfileEditScreen(navController = navController)
             }
             composable(CurioRoutes.QUESTS) {
                 QuestsScreen(navController = navController)

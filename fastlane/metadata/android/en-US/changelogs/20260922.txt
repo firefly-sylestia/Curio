@@ -1,3 +1,9 @@
+ADD:
+- Profile: Edit profile is a page of its own instead of a dialog — a quiet title, your picture with its camera disc and two actions, your name and bio as open fields, your account flat under ACCOUNT, one tap anywhere on the Privacy row, and Cancel / Save changes held at the bottom.
+- Profile: tapping your picture opens it over the page, with the ⋯ there to remove the photo.
+- Profile: your username saves with Save changes — the field checks it as you type, and the terms are the same dialog the account card already shows.
+- Profile: signed out, the account is one calm "Sign in to Curio" row instead of a form inside the page.
+
 FIX:
 - Reading: a scroll over the reading-progress bar no longer moves it — the bar took any movement as a scrub, so a finger running down the page that passed over it moved your place AND stopped the page from scrolling; it waits for a sideways move, and a downward one belongs to the page.
 - Reading: the highlight dock's colours are a switch — the colour a passage already wears is drawn as taken, and pressing it again takes the highlight back; the cross at the end of the dock is gone.

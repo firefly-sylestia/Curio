@@ -284,6 +284,10 @@ object CurioRoutes {
 
     // ── Push destinations (no bottom nav)
     const val PROFILE = "profile"
+    /** v444 — EDIT PROFILE as a PAGE. The identity editor (picture, name,
+     *  bio, the account's handle, privacy, sign out) used to be a dialog on the
+     *  profile page; it is its own full screen now (see [ProfileEditScreen]). */
+    const val PROFILE_EDIT = "profile/edit"
     const val QUESTS = "quests"
     // v174c — the Curiosity Stats page (observatory constellation + all
     // lifetime stats), reachable from the drawer and Profile.

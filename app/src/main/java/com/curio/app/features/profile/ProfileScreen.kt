@@ -1,18 +1,11 @@
 package com.curio.app.features.profile
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -34,22 +27,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -65,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -79,29 +63,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
-import android.net.Uri
-import androidx.compose.ui.unit.IntRect
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsCardAccentInk
-import com.curio.app.ui.components.AvatarCropDialog
 import com.curio.app.ui.components.CurioMemberAvatar
-import com.curio.app.ui.components.ProfileAvatarImage
 import com.curio.app.ui.components.hasOwnPicture
-import java.io.File
-import com.curio.app.features.community.SocialConfirmDialog
 import com.curio.app.features.community.SocialModerationHistoryCard
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
@@ -114,7 +86,6 @@ import com.curio.app.data.StreakTracker
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.ModerationRecord
 import com.curio.app.data.supabase.OnlineAccount
-import com.curio.app.data.supabase.SocialApi
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -146,19 +117,11 @@ import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.activeNamedTheme
-import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
-import com.curio.app.features.settings.CurioAccountIdentityCard
-import com.curio.app.features.settings.CurioAuthCard
-import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioDialogActionButtonColors
-import com.curio.app.ui.theme.curioDialogActionColor
-import com.curio.app.ui.theme.curioDialogContainerColor
-import com.curio.app.ui.theme.curioProfileDialogColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.curioRoseInk
@@ -167,14 +130,9 @@ import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.pastelFillInk
-import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
-import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Profile hub — identity + stats only (v7.38 — Home torn-banner redesign).
@@ -243,86 +201,17 @@ fun ProfileScreen(navController: NavController) {
     // lock prevents the second pop from firing.
     var isPopping by remember { mutableStateOf(false) }
     var displayName by remember { mutableStateOf(AppPreferences.getDisplayName(context)) }
-    var showNameDialog by remember { mutableStateOf(false) }
-    var nameInput by remember(displayName) { mutableStateOf(displayName) }
-    // v97 — the tagline (the line under the name) is edited in the SAME
-    // "Edit profile" dialog as the name — no separate tagline dialog. The
-    // revision bump re-reads the pref so the hero updates instantly after
-    // saving. The automatic line derives from the DISPLAY streak.
-    var taglineInput by remember { mutableStateOf("") }
-    var taglineRevision by remember { mutableIntStateOf(0) }
-    // Signing out from the editor asks first, like every other irreversible
-    // move in this app.
-    var confirmingSignOut by remember { mutableStateOf(false) }
-    var signingOut by remember { mutableStateOf(false) }
-    // v103 — profile avatar: a user-picked photo kept in the app's
-    // private files dir. Each pick gets a fresh filename so the
-    // remember(path) bitmap caches reload; the path pref is also read by
-    // the Home drawer hero.
-    // v115 — the photo is DECODED (EXIF-rotated, downscaled) and saved as
-    // a CENTER-SQUARE crop (auto-crop from the middle by default, so
-    // portrait/tall photos fill the square avatar instead of squishing),
-    // with the editable source kept alongside for the manual crop editor.
+    // ── v444 — THE IDENTITY EDITOR IS A PAGE OF ITS OWN ──────────────────
+    //
+    // The name, the bio, the photo (with its crop editor), the account's
+    // handle, Privacy and Sign out all live on [ProfileEditScreen] now, reached
+    // through [CurioRoutes.PROFILE_EDIT] from every "Edit profile" door this
+    // page offers. What is left HERE is only what this page DRAWS: the path of
+    // the picture the hero wears. The editor writes the same preference, and
+    // this page re-reads it on every entry (see the LaunchedEffect below), so a
+    // picture added there is on the hero the moment the member comes back.
     var avatarPath by remember { mutableStateOf(AppPreferences.getProfileAvatarPath(context)) }
-    // The editable source bitmap for the crop editor — non-null while the
-    // crop dialog is open (rendered above the edit dialog).
-    var cropSource by remember { mutableStateOf<Bitmap?>(null) }
     val scope = rememberCoroutineScope()
-    // Saves the avatar — center-square auto-crop by default, or the manual
-    // crop rect from the crop editor. Stores BOTH the square avatar and
-    // the editable source (so Crop can re-frame the original photo).
-    // NOTE: declared BEFORE the picker below — local functions can't be
-    // forward-referenced in Kotlin (the picker's lambda calls saveAvatar).
-    fun saveAvatar(source: Bitmap, cropRect: IntRect?) {
-        val cropped = if (cropRect == null) {
-            centerSquareCrop(source)
-        } else {
-            val r = cropRect
-            val clamped = android.graphics.Rect(
-                r.left.coerceIn(0, source.width), r.top.coerceIn(0, source.height),
-                r.right.coerceIn(0, source.width), r.bottom.coerceIn(0, source.height)
-            )
-            if (clamped.width() > 0 && clamped.height() > 0) {
-                centerSquareCrop(
-                    Bitmap.createBitmap(source, clamped.left, clamped.top, clamped.width(), clamped.height())
-                )
-            } else centerSquareCrop(source)
-        }
-        val avatar = scaleToMax(cropped, 512)
-        val ts = System.currentTimeMillis()
-        val srcFile = File(context.filesDir, "profile_avatar_src_$ts.png")
-        val avatarFile = File(context.filesDir, "profile_avatar_$ts.png")
-        runCatching { srcFile.outputStream().use { source.compress(Bitmap.CompressFormat.PNG, 100, it) } }
-        runCatching { avatarFile.outputStream().use { avatar.compress(Bitmap.CompressFormat.PNG, 100, it) } }
-        // Replace any previous avatar/source files (the fresh names keep
-        // the remember(path) caches re-keyed).
-        context.filesDir.listFiles()
-            ?.filter { it.name.startsWith("profile_avatar_") && it != srcFile && it != avatarFile }
-            ?.forEach { it.delete() }
-        avatarPath = if (avatarFile.exists() && avatarFile.length() > 0L) avatarFile.absolutePath else ""
-        AppPreferences.setProfileAvatarPath(context, avatarPath)
-    }
-    val avatarPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        scope.launch {
-            val src = withContext(Dispatchers.IO) { decodeAvatarSource(context, uri) }
-            // v117 — the pick does NOT apply immediately: it opens the crop
-            // editor first, so the user frames the square before anything
-            // is saved (Apply saves; canceling discards the pick).
-            if (src != null) cropSource = src
-        }
-    }
-    fun removeAvatar() {
-        avatarPath.takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
-        context.filesDir.listFiles()
-            ?.filter { it.name.startsWith("profile_avatar_") }
-            ?.forEach { it.delete() }
-        avatarPath = ""
-        cropSource = null
-        AppPreferences.setProfileAvatarPath(context, "")
-    }
     var crashCount by remember { mutableIntStateOf(0) }
     var totalSaved by remember { mutableIntStateOf(0) }
     var categoryCounts by remember { mutableStateOf<Map<CategoryId, Int>>(emptyMap()) }
@@ -366,6 +255,12 @@ fun ProfileScreen(navController: NavController) {
     }
 
     LaunchedEffect(Unit) {
+        // v444 — the editor is a page now, so what this page DRAWS of the
+        // member's identity is re-read on every entry into it (the hero's name
+        // line and the picture it wears). One preference read each, and the
+        // hero can never lag behind an edit made one screen away.
+        displayName = AppPreferences.getDisplayName(context)
+        avatarPath = AppPreferences.getProfileAvatarPath(context)
         refreshStats()
         OnlineAccount.restore(context)
         // Feed the quests system — visiting Profile completes the journey quest.
@@ -393,7 +288,7 @@ fun ProfileScreen(navController: NavController) {
     val progress = CurioQuests.xpProgress(displayXp)
     // v53 — the hero tagline (custom pref or the streak-based automatic
     // line).
-    val heroTagline = remember(taglineRevision, displayStreak) {
+    val heroTagline = remember(displayStreak) {
         AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
     }
 
@@ -412,81 +307,8 @@ fun ProfileScreen(navController: NavController) {
     val heroFill = profileRoseAccent()
     val heroInk = profileReadableInk(heroFill)
 
-    ProfileDialogs(
-        showEditDialog = showNameDialog,
-        // v103 — the avatar photo applies immediately when picked.
-        avatarPath = avatarPath,
-        nameInput = nameInput,
-        onNameInputChange = { nameInput = it },
-        onPickAvatar = { avatarPicker.launch("image/*") },
-        onRemoveAvatar = { removeAvatar() },
-        cropSource = cropSource,
-        onCropApply = { rect ->
-            cropSource?.let { src -> saveAvatar(src, rect) }
-            cropSource = null
-        },
-        onCropDismiss = { cropSource = null },
-        taglineInput = taglineInput,
-        onTaglineInputChange = { taglineInput = it },
-        onSignOut = {
-            showNameDialog = false
-            cropSource = null
-            confirmingSignOut = true
-        },
-        onOpenPrivacy = {
-            // The dialog closes first: Privacy is a full page in the settings
-            // family, and leaving the edit dialog behind it would stack two
-            // modals over the profile.
-            showNameDialog = false
-            cropSource = null
-            navController.navigate(CurioRoutes.SETTINGS_PRIVACY) { launchSingleTop = true }
-        },
-        onDismiss = {
-            showNameDialog = false
-            cropSource = null
-        },
-        onSave = {
-            displayName = nameInput.trim().ifBlank { "Curious Explorer" }
-            AppPreferences.setDisplayName(context, displayName)
-            // The account's DISPLAY name travels too: the wall, the replies and
-            // every profile now LEAD with it, with the @username underneath.
-            // Local first (so the hero moves at once), mirrored best-effort —
-            // an offline save is never blocked by a failed push.
-            OnlineAccount.state.session?.accessToken?.let { active ->
-                scope.launch {
-                    SocialApi.updateDisplayName(active, displayName)
-                    // The bio is the account's PUBLIC line too, not only the
-                    // hero's tagline: a profile shows it to other members, so
-                    // it travels with the name.
-                    SocialApi.updateBio(active, taglineInput)
-                }
-            }
-            // v97 — the tagline (the Bio) saves with the same Edit profile
-            // dialog; an empty value keeps the automatic streak line.
-            AppPreferences.setCustomStreakTagline(context, taglineInput)
-            taglineRevision++
-            showNameDialog = false
-        }
-    )
-
-    if (confirmingSignOut) {
-        SocialConfirmDialog(
-            title = "Sign out of Curio?",
-            body = "Online mode turns off and nothing online loads until you sign in again. " +
-                "Your captures, recordings and conversations stay on this device.",
-            confirmLabel = "Sign out",
-            busy = signingOut,
-            onDismiss = { if (!signingOut) confirmingSignOut = false },
-            onConfirm = {
-                signingOut = true
-                scope.launch {
-                    OnlineAccount.signOut(context)
-                    signingOut = false
-                    confirmingSignOut = false
-                }
-            }
-        )
-    }
+    // v444 — nothing is composed for the editor here: this page OPENS it (see
+    // the doors below) and re-reads what it drew the moment it comes back.
 
     // v7.38 — Profile joins the Home torn-banner family: the rose banner
     // tears at the bottom (same bold soft tear + theme under-sheet), wears
@@ -583,11 +405,7 @@ fun ProfileScreen(navController: NavController) {
                     // pinned morph bar (see profileStickyProgress above).
                     reserveHeight = glassHeaderReserve,
                     onEditName = {
-                        nameInput = displayName
-                        // v97 — the tagline field rides the same Edit profile
-                        // dialog now (no separate tagline dialog).
-                        taglineInput = AppPreferences.getCustomStreakTagline(context)
-                        showNameDialog = true
+                        navController.navigate(CurioRoutes.PROFILE_EDIT) { launchSingleTop = true }
                     }
                 )
             }
@@ -746,11 +564,7 @@ fun ProfileScreen(navController: NavController) {
                 streakCount = displayStreak,
                 onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
                 onEditClick = {
-                    nameInput = displayName
-                    // v97 — the tagline field rides the same Edit profile
-                    // dialog now (no separate tagline dialog).
-                    taglineInput = AppPreferences.getCustomStreakTagline(context)
-                    showNameDialog = true
+                    navController.navigate(CurioRoutes.PROFILE_EDIT) { launchSingleTop = true }
                 },
                 // v3xx22 — the restored Edit + streak action row in the FULL
                 // bar (the torn hero's action pills, brought back into the
@@ -761,12 +575,10 @@ fun ProfileScreen(navController: NavController) {
                     } else {
                         lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioPillTintLift(), 0.38f)
                     }
-                    // Edit profile — opens the same edit dialog as the torn hero.
+                    // Edit profile — the same page as the torn hero's Edit.
                     Surface(
                         onClick = {
-                            nameInput = displayName
-                            taglineInput = AppPreferences.getCustomStreakTagline(context)
-                            showNameDialog = true
+                            navController.navigate(CurioRoutes.PROFILE_EDIT) { launchSingleTop = true }
                         },
                         shape = RoundedCornerShape(50),
                         color = actionPillBg,
@@ -969,396 +781,6 @@ fun ProfileScreen(navController: NavController) {
  *  Profile also carried a plain Settings card in its list, so the screen had
  *  two doors to one place; the member chose to keep the card. The class of
  *  pill is still live on Home (`TopBarPill`) if one is ever needed again. */
-
-@Composable
-private fun ProfileDialogs(
-    showEditDialog: Boolean,
-    // v103 — the profile avatar photo path ("" = none).
-    avatarPath: String,
-    nameInput: String,
-    onNameInputChange: (String) -> Unit,
-    onPickAvatar: () -> Unit,
-    onRemoveAvatar: () -> Unit,
-    // The crop editor source bitmap — non-null while cropping (rendered
-    // ABOVE the edit dialog so the crop window is on top).
-    cropSource: Bitmap?,
-    onCropApply: (IntRect) -> Unit,
-    onCropDismiss: () -> Unit,
-    // v97 — the tagline (the line under the name) edits in the SAME
-    // "Edit profile" dialog — the separate tagline dialog is gone.
-    // v170 — the field is presented as the "Bio" now; leaving it empty
-    // still falls back to the automatic streak line (the "Use automatic
-    // tagline" button + helper texts are gone).
-    taglineInput: String,
-    onTaglineInputChange: (String) -> Unit,
-    /** Opens Settings → Privacy from inside the dialog. */
-    onOpenPrivacy: () -> Unit,
-    /** Signs the account out (confirmed by the caller). */
-    onSignOut: () -> Unit,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit
-) {
-    // ── v439 — A CONTEXT A CLICK CAN HOLD ───────────────────────────────
-    //
-    // `LocalContext.current` is @Composable and the blob door's `onClick` is a
-    // plain lambda (see AGENTS rule 3), so it is read HERE, in the composable's
-    // own scope, and captured. The last build failed on exactly this.
-    val actionContext = LocalContext.current
-    if (showEditDialog) {
-        AlertDialog(
-            // The profile's own editor wears the PAGE's surface with the brand
-            // rose breathed in, not the tan container the rest of the dialogs
-            // use: on this page that tan read as a coffee-cream slab.
-            containerColor = curioProfileDialogColor(),
-            shape = CurioDialogShape,
-            // v3xx55 — the dialog is WIDER than the platform default: it holds
-            // the photo picker, both identity fields and the whole Curio
-            // account section (sign in / create account when signed out), and
-            // the default width squeezed all of that into a column of wrapped
-            // labels. 94% of the window, capped at 520dp so it still reads as
-            // a dialog and never as a full-screen page.
-            modifier = Modifier
-                .fillMaxWidth(0.94f)
-                .widthIn(max = 520.dp),
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            onDismissRequest = onDismiss,
-            title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
-            text = {
-                val account = OnlineAccount.state
-                // The body ARRIVES rather than appearing: one short fade with a
-                // small rise, the motion the app's sheets already use. Keyed on
-                // the dialog's own lifetime, so it plays once per open.
-                val revealed = remember {
-                    MutableTransitionState(false).apply { targetState = true }
-                }
-                AnimatedVisibility(
-                    visibleState = revealed,
-                    enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
-                        slideInVertically(
-                            animationSpec = tween(CurioMotion.Durations.Quick),
-                            initialOffsetY = { it / 22 }
-                        )
-                ) {
-                // v170 — section hierarchy: Profile photo (bigger label +
-                // icon), Your name, Bio. The tagline field IS the Bio — the
-                // "Tagline" label, the "Use automatic tagline" button and
-                // both helper texts are gone (leaving it empty still falls
-                // back to the automatic streak line on the hero).
-                // v3xx — the body scrolls now that the Curio account section
-                // (sign in · username · portrait) lives here too, so the last
-                // section is never clipped on a short screen.
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // ── Your portrait ──
-                    // One section, one identity: the photo (this device's
-                    // picture, cropped by the member) and the Curio icon
-                    // Social actually shows. They used to sit at opposite ends
-                    // of the dialog with a heading each, which is why choosing
-                    // a portrait meant scrolling past the account form to find
-                    // half of it.
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // v117 - a clean preview with NO badge and no tap-to-
-                        // crop: every pick opens the crop editor BEFORE anything
-                        // is saved, so the avatar is always framed by the user.
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(14.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(84.dp)
-                                    .clip(CircleShape)
-                                    .background(curioPillTintLift()),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                // v439 — the same resolution the hero uses, so the
-                                // preview and the hero can never disagree about
-                                // what the member is wearing.
-                                if (hasOwnPicture(avatarPath)) {
-                                    CurioMemberAvatar(avatarPath, Modifier.fillMaxSize())
-                                } else {
-                                    Text(
-                                        nameInput.firstOrNull()?.uppercase().orEmpty(),
-                                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                EditSectionLabel(icon = CurioIcons.Person, text = "Your picture")
-                                Text(
-                                    // v435 — the line used to promise the icon
-                                    // travelled into Social, which was true when
-                                    // a portrait was a thing you picked. Your
-                                    // face is now DERIVED from your handle, so
-                                    // the honest statement is: this photo is
-                                    // local, and Social draws you from your
-                                    // username.
-                                    if (AppPreferences.profileAvatarBlobState) {
-                                        "Your blob, drawn from your @username \u2014 the " +
-                                            "same face Social shows. Your photo is kept."
-                                    } else {
-                                        "This photo stays on this device \u2014 in Social " +
-                                            "your face is drawn from your @username."
-                                    },
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    DialogPillAction(
-                                        label = if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
-                                        accent = true,
-                                        onClick = onPickAvatar
-                                    )
-                                    // ── v439 — OR WEAR YOUR BLOB ─────────────
-                                    //
-                                    // The member: *"let user set that blob as
-                                    // their pfp in app profile too"*. It is the
-                                    // face Social already draws them from their
-                                    // handle, so it is offered here BESIDE the
-                                    // photo rather than instead of it: the pick
-                                    // is remembered on its own and the photo on
-                                    // this device is left exactly where it is,
-                                    // so switching back puts it straight on again.
-                                    DialogPillAction(
-                                        label = if (AppPreferences.profileAvatarBlobState) {
-                                            "Use a photo"
-                                        } else {
-                                            "Use my blob"
-                                        },
-                                        onClick = {
-                                            // The captured context: this dialog
-                                            // composable takes no context parameter,
-                                            // and the name `context` resolves to a
-                                            // function in this file's scope.
-                                            AppPreferences.setProfileAvatarBlob(
-                                                actionContext,
-                                                !AppPreferences.profileAvatarBlobState
-                                            )
-                                        }
-                                    )
-                                    if (avatarPath.isNotBlank()) {
-                                        DialogPillAction(
-                                            label = "Remove",
-                                            destructive = true,
-                                            onClick = onRemoveAvatar
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Your name ──
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        EditSectionLabel(icon = CurioIcons.Person, text = "Your name")
-                        OutlinedTextField(
-                            value = nameInput,
-                            onValueChange = onNameInputChange,
-                            singleLine = true,
-                            shape = RoundedCornerShape(16.dp),
-                            placeholder = { Text("Your name") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    // ── Bio ──
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        EditSectionLabel(icon = CurioIcons.Note, text = "Bio")
-                        OutlinedTextField(
-                            value = taglineInput,
-                            onValueChange = onTaglineInputChange,
-                            singleLine = true,
-                            shape = RoundedCornerShape(16.dp),
-                            placeholder = { Text("Keep the spark going today.") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    // ── Curio account ──
-                    // The community tab row is gone from Profile; this is now
-                    // the one place the account lives. Signed out it is the
-                    // sign-in / create-account form; signed in it is the
-                    // username, stated in one line.
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        EditSectionLabel(icon = CurioIcons.Person, text = "Curio account")
-                        if (account.signedIn) {
-                            CurioAccountIdentityCard(email = account.email)
-                        } else {
-                            // v3xx60 — signed out, the account is a TOGGLE: one
-                            // calm row states the offer and opens the form. It
-                            // never appears once the member is signed in — the
-                            // identity card takes its place above.
-                            var signInOpen by remember { mutableStateOf(false) }
-                            Surface(
-                                onClick = { signInOpen = !signInOpen },
-                                shape = RoundedCornerShape(16.dp),
-                                color = curioPillTintLift(),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    CurioIcon(
-                                        name = CurioIcons.Person,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        size = 18.dp
-                                    )
-                                    Spacer(Modifier.width(10.dp))
-                                    Text(
-                                        text = "Sign in to Curio",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    val chevron by animateFloatAsState(
-                                        targetValue = if (signInOpen) 180f else 0f,
-                                        animationSpec = tween(CurioMotion.Durations.Quick),
-                                        label = "profileSignInChevron"
-                                    )
-                                    CurioIcon(
-                                        name = CurioIcons.KeyboardArrowDown,
-                                        contentDescription = if (signInOpen) "Collapse" else "Expand",
-                                        modifier = Modifier.rotate(chevron),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        size = 18.dp
-                                    )
-                                }
-                            }
-                            AnimatedVisibility(visible = signInOpen) {
-                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    Text(
-                                        "Sign in to claim a username, carry your portrait into Social and " +
-                                            "keep your liked topics in sync.",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    CurioAuthCard()
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Privacy ──
-                    // One door to the member's own rules (who sees the
-                    // profile, whether activity is drawn, who is blocked).
-                    // The page itself lives in the settings family, so this is
-                    // a button rather than a third copy of the switches.
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        EditSectionLabel(icon = CurioIcons.VisibilityOff, text = "Privacy")
-                        Text(
-                            "Who can open your profile, whether your activity is shown, and " +
-                                "who you have blocked.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        DialogPillAction(
-                            label = "Open privacy settings",
-                            accent = true,
-                            onClick = onOpenPrivacy
-                        )
-                    }
-
-                    // ── Account actions ──
-                    // Signing out belongs where the account is edited, not one
-                    // page away in Settings, which is where it was.
-                    if (account.signedIn) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            EditSectionLabel(icon = CurioIcons.Close, text = "Account")
-                            DialogPillAction(
-                                label = "Sign out",
-                                destructive = true,
-                                onClick = onSignOut
-                            )
-                        }
-                    }
-                }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onSave, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Cancel") }
-            }
-        )
-    }
-    // v115 — the crop editor, composed AFTER the edit dialog so its window
-    // stacks on top. Canceling the edit dialog also clears the crop state
-    // (the caller's onDismiss does both), so a stray crop never lingers.
-    cropSource?.let { src ->
-        AvatarCropDialog(
-            bitmap = src,
-            onConfirm = onCropApply,
-            onDismiss = onCropDismiss
-        )
-    }
-}
-
-/** v170 — a section heading in the Edit profile dialog: a small glyph +
- *  bold titleMedium label, so "Profile photo · Your name · Bio" read as a
- *  clear hierarchy instead of a wall of helper text. */
-@Composable
-private fun EditSectionLabel(icon: String, text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        CurioIcon(
-            name = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            size = 16.dp
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
-
-/** One small pill action inside the Edit profile dialog — the app's pill
- *  language (50% radius, accent fill or a calm surface) instead of the
- *  flat stock text buttons the dialog used before v115. */
-@Composable
-private fun DialogPillAction(
-    label: String,
-    onClick: () -> Unit,
-    accent: Boolean = false,
-    destructive: Boolean = false
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = when {
-            accent -> curioDialogActionColor()
-            destructive -> MaterialTheme.colorScheme.errorContainer
-            else -> MaterialTheme.colorScheme.surfaceContainerHigh
-        },
-        contentColor = when {
-            accent -> Color.White
-            destructive -> MaterialTheme.colorScheme.error
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        }
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-        )
-    }
-}
 
 /**
  * v7.38 — Profile's hero joins the Home torn-banner family. The solid rose
@@ -2148,79 +1570,3 @@ private fun taglineForStreak(streakDays: Int): String = when {
 // v7.40 — level math now lives in the shared quests system (CurioQuests):
 // XP-based thresholds, titles, and progress. Removed the old saved-count
 // levelFor / progressTowardsNextLevel / levelTitle helpers.
-
-// ── Avatar image pipeline (v115) ──────────────────────────────────────────
-// Pick → decode (EXIF-rotated + bounded) → CENTER-SQUARE auto-crop (portrait
-// photos fill the square avatar instead of squishing) → save BOTH the square
-// avatar and the editable source beside it, so the crop editor can re-frame
-// the original photo. The manual crop hands back a source-pixel [IntRect].
-
-/** Decodes a picked image EXIF-correctly and bounded (never full-size, so a
- *  40MP camera photo can't OOM the decode). Uses BitmapFactory for EVERY
- *  API level: it never applies EXIF orientation itself (documented), so the
- *  framework [ExifInterface] rotation below is applied identically on all
- *  devices — ImageDecoder's EXIF behavior varies across Android versions
- *  (auto-apply on some, not on others) and has no public toggle, so a
- *  single deterministic path avoids both double-rotation and compile/API
- *  availability risk. */
-private fun decodeAvatarSource(context: Context, uri: Uri): Bitmap? = runCatching {
-    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-    var sample = 1
-    while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= 2048) sample *= 2
-    val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-    val decoded = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
-        ?: return@runCatching null
-    // Framework ExifInterface (API 24+) handles content:// URIs — rotate to
-    // upright before any cropping so the square comes from the RIGHT photo.
-    val rotation = runCatching {
-        context.contentResolver.openInputStream(uri)?.use { stream ->
-            ExifInterface(stream).getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
-            )
-        }
-    }.getOrNull() ?: ExifInterface.ORIENTATION_NORMAL
-    if (rotation == ExifInterface.ORIENTATION_NORMAL) return@runCatching decoded
-    val matrix = Matrix().apply {
-        when (rotation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> postRotate(90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> postRotate(180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> postRotate(270f)
-            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> postScale(-1f, 1f)
-            ExifInterface.ORIENTATION_FLIP_VERTICAL -> postScale(1f, -1f)
-            ExifInterface.ORIENTATION_TRANSPOSE -> {
-                postRotate(90f)
-                postScale(-1f, 1f)
-            }
-            ExifInterface.ORIENTATION_TRANSVERSE -> {
-                postRotate(270f)
-                postScale(-1f, 1f)
-            }
-        }
-    }
-    Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
-}.getOrNull()
-
-/** The default avatar crop — the largest centered square (auto-crop from
- *  the MIDDLE, so tall portrait photos fill the square avatar instead of
- *  squishing). */
-private fun centerSquareCrop(source: Bitmap): Bitmap {
-    val size = min(source.width, source.height)
-    val left = (source.width - size) / 2
-    val top = (source.height - size) / 2
-    return Bitmap.createBitmap(source, left, top, size, size)
-}
-
-/** Downscales to at most [maxSide] pixels on the long side (the avatar is
- *  stored at 512px — small, fast to reload, plenty for a circle). */
-private fun scaleToMax(bitmap: Bitmap, maxSide: Int): Bitmap {
-    if (bitmap.width <= maxSide && bitmap.height <= maxSide) return bitmap
-    val scale = maxSide.toFloat() / max(bitmap.width, bitmap.height)
-    return Bitmap.createScaledBitmap(
-        bitmap,
-        (bitmap.width * scale).roundToInt(),
-        (bitmap.height * scale).roundToInt(),
-        true
-    )
-}

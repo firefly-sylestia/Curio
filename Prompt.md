@@ -6,7 +6,109 @@ from the state rather than from memory.
 
 ---
 
-## 1. The request (this session) — §38
+## 0. THE CURRENT REQUEST — §39 — the Edit profile page, as a full screen
+
+> this ia the desin specification of edit profile and instead of dialog box make it a full screen
+> with this style kee the backgorud and color theme aware and kee the backgroud plain thi sis the
+> modified only and ask question of anythign else, + the spec pasted below.
+
+**The spec, in one line each:** editorial, calm, minimal, tactile; theme-aware plain background;
+no gradients, no glassmorphism, no decorative cards; a small back button, a large quiet
+"Edit profile" title and one supporting sentence; the picture centred with a small camera disc
+overlapping it and exactly two compact actions under it; NAME and BIO as OPEN FIELDS with a
+subtle bottom border (never a box in a box); an ACCOUNT section of flat EMAIL (muted/locked) and
+USERNAME rows with a small supporting terms line; ONE tappable PRIVACY row; Cancel + Save
+changes fixed at the foot (quiet + solid berry, same height, same radius); one typeface with a
+calm hierarchy (nothing every-heading-bold); and an 8dp spacing base (8/16/24/32/40) where
+important elements get more SPACE rather than another card.
+
+**Decisions, all confirmed with the member before editing** (the ask round for this request):
+
+- **Signed OUT** → one calm row ("Sign in to Curio") that opens the existing account surface
+  (`CurioRoutes.SETTINGS_ONLINE`), never a form squatting inside the page.
+- **Sign out** lives at the BOTTOM of this screen (row + the existing confirm dialog).
+- **The picture**: exactly TWO actions (Add/Change photo · Use my blob / Use my photo). Tapping
+  the picture itself expands it over the page, and the ⋯ in that expansion offers removal
+  (the deletion door the dialog used to have).
+- **Terms** → the SAME dialog the account card already shows (one `private` → `internal` flip on
+  `CurioTermsDialog`, no second copy of the text).
+- **A real route** (`profile/edit`), not an overlay: the page is a page, and Cancel simply
+  leaves.
+- **The handle folds into Save changes** and is checked AS IT IS TYPED (the same rules the
+  server enforces, stated before the press) — no separate "Save username" button.
+
+**Files:** new `features/profile/ProfileEditScreen.kt` (the page + the avatar pipeline moved out
+of `ProfileScreen.kt`), `navigation/CurioRoutes.kt`, `navigation/CurioNavHost.kt`,
+`features/settings/CurioAccountComponents.kt` (the terms dialog's visibility),
+`features/profile/ProfileScreen.kt` (the old `ProfileDialogs` + its helpers retired; all four
+entry points navigate). `web/` and `desktop/` untouched, per root `AGENTS.md`.
+
+**Plan:** routes → the new page → the dialog's exit → verification (imports, references, bracket
+balance) → DOX + changelog + commit/push.
+
+## 0.1 What was built
+
+1. **The route** — `CurioRoutes.PROFILE_EDIT = "profile/edit"` and a plain `composable` in
+   `CurioNavHost`. It sits behind the profile page's own prefix, so the shell treats it as a
+   pop screen (the same arrival Profile itself has) and shows no bottom bar; it inherits the
+   nav host's `Push` clock, so nothing new was added for its opening.
+2. **`features/profile/ProfileEditScreen.kt` (new)** — the spec's page: back disc, a 31sp
+   Medium title, one 15sp sentence; the 104dp picture with a 34dp accent camera disc on its
+   corner and the two quiet actions under it; **open fields** (a hairline, never a box —
+   `EditOpenField`) for NAME and BIO and for the prefixed USERNAME; a muted, locked EMAIL row;
+   the handle's one-line notice; the terms as a supporting line; a plain tappable PRIVACY row;
+   a quiet SIGN OUT row; and Cancel / Save changes (52dp, 22dp radius, one each) held at the
+   foot. `EditSpace` holds the 8/16/24/32/40 ruler. The avatar pipeline
+   (`decodeAvatarSource`, `centerSquareCrop`, `scaleToMax`, `saveAvatar`, `removePhoto`) moved
+   here from `ProfileScreen`. Tapping the picture expands it over a **blurred** page
+   (`Modifier.blur` on an animated veil) with the ⋯ that removes the photo; `BackHandler`
+   closes the expansion before the page.
+3. **Saving** — `commit()`: name + bio written locally and mirrored best-effort; a changed
+   handle validated from the same rule the server uses, then claimed (`SocialApi.updateUsername`)
+   with the terms accepted through the shared dialog first (`pendingClaim`). A refusal is shown
+   on the page; a success pops.
+4. **The dialog retired** — `ProfileDialogs`, `EditSectionLabel`, `DialogPillAction` and the
+   avatar helpers are gone from `ProfileScreen.kt` (390 + 75 lines), all three "Edit profile"
+   doors navigate, the sign-out confirm moved with the page, and the screen keeps only the
+   avatar path it draws (re-read on entry and on `ON_RESUME`, so the hero can never lag an edit).
+5. **`CurioTermsDialog`** is `internal` now instead of `private` — one dialog, two callers, no
+   second copy of the disclosure text.
+
+## 0.2 Checks run
+
+- **No Gradle command** (root `AGENTS.md` forbids compile/build/lint here); CI validates on push.
+- Every API checked against its real definition before use: `CurioTermsDialog`'s signature,
+  `CurioContentFilter`'s package (`data`), `SocialApi.updateUsername/updateDisplayName/updateBio`,
+  `settingsRoseAccent`/`settingsReadableInk`/`settingsCardAccentInk` (public in
+  `SettingsHubScreen.kt`), `CurioIcons.Screenshot` (= "photo_camera"), `AvatarCropDialog`'s
+  three params, `SocialConfirmDialog`'s named params, `CurioMotion.Durations`, and
+  `popScreenRoutePrefixes`' prefix matching (which is what makes `profile/edit` arrive like
+  Profile). The module globally opts into `ExperimentalMaterial3Api`, so `Surface(onClick = …)`
+  needs nothing.
+- **A string/comment-aware bracket-balance pass** over all five touched Kotlin files: balanced.
+- **The unused-import sweep** over `ProfileScreen.kt` dropped the 42 imports the retired dialog
+  and its helpers owned; every remaining import is referenced (checked symbol by symbol, with
+  `getValue`/`setValue` excluded as delegated names).
+- Grepped the whole module for the retired names (`ProfileDialogs`, `showNameDialog`,
+  `nameInput`, `taglineInput`, `cropSource`, `saveAvatar`, `removeAvatar`, `confirmingSignOut`,
+  `decodeAvatarSource`, …) — no reference anywhere survives, and nothing else in the app opened
+  that dialog.
+
+## 0.3 Still open
+
+- **The ⋯ in the expanded picture** offers "Remove photo" (and the blob switch when there is no
+  photo, so the expansion is never a dead end). If the member wants more there — "Save to
+  device", sharing — the menu is the place for it.
+- **The bio is one line**, exactly as the dialog had it: the hero draws it as a single line, so
+  a multi-line bio would need the hero to grow a rule first.
+- **No SQL change and no migration**: everything here is UI, navigation, preference reads and
+  one existing network call.
+
+---
+
+# (previous session, kept for the state it records)
+
+## 1. The request (previous session) — §38
 
 > fix the reading progress accidental touch and in journal the pain the page remove that
 > option, and then mak ethe coloring smart so that chnaging color automatically adjusts the
@@ -201,6 +303,19 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§39 — Edit profile as a full screen, to the member's own design spec (DONE, v444).** The
+  identity editor is a PAGE now (`profile/edit`, `ProfileEditScreen`) instead of a dialog: a
+  small way back over a large quiet title and one supporting sentence, the picture centred with
+  a small camera disc and exactly two compact actions under it, NAME and BIO as OPEN FIELDS with
+  a hairline under them, a flat ACCOUNT section (muted locked EMAIL, prefixed USERNAME), ONE
+  tappable privacy row, sign out at the bottom, and Cancel / Save changes held at the foot — all
+  on a plain theme background with the spec's 8dp ruler and no cards inside cards. The handle is
+  claimed with **Save changes** and checked as it is typed, the terms are the SAME dialog the
+  account card shows, tapping the picture expands it (with the ⋯ that removes the photo) over a
+  blurred page, and a signed-out account is one calm row. What the dialog could do — the photo
+  and its crop editor, the blob, the name, the bio, the handle, Privacy, signing out — all
+  survives the move; the old `ProfileDialogs` and its helpers are gone. **No SQL, no migration.**
+  See §0–§0.3 above and the v444 section of `app/AGENTS.md`.
 - **§38 — the seven fixes across the book page, the journal, the reader's dock and Home
   (DONE, v443).** The progress gauge wears in sideways so a scroll over it neither moves it nor
   steals the page's scroll; the journal's "Paint the page too" is gone and the paper is the

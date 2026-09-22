@@ -542,7 +542,7 @@ private fun TermsAcceptanceRow(
 }
 
 @Composable
-private fun CurioTermsDialog(
+internal fun CurioTermsDialog(
     onDismiss: () -> Unit,
     onAccept: () -> Unit
 ) {
