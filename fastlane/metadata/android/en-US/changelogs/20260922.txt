@@ -2,6 +2,16 @@ ADD:
 - Appearance: liquid glass reaches the reading surface — the reader's floating pills (the way out, the book's name, search, the foot's five buttons, the search bar, the listen and motion-lock pills, the pinned page count and the page scrubber) now refract the page under them instead of sitting on a solid fill; the glass follows the same Liquid glass switch, and a pill that is "on" (a held page, a voice reading) refracts through its own accent tint.
 - Everywhere: the round back pill refracts on every page that uses the glass, with no per-page setup — it is the app's most repeated control and it was solid everywhere.
 
+ADD:
+- Reading: the dictionary is one you can walk, like a shelf — the page from Home's "+" lists the words the dictionary actually holds, a letter at a time, and taps straight into any of them; the search is a pill at the top right that opens when you ask for it instead of a field that is always in the way.
+- Reading: a word shows which dictionary answered — one badge per dictionary on your phone above the answer, so you can see what WordNet says and switch to the complete 1913 (or the other way round) without leaving the word.
+- Appearance: the theme picker is a two-column grid of real previews — each card draws the theme itself (its page, its hero and its own ink) with the name under it, and the one you are on is ringed in its own accent.
+
+FIX:
+- Messages: a received bubble's words ask the bubble's own colour (and the "edited" mark stopped being a hardcoded white), so text can no longer blend into the bubble on a dark or colour-carrying theme.
+- Profile: "Change photo" and "Use my blob" are proper pills with a real lift and an equal share of the row, and the camera on your picture's corner sits on it instead of flat against it.
+- Journals: filtering is two labelled rows — how the day felt and how much you wrote — and the colour filter is gone (a page's colour still marks it; it is just no longer a way to hide pages).
+
 FIX:
 - Reading: the dictionary's Offline door answers from every dictionary on your phone — the door called "Offline" used to be one abridged dictionary on its own, so standing on it could answer nothing while Modern and Full 1913 answered; the badge row is now Offline · Wiktionary · Free, the one Offline door searches whatever you have downloaded (modern senses first, then the complete 1913, then the abridged one) and keeps offering all three to download or remove.
 - Reading: the ⋯ menu is six doors in two full rows — the Share tile is gone (Share is the selection's own door and is still there when you pick a passage, with Snapshot beside it for a cropped picture), and Settings moved up so every row is as wide as the others.

@@ -458,6 +458,10 @@ fun ProfileEditScreen(navController: NavController) {
                             shape = CircleShape,
                             color = accent,
                             contentColor = accentInk,
+                            // v453 — the camera rides the picture's corner, so it
+                            // needs to read as a control ON it: a 2dp lift (the
+                            // accent fill is opaque, so the shadow stays clean).
+                            shadowElevation = 2.dp,
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .size(34.dp)
@@ -472,14 +476,19 @@ fun ProfileEditScreen(navController: NavController) {
                         }
                     }
                     Spacer(Modifier.height(EditSpace.S))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         EditQuietAction(
                             label = if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
-                            onClick = { pickPhoto() }
+                            onClick = { pickPhoto() },
+                            modifier = Modifier.weight(1f)
                         )
                         EditQuietAction(
                             label = if (wearingBlob) "Use my photo" else "Use my blob",
-                            onClick = { wearBlob(!wearingBlob) }
+                            onClick = { wearBlob(!wearingBlob) },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -1112,19 +1121,41 @@ private fun EditFlatValue(label: String, value: String, locked: Boolean = false)
 /** One of the two compact actions under the picture — quiet, same height,
  *  same radius, never a filled pill (the picture's camera disc is the solid
  *  one). */
+/**
+ * v453 — A REAL PILL, WITH A REAL LIFT.
+ *
+ * The member: *"the change photo and use photo/use blob they dont have elevation or
+ * proper pill fix it"*. They were 14dp rounded rectangles on a 45%-translucent
+ * `surfaceVariant`, so they had no shape of their own (a rounded box is not the
+ * capsule language the rest of the app's controls speak) and nothing holding them
+ * off the page — and a translucent fill cannot take a shadow cleanly anyway (it
+ * lets the shadow bleed through it, the root rail's own rule). So: **a true
+ * capsule** (`RoundedCornerShape(50)`), **an OPAQUE fill** (`surfaceContainerHigh`,
+ * a real step of the theme's own card ladder rather than a wash of surfaceVariant),
+ * a 2dp lift, and the two of them take an equal half of the row each so the pair
+ * reads as one control group instead of two chips of different widths.
+ */
 @Composable
-private fun EditQuietAction(label: String, onClick: () -> Unit) {
+private fun EditQuietAction(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-        contentColor = MaterialTheme.colorScheme.onSurface
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 2.dp,
+        modifier = modifier
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 11.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
+            )
+        }
     }
 }
 

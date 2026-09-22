@@ -74,6 +74,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import com.curio.app.ui.components.liquidGlassCapsule
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -114,6 +115,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.CurioNamedTheme
 import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
@@ -681,7 +683,9 @@ private fun ColorThemeSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            // v453 — the grid's own rhythm: 10dp between cards, where the old
+            // one-row-per-theme list needed only 2.
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 "Color theme",
@@ -700,68 +704,168 @@ private fun ColorThemeSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(8.dp))
-            choices.forEach { choice ->
-                val live = choice.id == current
-                // The reveal expands from the row that was tapped.
-                var rowBounds by remember { mutableStateOf(Rect.Zero) }
-                // v427 — a TIGHTER ROW: the sheet is a list of nine, so every
-                // row gives back the air it was not using (see the padding).
-                //
-                // AND THE LIVE ROW CHANGES ITS MIND IN PLACE. The picked row's
-                // wash used to SNAP on the instant the pref landed; it animates
-                // now, so picking a theme reads as one move (the row lights, then
-                // the page reveals) instead of a flicker followed by a paint.
-                val rowFill by animateColorAsState(
-                    targetValue = if (live) lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f)
-                                  else Color.Transparent,
-                    animationSpec = tween(220),
-                    label = "color-theme-row"
-                )
+            // ── v453 — THE PICKER IS A TWO-COLUMN GRID ─────────────────
+            //
+            // The member: *"make the theme select 2 grid based with beautiful
+            // view"*. It was one full-width row per theme with a 24dp swatch
+            // beside the name — nine of those is a LIST of names with a smudge
+            // next to each, and a theme's own colours (the one thing that tells it
+            // from the others) were the smallest thing on the screen. A theme is a
+            // PLACE, not a name, so the picker shows the place: two cards to a row,
+            // each with a real preview pane — the theme's page with its hero across
+            // it and its own ink as the words on it — and its name and line under
+            // that. The live one is ringed in its own accent and carries the check.
+            choices.chunked(2).forEach { pair ->
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onGloballyPositioned { rowBounds = it.boundsInWindow() }
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(rowFill)
-                        // A deeper squish than the section rows wear: this is a
-                        // picker, and the finger should feel it take the choice.
-                        .curioPressClickable(pressedScale = 0.965f, onClick = {
-                            if (!live) {
-                                // The whole scheme repaints, so the transition is
-                                // FORCED (like the Material toggle's used to be):
-                                // the circular reveal plays from the tapped row.
-                                val center = if (rowBounds == Rect.Zero) Offset.Zero
-                                else Offset(rowBounds.center.x, rowBounds.center.y)
-                                switchVisualThemeWithReveal(transition, transitionScope, center) {
-                                    AppPreferences.setColorTheme(context, choice.id)
-                                }
-                            }
-                            onDismiss()
-                        })
-                        .padding(horizontal = 9.dp, vertical = 7.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    ColorThemeSwatch(choice)
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            choice.label,
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            choice.hint,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                    pair.forEach { choice ->
+                        ColorThemeCard(
+                            choice = choice,
+                            live = choice.id == current,
+                            accent = accent,
+                            modifier = Modifier.weight(1f),
+                            onPick = { center ->
+                                if (choice.id != current) {
+                                    // The whole scheme repaints, so the transition is
+                                    // FORCED (like the Material toggle's used to be):
+                                    // the circular reveal plays from the card tapped.
+                                    switchVisualThemeWithReveal(transition, transitionScope, center) {
+                                        AppPreferences.setColorTheme(context, choice.id)
+                                    }
+                                }
+                                onDismiss()
+                            }
                         )
                     }
-                    if (live) {
-                        CurioIcon(CurioIcons.Check, null, tint = accent, size = 18.dp)
-                    }
+                    // An odd last row keeps the same card width instead of
+                    // stretching its survivor across the panel.
+                    if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+/**
+ * ONE THEME, AS A CARD (v453).
+ *
+ * The preview is the theme itself, drawn at a glance: its page as the pane, its
+ * hero as the banner across the top of it, its ink as a short line of "writing" on
+ * the banner and a fainter one on the page below — the same three colours
+ * [colorThemeChoices] hands every entry, arranged the way the app actually paints
+ * them (page behind, hero in front, ink on the hero). A card's own colours are the
+ * picture; nothing here is decoration, so a member picks the theme they can see.
+ *
+ * The live card lights IN PLACE (the wash animates rather than snapping) and is
+ * ringed in its own accent, so "which one am I on" is answerable without reading
+ * the names.
+ */
+@Composable
+private fun ColorThemeCard(
+    choice: ColorThemeChoice,
+    live: Boolean,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    onPick: (Offset) -> Unit
+) {
+    var bounds by remember { mutableStateOf(Rect.Zero) }
+    val fill by animateColorAsState(
+        targetValue = if (live) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.18f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        },
+        animationSpec = tween(220),
+        label = "color-theme-card"
+    )
+    Column(
+        modifier = modifier
+            .onGloballyPositioned { bounds = it.boundsInWindow() }
+            .clip(RoundedCornerShape(22.dp))
+            .background(fill)
+            .border(
+                width = if (live) 1.5.dp else 1.dp,
+                color = if (live) accent else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+                shape = RoundedCornerShape(22.dp)
+            )
+            // A deeper squish than the section rows wear: this is a picker, and
+            // the finger should feel it take the choice.
+            .curioPressClickable(pressedScale = 0.96f, onClick = {
+                val center = if (bounds == Rect.Zero) Offset.Zero
+                else Offset(bounds.center.x, bounds.center.y)
+                onPick(center)
+            })
+            .padding(9.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(choice.page)
+        ) {
+            // The hero, across the top of the page — the app's own construction.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(34.dp)
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .background(choice.hero)
+            )
+            // Its ink, as the words on the hero (a bold line) and on the page
+            // (a quieter one) — enough to say whether the ink reads on that fill.
+            Box(
+                modifier = Modifier
+                    .padding(start = 10.dp, top = 15.dp)
+                    .size(width = 30.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(choice.ink.copy(alpha = 0.85f))
+            )
+            Box(
+                modifier = Modifier
+                    .padding(start = 10.dp, top = 44.dp)
+                    .size(width = 44.dp, height = 3.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(choice.ink.copy(alpha = 0.35f))
+            )
+            if (live) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(accent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        CurioIcons.Check,
+                        null,
+                        // The glyph asks the disc it sits on (see [curioFillInk]).
+                        tint = curioFillInk(accent),
+                        size = 13.dp
+                    )
+                }
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(
+                choice.label,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                choice.hint,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

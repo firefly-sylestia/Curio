@@ -256,6 +256,74 @@ internal object ReaderOfflineDictionary {
         }
     }
 
+    /**
+     * v453 — THE WORDS THIS DICTIONARY HOLDS UNDER [letter].
+     *
+     * The member: *"the dictionary from the home screen shows the full words it
+     * have, like a physical dictionary and user can search words and it shows it"*.
+     * A dictionary page that can only answer what you already spelled is a
+     * lookup box; a dictionary you can BROWSE is the thing a shelf is for, and
+     * browsing needs the words themselves.
+     *
+     * The index makes this cheap, and that is the whole point of the per-letter
+     * buckets (see the class note): **one letter is one file** (~0.5MB), so the
+     * page reads a single bucket, takes the first field of each line and returns
+     * them sorted — no whole-dictionary scan, no second copy of anything, and only
+     * ever while the member is looking at that letter. The single-file door has no
+     * buckets, so it is streamed once for the letter asked for (its object is
+     * already `headword → definition`, so only the NAMES are read and every value
+     * is skipped without being built).
+     *
+     * The sort is `CASE_INSENSITIVE_ORDER` — a physical dictionary files "Apple"
+     * and "apple" together, and a list where "Zebra" sorts before "apple" (which
+     * is what plain string order does to mixed case) reads as broken.
+     */
+    suspend fun headwords(context: Context, volume: Volume, letter: Char): List<String> =
+        withContext(Dispatchers.IO) {
+            if (!isReady(context, volume)) return@withContext emptyList()
+            val wanted = letter.lowercaseChar()
+            val found = java.util.TreeSet(String.CASE_INSENSITIVE_ORDER)
+            runCatching {
+                when (volume.format) {
+                    Volume.Format.JSON_MAP -> {
+                        FileInputStream(volume.home(context)).use { stream ->
+                            JsonReader(InputStreamReader(stream, Charsets.UTF_8)).use { reader ->
+                                reader.beginObject()
+                                while (reader.hasNext()) {
+                                    val name = reader.nextName()
+                                    // The value is never read: only the headwords are
+                                    // wanted, so every definition is skipped as tokens.
+                                    reader.skipValue()
+                                    if (name.firstOrNull()?.lowercaseChar() == wanted) found.add(name)
+                                }
+                                reader.endObject()
+                            }
+                        }
+                    }
+                    else -> {
+                        val bucket = File(volume.home(context), bucketName(wanted.toString()))
+                        if (bucket.isFile && bucket.length() > 0L) {
+                            FileInputStream(bucket).use { stream ->
+                                BufferedReader(
+                                    InputStreamReader(stream, Charsets.UTF_8),
+                                    64 * 1024
+                                ).use { lines ->
+                                    while (true) {
+                                        val line = lines.readLine() ?: break
+                                        val tab = line.indexOf(TAB)
+                                        if (tab <= 0) continue
+                                        val head = line.substring(0, tab)
+                                        if (head.firstOrNull()?.lowercaseChar() == wanted) found.add(head)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            found.toList()
+        }
+
     // ── Door 1: the file that is already an index ────────────────────────────
     //
     // Webster's conversion is one JSON object of `headword → definition`, which is

@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -36,7 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -108,25 +117,59 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
         )
     }
 
+    // ── v453 — THE VERSIONS OF THE DICTIONARY, AS A CHOICE ──────────────
+    //
+    // The member: *"only opening the word shows both of the version with badge to
+    // switch"*. v452 merged the door's volumes into one best-first answer, which
+    // is right for the SHEET (a passage was swept, the member wants the meaning
+    // now) and wrong for a page someone is BROWSING: a reader who looked a word up
+    // on purpose wants to see what each dictionary it could come from says, and to
+    // be able to say "show me the other one". So the page keeps the volumes
+    // separate: the badges under the rail are the DICTIONARIES THAT ARE HERE, and
+    // the answer belongs to the one you are on.
+    val shelf = remember(door, ready) { door.volumes.filter { ready[it] == true } }
+    var version by remember(shelf) { mutableStateOf(shelf.firstOrNull()) }
+
     suspend fun ask(term: String): List<ReaderDictionarySense>? {
-        // v452 — the merged offline answer (the same rule as the sheet's: ask every
-        // volume the door has, best first, and keep "no dictionary" and "no such
-        // word" apart).
         if (door.volumes.isNotEmpty()) {
-            var anyReady = false
-            for (volume in door.volumes) {
-                val senses = ReaderOfflineDictionary.define(context, volume, term)
-                    ?: continue
-                anyReady = true
-                if (senses.isNotEmpty()) return senses
-            }
-            return if (anyReady) emptyList() else null
+            val chosen = version ?: return null
+            return ReaderOfflineDictionary.define(context, chosen, term)
         }
         val online = door.online ?: ReaderDictionarySource.WIKTIONARY
         return ReaderDictionary.define(term, online)
     }
 
-    LaunchedEffect(word, door) {
+    // ── v453 — AND THE PAGE BROWSES THE WORDS THEMSELVES ────────────────
+    //
+    // *"The dictionary from the home screen shows the full words it have, like a
+    // physical dictionary and user can search words and it shows it"*. A page that
+    // can only answer what you already spelled is a lookup box; a dictionary you
+    // can WALK is what a shelf is for. One letter is one bucket (see
+    // [ReaderOfflineDictionary.headwords]), so the words of the letter you are
+    // standing on are read when you stand on it and never before.
+    var searchOpen by remember { mutableStateOf(false) }
+    val searchFocus = remember { FocusRequester() }
+    var letter by remember { mutableStateOf('a') }
+    var words by remember { mutableStateOf<List<String>>(emptyList()) }
+    var readingLetter by remember { mutableStateOf(false) }
+    // The volume the browse reads: the best one that is actually on the phone.
+    val browseVolume = remember(door, ready) {
+        door.volumes.firstOrNull { ready[it] == true }
+    }
+    LaunchedEffect(browseVolume, letter) {
+        val volume = browseVolume ?: return@LaunchedEffect
+        readingLetter = true
+        words = withContext(Dispatchers.IO) {
+            runCatching { ReaderOfflineDictionary.headwords(context, volume, letter) }
+                .getOrDefault(emptyList())
+        }
+        readingLetter = false
+    }
+
+    // v453 — the VERSION is a key too: switching the badge asks the other
+    // dictionary for the same word rather than showing the old answer beside a
+    // badge claiming it.
+    LaunchedEffect(word, door, version) {
         val term = ReaderDictionary.headword(word)
         if (term.isBlank()) {
             lookup = DictionaryPageLookup.Idle
@@ -145,7 +188,12 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
         if (found.isNotEmpty()) {
             lookup = DictionaryPageLookup.Answer(term, found)
             guesses = emptyList()
-            history = (listOf(term) + history.filterNot { it.equals(term, true) }).take(12)
+            // v453 — the words you have been to read in the order a dictionary is
+            // filed in, not the order you happened to walk them (the member: "show
+            // the dictionary words by alphabetical order").
+            history = (listOf(term) + history.filterNot { it.equals(term, true) })
+                .take(16)
+                .sortedWith(String.CASE_INSENSITIVE_ORDER)
             return@LaunchedEffect
         }
         // A miss is usually a spelling: the nearest page names are offered, and the
@@ -217,6 +265,36 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         )
                     }
                 }
+                // ── v453 — THE SEARCH IS A PILL OF ITS OWN ──────────────
+                //
+                // The member: *"fix the dictionary page search box always open, show
+                // it as a search pill to the right"*. The field used to sit across
+                // the top of the page permanently — which for a page that now BROWSE
+                // the words is a keyboard-height of furniture over a list nobody has
+                // asked to filter yet. It is the reader's own object instead: a 50dp
+                // circle at the right end of the head, exactly like the search door
+                // beside the book's name in the reader, and the field opens when it
+                // is tapped (see the field below).
+                Surface(
+                    onClick = { searchOpen = !searchOpen },
+                    shape = CircleShape,
+                    color = if (searchOpen) {
+                        lerp(palette.surface, palette.accent, 0.28f)
+                    } else {
+                        palette.surface
+                    },
+                    shadowElevation = 10.dp,
+                    modifier = Modifier.size(50.dp)
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            if (searchOpen) CurioIcons.Close else CurioIcons.Search,
+                            if (searchOpen) "Close the search" else "Search the dictionary",
+                            tint = palette.ink.copy(alpha = 0.85f),
+                            size = 21.dp
+                        )
+                    }
+                }
             }
 
             Column(
@@ -227,50 +305,66 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // ── THE FIELD ─────────────────────────────────────────────
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = palette.ink.copy(alpha = 0.06f),
-                    modifier = Modifier.fillMaxWidth()
+                // ── THE FIELD, WHILE THE SEARCH IS OPEN ─────────────────
+                //
+                // It arrives on the pill clock from the edge its pill lives on (the
+                // head), takes focus as it opens (a search that needs a second tap
+                // before it can be typed into is not a search), and its own cross
+                // empties the word as well as putting the field away — the row's
+                // pill turns into that cross, so one object opens and closes it.
+                LaunchedEffect(searchOpen) {
+                    if (searchOpen) runCatching { searchFocus.requestFocus() }
+                }
+                AnimatedVisibility(
+                    visible = searchOpen,
+                    enter = CurioMotion.pillArrive(fromTop = true),
+                    exit = CurioMotion.pillLeave(fromTop = true)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = palette.ink.copy(alpha = 0.06f),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        CurioIcon(
-                            CurioIcons.Search,
-                            null,
-                            tint = palette.ink.copy(alpha = 0.5f),
-                            size = 18.dp
-                        )
-                        BasicTextField(
-                            value = word,
-                            onValueChange = { next -> word = next },
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontFamily = readerTypeFamily(ReaderLook.typeFace),
-                                fontSize = 17.sp,
-                                color = palette.ink
-                            ),
-                            cursorBrush = SolidColor(palette.accent),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            decorationBox = { inner ->
-                                Box {
-                                    if (word.isEmpty()) {
-                                        Text(
-                                            "Any word",
-                                            style = TextStyle(fontSize = 17.sp),
-                                            color = palette.ink.copy(alpha = 0.35f)
-                                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.Search,
+                                null,
+                                tint = palette.ink.copy(alpha = 0.5f),
+                                size = 18.dp
+                            )
+                            BasicTextField(
+                                value = word,
+                                onValueChange = { next -> word = next },
+                                singleLine = true,
+                                textStyle = TextStyle(
+                                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                                    fontSize = 17.sp,
+                                    color = palette.ink
+                                ),
+                                cursorBrush = SolidColor(palette.accent),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                decorationBox = { inner ->
+                                    Box {
+                                        if (word.isEmpty()) {
+                                            Text(
+                                                "Find a word",
+                                                style = TextStyle(fontSize = 17.sp),
+                                                color = palette.ink.copy(alpha = 0.35f)
+                                            )
+                                        }
+                                        inner()
                                     }
-                                    inner()
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 14.dp)
-                        )
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 14.dp)
+                                    .focusRequester(searchFocus)
+                            )
+                        }
                     }
                 }
 
@@ -481,6 +575,48 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                     }
                 }
 
+                // ── v453 — WHICH DICTIONARY IS ANSWERING ────────────────
+                //
+                // One badge per volume that is ON THE PHONE, in the door's own
+                // order of quality (WordNet, then the complete 1913, then the
+                // abridged one), and the answer above belongs to the badge you are
+                // on — so "which dictionary is this from" is never a guess, and the
+                // other one is one tap away. Nothing is shown for an online door:
+                // there is no version to choose between.
+                if (shelf.size > 1) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        shelf.forEach { volume ->
+                            val chosen = volume == version
+                            Surface(
+                                onClick = { version = volume },
+                                shape = RoundedCornerShape(50),
+                                color = if (chosen) {
+                                    palette.accent.copy(alpha = 0.18f)
+                                } else {
+                                    palette.ink.copy(alpha = 0.06f)
+                                },
+                                contentColor = palette.ink
+                            ) {
+                                Text(
+                                    volume.source,
+                                    style = TextStyle(
+                                        fontSize = 12.sp,
+                                        fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
+                                    ),
+                                    color = palette.ink.copy(alpha = if (chosen) 1f else 0.75f),
+                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // ── THE ANSWER ───────────────────────────────────────────
                 when (val state = lookup) {
                     DictionaryPageLookup.Idle -> Unit
@@ -627,6 +763,98 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         }
                     }
                 }
+                // ── v453 — AND THE WORDS THEMSELVES, LIKE A SHELF ───────
+                //
+                // The member: *"the dictionary from the home screen shows the full
+                // words it have, like a physical dictionary and user can search words
+                // and it shows it"*. Below everything the page has answered stands the
+                // dictionary itself: the letters along a rail, and the words of the
+                // letter you are holding, read from that letter's own bucket (see
+                // [ReaderOfflineDictionary.headwords]). A tap puts the word in the
+                // field, which is what looks it up — so the list, the search and the
+                // answer are one machine instead of three.
+                if (browseVolume != null) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                    ) {
+                        Text(
+                            "THE DICTIONARY \u00b7 " + browseVolume.source.uppercase(),
+                            style = TextStyle(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 1.2.sp,
+                                color = palette.ink.copy(alpha = 0.5f)
+                            )
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ('a'..'z').forEach { l ->
+                                val chosen = l == letter
+                                Surface(
+                                    onClick = { letter = l },
+                                    shape = RoundedCornerShape(50),
+                                    color = if (chosen) {
+                                        palette.accent.copy(alpha = 0.18f)
+                                    } else {
+                                        palette.ink.copy(alpha = 0.06f)
+                                    },
+                                    contentColor = palette.ink
+                                ) {
+                                    Text(
+                                        l.uppercase(),
+                                        style = TextStyle(
+                                            fontSize = 12.sp,
+                                            fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
+                                        ),
+                                        color = palette.ink.copy(alpha = if (chosen) 1f else 0.7f),
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                    )
+                                }
+                            }
+                        }
+                        if (readingLetter) {
+                            Text(
+                                "Reading the \u201c" + letter.uppercase() + "\u201d pages\u2026",
+                                style = TextStyle(fontSize = 13.sp, color = palette.ink.copy(alpha = 0.5f)),
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            )
+                        } else if (words.isEmpty()) {
+                            Text(
+                                "Nothing under \u201c" + letter.uppercase() + "\u201d.",
+                                style = TextStyle(fontSize = 13.sp, color = palette.ink.copy(alpha = 0.6f)),
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            )
+                        } else {
+                            // A bounded window of its own: the page already scrolls,
+                            // so a list taller than this would fight it — the words
+                            // get a real list inside the page's own scroll.
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(340.dp),
+                                verticalArrangement = Arrangement.spacedBy(1.dp)
+                            ) {
+                                items(words) { head ->
+                                    DictionaryHeadwordRow(
+                                        head = head,
+                                        palette = palette,
+                                        chosen = head.equals(
+                                            ReaderDictionary.headword(word),
+                                            ignoreCase = true
+                                        ),
+                                        onClick = { word = head }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 Spacer(Modifier.height(10.dp))
             }
         }
@@ -638,6 +866,55 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .navigationBarsPadding()
         )
+    }
+}
+
+/**
+ * ONE WORD OF THE DICTIONARY, as a row you can walk down (v453).
+ *
+ * The row the member taps to look a word up: its headword in the reader's own type,
+ * a quiet chevron saying the row opens something, and a wash when it is the word
+ * currently answered — so a tap that lands on the word already open reads as one
+ * state rather than as nothing happening.
+ */
+@Composable
+private fun DictionaryHeadwordRow(
+    head: String,
+    palette: ReaderPalette,
+    chosen: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = if (chosen) palette.accent.copy(alpha = 0.12f) else Color.Transparent,
+        contentColor = palette.ink
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                head,
+                style = TextStyle(
+                    fontFamily = readerTypeFamily(ReaderLook.typeFace),
+                    fontSize = 16.sp,
+                    color = if (chosen) palette.accent else palette.ink
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            CurioIcon(
+                CurioIcons.ChevronRight,
+                null,
+                tint = palette.ink.copy(alpha = 0.25f),
+                size = 16.dp
+            )
+        }
     }
 }
 

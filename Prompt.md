@@ -6,7 +6,36 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §47 — one Offline door, six ⋯ doors, and the header that matches the app
+## 0. THE CURRENT REQUEST — §48 — a dictionary you can walk, a theme grid, and the audit
+
+> make the theme select 2 grid based with beautiful view fix the dictionary page search box always open show it as a search pill to the
+> right and show the dictionary words by alphabetical order, and only opening the word shows both of the version with badge to switch,
+> and in edit profile screen the change photo and use photo/use blob they dont have elevation or proper pill fix it. in chats the theme
+> dark chat bubble color is a little bad sometimes the texts blend, find more flaws which you can notice, and report it to me, do a full
+> app audit analysis. and dont push it yet
+
+**Confirmed with the member before editing** (the ask round): the dictionary page is a **physical-dictionary browse of the words the volume
+holds**, and the per-version badge belongs to **the word's page** ("in bottom sheet").
+
+**Files:** `ReaderOfflineDictionary.kt` (`headwords`), `ReaderDictionaryPage.kt` (the rail, the list, the search pill, the version badges),
+`SettingsSectionScreen.kt` (`ColorThemeCard`), `ProfileEditScreen.kt` (`EditQuietAction`), `DirectMessageScreen.kt` (`bubbleFill`/`bubbleInk`),
+`JournalListScreen.kt` (the colour filter out, labels in).
+
+### 0.1 What was built
+
+1. **A DICTIONARY YOU CAN WALK** — one bucket per letter, sorted case-insensitively; the field is a search pill on the head that opens on the
+   pill clock and turns into its own cross; a word row sets the field, so list, search and answer are one machine.
+2. **WHICH DICTIONARY ANSWERED** — the page keeps its volumes separate (unlike the sheet's merged answer): one badge per volume on the phone,
+   `version` a key of the lookup effect so switching re-asks.
+3. **THE THEME GRID** — two cards to a row, each drawing the theme it offers (page, hero, ink), live one ringed in its accent.
+4. **THE PILLS** — `EditQuietAction` is a capsule, opaque, 2dp lift, equal halves; the camera disc lifted too.
+5. **THE CHAT INK** — one `bubbleFill`, one measured `bubbleInk` for both sides (body, quote, timestamp, edited, ticks) and the surviving
+   hardcoded white removed.
+6. **THE JOURNALS** — the colour filter and its state/imports are gone; the mood and length rows are labelled.
+
+---
+
+## 0e. §47 — one Offline door, six ⋯ doors, and the header that matches the app (DONE, v452)
 
 > merge the two modern and full 1913 in offline as offline shows nothing, only modern and full 1973 does. also from
 > the 3 dot menu remove the share button, also the profile and home glass header is bad, they dont look like other
@@ -474,6 +503,15 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§48 — the browsable dictionary, the theme grid, the chat ink, and a full app audit (DONE, v453 — COMMITTED, NOT PUSHED per the member's own "dont push it yet").** Asked which list "alphabetical order" meant and where the version badge goes: the answers were *"the
+  dictionary from the home screen shows the full words it have, like a physical dictionary"* and *"dictionary page inside the word page in a
+  bottom sheet"*. Built: **the dictionary page browses** (`headwords` per letter — one bucket per letter, sorted case-insensitively, nothing read
+  until a letter is stood on), the **search is a 50dp pill at the right of the head** whose glyph becomes the cross that closes it, a word row
+  sets the field, and **a word shows one badge per dictionary on the phone** with the answer belonging to the badge you are on. Also: the theme
+  picker is a **two-column grid of real previews**, `EditQuietAction` is a real capsule with a 2dp lift, the chat bubble's ink asks its own fill
+  **on both sides** (plus one surviving hardcoded white killed), and the journals' colour filter is gone with the two remaining rows labelled.
+  **Open, and deliberately not half-built: the word's own sheet.** The answer is still inline on the page (with the version badges working);
+  moving it into a bottom sheet is the remaining piece of the member's answer. The audit findings are in the response and in `app/AGENTS.md`.
 - **§47 — "merge the two modern and full 1913 in offline as offline shows nothing … also from the 3 dot menu remove the share button, also the profile and home glass header is bad, they dont look like other glass header with that curve look" (DONE, v452).** Three things. **The dictionary's Offline door is a DOOR now**, not a dictionary: it owns all three volumes (modern
   senses first, then the complete 1913, then the abridged one), the badge row is **Offline · Wiktionary · Free**, and `ask`
   walks the door's volumes and returns the first that carries the word — with "no volume here" (`null`) and "no such

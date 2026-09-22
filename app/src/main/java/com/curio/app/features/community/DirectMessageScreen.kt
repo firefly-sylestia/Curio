@@ -1356,6 +1356,37 @@ private fun MessageBubble(
     val haptics = LocalHapticFeedback.current
     val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
     val others = reactions.filterNot { it.userId == myUserId }
+    // ── v453 — THE BUBBLE'S INK ASKS THE BUBBLE, ON BOTH SIDES ─────────
+    //
+    // The member: *"in chats the theme dark chat bubble color is a little bad
+    // sometimes the texts blend"*. v412 fixed exactly this — a fill's ink must be
+    // MEASURED, never assumed — but it fixed it for MY bubble only: a received
+    // message still took plain `onSurface` whatever its fill was, and its quote,
+    // its timestamp and its "edited" mark took `onSurfaceVariant` further down the
+    // alpha ramp. On a theme whose container ladder carries colour (or in dark
+    // mode, where the received fill is the HIGHEST neutral step) the words could
+    // land close enough to the fill to blend — and "sometimes" is what a theme's
+    // own colours do to a hardcoded ink.
+    //
+    // So the fill is one value that both the surface and its ink read, theirs
+    // included, and every piece of text in the bubble asks it. In dark mode the
+    // received fill is nudged a hair toward the ink as well, so the bubble reads as
+    // a bubble against the dark page instead of as a hole in it — an opaque lerp of
+    // two opaque colours, never an alpha (a translucent fill is what lets a shadow
+    // bleed through, see the root rail's rule).
+    val bubbleFill = when {
+        // Mine: the brand rose, both themes — no more dark bubble that read as
+        // the other person's.
+        mine -> curioDialogActionColor()
+        // Theirs: a raised neutral, clearly not the accent.
+        dark -> lerp(
+            MaterialTheme.colorScheme.surfaceContainerHighest,
+            MaterialTheme.colorScheme.onSurface,
+            0.06f
+        )
+        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    val bubbleInk = curioFillInk(bubbleFill)
     val shape = if (mine) {
         RoundedCornerShape(
             topStart = 20.dp,
@@ -1403,14 +1434,9 @@ private fun MessageBubble(
             Box(modifier = Modifier.offset { IntOffset(leanX.roundToInt(), 0) }) {
                 Surface(
                     shape = shape,
-                    color = when {
-                        // Mine: the brand rose, both themes — no more dark
-                        // bubble that read as the other person's.
-                        mine -> curioDialogActionColor()
-                        // Theirs: a raised neutral, clearly not the accent.
-                        dark -> MaterialTheme.colorScheme.surfaceContainerHighest
-                        else -> MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
+                    // One fill, and the ink above read it (v453 — see the note at
+                    // `bubbleFill`).
+                    color = bubbleFill,
                     shadowElevation = 1.dp,
                     modifier = Modifier
                         .then(press.modifier)
@@ -1464,24 +1490,25 @@ private fun MessageBubble(
                             // instead of the row just vanishing from the bubble.
                             ReplyQuoteRow(
                                 quoted = quoteOf ?: "This message is no longer available",
-                                mine = mine
+                                ink = bubbleInk
                             )
                         }
                         Text(
                             text = message.body,
                             style = MaterialTheme.typography.bodyMedium,
-                            // v412 — the ink ASKS the bubble fill (see
-                            // [curioFillInk]): dark mode's rose bubble is the
-                            // bright pale primary, where white text vanished.
-                            color = if (mine) curioFillInk(curioDialogActionColor())
-                            else MaterialTheme.colorScheme.onSurface
+                            // v412/v453 — the ink ASKS the bubble fill (see
+                            // [curioFillInk]), whichever side the bubble is on.
+                            color = bubbleInk
                         )
                         if (message.editedAtMillis != null) {
                             Text(
                                 text = "edited",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (mine) Color.White.copy(alpha = 0.7f)
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                // v453 — it was a HARDCODED white on my bubble (the
+                                // one line v412 missed), which is exactly what
+                                // vanishes on dark mode's pale rose; it asks the fill
+                                // like everything else here now.
+                                color = bubbleInk.copy(alpha = 0.7f)
                             )
                         }
                         if (lastOfRun) {
@@ -1496,8 +1523,7 @@ private fun MessageBubble(
                                         fontSize = 8.sp,
                                         lineHeight = 8.sp
                                     ),
-                                    color = if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.68f)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                                    color = bubbleInk.copy(alpha = 0.72f)
                                 )
                                 if (mine) {
                                     Text(
@@ -1507,9 +1533,8 @@ private fun MessageBubble(
                                             lineHeight = 8.sp,
                                             fontWeight = FontWeight.Bold
                                         ),
-                                        // v412 — asks the bubble fill (deep-ink path).
-                                        color = if (receipt != null) curioFillInk(curioDialogActionColor()).copy(alpha = 0.86f)
-                                        else curioFillInk(curioDialogActionColor()).copy(alpha = 0.62f)
+                                        // v412/v453 — asks the bubble fill (deep-ink path).
+                                        color = bubbleInk.copy(alpha = if (receipt != null) 0.86f else 0.62f)
                                     )
                                 }
                             }
@@ -1597,7 +1622,7 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
  * the bubble is free to be as wide as its own message.
  */
 @Composable
-private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
+private fun ReplyQuoteRow(quoted: String, ink: Color) {
     Row(
         modifier = Modifier.padding(bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -1607,17 +1632,16 @@ private fun ReplyQuoteRow(quoted: String, mine: Boolean) {
                 .width(3.dp)
                 .height(18.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(
-                    if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.55f)
-                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                )
+                // v453 — the quote's rule and its words wear the BUBBLE's own ink
+                // (it used to be a fixed onSurfaceVariant on a received bubble,
+                // which is one more tone that could land on the fill).
+                .background(ink.copy(alpha = 0.55f))
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = quoted,
             style = MaterialTheme.typography.labelMedium,
-            color = if (mine) curioFillInk(curioDialogActionColor()).copy(alpha = 0.85f)
-            else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = ink.copy(alpha = 0.85f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             // No weight/fill: a bounded width keeps the row wrap-content, so

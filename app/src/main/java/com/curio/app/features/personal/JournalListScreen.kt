@@ -42,7 +42,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -58,7 +57,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -177,7 +175,16 @@ fun JournalListScreen(navController: NavController) {
     }
     val journalDoor = rememberJournalDoor(navController, todayEntryId)
     var moodFilter by remember { mutableStateOf<PersonalMood?>(null) }
-    var colourFilter by remember { mutableIntStateOf(JOURNAL_ANY_COLOUR) }
+    // ── v453 — THE COLOUR FILTER IS GONE ────────────────────────────────
+    //
+    // The member: *"fix the journals page filtering, and remove sorting by
+    // color"*. Filtering the collection by the colour a page was given was a
+    // row of hue chips that answered a question nobody asks while looking for a
+    // day they wrote ("which cafe was the ochre one?") and cost a third of the
+    // panel — three scrolling rows of chips over a list. HOW THE DAY FELT and HOW
+    // MUCH WAS WRITTEN are the two things a member actually remembers about a
+    // page, and they keep their rows. The colour is still ON every row's spine and
+    // in each page's own tools; it is simply no longer a way to hide pages.
     var lengthFilter by remember { mutableStateOf(JournalLength.ANY) }
     var filtersOpen by remember { mutableStateOf(false) }
     //
@@ -186,19 +193,17 @@ fun JournalListScreen(navController: NavController) {
     var newestFirst by remember { mutableStateOf(true) }
     val focusManager = LocalFocusManager.current
     val needle = query.trim().lowercase()
-    val filtersOn = moodFilter != null || colourFilter != JOURNAL_ANY_COLOUR ||
-        lengthFilter != JournalLength.ANY
+    val filtersOn = moodFilter != null || lengthFilter != JournalLength.ANY
     val lengths by produceState<Map<String, Int>>(emptyMap(), journals, lengthFilter) {
         value = if (lengthFilter == JournalLength.ANY) emptyMap()
         else withContext(Dispatchers.Default) {
             journals.associate { page -> page.id to page.doc.wordCount() }
         }
     }
-    val matched = remember(journals, needle, moodFilter, colourFilter, lengthFilter, lengths) {
+    val matched = remember(journals, needle, moodFilter, lengthFilter, lengths) {
         journals.filter { page ->
             (needle.isEmpty() || page.answers(needle)) &&
                 (moodFilter == null || page.moodEnum == moodFilter) &&
-                (colourFilter == JOURNAL_ANY_COLOUR || page.accentArgb == colourFilter) &&
                 (lengthFilter == JournalLength.ANY ||
                     lengthFilter.holds(lengths[page.id] ?: 0))
         }
@@ -332,12 +337,18 @@ fun JournalListScreen(navController: NavController) {
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                // v453 — TWO ROWS, AND EACH ONE SAYS WHAT IT FILTERS. Three
+                // unlabelled rows of chips left the member to work out which row
+                // was mood and which was length by tapping them; a quiet label
+                // in front of each row answers that before the first tap.
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    JournalFilterLabel("Felt")
                     JournalFilterChip(
-                        label = "Any mood",
+                        label = "Any",
                         live = moodFilter == null,
                         onClick = { moodFilter = null }
                     )
@@ -352,31 +363,10 @@ fun JournalListScreen(navController: NavController) {
                 }
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    JournalFilterChip(
-                        label = "Any colour",
-                        live = colourFilter == JOURNAL_ANY_COLOUR,
-                        onClick = { colourFilter = JOURNAL_ANY_COLOUR }
-                    )
-                    JournalFilterChip(
-                        label = "Theme",
-                        live = colourFilter == JOURNAL_ACCENT_THEME,
-                        onClick = { colourFilter = JOURNAL_ACCENT_THEME }
-                    )
-                    journalHueChoices().forEach { (label, colour) ->
-                        val argb = colour.toArgb()
-                        JournalFilterChip(
-                            label = label,
-                            live = colourFilter == argb,
-                            onClick = { colourFilter = argb }
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
+                    JournalFilterLabel("Length")
                     JournalLength.entries.forEach { length ->
                         JournalFilterChip(
                             label = length.label,
@@ -883,6 +873,26 @@ private fun openJournal(navController: NavController, entryId: String) {
 }
 
 /**
+ * v453 — WHAT A FILTER ROW FILTERS.
+ *
+ * Two quiet words in front of two chip rows. The rows used to be three unlabelled
+ * scrolls of capsules, so which one held the moods and which held the lengths had to
+ * be discovered by tapping; a label costs 4dp of the row and answers it before the
+ * member touches anything. It is not a heading — it is the row's own name, at the
+ * ink and the weight of the chips' resting state, so the eye reads the chips first.
+ */
+@Composable
+private fun JournalFilterLabel(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.45f),
+        maxLines = 1,
+        modifier = Modifier.padding(start = 2.dp, end = 2.dp)
+    )
+}
+
+/**
  * v440 — ONE CHOICE IN THE FIND ROW, in the app's own capsule language.
  *
  * The same chip the reader's gestures box uses ([ZoneChip]'s shape): transparent
@@ -927,12 +937,6 @@ private fun JournalFilterChip(
     }
 }
 
-/**
- * "No colour filter" — every page's own colour follows the theme ([JOURNAL_ACCENT_THEME]
- * is 0 and is a filter of its own, so "any" needs a value that is not a colour at
- * all).
- */
-private const val JOURNAL_ANY_COLOUR = -1
 
 /**
  * The lengths a journal is filed under (see the filter panel in [JournalListScreen]).
