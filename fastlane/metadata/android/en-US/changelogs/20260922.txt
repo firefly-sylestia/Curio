@@ -1,4 +1,18 @@
 ADD:
+- Home: the drawer's star map stands in a soft light — one radial glow behind the sky, from the centre out to the page's own colour, with no panel edge or corner anywhere — and each star now comes out of the middle as it lights, gathering back the same way as the drawer closes.
+
+FIX:
+- Home: the drawer's star map is smoother and reads deeper — the stars and the lines between them carry a notch more shade, and the map draws one smooth glow per star instead of four stepped rings.
+- Reading: a highlight is drawn on the words you highlighted — a phrase the paragraph carries twice used to wash the earlier one, so a pick could land on a different line from the one you made; the pass you swept is remembered now and the wash stays on your words.
+- Reading: the reader's sheets move in one piece — a drag re-laid-out the whole panel and its shadow on every frame (that was the clunk inside them); the panel moves as one layer.
+- Reading: the dictionary's browsable word list is words — WordNet's multi-word entries arrived with their database underscores (alarm_clock) and its symbol strings read as corrupted rows; the list shows English now.
+- Reading: the dictionary page's paper reaches the bottom of the screen — a bare strip of the app's own background used to show under it.
+- Reading: the topic browser remembers your place — opening a topic and going back landed at the top of the list.
+
+REMOVE:
+- Reading: the abridged Webster's 1913 download is gone — the complete 1913 sits beside WordNet and holds the same text in full, so the two rows read as one dictionary twice; a phone that had downloaded it gets the space back.
+
+ADD:
 - Reading: a film's own facts, with no key at all — the reveal's film card and the film sheet show the year, the runtime, the score, the genres, the director and the cast, read from Wikidata and the film's Wikipedia article. The same keyless pair now dresses the Incursion rows too, so films stop being the lane that only works with an API key.
 - Reading: a word's meanings open in a bottom sheet in the reader's own paper, with which dictionary is answering — and a switch to the other dictionary on your phone — and the spellings it thinks you meant.
 - Support: the Share hub moved out of Settings to the Dev page (Support, then five taps on Version), under Sharing.

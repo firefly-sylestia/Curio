@@ -1624,7 +1624,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                                     paragraph = swept.asParagraph(),
                                     kind = ReaderMarkKind.HIGHLIGHT,
                                     text = swept.text,
-                                    colorKey = ink.key
+                                    colorKey = ink.key,
+                                    // v457 — the swept run itself, so the wash
+                                    // is drawn back where it was made.
+                                    from = swept.from,
+                                    to = swept.to
                                 )
                             }
                         }
@@ -3943,7 +3947,32 @@ private fun ReaderParagraphBlock(
                 )
             }
             highlights.forEach { passage ->
-                val at = if (passage.text.isBlank()) -1 else block.text.indexOf(passage.text)
+                // ── v457 — THE MARK'S OWN OFFSETS FIRST ─────────────────────
+                //
+                // The member: *"when highlighted the highlight goes to a
+                // totally different line or text, but in highlight it shows
+                // correctly the one i highlighted, but the view of highlight is
+                // at a wrong text or line"*. A mark stores where its words are
+                // now, so the wash is drawn AT the run that was swept. The
+                // stored offsets are only trusted when the words they point at
+                // are still the mark's own words (a re-imported file can move
+                // them), and a mark from before v457 has none — both fall back
+                // to the old search, which is the only answer either can give.
+                val stored = if (passage.from >= 0 && passage.to >= passage.from &&
+                    passage.to < block.text.length &&
+                    block.text.substring(passage.from, passage.to + 1) == passage.text
+                ) {
+                    passage.from
+                } else {
+                    -1
+                }
+                val at = if (stored >= 0) {
+                    stored
+                } else if (passage.text.isBlank()) {
+                    -1
+                } else {
+                    block.text.indexOf(passage.text)
+                }
                 if (at >= 0) {
                     spans.add(
                         ReaderTextSpan(
@@ -5637,11 +5666,18 @@ internal fun ReaderSheetFrame(
                 .fillMaxWidth()
                 .heightIn(min = floor, max = cap)
                 .onSizeChanged { measuredHeight = it.height }
-                .offset {
-                    IntOffset(
-                        0,
-                        (drag + (1f - appear.value) * travel).roundToInt()
-                    )
+                // ── v457 — THE SHEET MOVES IN A LAYER, NOT IN LAYOUT ────────
+                //
+                // This was an `offset { }`, which is read in the LAYOUT phase:
+                // every frame of a drag (and every frame of the arrival and the
+                // departure) re-laid-out the whole panel — its title, its senses,
+                // its rows — and re-rendered its 16dp shadow with it. The member's
+                // report was that the read's sheets still felt clunky, and this is
+                // the cost inside them. `graphicsLayer { translationY }` moves the
+                // sheet's own layer instead: the same pixels, no relayout, and the
+                // shadow travels with the layer it belongs to.
+                .graphicsLayer {
+                    translationY = drag + (1f - appear.value) * travel
                 }
                 // The body's over-scroll and the sheet's own drag are one
                 // gesture (see [pull]).
@@ -6466,8 +6502,12 @@ private enum class DictionaryDoor(
      * the two beside it answered. **The badge is the INTENT now** ("answer me
      * without a connection") and the volumes are what it draws on: one Offline
      * door over every volume the phone has, modern senses first (WordNet), then
-     * the complete 1913, then the abridged one. Nothing was deleted — all three
-     * are still offered, downloaded and removable under the one badge.
+     * the complete 1913.
+     *
+     * v457 — and the abridged 1913 conversion is gone: it was the same
+     * public-domain text as the full edition in a lighter conversion, so the two
+     * rows read as one dictionary twice and the smaller one was a strict subset
+     * (see [ReaderOfflineDictionary]).
      */
     val volumes: List<ReaderOfflineDictionary.Volume> = emptyList(),
     /** The online door this badge stands for, or null for a file. */
@@ -6477,8 +6517,7 @@ private enum class DictionaryDoor(
         "Offline",
         volumes = listOf(
             ReaderOfflineDictionary.Volume.MODERN,
-            ReaderOfflineDictionary.Volume.FULL,
-            ReaderOfflineDictionary.Volume.WEBSTER
+            ReaderOfflineDictionary.Volume.FULL
         )
     ),
     WIKTIONARY("Wiktionary", online = ReaderDictionarySource.WIKTIONARY),
@@ -6533,9 +6572,17 @@ private fun ReaderDictionarySheet(
     val doorScope = rememberCoroutineScope()
     // ── v446 — WHICH VOLUMES ARE ALREADY ON THE PHONE ───────────────────
     //
-    // Three of them now (Webster's, WordNet, the full 1913), each read once when
-    // the sheet opens and re-read after a download or a removal, so a badge can
-    // never claim a volume the phone does not have.
+    // Each read once when the sheet opens and re-read after a download or a
+    // removal, so a badge can never claim a volume the phone does not have.
+    // ── v457 — AND A RETIRED VOLUME'S FILE GOES ─────────────────────────
+    //
+    // The abridged 1913 door is removed; a phone that had downloaded it keeps the
+    // 9MB forever unless something deletes it, and nothing can search it any more
+    // (see [ReaderOfflineDictionary.purgeRetired]). It runs off the main thread
+    // and nothing below waits on it — the doors read the volumes that exist.
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) { ReaderOfflineDictionary.purgeRetired(context) }
+    }
     var ready by remember {
         mutableStateOf(
             ReaderOfflineDictionary.Volume.entries.associateWith {
@@ -8335,8 +8382,21 @@ private fun ReaderNoteDialog(
  * held the whole block's words and a passage could not be chosen. Now the words
  * ARE the mark: a paragraph (or a PDF page) finds what it stored and washes that
  * run, so two passages in one paragraph are two different marks.
+ *
+ * ── v457 — [from]/[to] ARE THE MARK'S OWN PLACE, NOT A SEARCH RESULT ──────
+ *
+ * They are the character offsets the passage was swept from (in the block's
+ * own text, or in a PDF page's glyph stream), or `-1` on a mark made before
+ * v457 stored them. With them the wash lands where the member put it; without
+ * them the renderer can only search for the words, and a phrase that occurs
+ * twice in one block lands on the wrong one (see [ReaderMarkEntity]).
  */
-private data class ReaderPassage(val text: String, val ink: Color)
+private data class ReaderPassage(
+    val text: String,
+    val ink: Color,
+    val from: Int = -1,
+    val to: Int = -1
+)
 
 /**
  * EVERY HIGHLIGHT A BLOCK WEARS (v389c).
@@ -8347,7 +8407,14 @@ private data class ReaderPassage(val text: String, val ink: Color)
  */
 private fun highlightsFor(marks: List<ReaderMarkEntity>, index: Int): List<ReaderPassage> =
     marks.filter { it.isHighlight && it.positionIndex == index }
-        .map { ReaderPassage(it.text, readerHighlighter(it.colorKey).ink) }
+        .map {
+            ReaderPassage(
+                text = it.text,
+                ink = readerHighlighter(it.colorKey).ink,
+                from = it.startIndex,
+                to = it.endIndex
+            )
+        }
 
 /** One stretch of a paragraph and the style it wears — see [annotatedWithSpans]. */
 private data class ReaderTextSpan(val start: Int, val end: Int, val style: SpanStyle)
@@ -8622,11 +8689,21 @@ private fun PdfPageTextLayer(
         }
         highlights.forEach { passage ->
             if (passage.text.isBlank()) return@forEach
-            val at = words.text.indexOf(passage.text)
-            if (at < 0) return@forEach
+            // ── v457 — THE SWEPT GLYPHS, NOT A SEARCH (see [ReaderPassage]) ──
+            //
+            // A page's mark carries the glyph range it was swept from, so the
+            // wash goes back onto those glyphs exactly. The word search is the
+            // fallback for a mark made before the offsets were stored.
+            val range = if (passage.from >= 0 && passage.to >= passage.from) {
+                passage.from..passage.to
+            } else {
+                val at = words.text.indexOf(passage.text)
+                if (at < 0) return@forEach
+                words.glyphRange(at, passage.text.length)
+            }
             drawPdfPassage(
                 text = words,
-                range = words.glyphRange(at, passage.text.length),
+                range = range,
                 color = passage.ink.copy(alpha = 0.34f),
                 scale = scale
             )
@@ -11423,7 +11500,14 @@ private suspend fun saveReaderMark(
     kind: ReaderMarkKind,
     text: String,
     colorKey: String = "",
-    note: String = ""
+    note: String = "",
+    /**
+     * v457 — WHERE THE WORDS ARE (see [ReaderMarkEntity]). The offsets the
+     * passage was swept from, or -1 when the caller has none (a whole
+     * paragraph, a chapter, a note's own place).
+     */
+    from: Int = -1,
+    to: Int = -1
 ) {
     withContext(Dispatchers.IO) {
         val existing = runCatching {
@@ -11437,7 +11521,17 @@ private suspend fun saveReaderMark(
                         // paragraph are two marks and neither overwrites the
                         // other. Notes and bookmarks stay one per place (asking
                         // twice about the same page means editing, not adding).
-                        (kind != ReaderMarkKind.HIGHLIGHT || it.text == text)
+                        //
+                        // v457 — and TWO RUNS OF THE SAME WORDS ARE TWO MARKS.
+                        // The same phrase twice in a block used to collapse onto
+                        // the first run; with the offsets stored, the run is part
+                        // of a highlight's identity. A row from before the
+                        // columns (startIndex -1) still matches on its words, so
+                        // the member's first re-highlight upgrades it in place
+                        // instead of stacking a second wash on the same words.
+                        (kind != ReaderMarkKind.HIGHLIGHT ||
+                            (it.text == text && (from < 0 || it.startIndex < 0 ||
+                                it.startIndex == from)))
                 }
         }.getOrNull()
         runCatching {
@@ -11452,7 +11546,9 @@ private suspend fun saveReaderMark(
                     text = text,
                     note = note,
                     colorKey = colorKey,
-                    chapter = paragraph.section
+                    chapter = paragraph.section,
+                    startIndex = from,
+                    endIndex = to
                 )
             )
         }

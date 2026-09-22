@@ -82,6 +82,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
@@ -3052,6 +3053,111 @@ private fun DrawerLaneStarMap(
     // regular grid the member rejected (v419).
     val dust = remember { starDust(STAR_DUST_COUNT) }
     val strongest = lanes.maxOf { it.knowledge }.coerceAtLeast(1)
+    val density = LocalDensity.current
+    // The box, in pixels, for everything that has to be measured rather than drawn.
+    var sizePx by remember { mutableStateOf(IntSize.Zero) }
+    // ── v457 — WHERE EVERY STAR SITS, IN PIXELS ───────────────────────────
+    //
+    // Position, the tap target and the drawing all read ONE list now. It used to be
+    // recomputed inside the canvas and again inside the hit test (the same maths,
+    // written twice), and the halos below need it in COMPOSITION — a star's glow is
+    // a cached brush, not something a draw pass can build. It is derived from the
+    // measured size, so a resize moves every star with the box (see [starPoint]).
+    val starPoints = remember(sizePx, slots) {
+        if (sizePx.width <= 0 || sizePx.height <= 0) {
+            emptyList()
+        } else {
+            val middle = Offset(sizePx.width / 2f, sizePx.height / 2f)
+            slots.map { slot ->
+                starPoint(slot, middle, sizePx.width.toFloat(), sizePx.height.toFloat())
+            }
+        }
+    }
+    // ── v457 — THE SKY HAS A LIGHT IN THE MIDDLE OF IT ────────────────────
+    //
+    // The member: *"make the star pattern animation more better and also more
+    // noticeable shade of it, with a slight glowish background, not a solid box but
+    // a slight glowish rounded or side rounded background"* — and, asked which
+    // shape, **a radial glow from the centre**.
+    //
+    // So this is not the panel v422 removed coming back: there is no plate, no
+    // edge, no corner radius to read as a box. It is ONE radial gradient centred on
+    // the hub, from a warm whisper of the brand colour at the middle out to the
+    // page's own colour at its rim — a lit sky with nothing drawn round it. Every
+    // stop is OPAQUE and the last one IS the page, so it cannot catch the eye with
+    // a seam (the v422 rule for this surface, which a gradient satisfies by
+    // construction rather than by mixing).
+    //
+    // It is built once per measured size and drawn as one rect, and it rides the
+    // same `reveal` layer as every star, so it arrives and leaves with the drawer.
+    val glowTint = lerp(page, MaterialTheme.colorScheme.primary, 0.22f)
+    val centreGlow = remember(sizePx, page, glowTint) {
+        if (sizePx.width <= 0 || sizePx.height <= 0) {
+            null
+        } else {
+            Brush.radialGradient(
+                colors = listOf(
+                    lerp(page, glowTint, 0.66f),
+                    lerp(page, glowTint, 0.34f),
+                    lerp(page, glowTint, 0.14f),
+                    page
+                ),
+                center = Offset(sizePx.width / 2f, sizePx.height / 2f),
+                radius = maxOf(sizePx.width, sizePx.height) * 0.66f
+            )
+        }
+    }
+    // ── v457 — ONE BRUSH PER STAR, BUILT ONCE PER LOOK ─────────────────────
+    //
+    // The bloom used to be FOUR concentric circles per star, repainted every frame
+    // of the twinkle: ~144 opaque discs on a 372dp canvas at 60fps, for a sky whose
+    // stars only breathe. That is the cost the member felt as "clanky" and it is also
+    // why the glow read as a dot with rings round it — three flat steps is not a
+    // falloff. A radial gradient IS the falloff those steps were approximating, so
+    // each star draws ONE disc now: a quarter of the ops, a genuinely smooth glow
+    // (their *"make the glow better"*), and the twinkle and the arrival become a
+    // canvas TRANSFORM over a brush that never changes (see the star pass).
+    //
+    // The colours are only slightly deeper than v444's steps, because the member
+    // asked for a more noticeable SHADE, not for a brighter sky: the core stays the
+    // lane's own accent, the mid ring is a touch stronger, and the outermost stop is
+    // the PAGE's colour so the halo has no rim (the "circle drawn around a star"
+    // look v444 was trying to lose). A picked star's aura is stronger still, which is
+    // what makes the tap answer — the disc itself moves the same 18% it did.
+    //
+    // `null` means "not a lit star": an unexplored, unpicked lane stays the plain
+    // solid point v422 settled on.
+    val lanesKey = lanes.joinToString(",") { "${it.id.name}:${it.knowledge}:${it.explored}" }
+    val starHalos: List<Pair<Float, Brush>?> = remember(
+        lanesKey, starPoints, selected, page, strongest, density
+    ) {
+        lanes.mapIndexed { index, lane ->
+            val picked = lane.id == selected
+            // The point a star is drawn at: the SAME list the canvas and the tap
+            // test use, so a halo can never be built around a place the star is not.
+            val centre = starPoints.getOrNull(index) ?: return@mapIndexed null
+            if (!lane.explored && !picked) return@mapIndexed null
+            val fraction = (lane.knowledge.toFloat() / strongest).coerceIn(0f, 1f)
+            val core = (if (lane.explored) {
+                2.2f + 3.4f * fraction
+            } else {
+                // A lane you have not started is a point, and it stays one.
+                2.9f
+            }) * (if (picked) 1.18f else 1f)
+            val corePx = with(density) { core.dp.toPx() }
+            val accent = lane.accent
+            corePx to Brush.radialGradient(
+                colors = listOf(
+                    lerp(page, accent, 0.97f),
+                    lerp(page, accent, if (picked) 0.78f else 0.56f),
+                    lerp(page, accent, if (picked) 0.42f else 0.24f),
+                    page
+                ),
+                center = centre,
+                radius = corePx * HALO_REACH
+            )
+        }
+    }
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
         lit.snapTo(0f)
@@ -3096,7 +3202,6 @@ private fun DrawerLaneStarMap(
             }
         }
     }
-    var sizePx by remember { mutableStateOf(IntSize.Zero) }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -3104,27 +3209,17 @@ private fun DrawerLaneStarMap(
             .height(DrawerStarMapHeight)
             // v422 — no clip and no fill: the pattern is the whole thing, drawn
             // on the drawer's page. (The touch target still spans the full box.)
-            .pointerInput(lanes, selected, sizePx) {
+            .pointerInput(lanes, selected, starPoints) {
                 detectTapGestures { tap ->
-                    if (sizePx.width <= 0 || sizePx.height <= 0) return@detectTapGestures
                     // The finger is the target: a 30dp halo around a star. The
-                    // slot is mapped through the SAME function the canvas
-                    // draws with (pixel space, not unit space), so a tap can
-                    // never land a few dp off the star it looks like it hit.
-                    val hub = Offset(sizePx.width / 2f, sizePx.height / 2f)
+                    // points measured here are the SAME ones the canvas draws
+                    // (pixel space, not unit space), so a tap can never land a
+                    // few dp off the star it looks like it hit.
+                    if (starPoints.isEmpty()) return@detectTapGestures
                     val reach = 30.dp.toPx()
-                    val hit = slots.indices
-                        .map { i ->
-                            i to starPoint(
-                                slots[i],
-                                hub,
-                                sizePx.width.toFloat(),
-                                sizePx.height.toFloat()
-                            )
-                        }
-                        .filter { (_, point) -> (point - tap).getDistance() <= reach }
-                        .minByOrNull { (_, point) -> (point - tap).getDistance() }
-                        ?.first
+                    val hit = starPoints.indices
+                        .filter { i -> (starPoints[i] - tap).getDistance() <= reach }
+                        .minByOrNull { i -> (starPoints[i] - tap).getDistance() }
                     if (hit != null) {
                         onSelect(if (lanes[hit].id == selected) null else lanes[hit].id)
                     }
@@ -3185,6 +3280,13 @@ private fun DrawerLaneStarMap(
             // of the two axes: the field is taller than it is wide now, so a
             // width-only cap would quietly drop the vertical constellations.
             val joinReach = (size.width + size.height) * 0.15f
+            // ── v457 — THE GLOW THE SKY STANDS IN (see [centreGlow]) — one
+            //    radial gradient, drawn first, so every star sits on a lit page
+            //    rather than on a flat one. Opaque stops that end in the page's
+            //    own colour: no rim, no box, nothing to see but light.
+            centreGlow?.let { glow ->
+                drawRect(brush = glow, size = size)
+            }
             // ── THE SKY, NOT A DIAL (v419) — the astrolabe grid is GONE.
             //    The rings and the twelve spokes were perfectly regular, and
             //    that regularity is exactly what read as too symmetric (member:
@@ -3194,7 +3296,7 @@ private fun DrawerLaneStarMap(
             //    muted ink — no alpha anywhere.
             dust.forEach { dot ->
                 drawCircle(
-                    color = lerp(page, muted, 0.06f + 0.09f * dot.y),
+                    color = lerp(page, muted, 0.08f + 0.12f * dot.y),
                     radius = 0.9.dp.toPx(),
                     center = Offset(dot.x * size.width, dot.y * size.height)
                 )
@@ -3256,74 +3358,68 @@ private fun DrawerLaneStarMap(
                     moveTo(from.x, from.y)
                     quadraticBezierTo(control.x, control.y, tip.x, tip.y)
                 }
+                // v457 — a notch stronger than v444's pair: the member asked for
+                // the pattern's shade to be more noticeable, and the hairlines are
+                // what draws the mesh the eye follows.
                 drawPath(
                     path = hair,
-                    color = lerp(page, hue, if (joined) 0.22f else 0.13f),
+                    color = lerp(page, hue, if (joined) 0.30f else 0.18f),
                     style = Stroke(width = 2.6.dp.toPx(), cap = StrokeCap.Round)
                 )
                 drawPath(
                     path = hair,
-                    color = lerp(page, hue, if (joined) 0.48f else 0.32f),
+                    color = lerp(page, hue, if (joined) 0.60f else 0.42f),
                     style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
             // ── The stars. ──
-            lanes.forEachIndexed { index, lane ->
-                val centre = at(index)
-                // The staggered light-up: each star waits its own turn, so the
-                // sky fills in as a sweep rather than blinking on.
+            //
+            // v422 — THE PICK MAKES THE STAR COME ON. It grows and its aura
+            // brightens toward the lane's own accent; there is no ring any more,
+            // because a circle drawn around a star read as furniture rather than
+            // as the star answering.
+            //
+            // v457 — AND EACH STAR IS ONE DRAW OP. The aura is the cached gradient
+            // in [starHalos] (a falloff, not rings — see its note), the twinkle and
+            // the birth are one translate+scale over it, and an unexplored lane is
+            // still the solid dim point v422 asked for.
+            lanes.forEachIndexed { index, _ ->
+                // The staggered light-up: each star waits its own turn, so the sky
+                // fills in as a sweep rather than blinking on.
                 val born = bornOf(index)
                 if (born <= 0f) return@forEachIndexed
-                // v422 — THE PICK MAKES THE STAR COME ON. It grows and its halo
-                // steps brighten toward the lane's own accent; there is no ring
-                // any more, because a circle drawn around a star read as
-                // furniture rather than as the star answering.
-                val picked = lane.id == selected
-                if (lane.explored) {
-                    val corePx = corePxOf(index)
-                    // THE BLOOM (v427) — four OPAQUE steps of the PAGE mixed
-                    // toward the lane's own accent, where there were three flat
-                    // ones: a wide field barely off the page, a mid ring, an
-                    // inner ring and the hot core. The falloff is what makes a
-                    // star read as LIT rather than as a dot with a circle round
-                    // it (member: "make the glow better").
-                    // v444 — THE PICKED AURA IS THE LANE'S OWN COLOUR, NOT A PALE
-                    // WASH OF IT (the member: *"fix the light glow of the category
-                    // tint when one is selected"*). The old picked steps were the
-                    // same mixes as an unpicked star's, only wider, so a selected
-                    // lane read as a LIGHTER star rather than as a lit one — a bigger
-                    // circle of nearly the page's own colour round a dot. They are
-                    // deeper now (0.34/0.58/0.82 where the untouched steps are
-                    // 0.10/0.22/0.44) and tighter (2.6/1.7/1.2 of the core instead of
-                    // 3.2/2.0/1.35), so the glow is the category's tint and the dot
-                    // stays the dot. `flick` is the twinkle, and it moves the RADIUS
-                    // only — a star breathes, it does not change colour.
-                    val flick = 1f + 0.07f * sin(beat + index * 1.9f)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.34f else 0.10f), corePx * 2.6f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.58f else 0.22f), corePx * 1.7f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, if (picked) 0.82f else 0.44f), corePx * 1.2f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, 0.97f), corePx * (if (picked) 1.04f else 1f), centre)
-                } else if (picked) {
-                    // A lane you have not started still answers a tap: it lights
-                    // in its own colour at the smallest lit size, so the readout
-                    // under the map and the star agree about which one was
-                    // picked.
-                    val corePx = corePxOf(index)
-                    // v444 — the same rule for a lane you have not started: the
-                    // aura carries the colour and the point stays a point.
-                    val flick = 1f + 0.07f * sin(beat + index * 1.9f)
-                    drawCircle(lerp(page, lane.accent, 0.36f), corePx * 2.5f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, 0.58f), corePx * 1.6f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, 0.74f), corePx * 1.15f * flick, centre)
-                    drawCircle(lerp(page, lane.accent, 0.95f), corePx, centre)
-                } else {
-                    // Unexplored: a SOLID dim point — present, but plainly not
-                    // lit yet.
+                val settled = starPoints.getOrNull(index) ?: return@forEachIndexed
+                val halo = starHalos.getOrNull(index)
+                if (halo == null) {
                     drawCircle(
-                        color = lerp(page, muted, 0.20f + 0.30f * born),
+                        color = lerp(page, muted, 0.26f + 0.34f * born),
                         radius = 2.6f.dp.toPx(),
-                        center = centre
+                        center = settled
                     )
+                    return@forEachIndexed
+                }
+                val (corePx, brush) = halo
+                // ── v457 — THE STAR COMES OUT OF THE HUB ────────────────
+                //
+                // A newborn star sits a tenth of its own distance closer to the
+                // middle and slides to its place while it grows, so the sky reads
+                // as a constellation being DRAWN outward from its centre rather
+                // than switched on star by star. It reverses on the way out for
+                // free: every star is driven by the same [born] the close is.
+                val pull = 1f - 0.10f * (1f - born)
+                val centre = Offset(
+                    hub.x + (settled.x - hub.x) * pull,
+                    hub.y + (settled.y - hub.y) * pull
+                )
+                // The twinkle moves the RADIUS only — a star breathes, it does not
+                // change colour.
+                val flick = 1f + 0.07f * sin(beat + index * 1.9f)
+                val sizeNow = born * flick
+                withTransform({
+                    translate(centre.x - settled.x, centre.y - settled.y)
+                    scale(sizeNow, sizeNow, pivot = settled)
+                }) {
+                    drawCircle(brush = brush, radius = corePx * HALO_REACH, center = settled)
                 }
             }
         }
@@ -3370,6 +3466,14 @@ private fun starPoint(slot: StarSlot, hub: Offset, width: Float, height: Float):
  * starts there meets the halo's edge instead of vanishing under it.
  */
 private const val HaloTrimFactor = 1.35f
+
+/**
+ * How far a lit star's glow reaches, as a multiple of its core (v457).
+ *
+ * The gradient's radius, the circle that bounds it and the halo the joins stop at
+ * all read from this one number, so the three can never drift apart.
+ */
+private const val HALO_REACH = 2.7f
 
 /**
  * v419 — LANES ON A GOLDEN-ANGLE SCATTER (this replaced the v414 lattice).

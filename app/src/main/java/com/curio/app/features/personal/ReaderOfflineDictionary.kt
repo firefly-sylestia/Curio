@@ -20,7 +20,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * v444 — A DICTIONARY THAT LIVES ON THE PHONE.
- * v446 — THREE OF THEM, EACH FROM ITS OWN RELEASE FILE.
+ * v446 — EACH FROM ITS OWN RELEASE FILE.
+ * v457 — TWO OF THEM, AND THE MODERN ONE READS AS ENGLISH.
  *
  * The member, after living with the two online doors: *"the online dictionary is
  * bad, add a downloadable dictionary inside the app in the dictionary bottom
@@ -31,36 +32,52 @@ import kotlinx.coroutines.withContext
  *
  * **Webster's Unabridged (1913) was the first door**, and it is the right one for
  * a reading app: PUBLIC DOMAIN (so it can be downloaded, kept and searched with
- * no licence to honour per lookup), a real dictionary rather than a word list, and
- * ~9MB / ~86,000 headwords — small enough to fetch once over a phone connection
- * and keep for good.
+ * no licence to honour per lookup), a real dictionary rather than a word list —
+ * which is why the FULL edition stayed and the abridged conversion did not (see
+ * the v457 note below).
  *
- * **The member then asked for the other two**: *"wordnet and fuller please"* —
- * so the sheet carries three offline volumes, side by side with the two online
- * doors, and each is parsed from the file its own project actually publishes:
+ * **The member then asked for the others**: *"wordnet and fuller please"* — and
+ * the sheet carries the offline volumes, side by side with the two online doors,
+ * each parsed from the file its own project actually publishes:
  *
- *  1. [ReaderOfflineVolume.WEBSTER] — `matthewreagan/WebstersEnglishDictionary`'s
- *     single 9MB JSON object (`headword → definition`), searched IN PLACE: it is
- *     already the shape a lookup wants, so nothing is copied and nothing is
- *     duplicated on disk (see [defineFromJsonFile]).
- *  2. [ReaderOfflineVolume.MODERN] — **WordNet 3.1** in the JSON conversion
+ *  1. [Volume.MODERN] — **WordNet 3.1** in the JSON conversion
  *     `fluhus/wordnet-to-json` publishes as a release asset
  *     (`wordnet.json.gz`, ~11.4MB). This is the door that carries MODERN
  *     vocabulary — the 1913 editions predate "internet" and "software" — and it
  *     is under the WordNet licence (free, attribution), which the row names.
- *  3. [ReaderOfflineVolume.FULL] — the **full OPTED 1913** as `CloudBytes
+ *  2. [Volume.FULL] — the **full OPTED 1913** as `CloudBytes
  *     -Academy/English-Dictionary-Open-Source` publishes it
  *     (`csv/dictionary.csv`, ~14MB, 176,023 definitions, three fields:
- *     word · word-type · definition). Same public-domain Webster's text as door
- *     1, but the COMPLETE article set rather than the abridged conversion.
+ *     word · word-type · definition). The COMPLETE article set of the
+ *     public-domain Webster's text.
  *
- * **Why two of them are INDEXED rather than kept as they arrive.** Doors 2 and 3
- * publish data built for a database, not for a phone: WordNet's JSON is keyed by
- * synset, so the words live in a separate `lemma` map and a definition needs a
- * join, and it arrives gzipped; the OPTED CSV is one 14MB table. Streaming either
- * one per lookup would mean decompressing and scanning tens of megabytes for one
- * word — several seconds, on every word, forever. So they are **translated once,
- * at download time, into an index this app can actually search**, and the
+ * **v457 — THE THIRD DOOR IS GONE, AND THE MODERN ONE SPEAKS ENGLISH.** The
+ * member, on the two Webster's rows standing side by side: *"the words view is
+ * weird with weird words, also remove the webster's 1913 one keep the full
+ * one"*.
+ *
+ *  · **The abridged conversion is REMOVED.** It was the same public-domain 1913
+ *    text as [Volume.FULL] in a lighter conversion — the two rows read as the
+ *    same dictionary twice, and the smaller one was a strict subset. Removing it
+ *    is a removal of a DOOR, not of anyone's data: [purgeRetired] deletes a
+ *    phone's copy of the retired file the first time a dictionary surface opens,
+ *    so the 9MB it occupied comes back rather than sitting there unsearchable.
+ *  · **A WORD IS A WORD, NOT A DATABASE KEY.** WordNet's own lemmas are
+ *    snake_case — `alarm_clock`, `a_capella` — which is the right spelling for a
+ *    synset index and the wrong one for a dictionary page. The index is written
+ *    with the underscores turned into spaces, and both the lookup and the
+ *    browsable word list read that form, so a member looking a word up and a
+ *    member WALKING the dictionary see the same English. Entries that are not
+ *    words at all (a stray initialism, a symbol string) are not indexed into the
+ *    word list either — see [isWordShaped].
+ *
+ * **Why they are INDEXED rather than kept as they arrive.** Both doors publish
+ * data built for a database, not for a phone: WordNet's JSON is keyed by synset,
+ * so the words live in a separate `lemma` map and a definition needs a join, and
+ * it arrives gzipped; the OPTED CSV is one 14MB table. Streaming either one per
+ * lookup would mean decompressing and scanning tens of megabytes for one word —
+ * several seconds, on every word, forever. So they are **translated once, at
+ * download time, into an index this app can actually search**, and the
  * translation is the interesting part:
  *
  *  - **One file per first letter** (`a`…`z`, and `_` for everything else). A line
@@ -80,6 +97,10 @@ import kotlinx.coroutines.withContext
  * removed from the same row it was downloaded from, and **a missing volume answers
  * `null`, not `emptyList()`** — "there is no dictionary" and "there is no such
  * word" are still different answers, and the sheet says them differently.
+ *
+ * [Volume.Format.JSON_MAP] remains a supported shape (it is one `when` branch
+ * each in the readers below) because the retired door was its only user — a
+ * future single-file dictionary lands on it without touching this file's spine.
  */
 internal object ReaderOfflineDictionary {
 
@@ -89,10 +110,6 @@ internal object ReaderOfflineDictionary {
      */
     private const val WORDNET_URL =
         "https://github.com/fluhus/wordnet-to-json/releases/download/v1.0/wordnet.json.gz"
-
-    /** The single JSON object the first door downloads (public domain). */
-    private const val WEBSTER_URL =
-        "https://raw.githubusercontent.com/matthewreagan/WebstersEnglishDictionary/master/dictionary.json"
 
     /** The full OPTED 1913 table, three fields per line (public domain). */
     private const val OPTED_URL =
@@ -130,14 +147,6 @@ internal object ReaderOfflineDictionary {
         val url: String,
         val format: Format
     ) {
-        WEBSTER(
-            label = "Offline",
-            source = "Webster's 1913",
-            blurb = "public domain \u00b7 86,000 headwords",
-            size = "9 MB",
-            url = WEBSTER_URL,
-            format = Format.JSON_MAP
-        ),
         MODERN(
             label = "Modern",
             source = "WordNet 3.1",
@@ -172,10 +181,27 @@ internal object ReaderOfflineDictionary {
 
         private val folderName: String
             get() = when (this) {
-                WEBSTER -> "webster1913.json"
                 MODERN -> "wordnet31"
                 FULL -> "opted1913"
             }
+    }
+
+    /**
+     * v457 — WHAT A DICTIONARY DOOR THAT NO LONGER EXISTS LEFT BEHIND.
+     *
+     * The abridged Webster's door wrote into this folder, and nothing can search
+     * it any more (see the class note). Removing a door must not leave 9MB of
+     * unsearchable file on a phone, so this is called once, from each surface
+     * that reads the volumes, and it is best-effort: a phone that never had it
+     * loses nothing, and one that did gets its space back.
+     */
+    private val RETIRED_FOLDERS = listOf("webster1913.json")
+
+    fun purgeRetired(context: Context) {
+        for (name in RETIRED_FOLDERS) {
+            runCatching { deleteTree(File(File(context.filesDir, FOLDER), name)) }
+            runCatching { deleteTree(File(File(context.filesDir, FOLDER), name + PART)) }
+        }
     }
 
     /** There, AND whole — a partial volume is never searchable (see the class note). */
@@ -246,7 +272,11 @@ internal object ReaderOfflineDictionary {
     ): List<ReaderDictionarySense>? = withContext(Dispatchers.IO) {
         val wanted = ReaderDictionary.headword(term).lowercase()
         if (wanted.isEmpty() || wanted.length > 48) return@withContext emptyList()
-        if (!wanted.all { it.isLetter() || it == '-' || it == '\'' }) {
+        // v457 — A SPACE IS PART OF A WORD HERE. WordNet's multi-word lemmas are
+        // indexed with their underscores turned into spaces (see the class note),
+        // so "alarm clock" is a headword this dictionary can carry and a lookup
+        // for one must not be refused before the bucket is even opened.
+        if (!wanted.all { it.isLetter() || it == '-' || it == '\'' || it == ' ' }) {
             return@withContext emptyList()
         }
         if (!isReady(context, volume)) return@withContext null
@@ -274,10 +304,19 @@ internal object ReaderOfflineDictionary {
      * already `headword → definition`, so only the NAMES are read and every value
      * is skipped without being built).
      *
-     * The sort is `CASE_INSENSITIVE_ORDER` — a physical dictionary files "Apple"
-     * and "apple" together, and a list where "Zebra" sorts before "apple" (which
-     * is what plain string order does to mixed case) reads as broken.
-     */
+ * The sort is `CASE_INSENSITIVE_ORDER` — a physical dictionary files "Apple"
+ * and "apple" together, and a list where "Zebra" sorts before "apple" (which
+ * is what plain string order does to mixed case) reads as broken.
+ *
+ * ── v457 — AND ONLY THE WORDS STAND IN THE LIST ────────────────────────
+ *
+ * The member: *"the words view is weird with weird words"*. A dictionary's index
+ * is not all words — it also carries symbol strings, initialisms and the odd
+ * fragment a source needed internally — and those are exactly the rows that read
+ * as corrupted. [isWordShaped] drops them from the LIST (the index keeps
+ * everything, so a lookup for one still answers) and nothing else changes: the
+ * letters, the order and the taps are the same.
+ */
     suspend fun headwords(context: Context, volume: Volume, letter: Char): List<String> =
         withContext(Dispatchers.IO) {
             if (!isReady(context, volume)) return@withContext emptyList()
@@ -294,7 +333,11 @@ internal object ReaderOfflineDictionary {
                                     // The value is never read: only the headwords are
                                     // wanted, so every definition is skipped as tokens.
                                     reader.skipValue()
-                                    if (name.firstOrNull()?.lowercaseChar() == wanted) found.add(name)
+                                    if (name.firstOrNull()?.lowercaseChar() == wanted &&
+                                        isWordShaped(name)
+                                    ) {
+                                        found.add(name)
+                                    }
                                 }
                                 reader.endObject()
                             }
@@ -313,7 +356,11 @@ internal object ReaderOfflineDictionary {
                                         val tab = line.indexOf(TAB)
                                         if (tab <= 0) continue
                                         val head = line.substring(0, tab)
-                                        if (head.firstOrNull()?.lowercaseChar() == wanted) found.add(head)
+                                        if (head.firstOrNull()?.lowercaseChar() == wanted &&
+                                            isWordShaped(head)
+                                        ) {
+                                            found.add(head)
+                                        }
                                     }
                                 }
                             }
@@ -487,7 +534,17 @@ internal object ReaderOfflineDictionary {
                     if (gloss.isNotBlank()) {
                         val definition = clean(gloss)
                         val label = wordNetLabel(pos)
-                        for (word in words) sink.write(word, label, definition)
+                        // ── v457 — AND THE WORD IS WRITTEN AS A WORD ────────
+                        //
+                        // A WordNet lemma is a database key, and a multi-word one
+                        // is spelled with underscores (`alarm_clock`). The index
+                        // is what the reader LOOKS AT — in the sheet's answer and
+                        // in the browsable word list — so the underscore arrives
+                        // as the space it stands for, and both the lookup and the
+                        // walk read the same English (see the class note).
+                        for (word in words) {
+                            sink.write(word.replace('_', ' '), label, definition)
+                        }
                     }
                 }
                 json.endObject()
@@ -811,6 +868,30 @@ internal object ReaderOfflineDictionary {
     private fun clean(raw: String): String {
         val text = raw.replace(Regex("\\s+"), " ").trim()
         return if (text.length > MAX_CHARS) text.take(MAX_CHARS).trimEnd() + "\u2026" else text
+    }
+
+    /**
+     * Whether [head] is a WORD a dictionary page would print (v457).
+     *
+     * Letters, with a space inside a multi-word entry, and the hyphen and
+     * apostrophe that belong to real headwords (`mother-in-law`, `o'clock`) —
+     * starting with a letter and ending with one. Everything else a source's
+     * index may hold (symbols, `A-1`-style fragments, digit strings) is not a
+     * row the member should meet while walking the letter's pages.
+     *
+     * Deliberately applied to the BROWSE list only, never to the lookup: the
+     * index holds every head the source published, so a word the member already
+     * knows is never lost to this filter (see [headwords]).
+     */
+    private fun isWordShaped(head: String): Boolean {
+        val word = head.trim()
+        if (word.isEmpty() || word.length > 40) return false
+        if (!word.first().isLetter() || !word.last().isLetter()) return false
+        if (word.contains("  ")) return false
+        // At most a handful of words: a "headword" longer than that is a phrase
+        // the source needed indexed, not an entry a dictionary prints.
+        if (word.count { it == ' ' } > 3) return false
+        return word.all { it.isLetter() || it == ' ' || it == '-' || it == '\'' }
     }
 
     /** Which bucket [word] belongs to: its first letter, or `_` for anything else. */

@@ -477,6 +477,18 @@ fun CurioNavHost(
         // the floating studio capsule.
         CurioRoutes.PET_DESIGNER.substringBefore("/")
     )
+    // ── v457 — AND THE ONE ROUTE THAT NEEDS AN EXACT MATCH ─────────────
+    //
+    // The dictionary page wears the reader's own paper, and the inset below
+    // stopped that paper above the gesture bar: the page's bottom carried a
+    // bare strip of the APP's background in a different colour, which is
+    // exactly what the member reported (*"the dictionary page is bad, bottom
+    // area is covered with something"*). It cannot be added to the PREFIX set
+    // above: its prefix is `reader`, which the reader's own settings page
+    // shares, and that page has its own (different) bottom treatment. So the
+    // dictionary is named by its full route, and it clears the gesture bar
+    // itself — its own `navigationBarsPadding` (see ReaderDictionaryPage).
+    val fullBleedBottomRoutes = setOf(CurioRoutes.READER_DICTIONARY)
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -715,8 +727,14 @@ fun CurioNavHost(
                     // record themselves into their own blurred backdrop.
                     .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
                     .then(
-                        if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
-                        else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        if ((showBottomBar && !wide) ||
+                            routePrefix in fullBleedBottomRoutePrefixes ||
+                            currentRoute in fullBleedBottomRoutes
+                        ) {
+                            Modifier
+                        } else {
+                            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {

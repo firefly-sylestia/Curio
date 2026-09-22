@@ -280,6 +280,23 @@ enum class ReaderMarkKind(val key: String, val label: String) {
  * until it is rendered. [positionFraction] says how far INTO that unit the
  * member was, because a chapter is taller than a screen and an index alone
  * would send them back to the top of something they had read half of.
+ *
+ * ── v457 — AND A HIGHLIGHT NOW SAYS EXACTLY WHERE ITS WORDS ARE ─────────
+ *
+ * A highlight used to store its WORDS and nothing else, so drawing it back
+ * onto the page meant searching the paragraph for the first place those words
+ * occur. That is ambiguous by nature: "the first great age" can appear twice
+ * in one block, and the wash then landed on the earlier run — the member's
+ * report was exact (*"when highlighted the highlight goes to a totally
+ * different line or text, but in highlight it shows correctly the one i
+ * highlighted, but the view of highlight is at a wrong text or line"*). The
+ * words were right and the position was a guess.
+ *
+ * [startIndex] and [endIndex] are the run the member actually swept, in the
+ * block's (or the PDF page's) own character offsets — the same numbers the
+ * live selection was built from, so the mark is drawn where it was made.
+ * **-1 on both means "this row predates the columns"**, and the renderer
+ * falls back to the old search for those, so no existing mark is lost.
  */
 @Entity(
     tableName = "reader_marks",
@@ -302,6 +319,13 @@ data class ReaderMarkEntity(
     val note: String = "",
     /** The highlight's ink key — see the reader's own ink table. */
     val colorKey: String = "",
+    /**
+     * WHERE the marked words are (v457) — the character offsets the passage was
+     * swept from, inclusive. **-1 means unknown** (a mark made before v457), and
+     * the renderer searches for [text] instead (see the class note).
+     */
+    val startIndex: Int = -1,
+    val endIndex: Int = -1,
     /** The 1-based chapter/section the mark belongs to (0 when unknown). */
     val chapter: Int = 0,
     val createdAtMillis: Long = 0L,

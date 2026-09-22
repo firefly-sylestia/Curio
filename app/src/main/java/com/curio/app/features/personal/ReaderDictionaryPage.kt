@@ -111,6 +111,14 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     // history) and part of the effect's keys.
     var askSeq by remember { mutableIntStateOf(0) }
     // ── The doors, and the volumes that live on the phone ────────────────
+    // v457 — A RETIRED VOLUME'S FILE IS CLEANED UP HERE, ONCE (see
+    // [ReaderOfflineDictionary.purgeRetired]): removing a door must not leave
+    // 9MB of unsearchable file behind on a phone that had downloaded it. It runs
+    // off the main thread and nothing waits on it — the doors below are read from
+    // the volumes that still exist.
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) { ReaderOfflineDictionary.purgeRetired(context) }
+    }
     var ready by remember {
         mutableStateOf(
             ReaderOfflineDictionary.Volume.entries.associateWith {
@@ -850,10 +858,13 @@ private enum class DictionaryPageDoor(
 ) {
     OFFLINE(
         "Offline",
+        // v457 — TWO VOLUMES, best-first: the MODERN one carries the words the
+        // 1913 editions predate, and the FULL 1913 is the complete article set.
+        // The abridged 1913 conversion was the same text as the full edition in
+        // a smaller conversion and is gone — see [ReaderOfflineDictionary].
         volumes = listOf(
             ReaderOfflineDictionary.Volume.MODERN,
-            ReaderOfflineDictionary.Volume.FULL,
-            ReaderOfflineDictionary.Volume.WEBSTER
+            ReaderOfflineDictionary.Volume.FULL
         )
     ),
     WIKTIONARY("Wiktionary", online = ReaderDictionarySource.WIKTIONARY),

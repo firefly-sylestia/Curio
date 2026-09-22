@@ -743,40 +743,71 @@ fun TopicDatabaseScreen(navController: NavController) {
     // a fast wheel scroll wrote to the saveable registry ~60x/second
     // (per-frame churn on a 16k-row list). Restore now lands at the row
     // top instead of mid-row — a sub-row precision loss no one can feel.
+    // ── v457 — THE RESTORE HAPPENS BEFORE ANYTHING CAN OVERWRITE IT ─────
+    //
+    // The member: *"in topic browser the scrolled position isn't remembered any
+    // more, so when i open a topic and exit it the scroll goes back to the top"*.
+    // The restore was right and the SAVER was racing it: `snapshotFlow` emits the
+    // CURRENT value the instant it is collected, and this collector was launched
+    // in the same frame as the restore — so on a return trip it wrote index 0
+    // into [savedScrollIndex] and into [TopicBrowserSession] a beat before
+    // `scrollToItem` ran, and the "restored" spot WAS 0 by then.
+    //
+    // [settled] is the order the two effects below obey: the restore lands first
+    // and flips the flag, and the saver ignores every emission until it does.
+    // The two RESET effects further down have the same hazard for the same reason
+    // (an effect's first body run is not a user action) and carry their own guard.
+    val settled = remember { booleanArrayOf(false) }
     val hasRows = rows.isNotEmpty()
     LaunchedEffect(hasRows) {
-        if (hasRows && (savedScrollIndex > 0 || savedScrollOffset > 0)) {
+        if (!hasRows) {
+            settled[0] = false
+            return@LaunchedEffect
+        }
+        if (savedScrollIndex > 0 || savedScrollOffset > 0) {
             listState.scrollToItem(savedScrollIndex, savedScrollOffset)
         }
+        settled[0] = true
     }
     LaunchedEffect(listState, hasRows) {
         if (!hasRows) return@LaunchedEffect
         snapshotFlow { listState.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { index ->
+                if (!settled[0]) return@collect
                 savedScrollIndex = index
                 savedScrollOffset = 0
                 TopicBrowserSession.savedScrollIndex = index
                 TopicBrowserSession.savedScrollOffset = 0
             }
     }
-    // v27r — switching the CATEGORY filter (or All) starts from the top,
-    // never from a stale position into the new lane.
+    // ── v27r — AND THESE TWO GO BACK TO THE TOP ON A REAL CHANGE ────────
+    //
+    // Switching the CATEGORY filter (or All), and flipping to another PAGE via
+    // the floating nav, each start a fresh row set from the top — never from a
+    // stale position into it.
+    //
+    // v457 — WHAT THEY MAY NOT DO IS FIRE ON ARRIVAL. A `LaunchedEffect` runs its
+    // body on the composition that starts it, so the entry frame is a "change" to
+    // both of them — and a reset one frame after the restore undoes the restore,
+    // which is the same top-of-the-list bug the saver had. Each one therefore
+    // remembers the value it last acted on and does nothing the first time it sees
+    // it, so only a REAL switch moves anything.
+    var catsSeen by remember { mutableStateOf(effectiveCats) }
     LaunchedEffect(effectiveCats) {
-        if (hasRows && listState.firstVisibleItemIndex > 0) {
-            savedScrollIndex = 0
-            savedScrollOffset = 0
-            listState.scrollToItem(0)
-        }
+        if (catsSeen == effectiveCats) return@LaunchedEffect
+        catsSeen = effectiveCats
+        savedScrollIndex = 0
+        savedScrollOffset = 0
+        if (hasRows) listState.scrollToItem(0)
     }
-    // v318b — flipping to another PAGE via the floating page nav also
-    // auto-scrolls back to the top (each page's row set starts fresh).
+    var pageSeen by remember { mutableIntStateOf(currentPage) }
     LaunchedEffect(currentPage) {
-        if (hasRows && listState.firstVisibleItemIndex > 0) {
-            savedScrollIndex = 0
-            savedScrollOffset = 0
-            listState.scrollToItem(0)
-        }
+        if (pageSeen == currentPage) return@LaunchedEffect
+        pageSeen = currentPage
+        savedScrollIndex = 0
+        savedScrollOffset = 0
+        if (hasRows) listState.scrollToItem(0)
     }
 
     // ── A–Z fast-scroller (v26) — the scroll knob's letter rail: the active
