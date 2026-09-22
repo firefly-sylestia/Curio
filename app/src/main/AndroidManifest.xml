@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+    <!-- v458 — the camera permission is gone with the ISBN scanner. The app
+         takes no picture of its own: every image door (an avatar, a pet, a
+         note's photo, a gallery wall) hands the job to the system picker,
+         which needs no permission here. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Update checker: queries the public GitHub API for the latest release (About → Check for updates). -->
     <uses-permission android:name="android.permission.INTERNET" />

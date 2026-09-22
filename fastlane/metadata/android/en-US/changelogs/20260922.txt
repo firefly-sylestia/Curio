@@ -1,3 +1,6 @@
+REMOVE:
+- Books: the ISBN barcode scanner is gone from the shelf's add-a-book sheet, and the camera permission the app asked for goes with it — Search and Type are the two doors that remain, and nothing else in the app used a camera (a picture is always handed to your phone's own picker).
+
 FIX:
 - Reading: a locked page scrolls like a page — with the motion lock on, a drag whose first few pixels went a hair sideways froze the page for the whole gesture (it could not scroll at all), while a drag that began vertically let a later sideways move turn the page; the lock settles the axis once, at the touch slop, and keeps it until you lift.
 - Reading: the dictionary's word list no longer unloads for a letter — tapping a letter replaced the whole list with a "Reading the … pages" line and built it again when the words arrived; the list stays and only its words change.
