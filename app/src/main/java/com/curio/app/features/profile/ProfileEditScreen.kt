@@ -371,7 +371,7 @@ fun ProfileEditScreen(navController: NavController) {
                 Text("Edit profile", style = titleStyle, color = ink)
                 Spacer(Modifier.height(EditSpace.XS))
                 Text(
-                    "Your picture, your name, and the line that follows you around Curio.",
+                    "Your identity.",
                     style = leadStyle,
                     color = muted
                 )
