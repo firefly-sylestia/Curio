@@ -195,7 +195,6 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.isLiteMode
-import com.curio.app.ui.theme.curioItemIn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.pastelAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -1231,11 +1230,7 @@ fun HomeScreen(navController: NavController) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         // Home keeps this as a five-item preview; the full
                         // feed is available through View all → Recents.
-                        // v455 — `forEachIndexed`: the row's place in the run is
-                        // what staggers its arrival under the motion system
-                        // (see [curioItemIn]); it is `0` for every row when the
-                        // experiment is off, so nothing else changes.
-                        recentPreview.forEachIndexed { index, item ->
+                        recentPreview.forEach { item ->
                             when (item) {
                                 is RecentFeedItem.Explored -> {
                                     val explored = item.topic
@@ -1244,7 +1239,6 @@ fun HomeScreen(navController: NavController) {
                                         topicName = explored.topicName,
                                         tag = if (explored.wasUnexplored) "Resumed" else null,
                                         subtitle = "Explored · tap to open",
-                                        order = index,
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(explored.categoryId.routeSlug, explored.topicName)
@@ -1259,7 +1253,6 @@ fun HomeScreen(navController: NavController) {
                                         topicName = unexplored.topicName,
                                         tag = "Unexplored",
                                         subtitle = "Left without exploring · tap to resume",
-                                        order = index,
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
@@ -1270,7 +1263,6 @@ fun HomeScreen(navController: NavController) {
                                 is RecentFeedItem.SavedEntry -> {
                                     RecentEntryRow(
                                         entry = item.entry,
-                                        order = index,
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(item.entry.topic.categoryId.routeSlug, item.entry.topic.name)
@@ -2073,8 +2065,7 @@ private fun PinnedTopicRow(
 @OptIn(ExperimentalFoundationApi::class)
 private fun RecentEntryRow(
     entry: CurioEntry,
-    onClick: () -> Unit,
-    order: Int = 0
+    onClick: () -> Unit
 ) {
     // v455 — no `hold`: Home's recents are tap-only (see the note at the
     // recents preview). The hold menu lives on the Recents page's own rows.
@@ -2086,8 +2077,6 @@ private fun RecentEntryRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            // v455 — the row's arrival (motion system only; inert otherwise).
-            .curioItemIn(key = entry.id, order = order)
             // v27u — recents rows sit on a soft 2dp lift; the white catch
             // stays at the TOP EDGE only (curioGlassEdge) — the full-pill
             // inner glow is gone.
@@ -3624,8 +3613,7 @@ private fun ExploreTopicRow(
     topicName: String,
     subtitle: String,
     onClick: () -> Unit,
-    tag: String? = null,
-    order: Int = 0
+    tag: String? = null
 ) {
     // v455 — no `hold`: Home's recents are tap-only (see the note at the
     // recents preview). The hold menu lives on the Recents page's own rows.
@@ -3639,8 +3627,6 @@ private fun ExploreTopicRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            // v455 — the row's arrival (motion system only; inert otherwise).
-            .curioItemIn(key = "${category.id}/$topicName", order = order)
             // v98 — dark pill: previous color + pill shape kept; the white
             // catch stays at the TOP EDGE only (curioGlassEdge) — the
             // full-pill inner glow is gone.

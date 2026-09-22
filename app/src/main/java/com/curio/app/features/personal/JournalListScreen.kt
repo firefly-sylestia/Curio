@@ -30,8 +30,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-// v455 phase 4 — the rows' entrance (see the list below).
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,8 +74,6 @@ import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.curioItemIn
-import com.curio.app.ui.theme.rememberCurioArrivals
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
@@ -427,10 +423,6 @@ fun JournalListScreen(navController: NavController) {
             val months = ordered.groupBy { journal ->
                 journal.dateMillis.toLocalDate().withDayOfMonth(1)
             }
-            // v455 phase 4 — the days arrive, and only once each: the list's
-            // own arrivals record is what stops a row re-animating when it is
-            // scrolled back to (see CurioArrivals).
-            val journalArrivals = rememberCurioArrivals()
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
@@ -438,14 +430,9 @@ fun JournalListScreen(navController: NavController) {
             ) {
                 months.forEach { (month, pages) ->
                     item(key = "month-$month") { MonthHead(month = month) }
-                    itemsIndexed(items = pages, key = { _, j -> j.id }) { index, journal ->
+                    items(items = pages, key = { it.id }) { journal ->
                         JournalRow(
                             journal = journal,
-                            modifier = Modifier.curioItemIn(
-                                key = journal.id,
-                                order = index,
-                                arrivals = journalArrivals
-                            ),
                             // v389 — a row opens ITS OWN page: a journal day the
                             // editor, a to-do list the checklist page, a note on a
                             // topic the topic page. See personalRouteFor.
@@ -538,10 +525,7 @@ private fun MonthHead(month: java.time.LocalDate) {
 private fun JournalRow(
     journal: PersonalNoteEntity,
     onClick: () -> Unit,
-    onLongPress: () -> Unit,
-    // v455 phase 4 — the row's arrival (the motion system only; inert
-    // otherwise). See CurioMotionSystem.curioItemIn.
-    modifier: Modifier = Modifier
+    onLongPress: () -> Unit
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
     val mood = journal.moodEnum
@@ -563,7 +547,7 @@ private fun JournalRow(
         // member's accent), lifted by the soft shadow: a page in the
         // collection sits ON the page instead of being outlined into it.
         color = journalPaper(),
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 720.dp)
             .curioCardShadow(RoundedCornerShape(20.dp))

@@ -69,7 +69,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.DefaultNavTransitions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -175,27 +174,6 @@ import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.CurioRevealHost
-// v455 — the motion system's screen vocabulary. See `ui/theme/CurioMotionSystem.kt`
-// and `app/MOTION_PLAN.md`: when the experiment is on these ARE the app's page
-// motion, and the CurioMotion durations in the branches below are not consulted.
-import com.curio.app.ui.theme.curioMotionSystemOn
-import com.curio.app.ui.theme.sharedAxisFadeEnter
-import com.curio.app.ui.theme.sharedAxisFadeExit
-import com.curio.app.ui.theme.sharedAxisXEnter
-import com.curio.app.ui.theme.sharedAxisXExit
-import com.curio.app.ui.theme.sharedAxisZEnter
-import com.curio.app.ui.theme.sharedAxisZExit
-import com.curio.app.ui.theme.sharedAxisZPopEnter
-import com.curio.app.ui.theme.sharedAxisZPopExit
-// v455 phase 2 — the SEEKED pop (navigation 2.10's predictive parameters):
-// the same shapes as the pops above, on the linear curve, so the back gesture
-// scrubs the page under the finger instead of playing a fixed clip.
-import com.curio.app.ui.theme.predictivePopEnterFade
-import com.curio.app.ui.theme.predictivePopEnterX
-import com.curio.app.ui.theme.predictivePopEnterZ
-import com.curio.app.ui.theme.predictivePopExitFade
-import com.curio.app.ui.theme.predictivePopExitX
-import com.curio.app.ui.theme.predictivePopExitZ
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -787,29 +765,6 @@ fun CurioNavHost(
                 // Screen reveal owns the motion for this navigation — the old
                 // frame is already frozen over the destination.
                 if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
-                // ── v455 — THE MOTION SYSTEM (experiment) ──────────────────
-                // With it on, THIS is the open, and every duration below is
-                // skipped: shared axis X drifts a quarter of the width while
-                // cross-fading (Felicity's `SeekableSharedAxisXTransition`),
-                // Z for the modal-style pushes, and a pure fade wherever a
-                // shared element is already the animation (a tab hand-off,
-                // the settings rail's pill, Topic Reveal, the Pet Designer)
-                // — a drift there would fight the element that is moving.
-                else if (curioMotionSystemOn) when {
-                    // The splash hands over to Home: nothing to drift against.
-                    initialState.destination.route == CurioRoutes.SPLASH -> sharedAxisFadeEnter()
-                    // Peers: the bottom-nav tabs.
-                    isTabSwitch(initialState, targetState) -> sharedAxisFadeEnter()
-                    // Shared-element continuations — the hero grows out of the
-                    // Spin ticket, the rail's pill moves between chips.
-                    isRevealRoute(targetState) || isPetDesignerRoute(targetState) -> sharedAxisFadeEnter()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        sharedAxisFadeEnter()
-                    // Modal-style pushes come forward along Z.
-                    isDetailRoute(targetState) || isPopScreenRoute(targetState) -> sharedAxisZEnter()
-                    // Everything else: the drift.
-                    else -> sharedAxisXEnter()
-                }
                 else when {
                     // Settings-internal switches (hub ⇄ sections ⇄ drill-in
                     // tools): the rail's active pill MORPHS between chips
@@ -889,19 +844,6 @@ fun CurioNavHost(
             },
             exitTransition = {
                 if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
-                // v455 — mirrors the open above, on one clock.
-                else if (curioMotionSystemOn) when {
-                    initialState.destination.route == CurioRoutes.SPLASH -> sharedAxisFadeExit()
-                    isTabSwitch(initialState, targetState) -> sharedAxisFadeExit()
-                    isRevealRoute(targetState) || isPetDesignerRoute(targetState) -> sharedAxisFadeExit()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        sharedAxisFadeExit()
-                    isDetailRoute(targetState) || isPopScreenRoute(targetState) -> sharedAxisZExit()
-                    // A pop screen opening a non-pop push leaves the same way
-                    // it came in, so the modal language stays one language.
-                    isPopScreenRoute(initialState) -> sharedAxisZExit()
-                    else -> sharedAxisXExit()
-                }
                 else when {
                     // Settings-internal switches mirror the calm fade: the
                     // outgoing page's text + lower content fades out under
@@ -949,17 +891,6 @@ fun CurioNavHost(
             },
             popEnterTransition = {
                 if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
-                // v455 — coming back: the page underneath returns from the
-                // side it left towards (X, reversed) or from in front (Z).
-                else if (curioMotionSystemOn) when {
-                    isTabSwitch(initialState, targetState) -> sharedAxisFadeEnter()
-                    initialState.destination.route == CurioRoutes.REVEAL -> sharedAxisFadeEnter()
-                    isPetDesignerRoute(initialState) -> sharedAxisFadeEnter()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        sharedAxisFadeEnter()
-                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> sharedAxisZPopEnter()
-                    else -> sharedAxisXEnter(forward = false)
-                }
                 else when {
                     // Popping back inside settings (section → hub, drill-in
                     // → section): the page underneath fades back in the same
@@ -1002,17 +933,6 @@ fun CurioNavHost(
             },
             popExitTransition = {
                 if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
-                // v455 — and the page you are leaving goes the other way, on
-                // the same clock, so a back gesture reads as one movement.
-                else if (curioMotionSystemOn) when {
-                    isTabSwitch(initialState, targetState) -> sharedAxisFadeExit()
-                    initialState.destination.route == CurioRoutes.REVEAL -> sharedAxisFadeExit()
-                    isPetDesignerRoute(initialState) -> sharedAxisFadeExit()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        sharedAxisFadeExit()
-                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> sharedAxisZPopExit()
-                    else -> sharedAxisXExit(forward = false)
-                }
                 else when {
                     // Popping back inside settings: the outgoing page fades
                     // out over the same crossfade.
@@ -1044,50 +964,6 @@ fun CurioNavHost(
                             animationSpec = tween(CurioMotion.Durations.Pop, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Pop))
                     }
-                }
-            },
-            // ── v455 phase 2 — THE SEEKED POP ─────────────────────────────
-            //
-            // A predictive-back gesture SAMPLES its transition at the finger's
-            // own progress (navigation 2.10's predictive hooks). Felicity's
-            // rule is exactly this: `LinearInterpolator` while the animator is
-            // being seeked, `DecelerateInterpolator` when it runs free — so
-            // these two lambdas repeat the pop shapes above on the linear
-            // `Track` curve, and the released pop keeps the `Settle` curve.
-            // The result is a page that moves 1:1 with the hand and then
-            // settles, instead of one that runs ahead of it and then waits.
-            //
-            // With the motion system OFF the app must behave exactly as it did
-            // — which is what the library's own defaults are, so they are what
-            // is handed back (`DefaultNavTransitions`, the same object the
-            // parameters default to).
-            predictivePopEnterTransition = { swipeEdge ->
-                if (!curioMotionSystemOn) {
-                    DefaultNavTransitions.predictivePopEnterTransition.invoke(this, swipeEdge)
-                } else when {
-                    // The same classification as `popEnterTransition` above:
-                    // the shared-element routes fade, the modal routes come
-                    // back along Z, everything else drifts.
-                    isTabSwitch(initialState, targetState) -> predictivePopEnterFade()
-                    initialState.destination.route == CurioRoutes.REVEAL -> predictivePopEnterFade()
-                    isPetDesignerRoute(initialState) -> predictivePopEnterFade()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        predictivePopEnterFade()
-                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> predictivePopEnterZ()
-                    else -> predictivePopEnterX(swipeEdge)
-                }
-            },
-            predictivePopExitTransition = { swipeEdge ->
-                if (!curioMotionSystemOn) {
-                    DefaultNavTransitions.predictivePopExitTransition.invoke(this, swipeEdge)
-                } else when {
-                    isTabSwitch(initialState, targetState) -> predictivePopExitFade()
-                    initialState.destination.route == CurioRoutes.REVEAL -> predictivePopExitFade()
-                    isPetDesignerRoute(initialState) -> predictivePopExitFade()
-                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        predictivePopExitFade()
-                    isDetailRoute(initialState) || isPopScreenRoute(initialState) -> predictivePopExitZ()
-                    else -> predictivePopExitX(swipeEdge)
                 }
             }
         ) {

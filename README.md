@@ -343,15 +343,6 @@ Special thanks to the early testers and people who shared topics and feedback.
 
 Curio stands on other people's work. These are the ones it actually ships:
 
-- **[Felicity](https://github.com/firefly-sylestia/Felicity)** — **the motion.** Curio's
-  screen transitions, the shared-axis X/Y/Z pop, the seekable back gesture and the
-  "an item arrives once" list animations are a port of Felicity's design: its
-  transition builders (`decorations/src/main/java/app/simple/felicity/decorations/transitions/`),
-  its item animators (`add 300ms` / `remove 500ms`, a `0.85` scale start) and its
-  `AnimationUtils`. Felicity is **AGPL-3.0** and so is Curio — the same licence, so the
-  port is licence-clean. The design is Felicity's; the Compose implementation is
-  Curio's, rewritten for Compose rather than pasted. Per-file provenance lives in
-  [`app/MOTION_PLAN.md`](app/MOTION_PLAN.md).
 - **[AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass)** (Kyant0) — the
   backdrop, vibrancy, blur and lens pipeline behind Curio's glass headers, pills and
   docks.

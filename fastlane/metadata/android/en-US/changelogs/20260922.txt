@@ -1,20 +1,10 @@
 ADD:
 - Reading: a film's own facts, with no key at all — the reveal's film card and the film sheet show the year, the runtime, the score, the genres, the director and the cast, read from Wikidata and the film's Wikipedia article. The same keyless pair now dresses the Incursion rows too, so films stop being the lane that only works with an API key.
 - Reading: a word's meanings open in a bottom sheet in the reader's own paper, with which dictionary is answering — and a switch to the other dictionary on your phone — and the spellings it thinks you meant.
-- Support: "Motion by Felicity" in the app's credits, naming where the app's transitions came from.
 - Support: the Share hub moved out of Settings to the Dev page (Support, then five taps on Version), under Sharing.
 
 FIX:
 - Reading: the dictionary page's foot no longer hides its last rows behind an invisible bar, and the page no longer offers to remove a downloaded dictionary — that lives in the reader's dictionary sheet.
-
-ADD:
-- Experiments: "Smoother transitions" also brings lists in — a saved discovery in the Cabinet and a day in the journals arrive with a light lift, once each, so scrolling back to them is just a scroll.
-
-ADD:
-- Experiments: "Smoother transitions" now seeks — the back gesture moves the page with your finger and only settles when you let go, instead of playing a fixed clip; and the reader's sheets (the dictionary, the ⋯ menu, notes, highlights, contents) open on the same clock and curve as a screen, so a sheet and a page arriving read as one app.
-
-ADD:
-- Experiments: "Smoother transitions" — a new way for the app's screens to move, ported from Felicity: a page drifts a quarter of the screen while the two cross-fade (a hand-off, not a slide), a modal-style page comes forward out of depth, peer switches cross-fade, and the BACK GESTURE seeks the animation under your finger instead of playing a fixed clip. It replaces the app's older page motion while it is on; the old feel returns the moment you turn it off. Off by default, under Experiments → Motion.
 
 FIX:
 - Home: the recents rows no longer react to a hold — a hold that outlived the finger could keep the action menu up after letting go; the rows simply open the topic now, and the held actions (write about it, remove from recents, open a saved entry) are on the Recents page's own rows, where the feed is managed.

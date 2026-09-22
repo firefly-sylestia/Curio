@@ -42,8 +42,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-// v455 phase 4 — the entrance's index and record (see the grid below).
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -130,8 +128,6 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioTertiaryInk
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.curioItemIn
-import com.curio.app.ui.theme.rememberCurioArrivals
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
@@ -708,10 +704,6 @@ fun CabinetScreen(navController: NavController) {
                 kind = PetLandmarks.Kind.CURIOUS,
                 screen = "cabinet"
             ) { m ->
-                // v455 phase 4 — one arrivals record for this grid, alive as
-                // long as the screen is: a saved discovery animates in when it
-                // is saved, and a scroll back to it is just a scroll.
-                val cabinetArrivals = rememberCurioArrivals()
                 LazyVerticalGrid(
                     state = gridState,
                     // Phones keep the 2-column grid; wide windows gain columns
@@ -803,22 +795,13 @@ fun CabinetScreen(navController: NavController) {
                             }
                         }
                     }
-                    // v455 phase 4 — the cards arrive (Felicity's item ADD).
-                    // `itemsIndexed` because the row's place in the run is what
-                    // staggers its entrance, and the grid's own [arrivals]
-                    // record is what keeps a card from re-animating every time
-                    // it scrolls back into view (see CurioArrivals).
-                    itemsIndexed(visibleEntries, key = { _, e -> e.id }) { index, entry ->
+                    items(visibleEntries, key = { it.id }) { entry ->
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
                         // page pops up from center instead of expanding out of
                         // the card, so the card carries no shared element.
                         CurioEntryCard(
                             entry = entry,
-                            modifier = Modifier.curioItemIn(
-                                key = entry.id,
-                                order = index,
-                                arrivals = cabinetArrivals
-                            ),
+                            modifier = Modifier,
                             selected = entry.id in selectedEntryIds,
                             onLongClick = {
                                 selectionMode = true

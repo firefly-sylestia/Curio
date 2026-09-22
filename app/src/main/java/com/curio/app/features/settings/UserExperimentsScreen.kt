@@ -117,26 +117,12 @@ fun UserExperimentsScreen(navController: NavController) {
             item { SettingsSectionHeading("Motion") }
             item {
                 SettingsOptionCard {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        // v455 — the two switches answer different halves of
-                        // "how does the app move": Curio Alive is the
-                        // interaction layer (press feedback, card arrivals,
-                        // micro-motion); this one is the SCREEN layer — how a
-                        // page comes and goes. See ui/theme/CurioMotionSystem.kt
-                        // and app/MOTION_PLAN.md.
-                        ExperimentSwitchRow(
-                            "Smoother transitions",
-                            "Experimental: screens move with the shared-axis vocabulary ported from Felicity — a screen drifts a quarter of the width while cross-fading, a modal-style push comes forward along depth, peer switches cross-fade — and the back gesture seeks the animation under your finger instead of playing a fixed clip. Replaces the app's older page motion while it is on.",
-                            AppPreferences.motionSystemState
-                        ) { AppPreferences.setMotionSystemEnabled(context, it) }
-                        CurioSettingsDivider()
-                        ExperimentSwitchRow(
-                            "Curio Alive",
-                            "Upgrades press feedback, transitions, card arrivals and interaction motion across the app. Turn it off anytime to return to the classic motion.",
-                            CurioAlivePreferences.enabledState
-                        ) { wanted ->
-                            CurioAlivePreferences.setEnabled(context, wanted)
-                        }
+                    ExperimentSwitchRow(
+                        "Curio Alive",
+                        "Upgrades press feedback, transitions, card arrivals and interaction motion across the app. Turn it off anytime to return to the classic motion.",
+                        CurioAlivePreferences.enabledState
+                    ) { wanted ->
+                        CurioAlivePreferences.setEnabled(context, wanted)
                     }
                 }
             }

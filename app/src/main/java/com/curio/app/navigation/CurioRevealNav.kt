@@ -89,31 +89,12 @@ object CurioRevealNav {
     private var pendingAt = 0L
 
     /**
-     * v455 — whether the SCREEN REVEAL experiment is the app's transition
-     * right now: its own switch is on AND the motion system is not in charge.
-     *
-     * Two switching experiments that both answer "how does a screen change"
-     * must never both be on: the reveal freezes the outgoing screen into a
-     * bitmap and sweeps it away, while the motion system drifts the real pages
-     * — together that is a frozen frame sliding over a live one. The motion
-     * system wins (it is the newer, app-wide vocabulary) and the reveal's own
-     * preference is left exactly as the member set it, so turning the motion
-     * system off restores the reveal they had chosen.
-     */
-    val screenRevealActive: Boolean
-        get() = AppPreferences.screenRevealEnabledState && !AppPreferences.motionSystemState
-
-    /**
      * Warm the next reveal frame from the tap that is about to navigate.
      * Cheap no-op while the experiment is off, while a reveal is already
      * playing, or when a recent enough frame is already stashed.
      */
     fun armReveal() {
-        // v455 — the motion system supersedes the screen reveal: both are a
-        // way of moving from one screen to the next, and running them together
-        // would freeze a frame over a page that is also drifting. See
-        // `screenRevealActive` below.
-        if (!screenRevealActive) {
+        if (!AppPreferences.screenRevealEnabledState) {
             discard()
             return
         }
@@ -161,7 +142,7 @@ object CurioRevealNav {
         if (frame == null) return false
         val fresh = SystemClock.uptimeMillis() - pendingAt <= FRAME_FRESHNESS_MS
         val state = CurioRevealHost.transition
-        if (!fresh || frame.isRecycled || !screenRevealActive || state == null) {
+        if (!fresh || frame.isRecycled || !AppPreferences.screenRevealEnabledState || state == null) {
             frame.takeUnless { it.isRecycled }?.recycle()
             return false
         }
