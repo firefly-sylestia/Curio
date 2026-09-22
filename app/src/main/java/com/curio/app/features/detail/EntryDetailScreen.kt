@@ -1216,6 +1216,9 @@ private fun BoxScope.DetailStickyBar(
         val backPillInteraction = remember { MutableInteractionSource() }
         CurioBackButton(
             onClick = { navController.popBackStack() },
+            // This is the hero's own frosted plate (see its comment above) — it
+            // brings its glass itself, so the ambient one stays off.
+            ambientGlass = false,
             containerColor = Color.Transparent,
             contentColor = heroCardInk,
             shadowElevation = 0.dp,

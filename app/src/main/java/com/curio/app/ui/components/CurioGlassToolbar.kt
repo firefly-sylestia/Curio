@@ -150,6 +150,8 @@ fun CurioGlassToolbar(
             if (onBack != null) {
                 CurioBackButton(
                     onClick = onBack,
+                    // Already wears this bar's own glass (below).
+                    ambientGlass = false,
                     modifier = Modifier
                         .then(
                             if (glassBackdrop != null && isInScreenGlassActive())
@@ -439,6 +441,8 @@ fun CurioGlassToolbarMorph(
         } else if (onBack != null) {
             CurioBackButton(
                 onClick = onBack,
+                // The bar's own glass is applied below — the ambient is off here.
+                ambientGlass = false,
                 modifier = Modifier.then(
                     if (glassBackdrop != null && isInScreenGlassActive())
                         Modifier.liquidGlassCapsule(

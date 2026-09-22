@@ -8,7 +8,9 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,8 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
@@ -136,6 +140,150 @@ fun isLiquidGlassPillsActive(): Boolean {
 fun isInScreenGlassActive(): Boolean =
     // v242 — merged into the single Liquid glass toggle (Appearance).
     isLiquidGlassRequested() && android.os.Build.VERSION.SDK_INT >= 31
+
+/**
+ * v451 — THE SCREEN'S GLASS, AS AN AMBIENT (the app-wide adoption door).
+ *
+ * The member: *"liquid glass to more buttons and things app wide, many doesn't
+ * have it"*, and, asked what recipe: **real refraction, capture per screen**.
+ *
+ * Real refraction has one hard rule (the v228/v260 cyclic-render-node rule):
+ * **a pill may only sample a capture of what sits BEHIND it, and the pill itself
+ * must be OUTSIDE the captured subtree.** That is why every existing site threads
+ * a `LayerBackdrop` down as a parameter — and why, with 33 call sites in 18 files,
+ * most of the app never got one: each new pill needs its own plumbing.
+ *
+ * This is that plumbing, once. A screen declares ONE [rememberCurioGlassScreen],
+ * marks the content the pills sit over with [CurioGlassScreen.capture], and wraps
+ * the pills in [CurioGlassScreen.Provide]; from there **every descendant that asks
+ * ([Modifier.curioAmbientGlass], [ambientGlassOn]) gets real glass with no further
+ * parameters** — including the shared components (`CurioBackButton`, chips, menus,
+ * docks) that have no way to receive a backdrop of their own.
+ *
+ * Adoption is three lines:
+ * ```
+ * val glass = rememberCurioGlassScreen()
+ * Box(Modifier.fillMaxSize().then(glass.capture)) { ...the content... }
+ * glass.Provide { ...the floating pills, as SIBLINGS of that content... }
+ * ```
+ *
+ * Two rules a caller must respect, both of them the same rule twice: the capture
+ * must wrap ONLY the content behind the pills (never a subtree containing them),
+ * and the pills must be composed INSIDE [CurioGlassScreen.Provide] but OUTSIDE the
+ * captured box. A screen that has not adopted this changes nothing: the ambient is
+ * null and every consumer falls back to its solid fill.
+ */
+val LocalCurioGlassBackdrop = compositionLocalOf<LayerBackdrop?> { null }
+
+/**
+ * A screen's glass state: whether it refracts at all, and the layer its pills
+ * sample. Null [backdrop] (glass off, or Android below 12) makes every consumer
+ * fall back to its own solid fill, so a screen can adopt this unconditionally.
+ */
+class CurioGlassScreen internal constructor(
+    internal val backdrop: LayerBackdrop?,
+    val on: Boolean
+) {
+    /**
+     * Marks the content the screen's floating pills sit OVER. Apply it to the
+     * box that draws the content — never to an ancestor of the pills themselves.
+     */
+    val capture: Modifier
+        get() = if (on && backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier
+
+    /** Hands the backdrop to every pill drawn inside [content]. */
+    @Composable
+    fun Provide(content: @Composable () -> Unit) {
+        CompositionLocalProvider(LocalCurioGlassBackdrop provides backdrop) { content() }
+    }
+}
+
+/**
+ * One capture per screen, hoisted where both the content and the pills can see
+ * it. The `rememberLayerBackdrop` is created unconditionally (a hook cannot be
+ * conditional) and simply not handed out when glass is off.
+ */
+@Composable
+fun rememberCurioGlassScreen(): CurioGlassScreen {
+    val active = isInScreenGlassActive()
+    // NOTE the two hooks are SEPARATE on purpose: `rememberLayerBackdrop()` is
+    // itself @Composable, so it cannot be called from inside `remember { … }`'s
+    // (non-composable) calculation lambda — it is called here in the composition
+    // and only its RESULT is remembered over in the next line.
+    val layer = rememberLayerBackdrop()
+    return remember(active, layer) {
+        CurioGlassScreen(if (active) layer else null, active)
+    }
+}
+
+/** Whether this screen refracts — i.e. a backdrop is in reach and glass is on. */
+@Composable
+fun ambientGlassOn(): Boolean = LocalCurioGlassBackdrop.current != null
+
+/**
+ * The same ambient hand-off for a screen that ALREADY keeps a capture of its own
+ * (there are ~30 of them for their header pills). One line where the backdrop is
+ * already in hand:
+ *
+ * ```
+ * ProvideCurioGlass(glassBackdrop) { ...the header row, chips, menus, docks... }
+ * ```
+ *
+ * and every shared component drawn inside gets real refraction without a new
+ * parameter anywhere — [Modifier.curioAmbientGlass], [ambientGlassOn] and
+ * `CurioBackButton` all read it. Nothing is provided when the screen's capture is
+ * absent or glass is off, so the wrap is safe unconditionally.
+ */
+@Composable
+fun ProvideCurioGlass(
+    backdrop: LayerBackdrop?,
+    active: Boolean = isInScreenGlassActive(),
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalCurioGlassBackdrop provides if (active) backdrop else null
+    ) { content() }
+}
+
+/**
+ * The glass coat for a floating surface, taken from the AMBIENT backdrop.
+ *
+ * Returns `this` unchanged on a screen that has not adopted a capture (or with
+ * glass off), so a caller can write it unconditionally:
+ *
+ * ```
+ * Surface(
+ *     color = if (ambientGlassOn()) Color.Transparent else solid,
+ *     shadowElevation = if (ambientGlassOn()) 0.dp else 10.dp,
+ *     modifier = Modifier.curioAmbientGlass(solid, shape = RoundedCornerShape(50))
+ * ) { ... }
+ * ```
+ *
+ * The container is the surface's own solid fill: it is what the wash and the
+ * refraction are tinted with, so the glass reads as that fill under a lens rather
+ * than as a new colour. The shadow belongs to the glass (see [liquidGlassCapsule]),
+ * which is why a caller drops its own elevation while the glass is on.
+ */
+@Composable
+fun Modifier.curioAmbientGlass(
+    container: Color,
+    shape: Shape = CircleShape,
+    washAlpha: Float = 0.45f,
+    blurMultiplier: Float = 1f,
+    interactionSource: InteractionSource? = null
+): Modifier {
+    val backdrop = LocalCurioGlassBackdrop.current ?: return this
+    return this.then(
+        Modifier.liquidGlassCapsule(
+            container = container,
+            washAlpha = washAlpha,
+            backdrop = backdrop,
+            shape = shape,
+            interactionSource = interactionSource,
+            blurMultiplier = blurMultiplier
+        )
+    )
+}
 
 /**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:

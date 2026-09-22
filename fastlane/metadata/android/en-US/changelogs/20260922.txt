@@ -1,3 +1,7 @@
+ADD:
+- Appearance: liquid glass reaches the reading surface — the reader's floating pills (the way out, the book's name, search, the foot's five buttons, the search bar, the listen and motion-lock pills, the pinned page count and the page scrubber) now refract the page under them instead of sitting on a solid fill; the glass follows the same Liquid glass switch, and a pill that is "on" (a held page, a voice reading) refracts through its own accent tint.
+- Everywhere: the round back pill refracts on every page that uses the glass, with no per-page setup — it is the app's most repeated control and it was solid everywhere.
+
 FIX:
 - Home & Profile: the glass header is one bar again — it used to cross-fade between a tall hero and a short identity row while you scrolled, which read as a jump; it keeps the short bar at every scroll position now, so the header rides the scroll with nothing left to swap.
 - Everywhere: a pill's icon is the app's accent, and the words inside it stay ink — the back arrows, the menu, the streak fire and Edit were a mix of plain ink, muted tones and one-off colours, so a row of pills read as unrelated controls; they are one family now, in light and dark alike.

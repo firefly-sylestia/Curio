@@ -411,6 +411,8 @@ fun SettingsHeroHeader(
                         if (onBack != null) {
                         CurioBackButton(
                             onClick = onBack,
+                            // It is handed its own glass just below (v263).
+                            ambientGlass = false,
                             modifier = Modifier.then(
                                 // v263 — GLASSY BACK BUTTON: when a local
                                 // capture is provided and Liquid glass is

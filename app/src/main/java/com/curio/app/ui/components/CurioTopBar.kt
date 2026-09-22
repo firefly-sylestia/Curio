@@ -65,7 +65,17 @@ fun CurioBackButton(
     disableRipple: Boolean = false,
     // v246 — optional external gesture source: when the caller also wires
     // liquid-glass press feel, both must read the SAME stream.
-    pillInteraction: MutableInteractionSource? = null
+    pillInteraction: MutableInteractionSource? = null,
+    // v451 — WHETHER THIS PILL TAKES THE SCREEN'S AMBIENT GLASS.
+    //
+    // On by default, so a screen that has adopted a glass host
+    // ([rememberCurioGlassScreen] / [ProvideCurioGlass]) gets a refracting back
+    // pill with no wiring at all. It is the four callers that ALREADY hand this
+    // pill glass of its own (their own `Modifier.liquidGlassCapsule` — the two
+    // glass toolbars, SettingsHeroHeader and the entry-detail hero) that pass
+    // `false`, because two drawBackdrop passes over one capsule is the same
+    // refraction paid for twice, not a stronger one.
+    ambientGlass: Boolean = true
 ) {
     val icon: @Composable () -> Unit = {
         CurioIcon(
@@ -79,16 +89,34 @@ fun CurioBackButton(
                 .padding(12.dp)
         )
     }
+    // ── v451 — THE BACK PILL REFRACTS ON A GLASS SCREEN ──────────────
+    //
+    // The member: *"liquid glass to more buttons and things app wide, many doesn't
+    // have it"*. The app's most repeated control is this pill, and it was solid
+    // everywhere. It now takes the SCREEN's ambient glass ([ambientGlassOn]) — so it
+    // refracts on every page that has adopted a glass host
+    // ([rememberCurioGlassScreen]) and is exactly the pill it has always been
+    // anywhere that has not, with no parameter to pass either way.
+    //
+    // The fill goes transparent and the lift goes to the glass while it is on, and
+    // the dark-mode glow is dropped with it (two shadows under one capsule is what
+    // makes glass read as a smudge). A caller that brings its own frosted plate —
+    // the entry-detail hero — still passes `containerColor = Color.Transparent`,
+    // which makes the glass read CLEAR rather than as a second frost.
+    val glass = ambientGlass && ambientGlassOn()
+    val glassMod = Modifier.curioAmbientGlass(containerColor, shape = RoundedCornerShape(50))
+    val lift = if (glass) 0.dp else shadowElevation
     if (disableRipple) {
         val fallbackInteraction = remember { MutableInteractionSource() }
         val interactionSource = pillInteraction ?: fallbackInteraction
         Surface(
             shape = RoundedCornerShape(50),
-            color = containerColor,
-            shadowElevation = shadowElevation,
+            color = if (glass) Color.Transparent else containerColor,
+            shadowElevation = lift,
             modifier = modifier
                 // v28 — dark mode elevation visibility (glow + hairline).
-                .curioDarkGlow(shadowElevation, RoundedCornerShape(50))
+                .curioDarkGlow(lift, RoundedCornerShape(50))
+                .then(glassMod)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
@@ -99,11 +127,12 @@ fun CurioBackButton(
         Surface(
             onClick = onClick,
             shape = RoundedCornerShape(50),
-            color = containerColor,
-            shadowElevation = shadowElevation,
+            color = if (glass) Color.Transparent else containerColor,
+            shadowElevation = lift,
             modifier = modifier
                 // v28 — dark mode elevation visibility (glow + hairline).
-                .curioDarkGlow(shadowElevation, RoundedCornerShape(50))
+                .curioDarkGlow(lift, RoundedCornerShape(50))
+                .then(glassMod)
         ) { icon() }
     }
 }

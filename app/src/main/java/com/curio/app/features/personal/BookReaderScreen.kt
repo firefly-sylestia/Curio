@@ -171,7 +171,10 @@ import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.ReaderMarkKind
 import com.curio.app.data.newReaderMarkId
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.ambientGlassOn
+import com.curio.app.ui.components.curioAmbientGlass
 import com.curio.app.ui.components.curioPressClickable
+import com.curio.app.ui.components.rememberCurioGlassScreen
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -1224,6 +1227,22 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // here, once, and handed to the surface below (see [PdfScrollReader]).
     var surfaceOrigin by remember { mutableStateOf(Offset.Zero) }
     var surfaceSize by remember { mutableStateOf(IntSize.Zero) }
+    // ── v451 — THE READER'S GLASS (the app-wide ambient, see
+    // [rememberCurioGlassScreen]) ─────────────────────────────────────
+    //
+    // The member: *"liquid glass to more buttons and things app wide, many doesn't
+    // have it"* — and the reader was the biggest "doesn't": its head, foot, search,
+    // motion lock, speak, pinned-count and scrubber pills were all SOLID `palette
+    // .surface` with a 10–12dp lift, while every other floating surface in the app
+    // could refract.
+    //
+    // The page is marked as the capture ([readerGlass.capture] below) and the pills
+    // are its SIBLINGS, which is the one rule real refraction has (a pill may never
+    // sample a layer containing itself — the v228 cyclic render node). Nothing else
+    // in the reader changes: with glass off, or on Android below 12, `capture` and
+    // the pills' [curioAmbientGlass] are no-ops and every pill keeps the fill it has
+    // today.
+    val readerGlass = rememberCurioGlassScreen()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -1251,6 +1270,23 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 )
             }
     ) {
+        // The captured layer: everything the pills float over, and ONLY that —
+        // the chrome is composed after it, outside this box.
+        //
+        // The PAPER is repeated inside the capture on purpose. `layerBackdrop`
+        // records this subtree alone, so without a fill the capture would be
+        // transparent wherever the page draws nothing (a margin, the end of a
+        // chapter) and a pill there would refract nothing at all. Painting the
+        // reader's own paper in here makes the layer opaque, so a pill over the
+        // words and a pill over the margin are the same glass (this is the same
+        // construction Home's capture uses, and the outer box's own fill is
+        // underneath it, so nothing changes visually).
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(palette.paper)
+                .then(readerGlass.capture)
+        ) {
         when {
             error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
@@ -1362,6 +1398,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 null -> Unit
             }
         }
+        }
 
         /**
          * v431 — ONE FIND, ONE STEP.
@@ -1392,6 +1429,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             }
         }
 
+        // The pills' own door to the capture above — see [CurioGlassScreen.Provide].
+        readerGlass.Provide {
         ReaderChrome(
             visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
@@ -1435,6 +1474,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onBookmarks = { sheet = ReaderSheet.BOOKMARKS },
             onMenu = { sheet = ReaderSheet.MENU }
         )
+        }
 
         // ── v431 — THE PINNED COUNT, OUTSIDE THE CHROME ─────────────────
         //
@@ -1444,11 +1484,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         val pinned = scrubber
         if (ReaderLook.pinnedPage && pinned != null && pinned.short.isNotBlank()) {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                // Sits outside [ReaderChrome], so it gets the screen's glass of its
+                // own (see [rememberCurioGlassScreen]).
+                readerGlass.Provide {
                 ReaderPinnedPage(
                     pageLabel = pinned.short,
                     palette = palette,
                     onUnpin = { ReaderLook.pinnedPage = false }
                 )
+                }
             }
         }
 
@@ -1712,11 +1756,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 .padding(bottom = 84.dp)
         ) {
             if (run != null) {
+                // The scrubber is outside [ReaderChrome] too — its own glass door.
+                readerGlass.Provide {
                 ReaderScrubPill(
                     scrubber = run,
                     palette = palette,
                     onDismiss = { scrubOpen = false }
                 )
+                }
             }
         }
     }
@@ -4320,10 +4367,15 @@ private fun ReaderChrome(
  */
 @Composable
 private fun ReaderSpeakPill(palette: ReaderPalette, speaking: Boolean, onToggle: () -> Unit) {
+    // v451 — the voice's pill refracts the page as well, tinted by its state (see
+    // [ReaderMotionLockPill]).
+    val glass = ambientGlassOn()
+    val body = if (speaking) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (speaking) lerp(palette.surface, palette.accent, 0.30f) else palette.surface,
-        shadowElevation = 8.dp
+        color = if (glass) Color.Transparent else body,
+        shadowElevation = if (glass) 0.dp else 8.dp,
+        modifier = Modifier.curioAmbientGlass(body, shape = RoundedCornerShape(50))
     ) {
         Row(
             modifier = Modifier
@@ -4416,6 +4468,14 @@ private fun ReaderTopPill(
     onClose: () -> Unit,
     onSearch: () -> Unit
 ) {
+    // ── v451 — THE HEAD REFRACTS THE PAGE ─────────────────────────────
+    //
+    // All three pills of the head wear the screen's ambient glass (see
+    // [rememberCurioGlassScreen]): the fill goes TRANSPARENT and the lift goes
+    // away so the glass is what draws the surface — its own refraction carries the
+    // edge, and two shadows under one capsule was what made a glass pill read as a
+    // smudge. With glass off nothing here changes.
+    val glass = ambientGlassOn()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -4436,9 +4496,11 @@ private fun ReaderTopPill(
         Surface(
             onClick = onClose,
             shape = CircleShape,
-            color = palette.surface,
-            shadowElevation = 10.dp,
-            modifier = Modifier.size(50.dp)
+            color = if (glass) Color.Transparent else palette.surface,
+            shadowElevation = if (glass) 0.dp else 10.dp,
+            modifier = Modifier
+                .size(50.dp)
+                .curioAmbientGlass(palette.surface, shape = CircleShape)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CurioIcon(
@@ -4454,9 +4516,11 @@ private fun ReaderTopPill(
         // leave and ellipsises inside it.
         Surface(
             shape = RoundedCornerShape(50),
-            color = palette.surface,
-            shadowElevation = 10.dp,
-            modifier = Modifier.weight(1f)
+            color = if (glass) Color.Transparent else palette.surface,
+            shadowElevation = if (glass) 0.dp else 10.dp,
+            modifier = Modifier
+                .weight(1f)
+                .curioAmbientGlass(palette.surface, shape = RoundedCornerShape(50))
         ) {
             Row(
                 modifier = Modifier
@@ -4486,9 +4550,11 @@ private fun ReaderTopPill(
         Surface(
             onClick = onSearch,
             shape = CircleShape,
-            color = palette.surface,
-            shadowElevation = 10.dp,
-            modifier = Modifier.size(50.dp)
+            color = if (glass) Color.Transparent else palette.surface,
+            shadowElevation = if (glass) 0.dp else 10.dp,
+            modifier = Modifier
+                .size(50.dp)
+                .curioAmbientGlass(palette.surface, shape = CircleShape)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CurioIcon(
@@ -4521,14 +4587,17 @@ private fun ReaderBottomPill(
     onBookmarks: () -> Unit,
     onMenu: () -> Unit
 ) {
+    // ── v451 — THE FOOT REFRACTS THE PAGE (see [rememberCurioGlassScreen])
+    val glass = ambientGlassOn()
     Surface(
         shape = RoundedCornerShape(50),
-        color = palette.surface,
-        shadowElevation = 12.dp,
+        color = if (glass) Color.Transparent else palette.surface,
+        shadowElevation = if (glass) 0.dp else 12.dp,
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(start = 12.dp, end = 12.dp, bottom = 14.dp)
+            .curioAmbientGlass(palette.surface, shape = RoundedCornerShape(50), blurMultiplier = 1.2f)
     ) {
         Row(
             modifier = Modifier
@@ -4599,13 +4668,19 @@ private fun RowScope.ReaderPillButton(
 @Composable
 private fun ReaderMotionLockPill(palette: ReaderPalette) {
     val locked = ReaderLook.motionLock
+    // v451 — and it refracts too, TINTED BY ITS OWN STATE: the container handed to
+    // the glass is the same accent blend the solid pill wears when locked, so a
+    // held page still reads as held through the glass.
+    val glass = ambientGlassOn()
+    val body = if (locked) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (locked) lerp(palette.surface, palette.accent, 0.30f) else palette.surface,
-        shadowElevation = 8.dp,
+        color = if (glass) Color.Transparent else body,
+        shadowElevation = if (glass) 0.dp else 8.dp,
         modifier = Modifier
             .height(40.dp)
             .clip(RoundedCornerShape(50))
+            .curioAmbientGlass(body, shape = RoundedCornerShape(50))
             .curioPressClickable(
                 pressedScale = 0.92f,
                 onClickLabel = if (locked) "Let the page move again" else "Hold the page still"
@@ -4706,16 +4781,20 @@ private fun ReaderSearchBar(
     } else {
         ""
     }
+    // v451 — the search bar is the fourth pill of the reader's own family, so it
+    // refracts the page like the head, the foot and the lock.
+    val glass = ambientGlassOn()
     Surface(
         shape = RoundedCornerShape(50),
-        color = palette.surface,
-        shadowElevation = 10.dp,
+        color = if (glass) Color.Transparent else palette.surface,
+        shadowElevation = if (glass) 0.dp else 10.dp,
         modifier = Modifier
             .fillMaxWidth()
             // The same floor the head stands on, so the bar lands exactly where
             // the name capsule was instead of jumping a few dp up.
             .readerChromeTopInset()
             .padding(horizontal = 12.dp, vertical = 8.dp)
+            .curioAmbientGlass(palette.surface, shape = RoundedCornerShape(50), blurMultiplier = 1.2f)
     ) {
         Row(
             modifier = Modifier
@@ -4795,15 +4874,20 @@ private fun ReaderPinnedPage(
     palette: ReaderPalette,
     onUnpin: () -> Unit
 ) {
+    // v451 — the pin refracts the page like every other pill of the chrome; the
+    // glass is what keeps it reading as a pill once the chrome it left behind is
+    // gone.
+    val glass = ambientGlassOn()
     Surface(
         onClick = onUnpin,
         shape = RoundedCornerShape(50),
-        color = palette.surface,
-        shadowElevation = 8.dp,
+        color = if (glass) Color.Transparent else palette.surface,
+        shadowElevation = if (glass) 0.dp else 8.dp,
         modifier = Modifier
             .readerChromeTopInset()
             // Clear of the head row, which owns the first ~76dp below the floor.
             .padding(top = 70.dp, end = 14.dp)
+            .curioAmbientGlass(palette.surface, shape = RoundedCornerShape(50))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -4881,14 +4965,22 @@ private fun ReaderScrubPill(
     //    on every frame of every arrival.
     val body = lerp(palette.surface, palette.ink, 0.06f)
     val edge = lerp(palette.surface, palette.ink, 0.16f)
+    // ── v451 — THE SCRUBBER REFRACTS THE PAGE ───────────────────────────
+    //
+    // It is the pill the member scrubs to a page ON, so it is the one that most
+    // wants the page visible through it. Its own hairline edge is kept (it is what
+    // says "capsule" over pale paper — the v441 note) and the lift goes to the glass.
+    val glass = ambientGlassOn()
     Surface(
         // 28dp, the dock's own radius: it is a capsule at this height and it
         // never arcs a slider thumb out of its track.
         shape = RoundedCornerShape(28.dp),
-        color = body,
-        shadowElevation = 8.dp,
+        color = if (glass) Color.Transparent else body,
+        shadowElevation = if (glass) 0.dp else 8.dp,
         border = androidx.compose.foundation.BorderStroke(1.dp, edge),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .curioAmbientGlass(body, shape = RoundedCornerShape(28.dp), blurMultiplier = 1.2f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
