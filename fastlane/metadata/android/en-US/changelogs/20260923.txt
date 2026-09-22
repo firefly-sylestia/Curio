@@ -8,6 +8,8 @@ ADD:
 - Settings: Home's writing rows each have their own switch — turn the pages row off, the shelf row off, or both, without touching your journals or your books.
 
 FIX:
+- Reading: the dictionary page has no blank band at its foot — the word list was a fixed-height window inside the page's own scroll, so a letter with a few words reserved three hundred pixels of empty paper under them; the list is as tall as its words now, and only a big letter gets the window and scrolls inside it.
+- Reading: the dictionary's alphabet left the page and became a floating pill at the foot of the page — a rail inside the scroll had to be scrolled to and fought the page for sideways flicks, and the letter you are standing on now wears the accent with the current letter named beside the section.
 - Writing: Android's own Select all takes the whole page — the doors that never reach the app's own toolbar (an IME's select-all, the paste menu) used to take only the row the cursor was in.
 - Films & Incursion: the artwork is the real poster now — with a TMDB key in the build, TMDB answers FIRST instead of being the last door behind the free ones (iTunes' square covers, TVMaze stills and Wikipedia lead images), and a title's own year is searched for rather than ignored, so a remake's poster stops landing on the original. A build with no key is unchanged.
 - Films & Incursion: a credential TMDB refuses no longer takes the posters with it — a read token that has been rotated, expired or pasted into the wrong box is retried once with the API key beside it instead of ending every look-up.

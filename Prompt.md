@@ -6,7 +6,19 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §56 — the TMDB posters, the drawer sky's glow, the version bump (1.4.0), and a batch still to be scoped
+## 0. THE CURRENT REQUEST — §57 — the dictionary page's blank foot and its alphabet (v462)
+
+> the dictionary page still have a blank area in the buttom bruh, can u please fully rewrite the ui with roper pills etc beautiful ui
+
+**What it was:** two separate causes, and the v456 pass had fixed only the first. That one was the INSET — the nav bar's height was taken by a zero-width spacer drawn over the page, so the scroll ran under an invisible strip and a fling ended in a band of nothing; it is a real `navigationBarsPadding()` on the scroll's own column. **This one was the list:** the browsable words are a `LazyColumn` with a FIXED `height(340.dp)` inside the page's own `verticalScroll` Column — a letter with forty words reserves three hundred pixels of empty paper under them, with no content and no edge. That is the blank area.
+
+**What changed (v462, `ReaderDictionaryPage` only):** the window is a CEILING (`heightIn(max = DictionaryWordsWindow)`) so a small letter is as tall as its own words and a big one still scrolls inside the page; the alphabet left the page's scroll and became a **floating pill at the page's foot** (the reader's own language — paper colour, soft shadow, round chips inside one capsule, the letter you are on wearing the accent), stepping aside for an open search and an open word sheet; the current letter moved into the section label ("THE DICTIONARY · OPTED · B"); and a `DictionaryFootClearance` spacer keeps the last word above the floating pill. **The reason the rail had to move rather than be restyled:** a horizontal scroller nested inside a vertical one is a gesture conflict (a sideways flick over the letters can carry the page), and a rail that scrolls away is an alphabet you cannot reach while reading an entry.
+
+**Also fixed on the way:** the word sheet's own doc block had been split from its function by the new composable (a Kotlin doc binds to the next DECLARATION) — the block now says whose it is and the sheet carries a pointer back to it.
+
+---
+
+## 0 (previous). §56 — the TMDB posters, the drawer sky's glow, the version bump (1.4.0), and a batch still to be scoped
 
 > no need can u fix the tmdb api please, i need it to work on the app for the movies and incursion ui posters to work, coz the posters its fetching rn is bad. and not accurate, also the drawer costellation i can see the edges in dark mode, and also in light mode its not visible. and in collection sthe open and close is really clanky and weird looking. lets update the intro as well, and also ability to turn off journal shelf etc, in collections use 3 grid for books etc, add online in intro, with log in in that, and exlaing you can share your thoughts, also a way for user to open the added book directly without going through the book detail, how about when added a pdf in book, user can pin it in home screen shelf door and it shows with the small in icon. also lease the way our app does select all rows, why cant i do the same with select all with android it still sometimes does only 1 row oy or sometimes misses some rows, fix it. also bum version code and number both, and udate the release notes. also maybe simplifying settings, like yk some are really confusing to find
 

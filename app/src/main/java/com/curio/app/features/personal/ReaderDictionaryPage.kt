@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -85,6 +86,32 @@ import kotlinx.coroutines.withContext
  *    than a retype. Nothing is written to disk for it.
  */
 @Composable
+/**
+ * v462 — THE BROWSED WORDS' WINDOW, AND WHY IT IS A CEILING, NOT A HEIGHT.
+ *
+ * The member, of this page: *"the dictionary page still have a blank area in the
+ * buttom"*. It was this window: the word list was a `LazyColumn` with a FIXED
+ * 340dp height sitting inside the page's own scroll, so a letter with forty words
+ * reserved three hundred pixels of nothing under them — a band of dead paper with
+ * no content and no edge, which is exactly what a blank area at the bottom of a
+ * dictionary looks like. It is a **ceiling** now (`heightIn(max = …)`): a big
+ * letter still gets the window and scrolls inside it, and a small one is as tall
+ * as its own words, so the paper below it belongs to the page's scroll and not to
+ * a reserved box.
+ */
+private val DictionaryWordsWindow = 340.dp
+
+/**
+ * v462 — HOW MUCH ROOM THE PAGE LEAVES FOR ITS OWN FOOT.
+ *
+ * The alphabet is a FLOATING pill bar pinned to the bottom of the page (see it in
+ * the body), so the last word has to stop above it rather than slide under it —
+ * the same rule the reader's floating pills obey. Applied as the page's own
+ * bottom padding, which means the empty space belongs to the SCROLL (a fling
+ * ends on content) instead of being a band drawn under the list.
+ */
+private val DictionaryFootClearance = 104.dp
+
 internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -686,8 +713,21 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(9.dp)
                     ) {
+                        // ── v462 — THE LETTER IS IN THE LABEL, THE ALPHABET IS AT
+                        //    THE FOOT ──────────────────────────────────────────
+                        //
+                        // This label used to stand over a rail of twenty-six letter
+                        // pills, and the rail scrolls sideways INSIDE the page's
+                        // vertical scroll — so the two scrollers traded gestures
+                        // (a sideways flick over the letters could carry the page
+                        // instead, and the letter you wanted sat off-screen at the
+                        // end of a row that moved under your finger). The alphabet
+                        // is a FLOATING bar at the page's foot now (see the body's
+                        // own note), always reachable, one axis, and the label here
+                        // simply names the letter whose words are under it.
                         Text(
-                            "THE DICTIONARY \u00b7 " + browseVolume.source.uppercase(),
+                            "THE DICTIONARY \u00b7 " + browseVolume.source.uppercase() +
+                                " \u00b7 " + letter.uppercase(),
                             style = TextStyle(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
@@ -695,37 +735,6 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                                 color = palette.ink.copy(alpha = 0.5f)
                             )
                         )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ('a'..'z').forEach { l ->
-                                val chosen = l == letter
-                                Surface(
-                                    onClick = { letter = l },
-                                    shape = RoundedCornerShape(50),
-                                    color = if (chosen) {
-                                        palette.accent.copy(alpha = 0.18f)
-                                    } else {
-                                        palette.ink.copy(alpha = 0.06f)
-                                    },
-                                    contentColor = palette.ink
-                                ) {
-                                    Text(
-                                        l.uppercase(),
-                                        style = TextStyle(
-                                            fontSize = 12.sp,
-                                            fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal
-                                        ),
-                                        color = palette.ink.copy(alpha = if (chosen) 1f else 0.7f),
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                                    )
-                                }
-                            }
-                        }
                         // ── v457 — THE WORDS NEVER UNMOUNT FOR A LETTER ────
                         //
                         // The member: *"many ui elements have loading unloading
@@ -759,10 +768,14 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                             // A bounded window of its own: the page already scrolls,
                             // so a list taller than this would fight it — the words
                             // get a real list inside the page's own scroll.
+                            // v462 — A CEILING, NOT A HEIGHT (see
+                            // [DictionaryWordsWindow]): the list is as tall as its
+                            // own words until it reaches the window, and only then
+                            // does it scroll inside the page.
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(340.dp),
+                                    .heightIn(max = DictionaryWordsWindow),
                                 verticalArrangement = Arrangement.spacedBy(1.dp)
                             ) {
                                 items(words) { head ->
@@ -783,7 +796,50 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         }
                     }
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(DictionaryFootClearance))
+            }
+        }
+
+        // ── v462 — THE ALPHABET IS THE PAGE'S FOOT ────────────────────────────
+        //
+        // A floating pill, in the reader's own language: the page's paper colour
+        // lifted by a soft shadow, the letters as round chips inside it, and the
+        // one you are standing on wearing the accent. It is the dictionary's real
+        // control — a dictionary you can WALK needs its alphabet within thumb
+        // reach at every scroll position, and a rail that scrolls away with the
+        // words is a rail you have to go looking for.
+        //
+        // It steps aside for the two things it would be in the way of: an open
+        // search (you are spelling, not browsing) and an open word sheet (a panel
+        // over the page should own the bottom of it) — the same rule the reader's
+        // foot follows.
+        if (browseVolume != null && !searchOpen && sheetWord == null) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = palette.surface,
+                shadowElevation = 12.dp,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 8.dp, vertical = 7.dp),
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ('a'..'z').forEach { l ->
+                        DictionaryLetterPill(
+                            letter = l,
+                            chosen = l == letter,
+                            palette = palette,
+                            onClick = { letter = l }
+                        )
+                    }
+                }
             }
         }
         // v456 — the bottom overlay that used to stand here is gone (see the
@@ -916,8 +972,62 @@ private enum class DictionaryPageDoor(
  *  · **The senses** themselves, in the reader's own type.
  *  · **The spellings it thinks you meant** — a suggestion is only meaningful
  *    beside the miss that produced it, so it travels with the answer.
+ *
+ * ── v462 — AND THE NOTES ABOVE BELONG TO [DictionaryWordSheet] ─────────────
+ *
+ * The letter pill below was inserted between these notes and the sheet they
+ * describe, and a Kotlin doc comment binds to whatever DECLARATION comes next —
+ * so for the compiler these were the pill's notes and the sheet had none (the
+ * v458/v461 lesson, in its documentation form). Rather than reshuffle thirty
+ * lines of reasoning to keep them adjacent, the sheet carries a pointer back up
+ * to them; **if a composable is ever added between the two, it needs its own
+ * notes and this block needs re-reading.**
+ */
+
+/**
+ * v462 — ONE LETTER OF THE ALPHABET, AS A CHIP IN THE FOOT'S PILL.
+ *
+ * Square-ish on purpose (28 × 30dp): a letter is not a word, and a capsule sized
+ * to its own glyph would make the rail's chips different widths and the alphabet
+ * unreadable as an alphabet. The one you are standing on takes the accent wash and
+ * a heavier weight, so "where am I" is answered without a second look.
  */
 @Composable
+private fun DictionaryLetterPill(
+    letter: Char,
+    chosen: Boolean,
+    palette: ReaderPalette,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (chosen) {
+            palette.accent.copy(alpha = 0.20f)
+        } else {
+            palette.ink.copy(alpha = 0.06f)
+        },
+        contentColor = palette.ink,
+        modifier = Modifier.size(width = 28.dp, height = 30.dp)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                letter.uppercase(),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = if (chosen) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = palette.ink.copy(alpha = if (chosen) 1f else 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+// The word sheet's own reasoning (what it holds and why each part is here rather
+// than on the page) is the block headed "v456 — A WORD'S MEANINGS, IN THE
+// READER'S OWN SHEET", stated above the letter pills that were inserted before
+// this function — see the note at the end of that block.
 private fun DictionaryWordSheet(
     word: String,
     state: DictionaryPageLookup,
