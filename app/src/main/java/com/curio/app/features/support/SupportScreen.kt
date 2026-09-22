@@ -315,6 +315,34 @@ fun SupportScreen(navController: NavController) {
                             }
                         }
                         SettingsOptionDivider()
+                        // ── v456 — FELICITY'S MOTION — the app's transition
+                        //     vocabulary is a port of Felicity's design (see
+                        //     `app/MOTION_PLAN.md`): the shared-axis X/Y/Z pop,
+                        //     the seekable back gesture, the arrivals rule, and
+                        //     the 300/500ms item timing are that project's own
+                        //     numbers. Felicity is the same author's work and is
+                        //     AGPL-3.0 like Curio, so this is a credit and not an
+                        //     obligation — but a design taken from somewhere is
+                        //     exactly what a Credits list is for, and the app
+                        //     should say where its motion came from in the same
+                        //     place it says where its glass and its faces came
+                        //     from. The row opens the repository the design was
+                        //     read out of.
+                        SettingsOptionRow(
+                            CurioIcons.Info,
+                            "Motion by Felicity",
+                            "Screen transitions \u00b7 AGPL-3.0"
+                        ) {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://github.com/firefly-sylestia/Felicity")
+                                    )
+                                )
+                            }
+                        }
+                        SettingsOptionDivider()
                         // ── v436 — BLOBATAR'S MIT NOTICE ──────────────────
                         //
                         // The member's faces are a Kotlin port of blobatar's
