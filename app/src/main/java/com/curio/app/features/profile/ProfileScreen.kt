@@ -378,19 +378,14 @@ fun ProfileScreen(navController: NavController) {
                     .coerceIn(0f, 1f)
             }
         }
-        // ── v450 — THE RESERVATION IS THE COMPACT BAR'S, ALWAYS ───────────
+        // ── v452 — AND THE RESERVATION IS THE BAR'S OWN HEIGHT ────────────
         //
-        // The glass header is ONE state now (`CurioGlassToolbarMorph` pins
-        // `eased = 1f` — see its note), so the hero must sit under the COMPACT
-        // bar at every scroll position and never behind a tall one. Lerping
-        // from `ProfileHeroTotalHeight` (264dp) by `profileStickyProgress`
-        // would leave ~210dp of empty paper above the first card, because that
-        // clock no longer drives anything the bar draws.
-        val glassHeaderReserve = if (
-            AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
-        ) {
-            ProfileCompactHeaderHeight + statusTopDp
-        } else ProfileHeroTotalHeight
+        // The glass header is ONE state now AND it is the content-height bar
+        // (`CurioGlassToolbarMorph` pins `eased = 0f` — see its note), so the hero
+        // sits under exactly what that bar reports at every scroll position. The
+        // old lerp from `ProfileHeroTotalHeight` down to the compact floor is gone
+        // with the compact row it was measuring for.
+        val glassHeaderReserve = ProfileHeroTotalHeight
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().layerBackdrop(profileGlassBackdrop),

@@ -6,7 +6,33 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §46 — liquid glass app-wide, and the CL
+## 0. THE CURRENT REQUEST — §47 — one Offline door, six ⋯ doors, and the header that matches the app
+
+> merge the two modern and full 1913 in offline as offline shows nothing, only modern and full 1973 does. also from
+> the 3 dot menu remove the share button, also the profile and home glass header is bad, they dont look like other
+> glass header with that curve look
+
+**Files:** `features/personal/BookReaderScreen.kt` (the doors, `ask`, the badge liveness, the Remove branch, the chip
+labels, the ⋯ grid) and `ReaderDictionaryPage.kt` (the same door + a chips row it never had),
+`ui/components/CurioGlassToolbar.kt` (the morph's single state), `features/home/HomeScreen.kt` +
+`features/profile/ProfileScreen.kt` (the reservations, and the page stats card removed again).
+
+### 0.1 What was built
+
+1. **THE OFFLINE DOOR IS A DOOR, NOT A DICTIONARY.** `DictionaryDoor.volumes` owns all three volumes best-first; the
+   badge is the INTENT ("answer me without a connection") and the volumes are what it draws on; `ask` returns the first
+   volume that carries the word, `null` only when none of them is on the phone. Nothing was deleted — all three keep
+   their download, progress and Remove. Badges dim per-DOOR, Remove keeps the member where they stand, chips name the
+   source. Same in the sheet and on the page.
+2. **SIX ⋯ DOORS IN TWO FULL ROWS.** Share leaves the grid (the selection's own Share stays); Settings moves up so no
+   row is half-width.
+3. **THE HEADER IS THE APP'S OTHER GLASS HEADERS.** `eased = 0f`: one state, the bar's natural content height, the
+   26dp curve and the deep frost under all of it; the reservations follow the bar (never a lerp it does not drive),
+   and Home's stats row is back in the bar.
+
+---
+
+## 0f. §46 — liquid glass app-wide, and the CL (DONE, v451 — pushed, CI green)
 
 > liquid glass to more buttons and things app wide. many doesn't have it. fix cl fail
 
@@ -448,7 +474,18 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
-- **§46 — "liquid glass to more buttons and things app wide, many doesn't have it. fix cl fail" (DONE, v451 — COMMITTED, NOT PUSHED: the member asked to hold the push until the previous run is green).**
+- **§47 — "merge the two modern and full 1913 in offline as offline shows nothing … also from the 3 dot menu remove the share button, also the profile and home glass header is bad, they dont look like other glass header with that curve look" (DONE, v452).** Three things. **The dictionary's Offline door is a DOOR now**, not a dictionary: it owns all three volumes (modern
+  senses first, then the complete 1913, then the abridged one), the badge row is **Offline · Wiktionary · Free**, and `ask`
+  walks the door's volumes and returns the first that carries the word — with "no volume here" (`null`) and "no such
+  word" (`emptyList()`) still told apart. A badge dims only when NONE of its volumes is here, a Remove keeps the member
+  on Offline while any volume remains, the chips name the SOURCE ("Download WordNet 3.1"), and the dictionary PAGE got
+  the chips row it never had (with one badge its other two volumes would have been unreachable from the page).
+  **The ⋯ menu is six doors in two full rows** — the Share tile is gone (the selection's own Share and the hold dock's
+  are untouched) and Settings moved up so every row is as wide as the others. **The Home/Profile glass header is the
+  app's other glass headers now**: the single state is the bar's natural content height (title, subtitle, trailing
+  pills, action row, content row, 26dp bottom curve, 1.6× frost), with both screens' reservations following it, and
+  Home's Streak · Cabinet · Topics row back in the bar (the v450 page card removed).
+- **§46 — "liquid glass to more buttons and things app wide, many doesn't have it. fix cl fail" (DONE, v451 — pushed as `dc3aedef`, CI green).**
   **The CL:** the failure was the v449 dictionary route (`BookReaderScreen` navigated `CurioRoutes.READER_DICTIONARY`
   with no `CurioRoutes` import); the fix went out in `feea6cf3` and its run was still `in_progress` when this
   pass ended. **The glass:** asked what recipe — **real refraction, capture per screen** — and which surfaces:

@@ -2033,10 +2033,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     launchSingleTop = true
                 }
             },
-            onShare = {
-                sheet = null
-                shareReaderPlace(context, book?.title.orEmpty(), positionLabel, selection?.text.orEmpty())
-            },
             onSnapshot = {
                 // ── v448 — THE SNAPSHOT, WITH THE CHROME OUT OF THE WAY ───
                 //
@@ -5083,7 +5079,6 @@ private fun ReaderMenuSheet(
     onNotes: () -> Unit,
     onHighlights: () -> Unit,
     onDictionary: () -> Unit,
-    onShare: () -> Unit,
     /** v448 — the crop-and-share door (see [ReaderSnapshot]). */
     onSnapshot: () -> Unit,
     onSettings: () -> Unit,
@@ -5104,15 +5099,24 @@ private fun ReaderMenuSheet(
     // air: a wider gap between the tiles, a wider one between the rows, and a
     // breath under the last row so nothing sits jammed against the panel's edge.
     //
-    // ── v448 — SEVEN DOORS, THREE ROWS, AND A REAL RHYTHM ─────────────
+    // ── v448 — A REAL RHYTHM: REAL GAPS, REAL GUTTERS ─────────────────
     //
     // The member, again: *"still the 3 dot menu isnt good the padding etc and
-    // spacing feels off"*. The Snapshot door (see [ReaderSnapshot]) makes it seven
-    // tiles, so the grid is three rows rather than two, the rows are given a real
-    // gap (18dp), the tiles a real gutter (12dp), and the last row — Settings, one
-    // tile — is CENTRED at the same width the others have rather than stretched
-    // across the panel (`pad = 1`), which is what a grid of tools should do with a
-    // row it does not fill. The panel's floor grows with its own content (0.38).
+    // spacing feels off"*. The rows are given a real gap (18dp) and the tiles a
+    // real gutter (12dp), so the grid reads as one object instead of a row of
+    // pills jammed into the top of an empty panel. The panel's floor grows with
+    // its own content (0.38).
+    //
+    // ── v452 — SIX DOORS, TWO FULL ROWS, AND NO SHARE ─────────────────
+    //
+    // The member: *"from the 3 dot menu remove the share button"*. Share is the
+    // SELECTION's door and it stays there (the wide capsule toolbar still offers
+    // it, and Snapshot beside it crops what you are looking at) — what is gone is
+    // a Share tile that answered for a passage whether or not there was one. That
+    // leaves six doors, and SIX IS TWO ROWS OF THREE: Settings moves up into the
+    // second row rather than sitting alone in a row of one, so every row is full
+    // and every tile is the same width (a two-tile row beside three-tile rows
+    // would have made the survivors half again as wide — see [ReaderTileRow]).
     ReaderSheetFrame("More in this book", palette, onDismiss, minHeightFraction = 0.38f) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -5128,18 +5132,11 @@ private fun ReaderMenuSheet(
             )
             ReaderTileRow(
                 tiles = listOf(
-                    ReaderTile(CurioIcons.Share, "Share", 0, false, onShare),
                     ReaderTile(CurioIcons.Screenshot, "Snapshot", 0, false, onSnapshot),
-                    ReaderTile(CurioIcons.Crop, "Gestures", 0, gesturesOn, onGestures)
-                ),
-                palette = palette
-            )
-            ReaderTileRow(
-                tiles = listOf(
+                    ReaderTile(CurioIcons.Crop, "Gestures", 0, gesturesOn, onGestures),
                     ReaderTile(CurioIcons.Settings, "Settings", 0, false, onSettings)
                 ),
-                palette = palette,
-                pad = 1
+                palette = palette
             )
             Spacer(Modifier.height(2.dp))
         }
@@ -6449,16 +6446,40 @@ private sealed interface ReaderLookup {
  */
 private enum class DictionaryDoor(
     val label: String,
-    /** The volume that lives on the phone, or null for an online door. */
-    val volume: ReaderOfflineDictionary.Volume? = null,
+    /**
+     * v452 — THE VOLUMES THIS DOOR ANSWERS FROM, best first.
+     *
+     * The member: *"merge the two modern and full 1913 in offline as offline
+     * shows nothing, only modern and full 1913 does"*. Three offline BADGES meant
+     * a member had to guess which of the app's own dictionaries to stand on, and
+     * the one called "Offline" — the one a person actually reaches for — was the
+     * abridged Webster's alone, so choosing it could answer nothing at all while
+     * the two beside it answered. **The badge is the INTENT now** ("answer me
+     * without a connection") and the volumes are what it draws on: one Offline
+     * door over every volume the phone has, modern senses first (WordNet), then
+     * the complete 1913, then the abridged one. Nothing was deleted — all three
+     * are still offered, downloaded and removable under the one badge.
+     */
+    val volumes: List<ReaderOfflineDictionary.Volume> = emptyList(),
     /** The online door this badge stands for, or null for a file. */
     val online: ReaderDictionarySource? = null
 ) {
-    OFFLINE("Offline", volume = ReaderOfflineDictionary.Volume.WEBSTER),
-    MODERN("Modern", volume = ReaderOfflineDictionary.Volume.MODERN),
-    FULL("Full 1913", volume = ReaderOfflineDictionary.Volume.FULL),
+    OFFLINE(
+        "Offline",
+        volumes = listOf(
+            ReaderOfflineDictionary.Volume.MODERN,
+            ReaderOfflineDictionary.Volume.FULL,
+            ReaderOfflineDictionary.Volume.WEBSTER
+        )
+    ),
     WIKTIONARY("Wiktionary", online = ReaderDictionarySource.WIKTIONARY),
-    FREE("Free", online = ReaderDictionarySource.FREE)
+    FREE("Free", online = ReaderDictionarySource.FREE);
+
+    /**
+     * The volume whose row the sheet shows first — the door's own best one. The
+     * other volumes of the door keep their chips (see the sheet's volume block).
+     */
+    val volume: ReaderOfflineDictionary.Volume? get() = volumes.firstOrNull()
 }
 
 @Composable
@@ -6522,7 +6543,9 @@ private fun ReaderDictionarySheet(
     // online door reading settings already named (so nobody's habit changes).
     var door by remember {
         mutableStateOf(
-            if (ready[ReaderOfflineDictionary.Volume.WEBSTER] == true) {
+            // v452 — offline first once ANY volume is on the phone (the member's own
+            // rule, now that Offline is the merged door rather than Webster's alone).
+            if (ReaderOfflineDictionary.Volume.entries.any { ready[it] == true }) {
                 DictionaryDoor.OFFLINE
             } else when (ReaderLook.dictionary) {
                 ReaderDictionarySource.FREE -> DictionaryDoor.FREE
@@ -6539,8 +6562,28 @@ private fun ReaderDictionarySheet(
      * memoises them, so flipping back and forth between badges is free.
      */
     suspend fun ask(term: String): List<ReaderDictionarySense>? {
-        val volume = door.volume
-        if (volume != null) return ReaderOfflineDictionary.define(context, volume, term)
+        if (door.volumes.isNotEmpty()) {
+            // ── v452 — THE MERGED OFFLINE ANSWER ────────────────────────
+            //
+            // Ask every volume the door has, best first, and take the first one
+            // that carries the word — so "Offline" answers from WordNet's modern
+            // senses, or from the complete 1913, or from the abridged one, without
+            // the member choosing. The two answers the sheet must still tell apart
+            // are kept apart: a volume that is not on the phone says `null`
+            // (define's own contract) and is simply passed over, `anyReady` records
+            // whether ANY of them was there at all, and the door answers
+            // `emptyList()` (no such word) only when a dictionary really was asked;
+            // no volume at all still returns `null`, which is what makes the sheet
+            // offer the downloads instead of claiming the word does not exist.
+            var anyReady = false
+            for (volume in door.volumes) {
+                val senses = ReaderOfflineDictionary.define(context, volume, term)
+                    ?: continue
+                anyReady = true
+                if (senses.isNotEmpty()) return senses
+            }
+            return if (anyReady) emptyList() else null
+        }
         val online = door.online ?: ReaderDictionarySource.WIKTIONARY
         return ReaderDictionary.define(term, online)
     }
@@ -6641,7 +6684,14 @@ private fun ReaderDictionarySheet(
             ) {
                 DictionaryDoor.entries.forEach { option ->
                     val chosen = option == door
-                    val live = option.volume?.let { ready[it] == true } ?: true
+                    // v452 — an offline badge is dim only when the phone has NONE of
+                    // its volumes: any one of them is a working dictionary, and the
+                    // door searches them all.
+                    val live = if (option.volumes.isEmpty()) {
+                        true
+                    } else {
+                        option.volumes.any { ready[it] == true }
+                    }
                     Surface(
                         onClick = { door = option },
                         shape = RoundedCornerShape(50),
@@ -6789,11 +6839,18 @@ private fun ReaderDictionarySheet(
                     Surface(
                         onClick = {
                             ReaderOfflineDictionary.remove(context, wanted)
-                            ready = ready + (wanted to false)
-                            // The door's own volume is gone, so the sheet steps to an
-                            // online one rather than standing on a dictionary that is
-                            // not there any more.
-                            door = DictionaryDoor.WIKTIONARY
+                            val now = ready + (wanted to false)
+                            ready = now
+                            // v452 — ONE volume leaving does not empty the door: it
+                            // steps to an online one only when the phone has none of
+                            // the door's volumes left, so removing WordNet while the
+                            // 1913s are still there keeps the member exactly where
+                            // they are standing (the door searches what remains).
+                            door = if (door.volumes.any { now[it] == true }) {
+                                DictionaryDoor.OFFLINE
+                            } else {
+                                DictionaryDoor.WIKTIONARY
+                            }
                         },
                         shape = RoundedCornerShape(50),
                         color = palette.ink.copy(alpha = 0.06f),
@@ -6845,11 +6902,15 @@ private fun ReaderDictionarySheet(
                             contentColor = palette.ink
                         ) {
                             Text(
+                                // The chip names the SOURCE, not the badge (v452): the
+                                // labels were badges before, and "Download Offline"
+                                // beside a badge called Offline says nothing about
+                                // which dictionary is about to be fetched.
                                 if (downloading == volume) {
-                                    volume.label + " \u2026 " +
+                                    volume.source + " \u2026 " +
                                         (downloadProgress * 100f).toInt() + "%"
                                 } else {
-                                    "Download " + volume.label + " \u00b7 " + volume.size
+                                    "Download " + volume.source + " \u00b7 " + volume.size
                                 },
                                 style = TextStyle(fontSize = 11.sp),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)

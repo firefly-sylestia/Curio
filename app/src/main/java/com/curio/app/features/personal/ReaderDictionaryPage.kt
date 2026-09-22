@@ -62,13 +62,14 @@ import kotlinx.coroutines.withContext
  * over the page they were reading. A page is SEARCH-shaped — nothing to do with the
  * book in front of them, no reason to stay short, and a keyboard that should never
  * cover the answer (which is why the whole page rides the IME's own inset). So this
- * is the same five doors and the same lookup, told at a different size:
+ * is the same doors and the same lookup, told at a different size:
  *
  *  - **One field, always at the top**, and it is the point of the page (the member
  *    types a word the book never gave them).
- *  - **The doors are the badges**, exactly as in the sheet — Offline · Modern · Full
- *    1913 · Wiktionary · Free — with the offline volumes downloaded and removed from
- *    the row under them, progress bar and all (see [ReaderOfflineDictionary]).
+ *  - **The doors are the badges**, exactly as in the sheet — since v452 they are
+ *    **Offline · Wiktionary · Free**, and the one Offline door answers from every
+ *    volume the phone has (with each missing volume still offered as its own
+ *    download chip, and a volume that is here removable from its own row).
  *  - **The words you looked up stay in reach**: this page keeps its own short
  *    history for the visit, so walking back to the word before last is a tap rather
  *    than a retype. Nothing is written to disk for it.
@@ -97,7 +98,9 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     var door by remember {
         mutableStateOf(
             when {
-                ready[ReaderOfflineDictionary.Volume.WEBSTER] == true ->
+                // v452 — offline first once ANY volume is on the phone (the door
+                // searches all of them — see [DictionaryPageDoor]).
+                ReaderOfflineDictionary.Volume.entries.any { ready[it] == true } ->
                     DictionaryPageDoor.OFFLINE
                 ReaderLook.dictionary == ReaderDictionarySource.FREE -> DictionaryPageDoor.FREE
                 else -> DictionaryPageDoor.WIKTIONARY
@@ -106,8 +109,19 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     }
 
     suspend fun ask(term: String): List<ReaderDictionarySense>? {
-        val volume = door.volume
-        if (volume != null) return ReaderOfflineDictionary.define(context, volume, term)
+        // v452 — the merged offline answer (the same rule as the sheet's: ask every
+        // volume the door has, best first, and keep "no dictionary" and "no such
+        // word" apart).
+        if (door.volumes.isNotEmpty()) {
+            var anyReady = false
+            for (volume in door.volumes) {
+                val senses = ReaderOfflineDictionary.define(context, volume, term)
+                    ?: continue
+                anyReady = true
+                if (senses.isNotEmpty()) return senses
+            }
+            return if (anyReady) emptyList() else null
+        }
         val online = door.online ?: ReaderDictionarySource.WIKTIONARY
         return ReaderDictionary.define(term, online)
     }
@@ -270,7 +284,12 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                 ) {
                     DictionaryPageDoor.entries.forEach { option ->
                         val chosen = option == door
-                        val live = option.volume?.let { ready[it] == true } ?: true
+                        // v452 — dim only when NONE of the door's volumes is here.
+                        val live = if (option.volumes.isEmpty()) {
+                            true
+                        } else {
+                            option.volumes.any { ready[it] == true }
+                        }
                         Surface(
                             onClick = { door = option },
                             shape = RoundedCornerShape(50),
@@ -390,8 +409,14 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                         Surface(
                             onClick = {
                                 ReaderOfflineDictionary.remove(context, wanted)
-                                ready = ready + (wanted to false)
-                                door = DictionaryPageDoor.WIKTIONARY
+                                val now = ready + (wanted to false)
+                                ready = now
+                                // v452 — the door stays put while it still has a volume.
+                                door = if (door.volumes.any { now[it] == true }) {
+                                    DictionaryPageDoor.OFFLINE
+                                } else {
+                                    DictionaryPageDoor.WIKTIONARY
+                                }
                             },
                             shape = RoundedCornerShape(50),
                             color = palette.ink.copy(alpha = 0.06f),
@@ -402,6 +427,56 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                                 style = TextStyle(fontSize = 12.sp),
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
+                        }
+                    }
+                }
+
+                // ── v452 — THE DOOR'S OTHER VOLUMES ─────────────────────
+                //
+                // One Offline badge means one row for its BEST volume; the rest have
+                // to be reachable from the page too, or a member could only ever
+                // download WordNet here. A missing one is a chip, the same object the
+                // sheet offers (and a volume already on the phone is not offered —
+                // there is nothing left to do to it from this row).
+                val alsoMissing = door.volumes.filter { it != wanted && ready[it] != true }
+                if (alsoMissing.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        alsoMissing.forEach { volume ->
+                            Surface(
+                                onClick = {
+                                    diagnosing = volume
+                                    fetched = 0f
+                                    scope.launch {
+                                        val saved = ReaderOfflineDictionary.download(
+                                            context,
+                                            volume
+                                        ) { ratio -> fetched = ratio }
+                                        diagnosing = null
+                                        ready = ready + (volume to saved)
+                                    }
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = palette.ink.copy(alpha = 0.06f),
+                                contentColor = palette.ink
+                            ) {
+                                Text(
+                                    if (diagnosing == volume) {
+                                        volume.source + " \u2026 " +
+                                            (fetched * 100f).toInt() + "%"
+                                    } else {
+                                        "Download " + volume.source + " \u00b7 " + volume.size
+                                    },
+                                    style = TextStyle(fontSize = 12.sp),
+                                    color = palette.ink.copy(alpha = 0.75f),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -566,17 +641,30 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
     }
 }
 
-/** The five doors, exactly as the sheet's badge row wears them (v444/v446). */
+/**
+ * The doors, exactly as the sheet's badge row wears them (v444/v446) — and, since
+ * v452, THE THREE the sheet wears: **Offline · Wiktionary · Free**, with the one
+ * Offline badge answering from every volume the phone has (see the sheet's
+ * `DictionaryDoor`, whose note is the long version of this).
+ */
 private enum class DictionaryPageDoor(
     val label: String,
-    val volume: ReaderOfflineDictionary.Volume? = null,
+    val volumes: List<ReaderOfflineDictionary.Volume> = emptyList(),
     val online: ReaderDictionarySource? = null
 ) {
-    OFFLINE("Offline", volume = ReaderOfflineDictionary.Volume.WEBSTER),
-    MODERN("Modern", volume = ReaderOfflineDictionary.Volume.MODERN),
-    FULL("Full 1913", volume = ReaderOfflineDictionary.Volume.FULL),
+    OFFLINE(
+        "Offline",
+        volumes = listOf(
+            ReaderOfflineDictionary.Volume.MODERN,
+            ReaderOfflineDictionary.Volume.FULL,
+            ReaderOfflineDictionary.Volume.WEBSTER
+        )
+    ),
     WIKTIONARY("Wiktionary", online = ReaderDictionarySource.WIKTIONARY),
-    FREE("Free", online = ReaderDictionarySource.FREE)
+    FREE("Free", online = ReaderDictionarySource.FREE);
+
+    /** The volume whose row this page shows first (the door's best one). */
+    val volume: ReaderOfflineDictionary.Volume? get() = volumes.firstOrNull()
 }
 
 /** What this page is showing: its own states, for its own size. */

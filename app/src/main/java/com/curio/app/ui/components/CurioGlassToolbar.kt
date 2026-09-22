@@ -343,24 +343,34 @@ fun CurioGlassToolbarMorph(
         if (dark) 0.14f else 0.20f
     )
     val ink = MaterialTheme.colorScheme.onSurface
-    // ── v450 — ONE STATE, ALWAYS: THE COMPACT BAR ───────────────────────
+    // ── v450/v452 — ONE STATE, AND IT IS THE FULL BAR ───────────────────
     //
-    // The member, on the glass header of Home and Profile: *"glitchy scroll and 2
-    // differnt state so kee it 1 simplify and smooth"*, and, asked which one to
-    // keep: **the compact bar, always**. The bar used to cross-fade between a FULL
-    // hero (title, subtitle, an action row and a rose stat card) and a compact
-    // identity row while the finger scrubbed a `progress` between them — two
-    // contents, two alpha ramps and an animated height, all in the same 80dp of
-    // screen, which is precisely what a scroll reads as a glitch. There is ONE row
-    // now: it is the compact one, at every scroll position, and the full state is
-    // pinned to its hidden end (`eased = 1f`) instead of being scrubbed through —
-    // so the fade is never seen, the height never lerps, and the bar simply rides
-    // the scroll with nothing left to swap.
+    // The member, first: *"glitchy scroll and 2 differnt state so kee it 1 simplify
+    // and smooth"*. The bar cross-faded a FULL hero (title, subtitle, an action row
+    // and a rose stat card) with a compact identity row while the finger scrubbed a
+    // `progress` between them — two contents, two alpha ramps and an animated HEIGHT
+    // in the same 80dp of screen, which is what a scroll read as a glitch. So the
+    // two states became one, and v450 pinned `eased = 1f` — the COMPACT row.
     //
-    // `progress` is still taken (and still reported by the screens' scroll
-    // listeners) so nothing else has to change shape, but it no longer drives a
-    // visual state: one bar, one height, one look.
-    val eased = 1f
+    // ── v452 — AND THE ONE STATE IS THE FULL BAR (the member's follow-up) ──
+    //
+    // *"the profile and home glass header is bad, they dont look like other glass
+    // header with that curve look"*. A 54dp identity strip is not the object the
+    // other screens wear: every other glass header in the app is a CONTENT-HEIGHT
+    // bar — a title with its subtitle, its pills on the row, the deep 1.6× frost
+    // and the 26dp bottom curve standing under all of it. The compact row cannot
+    // look like that however it is styled, because the shape of a header is its
+    // PROPORTIONS. So the single state is the bar's own natural height now
+    // (`eased = 0f`): the title, the subtitle, the trailing pills, the action row
+    // and the content row are all the ONE state, the compact row is never drawn
+    // (`alpha = eased = 0`), and the bar reports its real height so the page
+    // reserves it (see the screens' `glassHeaderReserve`).
+    //
+    // `progress` is still taken (the screens still report their scroll through it,
+    // and the torn-paper path still uses it for the floating pills' frost) but it
+    // drives no visual state here: ONE bar, one height, one look — and that look is
+    // the app's other glass headers'.
+    val eased = 0f
     val compactH = with(LocalDensity.current) { compactHeight.toPx() }
     // v3xx43 — the status-bar strip belongs to the BAR (it fills it), so the
     // collapsed height is the compact row PLUS that inset. Without this the
