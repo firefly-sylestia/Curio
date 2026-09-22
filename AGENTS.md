@@ -144,8 +144,18 @@ definition file**. Do not assume parameter names from memory.
     1) let the shadow bleed through, so use an opaque `lerp(fill, accent,
     alpha)` blend instead of `color.copy(alpha = …)`. Never add elevation to
     ANIMATING deck cards — v24 rejected deck shadows ("weird look while the
-    cards animate"); the v27n elevation pass silently re-added a 2dp halo and
-    it regressed into a boxy artifact during the reel.
+   cards animate"); the v27n elevation pass silently re-added a 2dp halo and
+   it regressed into a boxy artifact during the reel.
+
+12. **RE-READ THE SEAMS AFTER A REMOVAL** — when a `str_replace` deletes lines
+    and its `oldString` starts on a line of its own, a `newString` that does
+    not end in a newline pulls the NEXT thing up into the line above it. A
+    removal of three dependency lines in `app/build.gradle.kts` left
+    `implementation(libs.com.alphacephei.vosk.android)` inside the Vosk
+    COMMENT — the dependency was gone from the build with its text still on
+    the page, so no grep for it would ever have noticed (v458). After any
+    deletion, read the five lines either side of the cut, and `grep -n` the
+    block for anything that has lost its own line.
 
 ### ✅ DO COMMIT AND PUSH AFTER EVERY FIX
 

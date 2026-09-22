@@ -361,7 +361,12 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
+    // v458 — the Compose tooling pair is gone: `ui-tooling-preview` (the
+    // `@Preview` annotation) and debug-only `ui-tooling` (the preview
+    // renderer) backed nothing, because this module has NO `@Preview` and no
+    // `androidx.compose.ui.tooling` import. `ui-tooling-preview` is an
+    // `implementation`, so it was shipping in the release APK. Both are still
+    // in the catalog — two lines to re-add with the first preview.
     implementation(libs.androidx.material3)
     // Window-size-class breakpoints for the adaptive tablet/landscape layouts
     // (compact < 600dp, medium 600-839, expanded >= 840).
@@ -372,9 +377,6 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.io.coil.kt.coil.compose)
     implementation(libs.io.coil.kt.coil.svg)
-    // v338 — cover-art swatch extraction (androidx Palette): the book/album
-    // notes sheets tint themselves from the artwork's dominant colors.
-    implementation(libs.androidx.palette.ktx)
     implementation(libs.org.jetbrains.kotlinx.coroutines.android)
 
     // Room database
@@ -399,9 +401,12 @@ dependencies {
     // transcription in the entry detail page; model downloaded in Settings).
     implementation(libs.com.alphacephei.vosk.android)
 
-    testImplementation(libs.junit)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // v458 — the test scaffolding is gone with the tests it never had: there is
+    // no source in `app/src/test` and no `androidTest` source set at all, so
+    // `testImplementation(junit)` and the debug UI-test manifest backed
+    // nothing. CI runs `lintRelease validateTopics assembleRelease` — no test
+    // task — so neither could have run even if a file appeared. Re-add both
+    // (they are still in the catalog) with the first real test.
 }
 
 // ── CI release APK naming helper ──────────────────────────────────────────

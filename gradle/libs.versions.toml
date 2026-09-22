@@ -22,7 +22,6 @@ desugarJdkLibs = "2.1.5"
 material3 = "1.5.0-alpha20"
 material = "1.14.0"
 media3 = "1.10.1"
-paletteKtx = "1.0.0"
 glance = "1.1.1"
 animation = "1.11.2"
 animationGraphics = "1.11.2"
@@ -93,7 +92,6 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 androidx-media3-exoplayer-midi = { group = "androidx.media3", name = "media3-exoplayer-midi", version.ref = "media3" }
 org-jellyfin-media3-ffmpeg-decoder = { group = "org.jellyfin.media3", name = "media3-ffmpeg-decoder", version = "1.9.0+1" }
-androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", version.ref = "paletteKtx" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- v458 — the camera permission is gone with the ISBN scanner. The app
@@ -20,12 +19,13 @@
     <!-- Explore-session timer: persistent elapsed-time notification + done reminder -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <!-- v272 — Glass Widget Lab auto-detect: reading the system wallpaper on
-         Android 13+ is gated behind All-files access (a Settings-page special
-         permission, requested only from the lab's own opt-in button). -->
-    <uses-permission
-        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
+    <!-- v458 — All-files access (`MANAGE_EXTERNAL_STORAGE`) is gone. Its only
+         user was the Glass Widget Lab's wallpaper auto-detect, deleted with the
+         lab itself; nothing here asks for it, checks it, or reads a wallpaper
+         file (the widget paints its own art), and it is the most
+         review-sensitive permission this manifest could carry. The widget lab's
+         `wallpaper` glyph and the OS's own wallpaper blur are unaffected — they
+         never needed the permission to draw. -->
 
     <!-- Android 11+ package visibility: without this, resolveActivity() /
          queryIntentActivities() return nothing for OTHER apps' activities,
