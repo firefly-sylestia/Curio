@@ -559,8 +559,22 @@ fun PersonalChipsRow(
                 BookChip(
                     book = book,
                     pinned = book.id == pinnedBookId,
+                    // ── v461 — A CHIP OPENS THE SAME THING ITS CARD DOES ──────
+                    //
+                    // The shelf's card lands in the reader when the book has a
+                    // document (see `BookShelfScreen`), and this row is a shortcut
+                    // INTO that shelf — so a chip that went to the book's page
+                    // while the card went to the words would be two answers to one
+                    // tap. Same test, same destinations.
                     onClick = {
-                        navController.navigate(CurioRoutes.bookDetail(book.id)) { launchSingleTop = true }
+                        val target = if (
+                            BookFiles.documentOf(book.documentPath, book.coverUrl).isNotBlank()
+                        ) {
+                            CurioRoutes.reader(book.id)
+                        } else {
+                            CurioRoutes.bookDetail(book.id)
+                        }
+                        navController.navigate(target) { launchSingleTop = true }
                     }
                 )
             }
@@ -966,7 +980,11 @@ private fun BookChip(
             if (pinned) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
+                    // The personal accent, not the theme's `primary`: the shelf
+                    // card wears this exact disc (see `BookShelfScreen`), and the
+                    // two marks have to be the same mark — a member who pins from
+                    // the shelf should recognise the chip at a glance.
+                    color = personalAccent(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(8.dp)
@@ -976,7 +994,7 @@ private fun BookChip(
                         CurioIcon(
                             CurioIcons.PushPin,
                             "Pinned to Home",
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = personalOnAccent(),
                             size = 13.dp
                         )
                     }
