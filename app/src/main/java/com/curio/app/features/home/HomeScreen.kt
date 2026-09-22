@@ -2556,7 +2556,10 @@ internal fun HomeDrawerContent(
                 // real numbers over the lane grid, built from real UI (see
                 // DrawerBrainPanel).
                 item("brain") {
-                    DrawerBrainPanel(onOpenStats = { onNavigate(CurioRoutes.STATS) })
+                    DrawerBrainPanel(
+                        onOpenStats = { onNavigate(CurioRoutes.STATS) },
+                        drawerOpen = drawerOpen
+                    )
                 }
             // v206 — the footer scrolls with the list as the last item.
             item("footer") {
@@ -2928,7 +2931,19 @@ private fun DrawerGlassHero(
  * grid.
  */
 @Composable
-private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
+private fun DrawerBrainPanel(
+    onOpenStats: () -> Unit,
+    /**
+     * v448 — the drawer's own state, handed down from [HomeDrawerContent].
+     *
+     * The star map is drawn at the end of THIS panel's body, so this is the flag
+     * that has to carry the drawer's state to it: `open` was not in scope here at
+     * all (the build had been failing on that line since v444), and the flag is
+     * named `drawerOpen` rather than `open` because `open` is a MODIFIER KEYWORD
+     * and `open = open` reads as a modifier in expression position.
+     */
+    drawerOpen: Boolean = true
+) {
     val context = LocalContext.current
     val streak = remember(context) { StreakTracker.getStreak(context) }
     val xp = CurioQuests.xpState
