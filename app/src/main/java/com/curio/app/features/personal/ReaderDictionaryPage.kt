@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -26,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,19 +84,17 @@ import kotlinx.coroutines.withContext
  *    than a retype. Nothing is written to disk for it.
  */
 /**
- * v462 — THE BROWSED WORDS' WINDOW, AND WHY IT IS A CEILING, NOT A HEIGHT.
+ * v462b — WHY THE WORDS HAVE NO WINDOW OF THEIR OWN ANY MORE.
  *
- * The member, of this page: *"the dictionary page still have a blank area in the
- * buttom"*. It was this window: the word list was a `LazyColumn` with a FIXED
- * 340dp height sitting inside the page's own scroll, so a letter with forty words
- * reserved three hundred pixels of nothing under them — a band of dead paper with
- * no content and no edge, which is exactly what a blank area at the bottom of a
- * dictionary looks like. It is a **ceiling** now (`heightIn(max = …)`): a big
- * letter still gets the window and scrolls inside it, and a small one is as tall
- * as its own words, so the paper below it belongs to the page's scroll and not to
- * a reserved box.
+ * The member, of this page: *"the dictionary page word list is only half visible
+ * and in the buttom a blank area is blocking from the buttom"*. The words were a
+ * `LazyColumn` NESTED inside the page's own vertical scroll: the inner list ate
+ * every vertical drag over it, so the page could not scroll past it — the list's
+ * lower half, and the foot clearance below it, sat off-screen as a blank band no
+ * gesture could reach. There is one scroll now (the whole page IS the list — see
+ * [ReaderDictionaryPage]), so the words no longer need a bounded window; they are
+ * the page list's own items and every one of them is reachable.
  */
-private val DictionaryWordsWindow = 340.dp
 
 /**
  * v462 — HOW MUCH ROOM THE PAGE LEAVES FOR ITS OWN FOOT.
@@ -270,6 +266,15 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
         guesses = near
     }
 
+    // ── v462b — THE SEARCH FIELD TAKES FOCUS WHEN IT OPENS ──────────────
+    //
+    // Hoisted out of the page's scroll: the field lives inside a LazyColumn item
+    // now, and an effect inside an item is cancelled the moment that item scrolls
+    // off — so the focus request belongs to the page body, where it always runs.
+    LaunchedEffect(searchOpen) {
+        if (searchOpen) runCatching { searchFocus.requestFocus() }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -373,24 +378,39 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                 }
             }
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                    .fillMaxWidth(),
+                // ── v462b — ONE SCROLL FOR THE WHOLE PAGE ───────────────
+                //
+                // The header (field, doors, downloads, history, the browse label)
+                // is this list's FIRST item and the browsed words are its own
+                // items, so a drag anywhere moves the same list — there is no inner
+                // scroll to swallow the gesture, and every word is reachable. The
+                // foot clearance is the list's bottom content padding, so the last
+                // word stops above the floating alphabet and a fling ends on a word
+                // instead of on the blank band that used to sit under a half-shown
+                // nested list.
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = DictionaryFootClearance
+                ),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
                 // ── THE FIELD, WHILE THE SEARCH IS OPEN ─────────────────
                 //
                 // It arrives on the pill clock from the edge its pill lives on (the
-                // head), takes focus as it opens (a search that needs a second tap
-                // before it can be typed into is not a search), and its own cross
-                // empties the word as well as putting the field away — the row's
-                // pill turns into that cross, so one object opens and closes it.
-                LaunchedEffect(searchOpen) {
-                    if (searchOpen) runCatching { searchFocus.requestFocus() }
-                }
+                // head), takes focus as it opens (the focus effect is hoisted to the
+                // page body so it survives this item's recomposition), and its own
+                // cross empties the word as well as putting the field away — the
+                // row's pill turns into that cross, so one object opens and closes it.
                 AnimatedVisibility(
                     visible = searchOpen,
                     enter = CurioMotion.pillArrive(fromTop = true),
@@ -773,39 +793,36 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                                 style = TextStyle(fontSize = 13.sp, color = palette.ink.copy(alpha = 0.6f)),
                                 modifier = Modifier.padding(vertical = 6.dp)
                             )
-                        } else {
-                            // A bounded window of its own: the page already scrolls,
-                            // so a list taller than this would fight it — the words
-                            // get a real list inside the page's own scroll.
-                            // v462 — A CEILING, NOT A HEIGHT (see
-                            // [DictionaryWordsWindow]): the list is as tall as its
-                            // own words until it reaches the window, and only then
-                            // does it scroll inside the page.
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = DictionaryWordsWindow),
-                                verticalArrangement = Arrangement.spacedBy(1.dp)
-                            ) {
-                                items(words) { head ->
-                                    DictionaryHeadwordRow(
-                                        head = head,
-                                        palette = palette,
-                                        chosen = head.equals(
-                                            ReaderDictionary.headword(word),
-                                            ignoreCase = true
-                                        ),
-                                        onClick = {
-                                            word = head
-                                            askSeq++
-                                        }
-                                    )
-                                }
-                            }
+                        }
                         }
                     }
+                    }
                 }
-                Spacer(Modifier.height(DictionaryFootClearance))
+
+                // ── v462b — THE WORDS ARE THE PAGE'S OWN ITEMS ──────────────
+                //
+                // No nested list, no ceiling: the words are items of the page's
+                // own LazyColumn, so they scroll with the header above them, stay
+                // virtualized (a big letter is thousands of words), and the last
+                // one clears the floating alphabet through the list's bottom
+                // content padding — the blank band under a half-shown nested list
+                // is gone.
+                if (browseVolume != null && words.isNotEmpty()) {
+                    items(words) { head ->
+                        DictionaryHeadwordRow(
+                            head = head,
+                            palette = palette,
+                            chosen = head.equals(
+                                ReaderDictionary.headword(word),
+                                ignoreCase = true
+                            ),
+                            onClick = {
+                                word = head
+                                askSeq++
+                            }
+                        )
+                    }
+                }
             }
         }
 
