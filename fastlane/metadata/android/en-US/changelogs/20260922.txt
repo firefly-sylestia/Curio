@@ -1,5 +1,5 @@
 ADD:
-- Reading: the dictionary has an offline door — download it once from inside the dictionary sheet (Webster's 1913, public domain, 9 MB) and every word answers with no connection; the sheet's badge row holds all three dictionaries (Offline · Wiktionary · Free) and shows the one you are on, and the ⋯ menu opens the dictionary in a taller panel where you can search any word.
+- Reading: the dictionary has offline doors — download one once from inside the dictionary sheet and every word answers with no connection: Webster's 1913 (public domain, 9 MB, 86,000 headwords), WordNet 3.1 (11 MB, 155,000 words WITH modern senses) and the complete OPTED 1913 (public domain, 14 MB, 176,000 definitions). The badge row holds all five doors (Offline · Modern · Full 1913 · Wiktionary · Free) and shows the one you are on, each volume is downloaded from its own row (with a progress bar) and removed from the same row, and the ⋯ menu opens the dictionary in a taller panel where you can search any word.
 - Reading: the drawer's star map twinkles, and it draws itself in and out with the drawer — the lines run from each star to the one it joins, and the whole sky gathers and lets go with the panel.
 
 FIX:

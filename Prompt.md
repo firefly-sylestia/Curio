@@ -379,6 +379,22 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§42 — WordNet and the fuller 1913 as extra offline doors (DONE, v447).** The member's answer to the
+  data question ("wordnet and fuller please") is built: the sheet's badge row is **Offline · Modern ·
+  Full 1913 · Wiktionary · Free** and the offline trio are three real, verified sources — **WordNet 3.1**
+  (`fluhus/wordnet-to-json`'s release asset `wordnet.json.gz`, ~11.4MB, the door with MODERN senses) and
+  **the full OPTED 1913** (`CloudBytes-Academy/English-Dictionary-Open-Source`'s `csv/dictionary.csv`,
+  ~14MB, 176,023 definitions, public domain) alongside the existing Webster's 1913 JSON object. Both new
+  volumes are **parsed from their own release format**: WordNet's synset-keyed gzipped JSON is read in one
+  pass over `synset` (skipping `lemma`/`example`) and the OPTED table through a real CSV reader (the 1913
+  definitions carry commas, doubled quotes and wrapped line breaks) — and both are **translated once, as
+  they download, into a per-first-letter bucket index** (`word \t label \t definition`) so a lookup opens
+  ~0.5MB instead of the whole dictionary, with no sorting and no dictionary-size buffer. The v445 rules
+  hold: a `*.part` index is never searchable, the download bytes are consumed and never kept, and a missing
+  volume answers `null` ("no dictionary") rather than `emptyList()` ("no such word"). The sheet keeps ONE
+  download row — the door you are standing on (source · licence · size · progress bar · Remove) — with
+  chips for the volumes you are not on. **Still open from §41:** the dictionary's own PAGE (a route opened
+  from the reader's ⋯ menu and from Home's `+` sheet). See the v447 section of `app/AGENTS.md`.
 - **§41 — download polish, Edit profile in the reader's floating pills, and the dictionary data question (PARTLY DONE, v446).**
   **Done:** the offline dictionary's download row carries a real 4dp progress bar under its percentage
   (two boxes, the reader's own ink and accent); Edit profile was re-skinned onto the reader's chrome

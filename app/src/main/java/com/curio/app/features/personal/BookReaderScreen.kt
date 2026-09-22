@@ -6177,18 +6177,18 @@ private sealed interface ReaderLookup {
  * switching is one tap rather than a trip to settings, and the offline file is
  * the door that is already answered before any network is asked.
  */
-private enum class DictionaryDoor(val label: String) {
-    OFFLINE("Offline"),
-    WIKTIONARY("Wiktionary"),
-    FREE("Free");
-
-    /** The online door this badge stands for, or null for the local file. */
-    val online: ReaderDictionarySource?
-        get() = when (this) {
-            OFFLINE -> null
-            WIKTIONARY -> ReaderDictionarySource.WIKTIONARY
-            FREE -> ReaderDictionarySource.FREE
-        }
+private enum class DictionaryDoor(
+    val label: String,
+    /** The volume that lives on the phone, or null for an online door. */
+    val volume: ReaderOfflineDictionary.Volume? = null,
+    /** The online door this badge stands for, or null for a file. */
+    val online: ReaderDictionarySource? = null
+) {
+    OFFLINE("Offline", volume = ReaderOfflineDictionary.Volume.WEBSTER),
+    MODERN("Modern", volume = ReaderOfflineDictionary.Volume.MODERN),
+    FULL("Full 1913", volume = ReaderOfflineDictionary.Volume.FULL),
+    WIKTIONARY("Wiktionary", online = ReaderDictionarySource.WIKTIONARY),
+    FREE("Free", online = ReaderDictionarySource.FREE)
 }
 
 private fun ReaderDictionarySheet(
@@ -6230,14 +6230,28 @@ private fun ReaderDictionarySheet(
     // ── v444 — THE DOORS, AND THE ONE THAT LIVES ON THE PHONE ──────────
     val context = LocalContext.current
     val doorScope = rememberCoroutineScope()
-    var offlineReady by remember { mutableStateOf(ReaderOfflineDictionary.isReady(context)) }
-    var downloading by remember { mutableStateOf(false) }
+    // ── v446 — WHICH VOLUMES ARE ALREADY ON THE PHONE ───────────────────
+    //
+    // Three of them now (Webster's, WordNet, the full 1913), each read once when
+    // the sheet opens and re-read after a download or a removal, so a badge can
+    // never claim a volume the phone does not have.
+    var ready by remember {
+        mutableStateOf(
+            ReaderOfflineDictionary.Volume.entries.associateWith {
+                ReaderOfflineDictionary.isReady(context, it)
+            }
+        )
+    }
+    // The volume being fetched right now, and how far it has come. Only one at a
+    // time: the rows are the member's own, and two 11MB downloads racing on a phone
+    // connection is not a choice a sheet should make for them.
+    var downloading by remember { mutableStateOf<ReaderOfflineDictionary.Volume?>(null) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     // The door the sheet OPENS on: the local file once it is there, else whichever
     // online door reading settings already named (so nobody's habit changes).
     var door by remember {
         mutableStateOf(
-            if (offlineReady) {
+            if (ready[ReaderOfflineDictionary.Volume.WEBSTER] == true) {
                 DictionaryDoor.OFFLINE
             } else when (ReaderLook.dictionary) {
                 ReaderDictionarySource.FREE -> DictionaryDoor.FREE
@@ -6254,7 +6268,9 @@ private fun ReaderDictionarySheet(
      * memoises them, so flipping back and forth between badges is free.
      */
     suspend fun ask(term: String): List<ReaderDictionarySense>? {
-        val online = door.online ?: return ReaderOfflineDictionary.define(context, term)
+        val volume = door.volume
+        if (volume != null) return ReaderOfflineDictionary.define(context, volume, term)
+        val online = door.online ?: ReaderDictionarySource.WIKTIONARY
         return ReaderDictionary.define(term, online)
     }
     LaunchedEffect(word, door) {
@@ -6347,13 +6363,14 @@ private fun ReaderDictionarySheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
                     .padding(bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 DictionaryDoor.entries.forEach { option ->
                     val chosen = option == door
-                    val live = option != DictionaryDoor.OFFLINE || offlineReady
+                    val live = option.volume?.let { ready[it] == true } ?: true
                     Surface(
                         onClick = { door = option },
                         shape = RoundedCornerShape(50),
@@ -6382,13 +6399,19 @@ private fun ReaderDictionarySheet(
                     }
                 }
             }
-            // ── THE OFFLINE DICTIONARY'S OWN ROW ───────────────────────
+            // ── THE VOLUME THE DOOR IN FRONT OF YOU NEEDS ──────────────
             //
-            // Nothing is fetched until the member asks for it, and once it is
-            // there the row is where it can be let go again. The source and its
-            // licence are stated where the tap is, because a file this app will
-            // keep for good is worth naming (see [ReaderOfflineDictionary]).
-            if (!offlineReady) {
+            // Nothing is fetched until the member asks for it, and once it is there
+            // the row is where it can be let go again. The source and its licence are
+            // stated where the tap is, because a file this app will keep for good is
+            // worth naming (see [ReaderOfflineDictionary]).
+            //
+            // v446 — AND IT IS THE ROW OF THE DOOR YOU ARE STANDING ON. There are
+            // three offline volumes now and one row: standing on a badge is what
+            // chooses a dictionary, so the row under the badges offers exactly that
+            // one's download — or, once it is there, its removal.
+            val wanted = door.volume
+            if (wanted != null && ready[wanted] != true) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -6404,7 +6427,7 @@ private fun ReaderDictionarySheet(
                     Spacer(Modifier.width(8.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Offline dictionary",
+                            wanted.source,
                             style = TextStyle(
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
@@ -6412,29 +6435,29 @@ private fun ReaderDictionarySheet(
                             )
                         )
                         Text(
-                            if (downloading) {
+                            if (downloading == wanted) {
                                 "Downloading\u2026 ${(downloadProgress * 100f).toInt()}%"
                             } else {
-                                "Webster's 1913 \u00b7 public domain \u00b7 " +
-                                    ReaderOfflineDictionary.DOWNLOAD_SIZE
+                                wanted.blurb + " \u00b7 " + wanted.size
                             },
                             style = TextStyle(fontSize = 11.sp, color = palette.ink.copy(alpha = 0.55f))
                         )
                     }
-                    if (!downloading) {
+                    if (downloading == null) {
                         Surface(
                             onClick = {
-                                downloading = true
+                                downloading = wanted
                                 downloadProgress = 0f
                                 doorScope.launch {
-                                    val saved = ReaderOfflineDictionary.download(context) { ratio ->
-                                        downloadProgress = ratio
-                                    }
-                                    downloading = false
-                                    offlineReady = saved
+                                    val saved = ReaderOfflineDictionary.download(
+                                        context,
+                                        wanted
+                                    ) { ratio -> downloadProgress = ratio }
+                                    downloading = null
                                     // A finished download is the door the member
-                                    // wanted; the sheet says so by opening on it.
-                                    if (saved) door = DictionaryDoor.OFFLINE
+                                    // wanted; the badge lights and the sheet keeps
+                                    // standing on it.
+                                    ready = ready + (wanted to saved)
                                 }
                             },
                             shape = RoundedCornerShape(50),
@@ -6462,7 +6485,7 @@ private fun ReaderDictionarySheet(
                 // than a progress-indicator API, so the reader's own paper and
                 // accent decide its look on every Material version this app builds
                 // against.
-                if (downloading) {
+                if (downloading == wanted) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -6480,7 +6503,7 @@ private fun ReaderDictionarySheet(
                         )
                     }
                 }
-            } else if (door == DictionaryDoor.OFFLINE) {
+            } else if (wanted != null) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -6488,15 +6511,18 @@ private fun ReaderDictionarySheet(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Offline \u00b7 Webster's 1913 \u00b7 public domain",
+                        wanted.source + " \u00b7 " + wanted.blurb + " \u00b7 stored",
                         style = TextStyle(fontSize = 11.sp, color = palette.ink.copy(alpha = 0.55f)),
                         modifier = Modifier.weight(1f)
                     )
                     Surface(
                         onClick = {
-                            ReaderOfflineDictionary.remove(context)
-                            offlineReady = false
-                            if (door == DictionaryDoor.OFFLINE) door = DictionaryDoor.WIKTIONARY
+                            ReaderOfflineDictionary.remove(context, wanted)
+                            ready = ready + (wanted to false)
+                            // The door's own volume is gone, so the sheet steps to an
+                            // online one rather than standing on a dictionary that is
+                            // not there any more.
+                            door = DictionaryDoor.WIKTIONARY
                         },
                         shape = RoundedCornerShape(50),
                         color = palette.ink.copy(alpha = 0.06f),
@@ -6507,6 +6533,57 @@ private fun ReaderDictionarySheet(
                             style = TextStyle(fontSize = 11.sp),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
+                    }
+                }
+            }
+            // ── AND THE VOLUMES YOU ARE NOT STANDING ON ────────────────
+            //
+            // The badges are doors, but a member who landed on Wiktionary has no
+            // reason to guess that tapping "Modern" is how WordNet is fetched. So
+            // every offline volume that is not on the phone yet is offered right
+            // here as a small chip — one tap, its own progress on the chip — and a
+            // volume already downloaded is not offered at all (there is nothing
+            // left to do to it from this row).
+            val missing = ReaderOfflineDictionary.Volume.entries.filter { ready[it] != true }
+            if (missing.any { it != wanted }) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    missing.forEach { volume ->
+                        if (volume == wanted) return@forEach
+                        Surface(
+                            onClick = {
+                                downloading = volume
+                                downloadProgress = 0f
+                                doorScope.launch {
+                                    val saved = ReaderOfflineDictionary.download(
+                                        context,
+                                        volume
+                                    ) { ratio -> downloadProgress = ratio }
+                                    downloading = null
+                                    ready = ready + (volume to saved)
+                                }
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = palette.ink.copy(alpha = 0.06f),
+                            contentColor = palette.ink
+                        ) {
+                            Text(
+                                if (downloading == volume) {
+                                    volume.label + " \u2026 " +
+                                        (downloadProgress * 100f).toInt() + "%"
+                                } else {
+                                    "Download " + volume.label + " \u00b7 " + volume.size
+                                },
+                                style = TextStyle(fontSize = 11.sp),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
                     }
                 }
             }
