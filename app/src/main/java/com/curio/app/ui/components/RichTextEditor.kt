@@ -40,12 +40,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -674,6 +676,51 @@ private fun clearSpanSize(spans: List<TextSpan>, s: Int, e: Int): List<TextSpan>
  * armed (sticky) format to newly typed characters. Each change reports the
  * plain text + spans back via [onRichTextChange].
  */
+
+/**
+ * v459 — A DICTATION SESSION OUTLIVES THE DOCK THAT STARTED IT.
+ *
+ * The mic rides the FIELD's tool dock (see the callers' `trailingAction`), and in
+ * DOCK mode that dock is a typing instrument: it is composed only while the field
+ * is focused and the keyboard is up (v389/v391). That is exactly what broke
+ * dictation — the member tapped the mic, the dialog opened, the dialog took window
+ * focus, the field blurred, the dock folded away, and the mic composable (which
+ * OWNS `open`) was unmounted with it. The dialog appeared and vanished in the same
+ * breath (member: *"the dialog opens and then it closes again because of the
+ * keyboard"*).
+ *
+ * The session state cannot live in a subtree that exists only while someone is
+ * typing, so the editor HOSTS it here: the mic reports the session up, the dock
+ * stays composed for as long as the member is dictating, and — the second half of
+ * the same report — every live word is typed straight into the field instead of
+ * waiting behind an Insert button.
+ *
+ * Ambient rather than a parameter, deliberately: the mic is handed to the editor
+ * as a SLOT by eight different format screens, so a parameter would mean eight
+ * copies of the same wiring, and every one of them could forget it. A host that is
+ * absent (nil) simply means "no live target" — the mic then behaves exactly as it
+ * always did, committing once on Insert.
+ */
+internal class DictationHost(
+    private val onSessionChange: (live: Boolean, discard: Boolean) -> Unit = { _, _ -> },
+    private val onTranscript: (String) -> Unit = {}
+) {
+    /** True while a dictation session is open — the dock's stay-alive. */
+    var open by mutableStateOf(false)
+        private set
+
+    /** The mic reports the session opening or ending ([discard] = put the field back). */
+    fun session(live: Boolean, discard: Boolean = false) {
+        open = live
+        onSessionChange(live, discard)
+    }
+
+    /** The live transcript as it grows, whole-session (committed + current words). */
+    fun live(transcript: String) = onTranscript(transcript)
+}
+
+internal val LocalDictationHost = compositionLocalOf<DictationHost?> { null }
+
 @Composable
 fun RichTextEditor(
     text: String,
@@ -1153,6 +1200,46 @@ fun RichTextEditor(
         return spansUnderlineCovered(current, s, e)
     }
 
+    // ── v459 — THE FIELD HOSTS THE DICTATION SESSION (see [DictationHost]) ──
+    //
+    // `base` is what the field held when the session opened, so a live
+    // transcript can be typed in as "the words I had + the words I am saying"
+    // without the field's own text being rewritten twice per partial. Cancel
+    // puts the field back to `base` — the words a live session typed are the
+    // session's, not the member's.
+    val dictationText by rememberUpdatedState(text)
+    val dictationSpans by rememberUpdatedState(spans)
+    val dictationChange by rememberUpdatedState(onRichTextChange)
+    var dictationBase by remember { mutableStateOf("") }
+    val dictationHost = remember {
+        DictationHost(
+            onSessionChange = { live, discard ->
+                if (live) {
+                    dictationBase = dictationText
+                } else if (discard) {
+                    if (dictationText != dictationBase) dictationChange(dictationBase, dictationSpans)
+                }
+            },
+            onTranscript = { transcript ->
+                val base = dictationBase
+                val joined = when {
+                    transcript.isBlank() -> base
+                    base.isBlank() -> transcript
+                    else -> base.trimEnd() + "\n" + transcript
+                }
+                if (joined != dictationText) dictationChange(joined, dictationSpans)
+            }
+        )
+    }
+    // The dock's copy of the slot, so the mic inside it can find the host (the
+    // top strip's own invocation is wrapped where it is called).
+    val dictationSlot: (@Composable () -> Unit)? = trailingAction?.let { action ->
+        val hosted: @Composable () -> Unit = {
+            CompositionLocalProvider(LocalDictationHost provides dictationHost) { action() }
+        }
+        hosted
+    }
+
     Column(modifier = modifier) {
         // ── Tool dock — one theme-aware strip above the field ───────────
         // v7.98 — redesigned: a single rounded dock (theme surface)
@@ -1255,7 +1342,9 @@ fun RichTextEditor(
                         }
                     )
                     Spacer(Modifier.weight(1f))
-                    trailingAction?.invoke()
+                    CompositionLocalProvider(LocalDictationHost provides dictationHost) {
+                        trailingAction?.invoke()
+                    }
                     if (historyField != null) {
                         Spacer(Modifier.width(2.dp))
                         TextHistoryPill(onClick = { historyOpen = true }, size = 32.dp)
@@ -1572,7 +1661,10 @@ fun RichTextEditor(
                 properties = PopupProperties(focusable = false)
             ) {
                 AnimatedVisibility(
-                    visible = dockVisible,
+                    // v459 — a dictation session keeps the dock (and therefore the
+                    // mic owning it) composed after the field has blurred: the
+                    // dialog is a window of its own and takes the focus with it.
+                    visible = dockVisible || dictationHost.open,
                     enter = slideInVertically { it } + fadeIn(),
                     exit = slideOutVertically { it } + fadeOut()
                 ) {
@@ -1619,7 +1711,7 @@ fun RichTextEditor(
                         onHistory = if (historyField != null) {
                             { historyOpen = true }
                         } else null,
-                        trailingAction = trailingAction,
+                        trailingAction = dictationSlot,
                         modifier = Modifier.fillMaxWidth()
                     )
                     }

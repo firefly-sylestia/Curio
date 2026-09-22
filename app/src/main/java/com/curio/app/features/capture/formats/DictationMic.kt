@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.components.LocalDictationHost
 import com.curio.app.ui.components.rememberPulseScale
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -75,6 +76,11 @@ fun DictationMic(
     onListeningChange: ((Boolean) -> Unit)? = null
 ) {
     val context = LocalContext.current
+    // v459 — the FIELD that owns the dock hands down a host (see [DictationHost]):
+    // it keeps the dock composed while this session is open and types every live
+    // word into the note. Null when the mic is used outside a hosted field, where
+    // the old Insert-once behaviour is exactly right.
+    val dictationHost = LocalDictationHost.current
     var open by remember { mutableStateOf(false) }
     var listening by remember { mutableStateOf(false) }
     // v131 — the transcript ACCUMULATES across pauses: `dictatedText` holds
@@ -236,9 +242,12 @@ fun DictationMic(
         }
     }.trim()
 
-    fun dismissDialog() {
+    fun dismissDialog(discard: Boolean = false) {
         stopListening()
         open = false
+        // v459 — the session is over, and [discard] says whether the member threw
+        // the words away: Cancel puts the field back to what it held before.
+        dictationHost?.session(false, discard)
         dictatedText = ""
         partialTranscript = ""
         speechEnded = false
@@ -256,6 +265,7 @@ fun DictationMic(
                 pendingPermission = false
                 if (enabled) {
                     open = true
+                    dictationHost?.session(true)
                     startListening()
                 }
             }
@@ -272,6 +282,7 @@ fun DictationMic(
             runCatching { recognizer?.cancel() }
             pendingPermission = false
             open = false
+            dictationHost?.session(false, true)
             listening = false
             onListeningChange?.invoke(false)
             dictatedText = ""
@@ -279,6 +290,16 @@ fun DictationMic(
             speechEnded = false
             error = null
         }
+    }
+
+    // v459 — EVERY LIVE WORD GOES INTO THE FIELD (see [DictationHost]). The mic
+    // still owns its own preview panel, but the field that hosts the session
+    // receives each partial as it arrives, so a note fills in while the member is
+    // still talking instead of waiting behind an Insert button. Keyed on the
+    // transcript itself, so it fires exactly when the words change.
+    val livePreview = preview()
+    LaunchedEffect(open, livePreview) {
+        if (open) dictationHost?.live(livePreview)
     }
 
     if (visible && enabled && !open) {
@@ -309,16 +330,22 @@ fun DictationMic(
             listening = listening,
             partial = preview(),
             error = error,
+            // v459 — with a host the words are ALREADY in the field (typed live
+            // as they were said), so the session's door is Done; an Insert would
+            // write the same transcript a second time.
+            live = dictationHost != null,
             onStop = {
                 stopListening()
                 error = null
             },
             onInsert = {
-                val text = preview()
-                if (text.isNotBlank()) onInsert(text)
+                if (dictationHost == null) {
+                    val text = preview()
+                    if (text.isNotBlank()) onInsert(text)
+                }
                 dismissDialog()
             },
-            onDismiss = { dismissDialog() }
+            onDismiss = { dismissDialog(discard = true) }
         )
     }
 }
@@ -337,6 +364,9 @@ private fun DictationDialog(
     listening: Boolean,
     partial: String,
     error: String?,
+    /** v459 — the words are landing in the field live, so the panel says so and
+     *  the door is Done rather than Insert. */
+    live: Boolean = false,
     onStop: () -> Unit,
     onInsert: () -> Unit,
     onDismiss: () -> Unit
@@ -401,7 +431,10 @@ private fun DictationDialog(
                         .heightIn(min = 72.dp, max = 160.dp)
                 ) {
                     Text(
-                        text = partial.ifBlank { "Your words will appear here while you speak…" },
+                        text = partial.ifBlank {
+                            if (live) "Your words go straight into the note as you speak…"
+                            else "Your words will appear here while you speak…"
+                        },
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontStyle = if (partial.isBlank()) FontStyle.Italic
                                        else FontStyle.Normal
@@ -419,8 +452,8 @@ private fun DictationDialog(
                     Text("Stop", fontWeight = FontWeight.Bold, color = accent)
                 }
             } else {
-                TextButton(onClick = onInsert, enabled = partial.isNotBlank()) {
-                    Text("Insert", fontWeight = FontWeight.Bold)
+                TextButton(onClick = onInsert, enabled = live || partial.isNotBlank()) {
+                    Text(if (live) "Done" else "Insert", fontWeight = FontWeight.Bold)
                 }
             }
         },

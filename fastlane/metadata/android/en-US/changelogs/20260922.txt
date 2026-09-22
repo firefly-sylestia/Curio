@@ -1,3 +1,9 @@
+FIX:
+- Writing: dictation in Save your take no longer closes the moment you tap the mic — the tool bar it was opened from folds away when the keyboard is down, and it used to take the open dialog with it.
+
+ADD:
+- Writing: dictation types into the note while you speak — your words land in the box as you say them, Cancel puts the note back exactly as it was, and the dialog's door is Done instead of Insert.
+
 REMOVE:
 - Privacy: the app no longer asks for all-files access — its only user was the wallpaper experiment retired earlier, and nothing has touched it since. The camera permission went with the barcode scanner above.
 - Books: the ISBN barcode scanner is gone from the shelf's add-a-book sheet, and the camera permission the app asked for goes with it — Search and Type are the two doors that remain, and nothing else in the app used a camera (a picture is always handed to your phone's own picker).
