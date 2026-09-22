@@ -1,8 +1,14 @@
 ADD:
+- Reading: the ⋯ menu's Snapshot — the reader puts its own head, foot and dock away, takes the picture of exactly what you were looking at, and hands it to a crop frame: corners to size it, anywhere inside to move it, and the cropped piece goes to the share sheet as a PNG in the page's own colours.
 - Reading: the dictionary has offline doors — download one once from inside the dictionary sheet and every word answers with no connection: Webster's 1913 (public domain, 9 MB, 86,000 headwords), WordNet 3.1 (11 MB, 155,000 words WITH modern senses) and the complete OPTED 1913 (public domain, 14 MB, 176,000 definitions). The badge row holds all five doors (Offline · Modern · Full 1913 · Wiktionary · Free) and shows the one you are on, each volume is downloaded from its own row (with a progress bar) and removed from the same row, and the ⋯ menu opens the dictionary in a taller panel where you can search any word.
 - Reading: the drawer's star map twinkles, and it draws itself in and out with the drawer — the lines run from each star to the one it joins, and the whole sky gathers and lets go with the panel.
 
 FIX:
+- Reading: back puts the selection down instead of leaving the book — with words picked, the system's back closed the reader with the dock still up.
+- Reading: the highlight dock is a real toolbar — 42dp colour discs and 44dp doors (they were 30 and 32, under the size a finger can aim at) with a real gutter between them, and the dictionary is its own pill above the dock, naming the word it will answer for, when the selection is a single word.
+- Reading: "Wide" stays wide — the choice was being read back from a save that had not landed yet when the rotation rebuilt the reader, so the page turned to landscape and then straight back to upright.
+- Reading: a locked page keeps its vertical move — with the motion lock on and the page Wide, or magnified in pages mode, a drag that is going up or down still moves the page; the pinch and the sideways page turn stay frozen.
+- Reading: the ⋯ menu breathes — three rows with a real gap between them and between the tiles, sharing a row with the new Snapshot door, and its own floor grows with them.
 - Reading: the offline dictionary's download says how far along it is — the row carries a bar under its percentage, so a slow connection reads as progress instead of a stuck number.
 - Profile: Edit profile wears the reader's floating pills — the page's name rides a floating capsule beside a round way back, and Cancel and Save changes float at the bottom instead of sitting in a band; the account's state, a locked email and a username's verdict are badges in their own colours.
 - Reading: a swipe down really closes a sheet — the body's drag had no end of its own, so the panel sat half-way down for the whole settle wait after your finger was gone; it springs back or shuts the instant you let go.

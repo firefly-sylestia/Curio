@@ -313,25 +313,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // than to the app: it opens OVER the book, in the reader's own paper, and
     // back returns to the page that was being read (see [ReaderSettingsScreen]).
     var readerSettingsOpen by remember { mutableStateOf(false) }
-    // ── v438 — BACK CLOSES WHAT IS OPEN, NOT THE BOOK ────────────────────
-    //
-    // The member: *"backing from settings exits the reader"*. Reading settings is
-    // drawn OVER the reading from inside this screen (see [ReaderSettingsScreen]) —
-    // it is not a route — and the reader registered no back handler at all, so the
-    // system's own back went to the navigation stack and popped the READER out from
-    // under the settings page. One handler now answers for everything this screen
-    // opens over itself, innermost thing first, and it is enabled only while
-    // something IS open: with nothing up, back leaves the book exactly as before.
-    BackHandler(
-        enabled = readerSettingsOpen || ReaderLook.zonesEditing || sheet != null || scrubOpen
-    ) {
-        when {
-            readerSettingsOpen -> readerSettingsOpen = false
-            ReaderLook.zonesEditing -> ReaderLook.zonesEditing = false
-            sheet != null -> sheet = null
-            scrubOpen -> scrubOpen = false
-        }
-    }
+    // The back handler itself lives further down, beside the state it answers for
+    // (v448 moved it: a selection and a snapshot are things back must put down, and
+    // both are declared below this line) — see "BACK CLOSES WHAT IS OPEN".
     var marking by remember { mutableStateOf<ReaderParagraph?>(null) }
     var noteFor by remember { mutableStateOf<ReaderParagraph?>(null) }
     var searching by remember { mutableStateOf<ReaderSearch?>(null) }
@@ -340,6 +324,62 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // thing: words), so the bar that acts on it is drawn once, and either
     // surface simply reports what the finger swept.
     var selection by remember { mutableStateOf<ReaderSelection?>(null) }
+    // ── v448 — WHAT IS BEING SNAPSHOTTED ─────────────────────────────────
+    //
+    // The member: *"for share, when sharing from 3 dot open a crop selection … and
+    // it hides the dock and header too"*. `snapshotArmed` is the moment between the
+    // ⋯ door and the copy (the chrome takes a beat to leave, and it must be gone
+    // before the picture is taken), and `snapshot` is the crop frame itself — the
+    // capture, once it exists (see [ReaderSnapshot]).
+    var snapshotArmed by remember { mutableStateOf(false) }
+    var snapshot by remember { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(snapshotArmed) {
+        if (!snapshotArmed) return@LaunchedEffect
+        // The pills' own leave, plus a breath: a capture taken mid-animation would
+        // keep a half-faded pill in the member's crop.
+        delay(CurioMotion.EXIT_MS.toLong() + 140)
+        val shot = captureReaderScreen(view)
+        snapshotArmed = false
+        if (shot != null) {
+            snapshot = shot
+        } else {
+            // No picture (a view that refused to hand one over): the chrome comes
+            // back rather than the member being left on a bare page.
+            chrome = true
+        }
+    }
+    // ── v438/v448 — BACK CLOSES WHAT IS OPEN, NOT THE BOOK ───────────────
+    //
+    // The member: *"backing from settings exits the reader"*, and their own
+    // follow-up now: *"add back handling when i select highlight something, coz
+    // when backing it exits the reader"*. Reading settings is drawn OVER the
+    // reading from inside this screen (see [ReaderSettingsScreen]) — it is not a
+    // route — so one handler answers for everything this screen opens over itself,
+    // innermost thing first, and it is enabled only while something IS open: with
+    // nothing up, back leaves the book exactly as before. A crop frame and a
+    // selection are the two newest things it puts down; either of them used to
+    // hand the back to the navigation stack and leave the book with them still up.
+    BackHandler(
+        enabled = readerSettingsOpen || ReaderLook.zonesEditing || sheet != null || scrubOpen ||
+            selection != null || snapshot != null || snapshotArmed
+    ) {
+        when {
+            snapshot != null -> {
+                snapshot?.recycle()
+                snapshot = null
+                chrome = true
+            }
+            snapshotArmed -> {
+                snapshotArmed = false
+                chrome = true
+            }
+            readerSettingsOpen -> readerSettingsOpen = false
+            ReaderLook.zonesEditing -> ReaderLook.zonesEditing = false
+            sheet != null -> sheet = null
+            scrubOpen -> scrubOpen = false
+            selection != null -> selection = null
+        }
+    }
     // v434 — WHAT THE DICTIONARY OPENS ON when it was asked for from the mark
     // dock rather than from a sweep (see [ReaderMarkSheet]). v442 — it carries
     // the PASSAGE, not a word picked out of it: the sheet reads the passage for
@@ -798,6 +838,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     LaunchedEffect(content, ReaderLook.orientation) {
         val act = readerActivity ?: return@LaunchedEffect
         runCatching { act.requestedOrientation = ReaderLook.orientation.requested() }
+        // ── v448 — AND IT IS WRITTEN THE MOMENT IT IS ASKED FOR ──────────
+        //
+        // The rotation this line causes can rebuild the whole screen, and a rebuild
+        // reads the stored look ([ReaderLookStore.load]). The look's own save is
+        // debounced 400ms by design (a slider should not write a file per pixel), so
+        // an orientation change wrote itself NOW rather than racing the window it
+        // just turned — together with the once-per-process load above, that is what
+        // makes "Wide" stay wide.
+        runCatching { ReaderLookStore.save(lookContext) }
     }
     DisposableEffect(readerActivity) {
         onDispose {
@@ -1474,6 +1523,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         // bookmark is one more tap. It stands where the foot of the reader is
         // and the chrome is already out of the way (see [tapPage]).
         val swept = selection
+        // ── v448 — THE MEANING, WHICH IS WHAT ONE WORD IS FOR ─────────────
+        //
+        // The member: *"separate the meaning dictionary icon from the dock and
+        // place it as a floating pill above that dock when word is selected"*. A
+        // single word swept on a page is the one time a meaning is the obvious
+        // next thing, so it stands over the dock as its own pill and NAMES the
+        // word it will answer for (see the pill below).
+        val meaningWord = swept?.let { ReaderDictionary.headword(it.text) }.orEmpty()
+        val singleWord = swept != null && meaningWord.length > 1 &&
+            !swept.text.trim().contains(' ')
         if (swept != null && swept.text.isNotBlank() && sheet == null) {
             AnimatedVisibility(
                 visible = true,
@@ -1539,14 +1598,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             )
                         }
                     },
-                    onDictionary = {
-                        // The dictionary reads the selection itself (see the sheet
-                        // call), so the bar does not have to hand the word over —
-                        // and the selection stays up behind the sheet, so closing
-                        // it puts the member back on the words they asked about.
-                        dictionarySearch = false
-                        sheet = ReaderSheet.DICTIONARY
-                    },
                     onMore = {
                         // The whole-place sheet is still here, one tap away:
                         // selecting words ADDS a way to mark a book up, it does
@@ -1556,6 +1607,84 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                 )
             }
+        }
+
+        // ── v448 — AND THE MEANING PILL, ABOVE THE DOCK ────────────────────
+        //
+        // Its own arrival and its own lift, standing where the reader's other
+        // floating pills stand, and gone the moment the selection is: a word's
+        // meaning is a door, not a state the dock has to carry.
+        AnimatedVisibility(
+            visible = singleWord && sheet == null,
+            enter = CurioMotion.pillArrive(),
+            exit = CurioMotion.pillLeave(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                // Clear of the dock's own 84dp (see [ReaderSelectionBar]): the two
+                // are one stack, the pill over the tools.
+                .padding(bottom = 92.dp)
+        ) {
+            val pillBody = lerp(palette.surface, palette.ink, 0.06f)
+            val pillEdge = lerp(palette.surface, palette.ink, 0.16f)
+            Surface(
+                onClick = {
+                    // The dictionary reads the selection itself (see the sheet
+                    // call), so the pill does not hand the word over — and the
+                    // selection stays up behind the sheet, so closing it puts the
+                    // member back on the words they asked about.
+                    dictionarySearch = false
+                    sheet = ReaderSheet.DICTIONARY
+                },
+                shape = RoundedCornerShape(50),
+                color = pillBody,
+                shadowElevation = 8.dp,
+                border = androidx.compose.foundation.BorderStroke(1.dp, pillEdge)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CurioIcon(
+                        CurioIcons.MenuBook,
+                        "Look this word up",
+                        tint = palette.accent,
+                        size = 17.dp
+                    )
+                    Text(
+                        meaningWord,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = palette.ink
+                        ),
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+
+        // ── v448 — AND THE CROP FRAME, ON THE PICTURE IT JUST TOOK ─────────
+        //
+        // The member: *"open a crop selection to be able to only select the
+        // cropped image of that part of the book keeping the color as it is for the
+        // selected … from there user can share it"*. It is the LAST thing in this
+        // Box, so nothing the reader draws can sit over it, and it takes every
+        // touch: the page under it cannot scroll or turn while the frame is up.
+        val shot = snapshot
+        if (shot != null) {
+            ReaderSnapshotCrop(
+                bitmap = shot,
+                palette = palette,
+                onDone = {
+                    snapshot?.recycle()
+                    snapshot = null
+                    // The chrome the snapshot put away comes back with the frame's
+                    // own exit, so the reader is exactly as the member left it.
+                    chrome = true
+                }
+            )
         }
 
         // ── v437 — AND THE PAGE SLIDER, FLOATING OVER THE PAGE ─────────────
@@ -1849,6 +1978,18 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onShare = {
                 sheet = null
                 shareReaderPlace(context, book?.title.orEmpty(), positionLabel, selection?.text.orEmpty())
+            },
+            onSnapshot = {
+                // ── v448 — THE SNAPSHOT, WITH THE CHROME OUT OF THE WAY ───
+                //
+                // The member: *"open a crop selection … it hides the dock and
+                // header too"*. The pills leave FIRST — the capture waits for them
+                // (see the armed effect) — the selection goes with them, and the
+                // crop frame arrives on the picture a moment later.
+                sheet = null
+                selection = null
+                chrome = false
+                snapshotArmed = true
             },
             onSettings = {
                 sheet = null
@@ -4840,6 +4981,8 @@ private fun ReaderMenuSheet(
     onHighlights: () -> Unit,
     onDictionary: () -> Unit,
     onShare: () -> Unit,
+    /** v448 — the crop-and-share door (see [ReaderSnapshot]). */
+    onSnapshot: () -> Unit,
     onSettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -4857,10 +5000,20 @@ private fun ReaderMenuSheet(
     // which is the other half of what the member asked for) and its rows are given
     // air: a wider gap between the tiles, a wider one between the rows, and a
     // breath under the last row so nothing sits jammed against the panel's edge.
-    ReaderSheetFrame("More in this book", palette, onDismiss, minHeightFraction = 0.30f) {
+    //
+    // ── v448 — SEVEN DOORS, THREE ROWS, AND A REAL RHYTHM ─────────────
+    //
+    // The member, again: *"still the 3 dot menu isnt good the padding etc and
+    // spacing feels off"*. The Snapshot door (see [ReaderSnapshot]) makes it seven
+    // tiles, so the grid is three rows rather than two, the rows are given a real
+    // gap (18dp), the tiles a real gutter (12dp), and the last row — Settings, one
+    // tile — is CENTRED at the same width the others have rather than stretched
+    // across the panel (`pad = 1`), which is what a grid of tools should do with a
+    // row it does not fill. The panel's floor grows with its own content (0.38).
+    ReaderSheetFrame("More in this book", palette, onDismiss, minHeightFraction = 0.38f) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             ReaderTileRow(
                 tiles = listOf(
@@ -4873,12 +5026,19 @@ private fun ReaderMenuSheet(
             ReaderTileRow(
                 tiles = listOf(
                     ReaderTile(CurioIcons.Share, "Share", 0, false, onShare),
-                    ReaderTile(CurioIcons.Crop, "Gestures", 0, gesturesOn, onGestures),
-                    ReaderTile(CurioIcons.Settings, "Settings", 0, false, onSettings)
+                    ReaderTile(CurioIcons.Screenshot, "Snapshot", 0, false, onSnapshot),
+                    ReaderTile(CurioIcons.Crop, "Gestures", 0, gesturesOn, onGestures)
                 ),
                 palette = palette
             )
-            Spacer(Modifier.height(4.dp))
+            ReaderTileRow(
+                tiles = listOf(
+                    ReaderTile(CurioIcons.Settings, "Settings", 0, false, onSettings)
+                ),
+                palette = palette,
+                pad = 1
+            )
+            Spacer(Modifier.height(2.dp))
         }
     }
 }
@@ -4893,18 +5053,26 @@ private class ReaderTile(
     val onClick: () -> Unit
 )
 
-/** One row of the ⋯ grid, three capsules wide. */
+/**
+ * One row of the ⋯ grid, three capsules wide.
+ *
+ * [pad] puts an invisible tile-width of air on EACH side, so a row that holds
+ * fewer tiles than the others keeps the same tile width and reads as centred
+ * (v448 — the grid is three rows of three, three and one).
+ */
 @Composable
-private fun ReaderTileRow(tiles: List<ReaderTile>, palette: ReaderPalette) {
+private fun ReaderTileRow(tiles: List<ReaderTile>, palette: ReaderPalette, pad: Int = 0) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        // v442 — the tiles keep a real gutter between them: at 8dp two 46dp pills
-        // nearly touched once their labels were the widest thing in the row.
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        // v442/v448 — the tiles keep a real gutter between them: at 8dp two 46dp
+        // pills nearly touched once their labels were the widest thing in the row.
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        repeat(pad) { Spacer(Modifier.weight(1f)) }
         tiles.forEach { tile ->
             ReaderMenuTile(tile = tile, palette = palette, modifier = Modifier.weight(1f))
         }
+        repeat(pad) { Spacer(Modifier.weight(1f)) }
     }
 }
 
@@ -8415,8 +8583,6 @@ private fun ReaderSelectionBar(
     onHighlight: (ReaderHighlighter) -> Unit,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
-    /** v431 — the dictionary, which is what a ONE-WORD selection is for. */
-    onDictionary: () -> Unit,
     onMore: () -> Unit
 ) {
     // ── v438 — ONE WORD GETS THE WHOLE BAR BACK ──────────────────────
@@ -8456,6 +8622,18 @@ private fun ReaderSelectionBar(
     // uses. `animateContentSize` is gone with it: the bar is full width and its
     // height never changes, so it animated nothing and only asked for a layout pass
     // on every arrival.
+    //
+    // ── v448 — AND IT IS A REAL TOOLBAR, AT A REAL SIZE ────────────────
+    //
+    // The member: *"the highlight selected dock is too small and doesnt follow the
+    // size parameter"*, and, asked what it should follow: **a fixed, bigger dock**.
+    // The discs were 30dp and the doors 32dp — Material's own minimum touch target
+    // is 48dp, so every one of them was a control the member had to aim at, on a
+    // page they are holding one-handed. They are 42dp discs and 44dp doors now, the
+    // padding grows with them, and the gutter between them is a real one (9dp) so
+    // the row reads as tools rather than as ticks. The dictionary door went with it
+    // — it is its own pill ABOVE this dock when one word is picked (see the caller),
+    // which is the only time a meaning is what the member means.
     val body = lerp(palette.surface, palette.ink, 0.06f)
     val edge = lerp(palette.surface, palette.ink, 0.16f)
     Surface(
@@ -8468,9 +8646,9 @@ private fun ReaderSelectionBar(
         Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 7.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
         ) {
                 ReaderHighlighter.entries.forEach { ink ->
                     val worn = appliedInk == ink
@@ -8495,7 +8673,7 @@ private fun ReaderSelectionBar(
                             if (worn) 2.dp else 1.dp,
                             if (worn) palette.ink else ink.ink
                         ),
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(42.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (worn) {
@@ -8506,12 +8684,12 @@ private fun ReaderSelectionBar(
                                     // looking at (see `journalInkOn`) — a glyph in
                                     // the colour of its own disc is a blank disc.
                                     tint = journalInkOn(ink.ink),
-                                    size = 16.dp
+                                    size = 20.dp
                                 )
                             } else {
                                 Box(
                                     modifier = Modifier
-                                        .size(12.dp)
+                                        .size(16.dp)
                                         .clip(CircleShape)
                                         .background(ink.ink)
                                 )
@@ -8519,19 +8697,13 @@ private fun ReaderSelectionBar(
                         }
                     }
                 }
-                Spacer(Modifier.width(2.dp))
+                Spacer(Modifier.width(4.dp))
                 SelectionBarAction(CurioIcons.Note, "Write a note on this passage", palette, onNote)
                 SelectionBarAction(
                     CurioIcons.Bookmark,
                     "Bookmark this passage",
                     palette,
                     onBookmark
-                )
-                SelectionBarAction(
-                    CurioIcons.MenuBook,
-                    "Look a word up",
-                    palette,
-                    onDictionary
                 )
                 SelectionBarAction(
                     CurioIcons.MoreHoriz,
@@ -8563,14 +8735,14 @@ private fun SelectionBarAction(
         onClick = onClick,
         shape = CircleShape,
         color = palette.ink.copy(alpha = 0.12f),
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             CurioIcon(
                 name = glyph,
                 contentDescription = description,
                 tint = palette.ink.copy(alpha = 0.8f),
-                size = 17.dp
+                size = 21.dp
             )
         }
     }
@@ -9021,11 +9193,28 @@ internal object ReaderLookStore {
      * the object's own defaults ARE the answer then, and the mark is only written
      * on the first save.
      */
+    /**
+     * v448 — AND IT LOADS ONCE PER PROCESS, NOT ONCE PER SCREEN.
+     *
+     * The member: *"the wide option isnt working, it works and it rotates and then
+     * it rotates back to upright"*. The cause was this function running again after
+     * the rotation it had just caused: the reader is rebuilt by the config change,
+     * the rebuild read the store, and the 400ms-debounced save had not landed yet —
+     * so the store still said what the member had just replaced, their choice was
+     * overwritten, and the window turned straight back. The look IN MEMORY is the
+     * truth for as long as the process lives (every screen writes the same object),
+     * so a later entry into a reader has nothing to learn.
+     */
+    @Volatile
+    private var loadedThisProcess = false
+
     fun load(context: Context) {
+        if (loadedThisProcess) return
         val prefs = runCatching {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         }.getOrNull() ?: return
         if (!prefs.contains(MARK)) return
+        loadedThisProcess = true
         runCatching {
             ReaderLook.inkKey = prefs.getString(INK, ReaderLook.inkKey) ?: ReaderLook.inkKey
             ReaderLook.typeFace = prefs.getString(FACE, ReaderLook.typeFace) ?: ReaderLook.typeFace
@@ -10044,6 +10233,11 @@ private fun Modifier.pinchToZoom(
         // v442 — the motion lock's own travel, for the same wear-in (see the
         // lock's branch below). Also per-gesture.
         var held = 0f
+        // v448 — and that travel split by axis, because the lock has to tell a
+        // SIDEWAYS claim (a page turn, a zone sweep) from a vertical move (see the
+        // thaw below). Also per-gesture.
+        var heldX = 0f
+        var heldY = 0f
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
@@ -10062,7 +10256,39 @@ private fun Modifier.pinchToZoom(
             // finger is swallowed whole (consuming is what stops the scrolling
             // column or the pager underneath from taking it instead, which is how
             // a locked page stays exactly where the member left it).
-            if (ReaderLook.motionLock) {
+            // ── v448 — HOW FAR THIS EVENT WENT, IN EACH AXIS ───────────────
+            //
+            // Read for EVERY event (not only while the lock is on), because the
+            // lock's own thaw below needs to know which way the gesture is going
+            // before it can decide whether it is the lock's to take.
+            var stepX = 0f
+            var stepY = 0f
+            event.changes.forEach { change ->
+                val step = change.position - change.previousPosition
+                stepX += if (step.x < 0f) -step.x else step.x
+                stepY += if (step.y < 0f) -step.y else step.y
+            }
+            held += stepX + stepY
+            heldX += stepX
+            heldY += stepY
+            // ── v448 — AND A WIDE OR MAGNIFIED PAGE KEEPS ITS VERTICAL MOVE ─
+            //
+            // The member: *"when in wide or zoomed in with reading mode in pages,
+            // allow the vertical move around scrolling or move around gesture in
+            // motion lock on too"*. The lock freezes the ZOOM and the sideways drag
+            // (the page turn, the zone sweep); it was never meant to nail a page
+            // that is wider than the screen (Wide) or taller than its own frame (a
+            // magnified page in the paged reader) and leave the member unable to
+            // see the rest of it. So a gesture whose whole travel is VERTICAL falls
+            // through to the page's own handling below — where a magnified page pans
+            // and a page at rest hands the drag to the surface underneath — and only
+            // the sideways claim and the pinch stay locked.
+            val thawed = heldY > heldX &&
+                pressed.size < 2 &&
+                !ReaderTouch.selecting &&
+                (ReaderLook.orientation == ReaderOrientation.LANDSCAPE ||
+                    ReaderLook.pdfZoom > 1.02f)
+            if (ReaderLook.motionLock && !thawed) {
                 // ── v442 — AND A LOCKED PAGE STILL HEARS A TAP ──────────────
                 //
                 // The lock used to swallow every event in which any finger had
@@ -10082,13 +10308,6 @@ private fun Modifier.pinchToZoom(
                 // merely ignored would be taken by the column or the pager under
                 // it and the page would move anyway.
                 //
-                // (`position - previousPosition` rather than `positionChanged()`:
-                // that helper does not exist in this Compose version.)
-                held += event.changes
-                    .sumOf { change ->
-                        (change.position - change.previousPosition).getDistance().toDouble()
-                    }
-                    .toFloat()
                 if (pressed.size >= 2) {
                     // A pinch's second finger must not read as a tap when it
                     // lifts (see [ReaderTouch.multi]).
@@ -10203,6 +10422,8 @@ private fun Modifier.pinchToZoom(
                 travelled = 0f
                 claimedPan = false
                 held = 0f
+                heldX = 0f
+                heldY = 0f
                 last = null
             }
         } while (event.changes.any { it.pressed })

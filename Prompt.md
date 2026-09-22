@@ -379,6 +379,18 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§43 — the dock, the Wide that did not stay, the lock, the ⋯ menu, the Snapshot and back (DONE, v448).**
+  Seven items: the highlight dock is a **fixed, bigger toolbar** (42dp discs, 44dp doors, a real gutter) and the
+  **dictionary is its own pill above it** naming the word, shown only for a one-word selection; **"Wide" stays
+  wide** (a race — the reader's rebuild read a store whose 400ms-debounced save had not landed, so the store now
+  loads once per process AND an orientation change is written the moment it is applied); **a locked page keeps
+  its vertical move** when it is Wide or magnified in pages mode (the lock's guard now measures travel per axis
+  and lets a vertical gesture through, freezing only the pinch and the sideways claim); the **⋯ menu breathes**
+  (three rows, 18dp/12dp rhythm, the last row centred, a 0.38 floor); **Snapshot** is a seventh ⋯ door that puts
+  the chrome away, copies the SCREEN (`PixelCopy`, with a view-draw fallback — page colours and all), and hands it
+  to a fraction-based crop frame whose crop shares as a PNG (the member's answer: a second door beside Share,
+  always on, both PDF and reflowable); and **back puts a selection down** instead of leaving the book. See the
+  v448 section of `app/AGENTS.md`.
 - **§42 — WordNet and the fuller 1913 as extra offline doors (DONE, v447).** The member's answer to the
   data question ("wordnet and fuller please") is built: the sheet's badge row is **Offline · Modern ·
   Full 1913 · Wiktionary · Free** and the offline trio are three real, verified sources — **WordNet 3.1**
