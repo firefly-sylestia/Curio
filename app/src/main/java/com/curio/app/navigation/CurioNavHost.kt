@@ -673,10 +673,15 @@ fun CurioNavHost(
                     drawerScope.launch { drawerState.close() }
                     navController.navigate(route) { launchSingleTop = true }
                 },
-                // v444 — the drawer's own state, so the star map can play itself
+                // v444/v448 — the drawer's own state, so the star map can play itself
                 // in and out WITH the panel (the TARGET is what says "on its way",
                 // which the settled value would only say once it had arrived).
-                open = drawerState.targetValue != DrawerValue.Closed
+                //
+                // The parameter is `drawerOpen` and not `open` because `open` is a
+                // MODIFIER KEYWORD: the compiler takes `open = open` in the hero as a
+                // modifier in expression position and reports the value as an
+                // unresolved reference, so the flag is named for what it is.
+                drawerOpen = drawerState.targetValue != DrawerValue.Closed
             )
         },
         gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning

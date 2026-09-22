@@ -2503,7 +2503,7 @@ internal fun HomeDrawerContent(
      * and then the whole panel simply slid off. The drawer's own state is the one
      * thing that knows both halves (see `CurioNavHost`).
      */
-    open: Boolean = true
+    drawerOpen: Boolean = true
 ) {
     val context = LocalContext.current
     val displayName = AppPreferences.displayNameState
@@ -2567,7 +2567,7 @@ internal fun HomeDrawerContent(
             // -- Drawer hero — the GLASS toolbar bar (style on) or the torn
             // celestial sky banner (rows vanish at the seam) --------------
             if (drawerGlassOn) {
-                DrawerGlassHero(displayName = displayName, open = open)
+                DrawerGlassHero(displayName = displayName, drawerOpen = drawerOpen)
             } else {
             Box(
                 modifier = Modifier
@@ -2781,7 +2781,7 @@ internal fun HomeDrawerContent(
 private fun DrawerGlassHero(
     displayName: String,
     /** v444 — the drawer's own state, so the sky plays in with it and out with it. */
-    open: Boolean = true
+    drawerOpen: Boolean = true
 ) {
     val context = LocalContext.current
     val dark = isCurioDarkTheme()
@@ -3032,7 +3032,7 @@ private fun DrawerBrainPanel(onOpenStats: () -> Unit) {
             lanes = mapLanes,
             selected = selected,
             onSelect = { selected = it },
-            open = open
+            drawerOpen = drawerOpen
         )
         // v427 — NO COUNTER UNDER THE SKY. A line reading "1 of 338 lanes
         // explored" under a map is a meter wearing a caption: the stars already
@@ -3131,7 +3131,7 @@ private fun DrawerLaneStarMap(
     selected: CategoryId?,
     onSelect: (CategoryId?) -> Unit,
     /** v444 — the drawer's own state: the sky plays in with it and out with it. */
-    open: Boolean = true,
+    drawerOpen: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     if (lanes.isEmpty()) return
@@ -3161,12 +3161,12 @@ private fun DrawerLaneStarMap(
     // its own star toward the one it joins (so the mesh DRAWS itself rather than
     // appearing finished), and the two are reversed together on the way out. The
     // design is untouched — same stars, same places, same colours.
-    val reveal = remember { Animatable(if (open) 1f else 0f) }
-    LaunchedEffect(open) {
+    val reveal = remember { Animatable(if (drawerOpen) 1f else 0f) }
+    LaunchedEffect(drawerOpen) {
         reveal.animateTo(
-            targetValue = if (open) 1f else 0f,
+            targetValue = if (drawerOpen) 1f else 0f,
             animationSpec = tween(
-                durationMillis = if (open) 760 else 300,
+                durationMillis = if (drawerOpen) 760 else 300,
                 easing = FastOutSlowInEasing
             )
         )
@@ -3178,8 +3178,8 @@ private fun DrawerLaneStarMap(
     // draw block — so a twinkle costs draw passes and never a recomposition of the
     // map, its stars or the page behind it.
     var beat by remember { mutableStateOf(0f) }
-    LaunchedEffect(open) {
-        if (!open) {
+    LaunchedEffect(drawerOpen) {
+        if (!drawerOpen) {
             beat = 0f
             return@LaunchedEffect
         }
