@@ -24,11 +24,16 @@ import com.curio.app.data.AppPreferences
  * v455 — THE MOTION SYSTEM (experiment, default OFF).
  *
  * A second motion vocabulary for the app's SCREENS, ported from
- * **firefly-sylestia/Felicity** (`decorations/…/transitions/*`,
- * `…/itemanimators/*`, `music/…/utils/AnimationUtils.kt`). Felicity is
+ * **firefly-sylestia/Felicity** (`decorations/…/transitions/`,
+ * `…/itemanimators/`, `music/…/utils/AnimationUtils.kt`). Felicity is
  * AGPL-3.0 and so is this app, so the port is licence-clean; what follows is
  * the *design* carried over, rewritten for Compose — see `app/MOTION_PLAN.md`
  * for the file-by-file provenance and what is deliberately not ported.
+ *
+ * NOTE FOR ANYONE EDITING THIS FILE: Kotlin block comments NEST, so a shell
+ * glob written inside a KDoc (a directory name followed by an asterisk) opens
+ * a comment that is never closed — it took a red build to learn that (v455).
+ * Write the directory, not the glob.
  *
  * **What Felicity actually does, in four sentences** (from its own sources):
  *
