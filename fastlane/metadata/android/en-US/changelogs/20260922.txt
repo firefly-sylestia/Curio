@@ -1,4 +1,7 @@
 ADD:
+- Experiments: "Smoother transitions" also brings lists in — a saved discovery in the Cabinet and a day in the journals arrive with a light lift, once each, so scrolling back to them is just a scroll.
+
+ADD:
 - Experiments: "Smoother transitions" now seeks — the back gesture moves the page with your finger and only settles when you let go, instead of playing a fixed clip; and the reader's sheets (the dictionary, the ⋯ menu, notes, highlights, contents) open on the same clock and curve as a screen, so a sheet and a page arriving read as one app.
 
 ADD:

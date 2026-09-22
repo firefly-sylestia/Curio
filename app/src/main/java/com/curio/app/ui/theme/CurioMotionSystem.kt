@@ -15,6 +15,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -313,6 +314,31 @@ fun sharedAxisFadeExit(): ExitTransition =
     fadeOut(animationSpec = tween(CurioMotionSystem.NavMs, easing = CurioMotionSystem.Settle))
 
 /**
+ * Which keys a LAZY list has already brought in (phase 4).
+ *
+ * [curioItemIn] on a non-lazy `Column` needs nothing: an item that is composed
+ * is present, and a key that is remembered is the same item still there. A lazy
+ * list is different — `LazyColumn`/`LazyVerticalGrid` compose an item when it
+ * scrolls INTO VIEW — so `remember(key) { Animatable(0f) }` alone would make
+ * every row animate again each time the member scrolled back to it. That is not
+ * an entrance, it is a stutter, and it is the one way this primitive could do
+ * harm.
+ *
+ * So a lazy list declares one of these and hands it down: a key is animated the
+ * first time that list sees it, and never again. It is deliberately NOT snapshot
+ * state — nothing draws the set, and a mutable set in composition state would
+ * recompose a whole list to say "this row already arrived".
+ */
+@Stable
+class CurioArrivals internal constructor() {
+    internal val seen: MutableSet<Any?> = mutableSetOf()
+}
+
+/** One arrivals record per list, alive as long as the list is. */
+@Composable
+fun rememberCurioArrivals(): CurioArrivals = remember { CurioArrivals() }
+
+/**
  * Felicity's item ADD, as a modifier: `alpha 0 → 1` with `scale 0.85 → 1`
  * over 300ms (`FelicityDefaultAnimator.animateAdd`).
  *
@@ -333,8 +359,15 @@ fun Modifier.curioItemIn(
     key: Any?,
     order: Int = 0,
     staggerMs: Int = 45,
+    arrivals: CurioArrivals? = null,
 ): Modifier {
     if (!curioMotionSystemOn) return this
+    // A lazy list passes its [arrivals] record: the row animates the first time
+    // THAT list sees the key and never on a later scroll (see [CurioArrivals]).
+    // The mutation sits inside `remember(key)`, so it happens once per key per
+    // composition scope rather than on every recomposition.
+    val isArrival = remember(key) { arrivals?.seen?.add(key) ?: true }
+    if (arrivals != null && !isArrival) return this
     val progress = remember(key) { Animatable(0f) }
     LaunchedEffect(key) {
         progress.snapTo(0f)

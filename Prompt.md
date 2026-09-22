@@ -54,7 +54,8 @@ as unresolved across three files. Fixed, pushed as `96ec47ad`, and the lesson is
 2. **PHASE 3, PART SHIPPED.** The panel clock (`PanelEnterMs` = `NavMs`, `PanelExitMs` shorter, both on `Settle`) and the reader's
    `ReaderSheetFrame` re-timed with it — structure untouched (it still travels by its own measured height and the drag is still never
    interpolated), OFF keeping the pill clock's 190/130ms pair.
-3. **PHASE 3, THE PART THAT CANNOT BE DONE YET — WITH THE REASON.** The ~140 `ModalBottomSheet` sites are animated by Material 3 itself via
+3. **PHASE 4 SHIPPED (the lists that suit it).** `CurioArrivals` — the rule a lazy list must obey: an item there is composed when it SCROLLS INTO VIEW, so `curioItemIn` alone would make a row animate again on every scroll back to it. One record per list, a key animates once, and the record is not snapshot state. Adopted on the **Cabinet grid** (`itemsIndexed` + record) and the **journals list** (`JournalRow` gained a `modifier`), with Home's recents already on it (a scrolling `Column`, so nothing extra was needed). **The Topic Database is deliberately left out** — 16k rows with section headers, where headers would pop while scrolling. Recorded in `MOTION_PLAN.md` §4.
+4. **PHASE 3, THE PART THAT CANNOT BE DONE YET — WITH THE REASON.** The ~140 `ModalBottomSheet` sites are animated by Material 3 itself via
    `MaterialTheme.motionScheme`; **in M3 1.4.0 `MotionScheme`, `LocalMotionScheme`, `MaterialExpressiveTheme` and the `motionScheme` parameter are
    all `internal`** (read from the 1.4.0 sources jar, not the docs), and the public API is 1.5+, still alpha. The scheme is designed in
    `MOTION_PLAN.md` §4 phase 3 and the one line it goes in is marked in `CurioTheme`. **No Material3 alpha was pulled** — that is the app's

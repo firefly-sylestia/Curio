@@ -41,7 +41,7 @@ by the finger.** Not a slide, not a bounce.
 | The settle curve | `CurioMotionSystem.Settle` = `1 − (1−t)⁶` | **shipped** |
 | The **seeked** curve | `CurioMotionSystem.Track` = linear — handed to navigation's predictive-pop parameters (`predictivePop*X/Z/Fade`) | **shipped (phase 2)** |
 | Panels (phase 3) | `PanelEnterMs` / `PanelExitMs` on `Settle`, adopted by the reader's `ReaderSheetFrame`; Material's own sheets wait for M3 1.5 | **part shipped** |
-| Item ADD | `Modifier.curioItemIn(key, order)` — drawn in the draw phase, staggered | **shipped**, adopted on Home's recents rows |
+| Item ADD | `Modifier.curioItemIn(key, order, arrivals)` — drawn in the draw phase, staggered, plus `CurioArrivals` so a lazy list animates a row once | **shipped** — Home's recents, the Cabinet grid, the journals list |
 | Item REMOVE | not ported (see §5) | — |
 | `FlipItemAnimator` | not ported (see §5) | — |
 | `animateToZeroScale` | not ported (see §5) | — |
@@ -126,10 +126,26 @@ A sheet is a screen that does not change route.
   `MotionScheme.standard()` over when it is off. Do not reach for 1.5.0-alpha to get
   this early: it is the app's top-level theme.
 
-**Phase 4 — the item animators app-wide.** `curioItemIn` is on Home's recents only.
-Adopt it on the Cabinet grid, the journals list and the topic database, then decide
-whether the REMOVE animation and the flip (a content swap in place — the natural home
-would be a card whose topic changes) are wanted.
+**Phase 4 — the item animators (SHIPPED for the lists that suit it).**
+
+* **The rule a lazy list must obey (`CurioArrivals`).** On a `Column` an item that is
+  composed is present, so `remember(key) { Animatable(0f) }` is enough. On a
+  `LazyColumn`/`LazyVerticalGrid` an item is composed **when it scrolls into view** — so
+  the primitive alone would make every row animate again on every scroll back to it. That
+  is a stutter, not an entrance. A lazy list therefore declares one `rememberCurioArrivals()`
+  and hands it down: **a key animates the first time THAT list sees it and never again.**
+  The record is deliberately not snapshot state — nothing draws it.
+* **Adopted:** Home's recents (a scrolling `Column`, so nothing extra was needed), the
+  **Cabinet grid** (`itemsIndexed` + the arrivals record), and the **journals list**
+  (`JournalRow` gained a `modifier`). All three are lists a member adds to and returns to,
+  which is where an arrival is informative.
+* **Deliberately NOT adopted — the Topic Database.** 16k rows that mix topic rows with
+  section headers: an entrance on the headers would make the catalog pop as the member
+  scrolls, and per-row animation work is the last thing a 16k-row list needs. The plan's
+  own question (“does it want this?”) is answered **no**.
+* **Still open:** the REMOVE animation and the flip (a content swap in place). REMOVE is
+  not ported at all (see §5); the flip has no natural home yet and a 3D rotation in a list
+  reads as a glitch.
 
 **Phase 5 — retire the old branches.** Once phase 1–4 have been lived with: delete the
 `CurioMotion.Durations` nav branches, and decide whether the switch itself dies
