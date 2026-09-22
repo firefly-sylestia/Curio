@@ -10488,6 +10488,14 @@ private fun Modifier.pinchToZoom(
         // thaw below). Also per-gesture.
         var heldX = 0f
         var heldY = 0f
+        // ── v457 — THE LOCK'S ONE ANSWER FOR THIS GESTURE ────────────────────
+        //
+        // `null` until the finger crosses the touch slop (nothing is consumed
+        // before that, so a tap and a hold are never touched), then `true` when
+        // this gesture belongs to the page's own vertical move and `false` when it
+        // is the lock's. It is deliberately a plain local: it is decided and read
+        // inside the gesture loop and must never cause a recomposition.
+        var lockVerdict: Boolean? = null
         do {
             val event = awaitPointerEvent()
             val pressed = event.changes.filter { it.pressed }
@@ -10533,12 +10541,52 @@ private fun Modifier.pinchToZoom(
             // through to the page's own handling below — where a magnified page pans
             // and a page at rest hands the drag to the surface underneath — and only
             // the sideways claim and the pinch stay locked.
-            val thawed = heldY > heldX &&
-                pressed.size < 2 &&
-                !ReaderTouch.selecting &&
-                (ReaderLook.orientation == ReaderOrientation.LANDSCAPE ||
-                    ReaderLook.pdfZoom > 1.02f)
-            if (ReaderLook.motionLock && !thawed) {
+            // ── v457 — AND THE LOCK DECIDES ONCE, AT THE SLOP, AND HOLDS IT ──
+            //
+            // The member: *"fix the weird scrolling when zoom locked so the scroll
+            // isnt like scrolling but it lets me drag to side too, weird
+            // behavior"*. Both halves of that were one bug: the thaw was asked
+            // afresh on EVERY event from the gesture's accumulated travel, so the
+            // lock could change its mind in the middle of a drag.
+            //
+            //  · **"The scroll isnt like scrolling."** A drag whose first few
+            //    pixels went a hair sideways was swallowed whole — and because
+            //    consuming is what cancels the scrolling column's own slop wait,
+            //    the page then could not scroll at all, even after the finger
+            //    went straight down and the travel turned vertical. The gesture
+            //    was simply dead.
+            //  · **"It lets me drag to side too."** The mirror image: a drag that
+            //    began vertically thawed the lock, and from then on the sideways
+            //    move it went on to make was the pager's — so a page turn slipped
+            //    through the lock that exists to freeze it.
+            //
+            // The axis is settled ONCE now, on the event the finger crosses the
+            // touch slop, and the rest of the gesture obeys it to the lift: a
+            // vertical drag belongs to the page's own scrolling from that event
+            // onward, and anything else is the lock's. Same rules as v448 — only
+            // a page with somewhere to move vertically can thaw at all, and a
+            // pinch or a sweep in flight is never the page's.
+            val verticalCanMove =
+                ReaderLook.orientation == ReaderOrientation.LANDSCAPE ||
+                    ReaderLook.pdfZoom > 1.02f
+            if (ReaderLook.motionLock && lockVerdict == null &&
+                pressed.size < 2 && !ReaderTouch.selecting &&
+                held >= viewConfiguration.touchSlop
+            ) {
+                // Dominantly vertical travel = the page's scroll; dominantly
+                // sideways = the lock's (a page turn is exactly what it freezes).
+                lockVerdict = verticalCanMove && heldY > heldX
+            }
+            // A second finger is never the page's to take: two fingers are the
+            // pinch, and the lock swallows them whole whatever the verdict said.
+            if (pressed.size >= 2) {
+                // A pinch's second finger must not read as a tap when it lifts
+                // (see [ReaderTouch.multi]).
+                ReaderTouch.multi = true
+            }
+            val lockYields = pressed.size < 2 &&
+                (ReaderTouch.selecting || lockVerdict == true)
+            if (ReaderLook.motionLock && !lockYields) {
                 // ── v442 — AND A LOCKED PAGE STILL HEARS A TAP ──────────────
                 //
                 // The lock used to swallow every event in which any finger had
@@ -10558,17 +10606,12 @@ private fun Modifier.pinchToZoom(
                 // merely ignored would be taken by the column or the pager under
                 // it and the page would move anyway.
                 //
-                if (pressed.size >= 2) {
-                    // A pinch's second finger must not read as a tap when it
-                    // lifts (see [ReaderTouch.multi]).
-                    ReaderTouch.multi = true
-                }
                 // A sweep in flight is the selection's, not the lock's: the
                 // member asked for the pan to be frozen, not for words to stop
-                // being selectable (see [ReaderTouch.selecting]).
-                if (!ReaderTouch.selecting &&
-                    (pressed.size >= 2 || held >= viewConfiguration.touchSlop)
-                ) {
+                // being selectable (see [ReaderTouch.selecting]) — it never
+                // reaches here, and this line is what keeps that true whatever a
+                // later event's pressed-count says.
+                if (pressed.size >= 2 || held >= viewConfiguration.touchSlop) {
                     event.changes.forEach { it.consume() }
                 }
                 last = null

@@ -414,11 +414,23 @@ fun HomeScreen(navController: NavController) {
             }
         }
     } else null
-    val recentEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+    // ── v457 — HOME'S FEED STARTS FROM THE LAST LOOK (see [HomeFeedSnapshot]) ──
+    //
+    // The member: *"many ui elements have loading unloading behaviors
+    // unnecessarily"*. This read started at `emptyList()` on EVERY composition,
+    // so coming back to Home dropped the Recents rows and the drawer's own
+    // knowledge map to nothing and filled them in a frame or two later — the
+    // unload-and-load they were describing, for an archive that had not changed.
+    // The snapshot is the first frame now, and the read only ever corrects it. A
+    // FAILED read keeps what is on screen rather than blanking the feed, which is
+    // the same rule the store's own best-effort loads follow.
+    val recentEntries by produceState<List<CurioEntry>>(initialValue = HomeFeedSnapshot.entries.take(5)) {
         try {
-            value = CurioRepositoryHolder.repo.getAll().take(5)
+            val loaded = CurioRepositoryHolder.repo.getAll()
+            HomeFeedSnapshot.entries = loaded
+            value = loaded.take(5)
         } catch (_: Exception) {
-            value = emptyList()
+            // Nothing to do: the snapshot stands.
         }
     }
     val exploredTopics = ExploreSessionStore.recentlyExploredState
@@ -2840,8 +2852,13 @@ private fun DrawerBrainPanel(
     val level = CurioQuests.levelForXp(xp)
     val (levelProgress, nextThreshold) = CurioQuests.xpProgress(xp)
     val progress = remember(context) { CurioPassport.allProgress(context) }
-    val entries by produceState(initialValue = emptyList<CurioEntry>()) {
-        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
+    // v457 — and the drawer's own read is seeded the same way, so the knowledge
+    // map is drawn from the member's real archive on its first frame instead of
+    // coming up dark and lighting a beat later (see [HomeFeedSnapshot]).
+    val entries by produceState(initialValue = HomeFeedSnapshot.entries) {
+        val loaded = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull() ?: return@produceState
+        HomeFeedSnapshot.entries = loaded
+        value = loaded
     }
     val knowledge = remember(progress, entries) { laneKnowledge(progress, entries) }
     // Derived in composition (NOT remembered) so hiding a lane in Manage
@@ -2952,6 +2969,27 @@ private fun DrawerBrainPanel(
             CurioLaneDetailStrip(picked)
         }
     }
+}
+
+/**
+ * v457 — WHAT HOME PAINTS ON ITS FIRST FRAME.
+ *
+ * The member: *"many ui elements have loading unloading behaviors
+ * unnecessarily"*, and, asked which: *"screens that re-read everything when you
+ * come back … the books and journals in home screen"*. Every read in this screen
+ * that feeds a list started at `emptyList()`, so a return to Home dropped its
+ * rows (and the drawer's knowledge map) to nothing and filled them in a frame or
+ * two later — an unload and a load, on every visit, for an archive that had not
+ * changed.
+ *
+ * One snapshot for the archive, read by both consumers (the feed's recents and
+ * the drawer's own map), so the second one costs no extra read and the two can
+ * never disagree about what the member has saved. `@Volatile` because the read
+ * runs on a frame's coroutine and the next composition reads on the main thread
+ * with no lock between them.
+ */
+private object HomeFeedSnapshot {
+    @Volatile var entries: List<CurioEntry> = emptyList()
 }
 
 /**

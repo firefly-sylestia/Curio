@@ -26,11 +26,20 @@ from the state rather than from memory.
 6. **THE STAR MAP STANDS IN A SOFT LIGHT.** One radial gradient behind the sky (a warm whisper of the brand colour at the hub, out to the page's own colour — no plate, no edge, no corner), its stars and joins a notch deeper, and the bloom rebuilt as **one cached radial-gradient brush per star** instead of four concentric circles repainted every frame: a quarter of the draw ops, a real falloff instead of stepped rings, and the twinkle and the arrival reduced to a translate+scale over a brush that never changes. Each star also comes OUT OF THE HUB as it lights (a tenth of its distance inward, sliding to its place while it grows) and gathers back the same way as the drawer closes.
 7. **THE READER'S SHEETS MOVE AS ONE LAYER.** The panel's `offset { }` is read in the LAYOUT phase, so every frame of a drag, an arrival or a departure re-laid-out the whole sheet and re-rendered its 16dp shadow with it; `graphicsLayer { translationY }` moves the same pixels with no relayout.
 
-### 0.2 Still open from this request
+### 0.2 The second message in the same round (done)
 
-- **The zoom-locked scroll and the "loading/unloading" surfaces** (the member's second message in this round): the motion lock's page move and the elements that mount and unmount for no reason. Both are research-first items — the lock's gesture maths has a recorded history (v437's "a locked page keeps its vertical move") and the mounting report has no surface named yet.
+> now lets fix the weird scrolling when zoom locked so the scroll isnt like scrolling but it lets me drag to side too, weird behavrior, and also amany ui elements haev loading unloading behaviors unncecessarily.
+
+**Asked which elements load and unload**, the member answered **"Screens that re-read everything when you come back, the books and journals in home screen"** — so both halves have a surface, not a guess.
+
+8. **A LOCKED PAGE SCROLLS LIKE A PAGE.** `thawed` was recomputed on EVERY event from the gesture's accumulated travel, and both halves of the member's report were that one line: a drag whose first pixels went a hair sideways was swallowed whole (and consuming is what cancels the scrolling column's own slop wait, so the page could not scroll at all — *"the scroll isnt like scrolling"*), while a drag that began vertically thawed the lock and let the sideways move it went on to make turn the page (*"it lets me drag to side too"*). The axis is settled **once**, on the event the finger crosses the touch slop, and `lockVerdict` holds it until the lift; a pinch and a sweep in flight still never thaw, and the v448 rule (only a Wide or magnified page can thaw at all) is unchanged.
+9. **THE UNLOADS ARE GONE FROM THE WRITING SURFACES.** The dictionary page's word list was REPLACED by a "Reading the “B” pages…” line on every letter tap — a whole panel unmounting and remounting for a local file read; the list is one object through a letter change now and only its items change (the quiet line moved above it and is the only text state left). And the member's own two: the journals/books rows (and the journals list, and the shelf) read through `produceState(initialValue = emptyList())`, so every return to Home composed an EMPTY row and filled it a frame later — `PersonalShelfSnapshot` (one process-scoped snapshot for all three, since they read the same two flows) is the first frame now and the flow only corrects it; `HomeFeedSnapshot` does the same for Home's recents feed and the drawer's own knowledge map, which used to come up dark and light a beat later. A **failed** read keeps what is on screen instead of blanking it.
+
+### 0.3 Still open from this request
+
 - **The star map on a device** — CI compiles the map, it cannot see the glow; the arrival, the twinkle and the halo's falloff are the member's to walk.
 - **A legacy highlight's first re-draw** still searches for its words (it has no offsets); the first time the member highlights those same words again the mark is upgraded in place.
+- **The remaining `produceState(initialValue = emptyList())` reads** (`ChapterScreen`/`BookReviewScreen` notes, `BookDetailScreen`'s marks, `BookCoverHubScreen`/`BookBrowserScreen`'s catalogs): the same unload-then-fill shape, on surfaces the member did not name. The two the member named are fixed; these are candidates, not findings.
 
 ---
 

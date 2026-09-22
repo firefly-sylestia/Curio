@@ -314,6 +314,32 @@ private fun CreateEntryOption(
  * behind as a dead one.
  */
 @Composable
+/**
+ * v457 — WHAT THE WRITING PAGES PAINT ON THEIR FIRST FRAME.
+ *
+ * The member: *"many ui elements have loading unloading behaviors
+ * unnecessarily"* — and, asked which, *"the books and journals in home
+ * screen"*. The rows read the personal store through `produceState(initialValue
+ * = emptyList())`, so every return to Home composed an EMPTY row and filled it a
+ * frame or two later when Room's flow delivered: the chips (and the journals
+ * list, and the shelf) visibly unloaded and loaded again, on every visit, for
+ * data that had not changed.
+ *
+ * A process-scoped snapshot is the initial value now — the same shape the topic
+ * browser already uses for its rows (`BrowseRowsCache`) — so the last known
+ * journals and books are on screen in the first frame and the flow only ever
+ * CORRECTS them. It is one snapshot for all three surfaces because they read the
+ * same two flows (Home's two rows, the journals list, the shelf).
+ *
+ * `@Volatile` because the flows write on their own thread and the next
+ * composition reads on the main thread, with no lock and no hand-off between
+ * them.
+ */
+internal object PersonalShelfSnapshot {
+    @Volatile var journals: List<PersonalNoteEntity> = emptyList()
+    @Volatile var books: List<PersonalBookEntity> = emptyList()
+}
+
 fun PersonalChipsRow(
     navController: NavController,
     /**
@@ -331,14 +357,23 @@ fun PersonalChipsRow(
     backdrop: Color = MaterialTheme.colorScheme.background,
     modifier: Modifier = Modifier
 ) {
-    val journals by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
+    // v457 — SEEDED FROM THE LAST LOOK (see [PersonalShelfSnapshot]): the row is
+    // already full when Home comes back, and an empty snapshot (a genuinely empty
+    // library) still reads as empty on the very first frame.
+    val journals by produceState(initialValue = PersonalShelfSnapshot.journals) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeJournals().collect { value = it }
+            PersonalRepositoryHolder.repo.observeJournals().collect {
+                PersonalShelfSnapshot.journals = it
+                value = it
+            }
         }
     }
-    val books by produceState(initialValue = emptyList<PersonalBookEntity>()) {
+    val books by produceState(initialValue = PersonalShelfSnapshot.books) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
+            PersonalRepositoryHolder.repo.observeBooks().collect {
+                PersonalShelfSnapshot.books = it
+                value = it
+            }
         }
     }
     val ink = MaterialTheme.colorScheme.onBackground

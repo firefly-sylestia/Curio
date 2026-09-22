@@ -108,9 +108,15 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun BookShelfScreen(navController: NavController) {
     val context = LocalContext.current
-    val books by produceState(initialValue = emptyList<PersonalBookEntity>()) {
+    // v457 — SEEDED FROM THE LAST LOOK (see [PersonalShelfSnapshot]): the shelf is
+    // already drawn when you come back to it instead of composing empty and
+    // filling in a frame later.
+    val books by produceState(initialValue = PersonalShelfSnapshot.books) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeBooks().collect { value = it }
+            PersonalRepositoryHolder.repo.observeBooks().collect {
+                PersonalShelfSnapshot.books = it
+                value = it
+            }
         }
     }
     var addOpen by remember { mutableStateOf(false) }

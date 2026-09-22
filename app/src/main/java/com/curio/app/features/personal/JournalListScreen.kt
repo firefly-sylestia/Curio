@@ -100,9 +100,20 @@ fun JournalListScreen(navController: NavController) {
     // Notes collection in the Cabinet (user request: "the journal in personal
     // keep sthe journals only … also todo goes inside notes too, no more in
     // journa").
-    val pages by produceState(initialValue = emptyList<PersonalNoteEntity>()) {
+    // ── v457 — AND THE LIST IS ALREADY THERE WHEN YOU COME BACK ────────
+    //
+    // The member: *"screens that re-read everything when you come back"*. An
+    // `initialValue` of `emptyList()` meant the collection composed EMPTY and only
+    // filled when Room's flow delivered, so opening a page and coming back showed
+    // the list unload and load again. It starts from the last look instead — the
+    // same snapshot Home's own row reads (see [PersonalShelfSnapshot]) — and the
+    // flow only corrects it.
+    val pages by produceState(initialValue = PersonalShelfSnapshot.journals) {
         runCatching {
-            PersonalRepositoryHolder.repo.observeJournals().collect { value = it }
+            PersonalRepositoryHolder.repo.observeJournals().collect {
+                PersonalShelfSnapshot.journals = it
+                value = it
+            }
         }
     }
     val journals = remember(pages) {

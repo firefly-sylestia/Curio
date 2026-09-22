@@ -726,13 +726,30 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                                 }
                             }
                         }
+                        // ── v457 — THE WORDS NEVER UNMOUNT FOR A LETTER ────
+                        //
+                        // The member: *"many ui elements have loading unloading
+                        // behaviors unnecessarily"*. This was one of them: tapping
+                        // a letter replaced the whole list with a "Reading the “B”
+                        // pages…” line, so the panel unloaded and loaded again for a
+                        // read that is a local file — the rows you were looking at
+                        // vanished, said a sentence, and came back.
+                        //
+                        // The list is the same object through a letter change now
+                        // and only its items change: the words on screen stay until
+                        // the next letter's have arrived (a local bucket is
+                        // milliseconds, not a network wait), and the quiet line
+                        // above them says which letter is being read. It is the
+                        // ONLY text state left — a letter with nothing under it
+                        // still says so.
                         if (readingLetter) {
                             Text(
                                 "Reading the \u201c" + letter.uppercase() + "\u201d pages\u2026",
                                 style = TextStyle(fontSize = 13.sp, color = palette.ink.copy(alpha = 0.5f)),
                                 modifier = Modifier.padding(vertical = 6.dp)
                             )
-                        } else if (words.isEmpty()) {
+                        }
+                        if (words.isEmpty()) {
                             Text(
                                 "Nothing under \u201c" + letter.uppercase() + "\u201d.",
                                 style = TextStyle(fontSize = 13.sp, color = palette.ink.copy(alpha = 0.6f)),

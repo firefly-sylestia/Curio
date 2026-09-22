@@ -54,11 +54,15 @@ labelled **Felt** and **Length**.
 **What:** the badge you reached for was the *abridged* Webster's alone, so
 standing on it could answer nothing while Modern and Full 1913 answered.
 **Fix:** the door owns every volume on the phone and searches best-first
-(WordNet → complete 1913 → abridged). Nothing was deleted — each volume keeps
-its own download, progress and Remove. Three rules the merge forced: a badge
-dims only when **none** of its volumes is present; removing one volume keeps you
-on Offline while any other remains; and *no volume here* (`null`) stays distinct
-from *no such word* (`emptyList`, the miss path with spelling suggestions).
+(WordNet → complete 1913). Each volume keeps its own download, progress and
+Remove. Three rules the merge forced: a badge dims only when **none** of its
+volumes is present; removing one volume keeps you on Offline while any other
+remains; and *no volume here* (`null`) stays distinct from *no such word*
+(`emptyList`, the miss path with spelling suggestions).
+**v457 update:** the abridged Webster's door was later REMOVED (the same
+public-domain 1913 text as the full edition in a lighter conversion, so the two
+rows read as one dictionary twice) — the door is `MODERN, FULL` now and
+`purgeRetired` deletes a phone's copy of the retired file.
 
 ### The "wide" look that rotated back (v448)
 

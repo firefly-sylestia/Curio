@@ -1,3 +1,8 @@
+FIX:
+- Reading: a locked page scrolls like a page — with the motion lock on, a drag whose first few pixels went a hair sideways froze the page for the whole gesture (it could not scroll at all), while a drag that began vertically let a later sideways move turn the page; the lock settles the axis once, at the touch slop, and keeps it until you lift.
+- Reading: the dictionary's word list no longer unloads for a letter — tapping a letter replaced the whole list with a "Reading the … pages" line and built it again when the words arrived; the list stays and only its words change.
+- Home: the Pages and My shelf rows are already drawn when you come back — they composed empty and filled in a frame later, so the chips flashed on every visit, and the journals list, the shelf and the drawer's knowledge map started the same way.
+
 ADD:
 - Home: the drawer's star map stands in a soft light — one radial glow behind the sky, from the centre out to the page's own colour, with no panel edge or corner anywhere — and each star now comes out of the middle as it lights, gathering back the same way as the drawer closes.
 
