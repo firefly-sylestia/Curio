@@ -20,8 +20,9 @@ plugins {
 // is missing required property keyPassword". The env* prefix sidesteps that.
 //
 // Local dev (no env vars set): falls back to the default debug signing config,
-// so `gradlew assembleRelease` still produces an installable-but-debug-keyed
-// APK. CI: produces a properly-signed release APK.
+// so `gradlew assembleCoreRelease` / `assembleFullRelease` still produces an
+// installable-but-debug-keyed APK. CI: produces a properly-signed release APK.
+// (The bare `assembleRelease` is ambiguous once the `edition` flavors exist.)
 val envKeyStorePath: String? = System.getenv("KEYSTORE_PATH")?.trim()?.takeIf { it.isNotEmpty() }
 val envKeyStorePassword: String? = System.getenv("KEYSTORE_PASSWORD")?.trim()?.takeIf { it.isNotEmpty() }
 val envKeyAlias: String? = System.getenv("KEY_ALIAS")?.trim()?.takeIf { it.isNotEmpty() }
@@ -470,8 +471,9 @@ dependencies {
     // v458 — the test scaffolding is gone with the tests it never had: there is
     // no source in `app/src/test` and no `androidTest` source set at all, so
     // `testImplementation(junit)` and the debug UI-test manifest backed
-    // nothing. CI runs `lintRelease validateTopics assembleRelease` — no test
-    // task — so neither could have run even if a file appeared. Re-add both
+    // nothing. CI runs `lintCoreRelease lintFullRelease validateTopics
+    // assembleCoreRelease assembleFullRelease` (per edition — v465b) and no
+    // test task, so neither could have run even if a file appeared. Re-add both
     // (they are still in the catalog) with the first real test.
 }
 

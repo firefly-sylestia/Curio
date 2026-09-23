@@ -30,7 +30,7 @@ Curio is a single-module Android app:
 - **Android Studio** (latest stable) with **JDK 17**.
 - Open the repo root; the app module is `:app` (Kotlin + Jetpack Compose).
 - Dependency versions live in the Gradle version catalog: `gradle/libs.versions.toml`.
-- Build locally with `./gradlew assembleDebug` — CI additionally runs lint, topic validation, and `assembleRelease`.
+- Two editions ship from one codebase (`core` = `com.curio.app`, `full` = `com.curio.app.full`): build them with `./gradlew assembleCoreDebug` / `assembleFullDebug` (or the `Release` pair) — **the bare `assembleDebug` / `assembleRelease` names are ambiguous under the flavor dimension and Gradle refuses them at task selection.** CI additionally runs lint per edition (`lintCoreRelease`, `lintFullRelease`) plus topic validation.
 
 ### Topic content
 

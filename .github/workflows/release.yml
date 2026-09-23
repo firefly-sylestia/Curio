@@ -130,7 +130,12 @@ jobs:
             exit 1
           fi
           echo "Bundled $topic_files topic catalog files into the release APK."
-          ./gradlew validateTopics assembleRelease --stacktrace
+          # v465b — per-EDITION task names, not `assembleRelease`: with the
+          # `edition` flavor dimension that name is ambiguous and Gradle fails
+          # at task selection ("Task 'assembleRelease' is ambiguous …"). Both
+          # editions must be built here — the release publishes both, and the
+          # rename step below reads the edition from the APK's own path.
+          ./gradlew validateTopics assembleCoreRelease assembleFullRelease --stacktrace
 
       - name: Verify release APKs and signatures
         run: |

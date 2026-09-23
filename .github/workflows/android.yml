@@ -44,8 +44,10 @@ jobs:
     name: Curio Android (validate · lint · release)
     runs-on: ubuntu-latest
     # v465 — 45 minutes, not 30: TWO editions are compiled and linted now (core
-    # + full). `assembleRelease` and `lintRelease` both cover every flavor, which
-    # is what makes CI the thing that proves BOTH editions still build.
+    # + full). Each edition is named explicitly (`lintCoreRelease` /
+    # `assembleCoreRelease` and their `full` twins) — the bare `lintRelease` /
+    # `assembleRelease` names are ambiguous under the flavor dimension and fail
+    # at task selection, so CI is the thing that proves BOTH editions build.
     timeout-minutes: 45
 
     outputs:
@@ -132,10 +134,19 @@ jobs:
       # disables the per-ABI split packaging in app/build.gradle.kts).
       # The tag release workflow builds the full universal + per-ABI set.
       #
-      # v412 — the job compiles ONE variant, not two: `assembleRelease` is
-      # the build, and lint now runs `lintRelease` so it REUSES the release
+      # v412 — the job compiles ONE variant, not two: `assembleRelease` was
+      # the build, and lint ran `lintRelease` so it REUSED the release
       # compilation `assembleRelease` just did instead of compiling the
       # debug variant a second time (~half the Kotlin work per run).
+      #
+      # v465b — with the `edition` flavor dimension, `lintRelease` and
+      # `assembleRelease` are AMBIGUOUS: Gradle refuses to pick between
+      # `lintCoreRelease` and `lintFullRelease` and fails at TASK SELECTION,
+      # before a single line compiles ("Task 'lintRelease' is ambiguous in
+      # root project 'Curio' and its subprojects"). Every task below is
+      # therefore spelled out per edition. The pairing is kept — each
+      # `lint<Flavor>Release` runs first, so the `assemble<Flavor>Release`
+      # beside it reuses that variant's compilation rather than redoing it.
       #
       # `continue-on-error` so the annotation and summary steps below still run
       # on a FAILED build — the compiler's own errors are exactly what the
@@ -209,7 +220,7 @@ jobs:
           else
             echo "Supabase project URL + publishable key were provided to the build."
           fi
-          ./gradlew lintRelease validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
+          ./gradlew lintCoreRelease lintFullRelease validateTopics assembleCoreRelease assembleFullRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
             | tee gradle-build.log
 
       # ── SURFACE 2: THE CHECKS TAB ──────────────────────────────────────────
