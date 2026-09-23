@@ -37,11 +37,44 @@ concurrency:
 #      reviewer who opens only the report still sees everything.
 #   4. THE PULL REQUEST — the same summary as an upserted comment, for a
 #      same-repo PR only (a fork PR's token is read-only, so it is skipped).
+#
+# ── v466 — FOUR RUNNERS: TWO EDITIONS, TWO PHASES ───────────────────────────
+#
+# Measured from a green run's own log, not guessed. The job wall was 1056s and
+# 1007s of that was ONE Gradle invocation, inside which:
+#
+#     lintReportCoreRelease   ~400s   (40%)
+#     minifyCoreReleaseWithR8 ~362s   (36%)
+#     compileCoreReleaseKotlin ~155s  (15%)
+#
+# ...and lint ran LAST, after the APK was already built, signed and verified.
+# It was 40% of the WORK and NONE of the critical path — pure tail on a job
+# that had already answered its question. So each edition now has TWO jobs:
+#
+#     build  → ksp · kotlin · R8 · package · sign · verify   ~9.0 min
+#     lint   → ksp · kotlin · lintReport                     ~9.7 min
+#
+# starting together, so the critical path is max(build, lint) ≈ 10 min instead
+# of build + lint = 17.6. The cost is honest and worth stating: four runners
+# instead of two, and the Kotlin compile is performed twice per edition (lint
+# needs the same compiled classes the build does, and neither job can borrow
+# the other's, because they run at the same time).
+#
+# The APK is UNCHANGED by this. Nothing about the release artifact is
+# different for being built on its own runner — the same tasks, the same
+# flags, the same signing config. See the "what is NOT here" note on the build
+# job for the levers that were considered and rejected.
 # ─────────────────────────────────────────────────────────────────────────────
 
 jobs:
-  verify:
-    name: Curio Android · ${{ matrix.edition }} (validate · lint · release)
+  # ── PHASE 1 of 2: THE BUILD RUNNER ──────────────────────────────────────
+  #
+  # One edition, and nothing but the APK: ksp · Kotlin · R8 · package · sign ·
+  # verify. Lint moved to the `lint` job below (v466 — see the header note); it
+  # is not invoked here, which is what makes this runner ~9 minutes instead of
+  # ~17.6.
+  build:
+    name: Curio Android · ${{ matrix.edition }} · build
     runs-on: ubuntu-latest
     # ── v465e — ONE EDITION PER RUNNER, STARTING TOGETHER ────────────────────
     #
@@ -58,12 +91,16 @@ jobs:
     #
     # ⚠️ NO JOB-LEVEL `outputs:` HERE, AND THAT IS THE POINT. This used to
     # publish eleven step outputs for the standalone report job to quote. A
-    # MATRIX JOB CANNOT OFFER A SINGLE JOB'S OUTPUTS — `needs.verify.outputs`
+    # MATRIX JOB CANNOT OFFER A SINGLE JOB'S OUTPUTS — `needs.build.outputs`
     # becomes an aggregation whose winner GitHub does not specify, so a roll-up
     # built on it would print one edition's numbers under a heading implying
     # both. Each edition therefore WRITES its row to `ci-report/` and uploads it
     # (see build-summary.sh and run-report.py); the report merges artifacts.
-    # Do not reintroduce `needs.verify.outputs.*` in the report job.
+    # Do not reintroduce `needs.build.outputs.*` in the report job.
+    #
+    # v466 — AND `needs` IS A LIST NOW, for the same reason: the report rolls up
+    # FOUR rows (two editions × build|lint), and every one of them is written by
+    # a matrixed job.
     strategy:
       fail-fast: false
       matrix:
@@ -73,18 +110,17 @@ jobs:
             cap: Core
           - edition: full
             cap: Full
-    # v465c — 60 minutes, not 45: the FULL edition now links a vendored 48 MB
-    # native AAR (sherpa-onnx) and R8 has to process it whole, on top of the two
-    # editions' compile and lint. The 45-minute ceiling was set when the only
-    # extra weight was Vosk; a timeout that binds on the build that is supposed
-    # to take longest is a timeout that fails a healthy run, which is worse than
-    # a generous one.
+    # v465c — 60 minutes, not 45: the FULL edition links a vendored 48 MB
+    # native AAR (sherpa-onnx) and R8 has to process it whole. The 45-minute
+    # ceiling was set when the only extra weight was Vosk; a timeout that binds
+    # on the build that is supposed to take longest is a timeout that fails a
+    # healthy run, which is worse than a generous one.
     #
-    # v465 — 45 minutes, not 30: TWO editions are compiled and linted now (core
-    # + full). Each edition is named explicitly (`lintCoreRelease` /
-    # `assembleCoreRelease` and their `full` twins) — the bare `lintRelease` /
-    # `assembleRelease` names are ambiguous under the flavor dimension and fail
-    # at task selection, so CI is the thing that proves BOTH editions build.
+    # v466 — UNCHANGED by the lint split, deliberately. This runner no longer
+    # lints, so 60 is now slack rather than a bound; but a ceiling that has
+    # never been hit is not worth tightening on a build nobody has timed with
+    # the other three jobs competing for runner capacity. The `lint` job below
+    # gets its own, tighter, because lint's cost IS known (~10 minutes).
     timeout-minutes: 60
 
     steps:
@@ -161,22 +197,20 @@ jobs:
       # v412 — the job compiles ONE variant, not two: `assembleRelease` was
       # the build, and lint ran `lintRelease` so it REUSED the release
       # compilation `assembleRelease` just did instead of compiling the
-      # debug variant a second time (~half the Kotlin work per run).
+      # debug variant a second time (~half the Kotlin work per run). That
+      # pairing is what v466 unpicks — see the note on the task list below.
       #
-      # v465b — with the `edition` flavor dimension, `lintRelease` and
-      # `assembleRelease` are AMBIGUOUS: Gradle refuses to pick between
-      # `lintCoreRelease` and `lintFullRelease` and fails at TASK SELECTION,
-      # before a single line compiles ("Task 'lintRelease' is ambiguous in
-      # root project 'Curio' and its subprojects"). Every task below is
-      # therefore spelled out per edition. The pairing is kept — each
-      # `lint<Flavor>Release` runs first, so the `assemble<Flavor>Release`
-      # beside it reuses that variant's compilation rather than redoing it.
+      # v465b — with the `edition` flavor dimension, `assembleRelease` is
+      # AMBIGUOUS: Gradle refuses to pick between `assembleCoreRelease` and
+      # `assembleFullRelease` and fails at TASK SELECTION, before a single
+      # line compiles ("Task 'lintRelease' is ambiguous in root project
+      # 'Curio' and its subprojects"). So the task is spelled out per edition.
       #
       # `continue-on-error` so the annotation and summary steps below still run
       # on a FAILED build — the compiler's own errors are exactly what the
       # Checks tab should be showing — and the outcome is re-failed by the gate
       # step after them.
-      - name: Validate, lint and build the release APK
+      - name: Validate the topics and build the release APK
         id: build
         continue-on-error: true
         env:
@@ -245,17 +279,29 @@ jobs:
             echo "Supabase project URL + publishable key were provided to the build."
           fi
           # v465e — ONE EDITION's tasks, from the matrix. `${{ matrix.cap }}` is
-          # `Core`/`Full` to match Gradle's own task capitalisation, and the two
-          # names are paired on purpose: `lint<Cap>Release` runs first so the
-          # `assemble<Cap>Release` beside it reuses that variant's compilation
-          # instead of redoing it (the v412 optimisation, kept per edition).
-          ./gradlew lint${{ matrix.cap }}Release validateTopics assemble${{ matrix.cap }}Release -PcurioAbiSplits=false --stacktrace 2>&1 \
+          # `Core`/`Full` to match Gradle's own task capitalisation. Each edition
+          # is named explicitly — the bare `assembleRelease` name is ambiguous
+          # under the flavor dimension and fails at task selection, so CI is the
+          # thing that proves BOTH editions build.
+          #
+          # v466 — NO `lint<Cap>Release` HERE. It was paired with the assemble on
+          # purpose, so the assemble could reuse the variant's compilation; that
+          # is why this runner took 17.6 minutes. Lint now has its own job, and
+          # the compile it needs happens there instead of at the end of a build
+          # that had already produced its APK. `validateTopics` stays: an empty
+          # topic catalog is the one failure that has already shipped an APK with
+          # no data (v412), and a build runner that does not check it is a build
+          # runner that will happily package the empty one.
+          ./gradlew validateTopics assemble${{ matrix.cap }}Release -PcurioAbiSplits=false --stacktrace 2>&1 \
             | tee gradle-build.log
 
-      # ── SURFACE 2: THE CHECKS TAB ──────────────────────────────────────────
-      # Every Kotlin diagnostic in the log becomes a real annotation, and the
-      # counts become outputs the summary and the report job reuse. Nothing here
-      # can fail the run: it is a reader of the log, not a check.
+      # ── SURFACE 2: THE CHECKS TAB ────────────────────────────────────────
+      # Every Kotlin diagnostic in the log becomes a real annotation. Nothing
+      # here can fail the run: it is a reader of the log, not a check.
+      #
+      # v466 — its `errors`/`warnings` step outputs are gone along with the lint
+      # totals step (nothing read them any more), but the annotations are the
+      # reason this step existed and they are untouched.
       - name: Publish compiler diagnostics as check annotations
         id: annotate
         if: always()
@@ -315,24 +361,11 @@ jobs:
           echo "signature=release keystore" >> "$GITHUB_OUTPUT"
           echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
 
-      - name: Read the lint totals
-        id: lint
-        if: always()
-        run: |
-          set -uo pipefail
-          # v412 — lint runs the RELEASE variant now (see the build step), so
-          # the report name moved with it; keep the old glob as a fallback.
-          report=$(ls app/build/reports/lint-results*.txt 2>/dev/null | head -1 || true)
-          if [ -z "$report" ]; then
-            echo "errors=0" >> "$GITHUB_OUTPUT"
-            echo "warnings=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          totals=$(grep -oE '[0-9]+ (errors?|warnings?)' "$report" | tail -2 | tr '\n' ' ' || true)
-          errors=$(printf '%s' "$totals" | grep -oE '[0-9]+ error' | grep -oE '[0-9]+' | head -1)
-          warnings=$(printf '%s' "$totals" | grep -oE '[0-9]+ warning' | grep -oE '[0-9]+' | head -1)
-          echo "errors=${errors:-0}" >> "$GITHUB_OUTPUT"
-          echo "warnings=${warnings:-0}" >> "$GITHUB_OUTPUT"
+      # v466 — "Read the lint totals" lived here. It read the lint report to
+      # publish `errors`/`warnings` step outputs, and BOTH of its readers are
+      # gone: the lint report is not on this runner any more, and the report job
+      # reads artifact rows rather than step outputs (v465e). Its work moved to
+      # the lint job, where the report actually exists.
 
       - name: Write the run summary
         id: summary
@@ -357,10 +390,13 @@ jobs:
           # compiler errors (see build-summary.sh's postmortem block).
           #
           # v465e — and the EDITION, which is what tells the script to read this
-          # runner's APK directory rather than every edition's, and what makes it
-          # write `ci-report/curio-<edition>.json` for the report job.
+          # runner's APK directory rather than every edition's.
+          #
+          # v466 — and the PHASE (`build`), which is what makes it write
+          # `ci-report/curio-<edition>-<phase>.json` and keep its Lint row from
+          # saying "no report" about a runner that was never asked to lint.
           chmod +x .github/scripts/run-report.py
-          .github/scripts/build-summary.sh "$signature" "$BUILD_OUTCOME" "${{ matrix.edition }}"
+          .github/scripts/build-summary.sh "$signature" "$BUILD_OUTCOME" "${{ matrix.edition }}" "build"
           echo "version=${version_name:-1.1.1} (${version_code:-20260922})" >> "$GITHUB_OUTPUT"
           echo "signature=${signature}" >> "$GITHUB_OUTPUT"
 
@@ -379,21 +415,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-      - name: Upload lint reports
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: curio-lint-reports-${{ matrix.edition }}-${{ github.run_number }}
-          path: |
-            app/build/reports/lint-results*.*
-            app/build/reports/lint/**/*.html
-            app/build/reports/lint/**/*.xml
-          # Lint reports are best-effort diagnostics; the Gradle step above
-          # remains authoritative for CI success/failure. Throwaway
-          # diagnostics — shrink to the minimum so artifact storage barely
-          # accumulates (matches the release-APK retention below).
-          if-no-files-found: ignore
-          retention-days: 1
+      # v466 — "Upload lint reports" moved to the lint job. There is no lint
+      # report on a build runner, so the step here had been uploading nothing
+      # (`if-no-files-found: ignore`) since the split.
 
       - name: Upload release APKs
         if: success()
@@ -410,17 +434,24 @@ jobs:
           # APKs attached to tag RELEASES (release.yml) stay permanent.
           retention-days: 1
 
-      # ── v465e — THIS EDITION'S ROW, FOR THE REPORT JOB ──────────────────
+      # ── v465e — THIS JOB'S ROW, FOR THE REPORT JOB ──────────────────────
       # Written by build-summary.sh above, even on a failed build, because
       # "which edition broke" is the first question a red run has to answer.
       # `if: always()` so the row exists whatever happened before it.
-      - name: Upload this edition's report row
+      #
+      # v466 — THE ARTIFACT NAME CARRIES THE PHASE, because there are four rows
+      # now and two of them come from the SAME edition. `curio-ci-report-core`
+      # from a build runner and from a lint runner would be one artifact name
+      # with two writers: upload-artifact would then either collide or merge them
+      # by luck of ordering, and the report would quote whichever landed second
+      # under a heading naming neither.
+      - name: Upload this job's report row
         id: report_row
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: curio-ci-report-${{ matrix.edition }}
-          path: ci-report/curio-${{ matrix.edition }}.json
+          name: curio-ci-report-${{ matrix.edition }}-build
+          path: ci-report/curio-${{ matrix.edition }}-build.json
           if-no-files-found: warn
           retention-days: 1
 
@@ -433,20 +464,200 @@ jobs:
             echo "> (a fork PR, or an unconfigured repository). A published release never falls back."
           } >> "$GITHUB_STEP_SUMMARY"
 
+  # ── PHASE 2 of 2: THE LINT RUNNER ───────────────────────────────────────
+  #
+  # v466 — LINT'S OWN JOB, AND THE WHOLE REASON THE RUN GETS FASTER.
+  #
+  # From the green run's log (see the header note): `lintReportCoreRelease` was
+  # ~400 of the ~1007 seconds one Gradle invocation took — 40% of the job — and
+  # it ran LAST, after the APK had already been built, signed and verified. It
+  # contributed nothing to the critical path and everything to the wall clock.
+  #
+  # Running it here, beside the build, turns the critical path from
+  # `build + lint` into `max(build, lint)`. Measured: ~9.0 minutes of build
+  # against ~9.7 minutes of lint, so the run lands near 10 minutes instead of
+  # 17.6 — about 43% off every push and PR, with the same APK and the same lint
+  # signal.
+  #
+  # ⚠️ WHAT THIS COSTS, stated plainly: four runners instead of two, and the
+  # Kotlin compile is done TWICE per edition. Lint needs the same compiled
+  # classes the build produces, and the two jobs run simultaneously — so neither
+  # can borrow the other's output, and neither can share a Gradle cache key
+  # (the action keys on the job context). That duplicated compile (~155s) is the
+  # price of not serialising the other ~400s.
+  #
+  # It lints the RELEASE variant only, matching what the build ships: a lint
+  # finding that only exists in a debug-only source set is not a finding about
+  # the artifact anyone installs.
+  lint:
+    name: Curio Android · ${{ matrix.edition }} · lint
+    runs-on: ubuntu-latest
+    strategy:
+      # Same reasoning as the build job: this job's whole job is proving both
+      # editions are clean, so a `core` finding must not cancel `full`. A warning
+      # is a warning in EVERY edition or it is not a warning about releasing.
+      fail-fast: false
+      matrix:
+        include:
+          - edition: core
+            cap: Core
+          - edition: full
+            cap: Full
+    # ~10 minutes observed, so 45 is pure headroom against a runner that is
+    # slow rather than against a task that is unbounded. Not 60: this job has no
+    # R8 and no 48 MB native AAR to process, and a ceiling shared with the
+    # build would hide exactly the regression this job could introduce.
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out Curio
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # THREE DELIBERATE DIFFERENCES FROM THE BUILD JOB'S SETUP, and each one is
+      # the member's "faster with cache or something" answered honestly rather
+      # than decoratively:
+      #
+      #  * `cache-read-only: true` — the action's teardown is what uploads the
+      #    Gradle user home, and on the green run that teardown was 24.6s of a
+      #    1056s job. THIS job does not need to be the one that saves the cache:
+      #    both editions' build runners save it, and this runner's restored
+      #    entry is the same `~/.gradle/caches`. Read-only means it still gets
+      #    the speed-up and pays none of the upload. (It also removes a
+      #    concurrent writer racing the two build runners' saves.)
+      #  * NO keystore decode — lint does not assemble, sign or verify an APK,
+      #    so fetching and decoding the release keystore here would be three
+      #    seconds and a secret touched for nothing.
+      #  * NO topic-catalog check — that belongs to the thing that bundles the
+      #    catalogs into the APK, and running it twice would report the same
+      #    fact twice under two headings.
+      - name: Set up Gradle (restore only — the build runners save)
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Lint the release variant
+        id: lint_build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          # `lint<Cap>Release` runs the variant's compile as a dependency, which
+          # is the ~155s duplication this job accepts in exchange for lifting
+          # the ~400s lint phase off the build runner's tail.
+          ./gradlew lint${{ matrix.cap }}Release --stacktrace 2>&1 | tee gradle-lint.log
+
+      # The Kotlin diagnostics from THIS job's compile, as annotations. The build
+      # runner annotates the same source, so a compile error can appear on both
+      # jobs' Checks entries — which is honest (both really did fail to compile
+      # it) and far better than the alternative of this runner's log being
+      # readable only by downloading an artifact.
+      - name: Publish compiler diagnostics as check annotations
+        if: always()
+        run: |
+          set -uo pipefail
+          chmod +x .github/scripts/annotate-gradle.sh
+          .github/scripts/annotate-gradle.sh gradle-lint.log
+
+      # v466 — AND LINT'S OWN FINDINGS, which are not compiler diagnostics and
+      # would otherwise be invisible in the Checks tab. Without this the new job
+      # would be strictly WORSE to read than the old one on the runs it exists
+      # for: a lint error fails the job, and the tab would show nothing about
+      # which file or which rule.
+      - name: Publish lint findings as check annotations
+        if: always()
+        run: |
+          set -uo pipefail
+          chmod +x .github/scripts/annotate-lint.py
+          python3 .github/scripts/annotate-lint.py
+
+      - name: Write this job's summary
+        if: always()
+        env:
+          LINT_OUTCOME: ${{ steps.lint_build.outcome }}
+          # The postmortem section greps the Gradle log for `> Task … FAILED`
+          # and `e: file://…`, so it has to be told WHICH log this runner wrote.
+          # Without this a red lint run would show an empty "Failed tasks"
+          # section — the one page a red run is read for — because the script
+          # would be grepping the build runner's filename, which does not exist
+          # here.
+          GRADLE_LOG: gradle-lint.log
+        run: |
+          set -uo pipefail
+          chmod +x .github/scripts/build-summary.sh
+          # `signature` is "not applicable" rather than unknown: this runner has
+          # no keystore and never had one, and build-summary.sh prints the Lint
+          # count instead of the signing/APK rows for a non-build phase.
+          .github/scripts/build-summary.sh "not applicable (lint runner)" "$LINT_OUTCOME" "${{ matrix.edition }}" "lint"
+
+      - name: Fail the run when lint failed
+        if: steps.lint_build.outcome == 'failure'
+        run: |
+          echo "::error::lint${{ matrix.cap }}Release failed — see the annotations above and the uploaded log."
+          exit 1
+
+      - name: Upload the lint log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-lint-log-${{ matrix.edition }}-${{ github.run_number }}
+          path: gradle-lint.log
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-lint-reports-${{ matrix.edition }}-${{ github.run_number }}
+          path: |
+            app/build/reports/lint-results*.*
+            app/build/reports/lint/**/*.html
+            app/build/reports/lint/**/*.xml
+          # Lint reports are best-effort diagnostics; the Gradle step above
+          # remains authoritative for CI success/failure. Throwaway
+          # diagnostics — shrink to the minimum so artifact storage barely
+          # accumulates (matches the release-APK retention).
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload this job's report row
+        id: report_row
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-ci-report-${{ matrix.edition }}-lint
+          path: ci-report/curio-${{ matrix.edition }}-lint.json
+          if-no-files-found: warn
+          retention-days: 1
+
   # ── SURFACE 3 + 4: THE REPORT JOB AND THE PULL REQUEST ─────────────────────
   #
-  # A second job so the run's own list carries a "Curio CI report" entry: it
-  # needs nothing from the machines that built the APKs, only the rows they
+  # A third job so the run's own list carries a "Curio CI report" entry: it
+  # needs nothing from the machines that built or linted, only the rows they
   # published, which is why it is cheap. `if: always()` so a failed build still
   # produces the reader-facing summary.
   #
-  # v465e — ONE COLUMN PER EDITION, FROM ARTIFACTS. `verify` is now a matrix, so
-  # there is no single job whose outputs a report could quote (see the note on
-  # that job's missing `outputs:` block, and on the steps below).
+  # v465e — ONE COLUMN PER JOB, FROM ARTIFACTS. `build` and `lint` are both
+  # matrices, so there is no single job whose outputs a report could quote (see
+  # the note on those jobs' missing `outputs:` blocks, and on the steps below).
+  #
+  # v466 — FOUR COLUMNS: two editions × build|lint. Both needs are listed, and
+  # the `if:` guards on `needs.build.result` alone, because that is the answer a
+  # reader came for — a lint finding is interesting, a build that did not happen
+  # is the whole story. `needs.lint.result` is still consulted by the rows
+  # themselves: a cancelled lint job simply leaves its column as a named gap.
   report:
     name: Curio CI report
-    needs: verify
-    if: always() && needs.verify.result != 'cancelled'
+    needs: [build, lint]
+    if: always() && needs.build.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -456,14 +667,21 @@ jobs:
     steps:
       # v465e — THIS JOB IS A READER OF ARTIFACTS NOW, NOT OF STEP OUTPUTS.
       #
-      # `verify` is a MATRIX (one parallel job per edition), and
-      # `needs.<matrixed job>.outputs` is an aggregation whose winner GitHub
-      # does not specify — a roll-up built on it would print ONE edition's
-      # numbers under a heading that implied both, which is worse than printing
-      # nothing when the only question this check answers is "did BOTH editions
-      # build?". So each edition writes its own row to `ci-report/` and uploads
-      # it, and `run-report.py` merges whatever arrived. Do not reintroduce
-      # `needs.verify.outputs.*` here.
+      # `build` AND `lint` are both MATRICES (one parallel job per edition,
+      # per phase), and `needs.<matrixed job>.outputs` is an aggregation whose
+      # winner GitHub does not specify — a roll-up built on it would print ONE
+      # job's numbers under a heading that implied all four, which is worse than
+      # printing nothing when the questions this check answers are "did BOTH
+      # editions build?" and "is either of them dirty?". So each job writes its
+      # own row to `ci-report/` and uploads it, and `run-report.py` merges
+      # whatever arrived. Do not reintroduce `needs.build.outputs.*` here.
+      #
+      # v466 — THE PATTERN NOW MATCHES FOUR ARTIFACTS, one per (edition, phase).
+      # `merge-multiple` drops all four JSONs into one directory, which is safe
+      # precisely because the FILE NAME carries both axes: a collision would
+      # mean two jobs claiming the same (edition, phase), which cannot happen
+      # without a matrix bug that this would then surface as one row silently
+      # replacing another. The names are distinct by construction.
       #
       # Checkout is needed because the report is a script now, not inline shell
       # (it is called twice — once for the summary, once for the PR body — and a
@@ -472,10 +690,10 @@ jobs:
         uses: actions/checkout@v5
 
       # `if: always()` and a TOLERANT reader: the report must still appear when
-      # one edition's job never got as far as uploading its row (it died before
-      # its summary step). That absence IS the finding — run-report.py names the
-      # edition instead of leaving a column quietly empty.
-      - name: Collect each edition's row
+      # a job never got as far as uploading its row (it died before its summary
+      # step). That absence IS the finding — run-report.py names the
+      # (edition, phase) instead of leaving a column quietly empty.
+      - name: Collect every job's row
         if: always()
         uses: actions/download-artifact@v6
         with:
