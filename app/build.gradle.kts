@@ -245,6 +245,57 @@ android {
         androidResources.localeFilters.add("en")
     }
 
+    // ── v465 — TWO EDITIONS: CORE AND FULL ─────────────────────────────────
+    //
+    // The member: *"lets do a double build, one with advance feature focising on
+    // online and all, one smaller with the core curio features"*. Asked where the
+    // line falls, their answer was narrow and deliberate: the CORE edition drops
+    // **only the two things that are large BINARY rather than large FEATURE** —
+    // the on-device speech-to-text stack (Vosk: ~19 MB of arm `.so` in a release
+    // APK) and the neural read-aloud voice packs that will follow it — and keeps
+    // everything else, online layer included. The FULL edition keeps both, and
+    // takes back the ISBN scanner (CameraX + ML Kit) the app gave up in v458 now
+    // that size is no longer the thing being optimised for.
+    //
+    // ── TWO PACKAGE NAMES, SIDE BY SIDE ────────────────────────────────────
+    //
+    // On the member's own instruction (*"two package names, side by side"*): an
+    // edition is an app the member CHOOSES, not a variant that overwrites the
+    // other. `com.curio.app` stays the core edition — the identity that already
+    // exists, so an existing install is never renamed (and never opens as a
+    // different app with a different data directory) — and `com.curio.app.full`
+    // is the full one. Both are signed by the SAME keystore: a signing key is not
+    // bound to a package name, and `signingConfigs.release` (below) already
+    // applies to every variant, so no new CI secret is involved.
+    //
+    // ⚠️ THE ONE THING THAT DOES BITE: a credential restricted by PACKAGE NAME
+    // (a Google Books key locked to a package + SHA-1) rejects the second package
+    // until that pair is added to the key's restrictions in its console. Plain
+    // keys (TMDB, OMDb, Comic Vine, LibraryThing, Spotify) do not care, and
+    // Supabase's anon key is the same project key for both.
+    flavorDimensions += "edition"
+
+    productFlavors {
+        create("core") {
+            dimension = "edition"
+            applicationId = "com.curio.app"
+            // The edition's own name, and it is not decoration: every published
+            // APK is named `Curio-<version>-<code>-<edition>-<abi>-...`, and the in-app
+            // updater matches THIS token to pick the right file out of a release's
+            // assets (see UpdateChecker.parseApkAsset). Both editions publish from the
+            // same tag, so an updater that took "the first .apk" would hand a member
+            // the other edition — an install that fails on the last tap.
+            buildConfigField("String", "EDITION", "\"core\"")
+            buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "false")
+        }
+        create("full") {
+            dimension = "edition"
+            applicationId = "com.curio.app.full"
+            buildConfigField("String", "EDITION", "\"full\"")
+            buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "true")
+        }
+    }
+
     signingConfigs {
         // Only create the release signing config when ALL four env vars are
         // present and non-empty. When any are missing (e.g. local dev), we skip — the
@@ -405,7 +456,16 @@ dependencies {
 
     // Vosk — on-device speech-to-text for pre-recorded sound bites (offline
     // transcription in the entry detail page; model downloaded in Settings).
-    implementation(libs.com.alphacephei.vosk.android)
+    //
+    // ⚠️ v465 — FULL EDITION ONLY (see the edition block above). This is the
+    // core edition's single largest binary cost (~19 MB of arm `.so` in the
+    // release APK) and the member's own line for the split is that the core
+    // edition drops it and nothing else. That is why the implementation moved to
+    // `app/src/full/java/.../OfflineTranscriber.kt` with an identical-API twin in
+    // `app/src/core/java/.../OfflineTranscriber.kt`: `main` is compiled for BOTH
+    // editions, so no file under `main` may import `org.vosk.*`. Any future
+    // Vosk-based work goes in `src/full`, never in `main`.
+    "fullImplementation"(libs.com.alphacephei.vosk.android)
 
     // v458 — the test scaffolding is gone with the tests it never had: there is
     // no source in `app/src/test` and no `androidTest` source set at all, so

@@ -15,7 +15,9 @@ jobs:
   release:
     name: Build and publish signed release APKs
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # v465 — 45 minutes, not 30: TWO editions ship from every tag now (core +
+    # full), so this job compiles and packages twice what it did before.
+    timeout-minutes: 45
     env:
       # The tag (e.g. "v1.2.3") drives the build's versionName (tag minus the
       # leading "v"). Consumed by app/build.gradle.kts at configuration time,
@@ -133,9 +135,15 @@ jobs:
       - name: Verify release APKs and signatures
         run: |
           set -euo pipefail
-          # ABI splits + universal APK all live here (see app/build.gradle.kts).
+          # ABI splits + universal APK all live here (see app/build.gradle.kts),
+          # now under ONE DIRECTORY PER EDITION (v465): the `edition` flavor
+          # dimension moved the outputs from `apk/release/` to
+          # `apk/<flavor>/release/`. A glob that did not learn the extra level
+          # matches nothing — and would fail this step with "No signed release
+          # APK was produced", which reads as a signing fault rather than a path
+          # fault.
           shopt -s nullglob
-          apks=(app/build/outputs/apk/release/*.apk)
+          apks=(app/build/outputs/apk/*/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
             echo "::error::No signed release APK was produced."
             exit 1
@@ -177,7 +185,10 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          cd app/build/outputs/apk/release
+          # cd to the PARENT of the per-edition directories (v465). The APKs are at
+          # `apk/<flavor>/release/<apk>`, so this step walks `*/release/*.apk` and
+          # reads the edition from the first path segment.
+          cd app/build/outputs/apk
           # VERSION is "versionName:versionCode" from the printReleaseVersion task.
           vname="${VERSION%%:*}"
           vcode="${VERSION##*:}"
@@ -205,17 +216,30 @@ jobs:
           {
             echo "## Curio $vname ($vcode)"
             echo ""
+            echo "**Two editions ship in this release, and every file name says which one it is.**"
+            echo ""
+            echo "- \`core\` — **Curio**, the smaller app: everything except the on-device offline voice-to-text stack and the neural read-aloud voice packs."
+            echo "- \`full\` — **Curio Full**: those two as well, plus the ISBN barcode scanner."
+            echo ""
+            echo "They install **side by side** and are two separate apps with separate data (\`com.curio.app\` and \`com.curio.app.full\`) — installing one never replaces the other."
+            echo ""
             echo "All APKs require **Android $min_android (API 26) or newer**. Pick the one that matches your device's CPU — when in doubt, use the **universal** APK."
             echo ""
             echo "| File | Best for | Size |"
             echo "|---|---|---|"
           } >> "$body"
 
-          for apk in *.apk; do
-            base="${apk%.apk}"
+          for apk in */release/*.apk; do
+            # The edition is the first path segment, the ABI the tail of AGP's own
+            # name (`app-<flavor>-<abi>-release.apk`), so the published file name
+            # carries BOTH and a member can never install the wrong edition by
+            # mistaking one for the other.
+            flavor="${apk%%/*}"
+            base="$(basename "${apk%.apk}")"
             abi="${base#app-}"
+            abi="${abi#${flavor}-}"
             abi="${abi%-release}"
-            new_name="Curio-${vname}-${vcode}-${abi}-Android${min_android}+.apk"
+            new_name="Curio-${vname}-${vcode}-${flavor}-${abi}-Android${min_android}+.apk"
             size=$(du -h "$apk" | cut -f1)
             case "$abi" in
               universal)   desc="Every Android $min_android+ device — the safe default (largest download)" ;;
@@ -226,7 +250,9 @@ jobs:
               *)           desc="See project README" ;;
             esac
             echo "| \`$new_name\` | $desc | ~$size |" >> "$body"
-            mv "$apk" "$new_name"
+            # Renamed IN PLACE, so the files stay beside their edition's directory
+            # and the publish step's glob below still finds them.
+            mv "$apk" "$(dirname "$apk")/$new_name"
           done
 
           # Hard guard: every expected split APK must exist after renaming, so a
@@ -235,11 +261,20 @@ jobs:
           # v204 — the release buildType's ndk abiFilters restrict native libs
           # to armeabi-v7a + arm64-v8a (x86/x86_64 are emulator-only legacy),
           # so the release emits ONLY the two arm splits + universal.
-          for expected in universal armeabi-v7a arm64-v8a; do
-            if [ ! -f "Curio-${vname}-${vcode}-${expected}-Android${min_android}+.apk" ]; then
-              echo "::error::Expected release APK missing after rename: $expected"
-              exit 1
-            fi
+          #
+          # v465 — AND THE GUARD IS PER EDITION. The two flavor names are written
+          # out here on purpose, exactly as the ABI list above is: this is the
+          # belt-and-braces check that a published release carries BOTH editions,
+          # so it must fail when one of them silently stops being built rather
+          # than read whichever names happen to be present. Adding a third
+          # edition means adding it here too.
+          for flavor in core full; do
+            for expected in universal armeabi-v7a arm64-v8a; do
+              if [ ! -f "${flavor}/release/Curio-${vname}-${vcode}-${flavor}-${expected}-Android${min_android}+.apk" ]; then
+                echo "::error::Expected release APK missing after rename: $flavor / $expected"
+                exit 1
+              fi
+            done
           done
 
           echo "" >> "$body"
@@ -272,5 +307,7 @@ jobs:
           # auto-generated release notes (commit list since the last tag).
           body_path: release-body.md
           generate_release_notes: true
-          files: app/build/outputs/apk/release/*.apk
+          # v465 — one directory per edition now (apk/<flavor>/release/); the
+          # rename step above left the renamed files beside their edition.
+          files: app/build/outputs/apk/*/release/*.apk
           fail_on_unmatched_files: true

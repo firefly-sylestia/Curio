@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  v465 — THE FULL EDITION SAYS ITS NAME.
+
+  The two editions install SIDE BY SIDE (the member's own choice: "two package
+  names, side by side"), which means the launcher, the app switcher, the
+  notification shade and every "Open with" row show BOTH of them at once. Two
+  entries both reading "Curio" would be a member's guess about which one they are
+  opening, so the full edition overrides `app_name` — a flavor's resources win
+  over `main`'s, so this one file is the whole change and `main` keeps "Curio".
+
+  The launcher keeps the same icon on purpose: it is the same app with more in
+  it, not a different app.
+-->
+<resources>
+    <string name="app_name">Curio Full</string>
+</resources>

@@ -43,7 +43,10 @@ jobs:
   verify:
     name: Curio Android (validate · lint · release)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # v465 — 45 minutes, not 30: TWO editions are compiled and linted now (core
+    # + full). `assembleRelease` and `lintRelease` both cover every flavor, which
+    # is what makes CI the thing that proves BOTH editions still build.
+    timeout-minutes: 45
 
     outputs:
       build_outcome: ${{ steps.build.outcome }}
@@ -228,7 +231,11 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          apks=(app/build/outputs/apk/release/*.apk)
+          # v465 — one directory per edition: the `edition` flavor dimension
+          # moved the outputs from `apk/release/` to `apk/<flavor>/release/`, so
+          # the extra level is part of the glob now. Every APK found here is
+          # signature-checked, so both editions are verified, not just the first.
+          apks=(app/build/outputs/apk/*/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
             echo "::error::No signed release APK was produced."
             exit 1
@@ -247,9 +254,18 @@ jobs:
               exit 1
             fi
           done
+          # v465 — two editions build now, so the summary NAMES EVERY APK instead
+          # of the first one. Size and SHA-256 stay the first of them (the core
+          # edition's, since `core` sorts before `full` in the glob) and the row
+          # says so rather than implying the number covers the whole set.
           apk="${apks[0]}"
-          echo "name=$(basename "$apk")" >> "$GITHUB_OUTPUT"
-          echo "size=$(du -h "$apk" | cut -f1)" >> "$GITHUB_OUTPUT"
+          names=""
+          for one in "${apks[@]}"; do
+            if [ -n "$names" ]; then names="$names, "; fi
+            names="$names$(basename "$one")"
+          done
+          echo "name=${names}" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$apk" | cut -f1) (first of ${#apks[@]})" >> "$GITHUB_OUTPUT"
           echo "sha=$(sha256sum "$apk" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "signature=release keystore" >> "$GITHUB_OUTPUT"
           echo "Verified ${#apks[@]} release APK(s) — none signed with the debug key."
@@ -334,7 +350,8 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: curio-pr-release-apks-${{ github.run_number }}
-          path: app/build/outputs/apk/release/*.apk
+          # v465 — one directory per edition (apk/<flavor>/release/).
+          path: app/build/outputs/apk/*/release/*.apk
           if-no-files-found: error
           # v26 — CI PR/push APKs are throwaway test builds: shrink to the
           # minimum so artifact storage barely accumulates. The official

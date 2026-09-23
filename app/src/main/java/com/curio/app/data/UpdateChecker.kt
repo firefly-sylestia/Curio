@@ -184,20 +184,39 @@ object UpdateChecker {
     }
 
     /**
-     * Finds the release's APK asset — the first `.apk` in the GitHub
-     * release's `assets` array. The release workflow uploads the signed
-     * release APK (from the `apk/release` output dir) to every release, so
-     * this is the direct download used by the in-app updater.
+     * Finds the release's APK asset — **this EDITION'S** APK, not merely the
+     * first `.apk` in the GitHub release's `assets` array.
+     *
+     * v465 — Curio ships TWO editions from every tag (core and full), so "the
+     * first `.apk`" stopped being an answer: GitHub's asset order is its own, and
+     * handing a member the other edition's file means an install that fails at the
+     * very last step with "App not installed" — the worst possible moment to find
+     * out the file was the wrong one. The release workflow names every published
+     * APK `Curio-<version>-<code>-<edition>-<abi>-Android8.0+.apk` (see
+     * `.github/workflows/release.yml`), so the edition is a TOKEN IN THE NAME and
+     * this picks the asset that carries [BuildConfig.EDITION].
+     *
+     * THE FALLBACK IS LOAD-BEARING, NOT SLOPPY: releases published BEFORE the
+     * split carry no edition token at all (there was only ever one APK), and an
+     * existing install must still be able to update from them — so when nothing
+     * matches the token, the first `.apk` is used, exactly as it always was.
      */
     private fun parseApkAsset(assets: JSONArray?): String? {
         if (assets == null) return null
+        val edition = BuildConfig.EDITION
+        var fallback: String? = null
         for (i in 0 until assets.length()) {
             val asset = assets.optJSONObject(i) ?: continue
-            if (asset.optString("name").endsWith(".apk", ignoreCase = true)) {
-                return asset.optString("browser_download_url").takeIf { it.isNotBlank() }
+            val name = asset.optString("name")
+            if (!name.endsWith(".apk", ignoreCase = true)) continue
+            val url = asset.optString("browser_download_url").takeIf { it.isNotBlank() }
+                ?: continue
+            if (edition.isNotBlank() && name.contains("-$edition-", ignoreCase = true)) {
+                return url
             }
+            if (fallback == null) fallback = url
         }
-        return null
+        return fallback
     }
 
     /**

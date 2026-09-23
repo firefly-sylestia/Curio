@@ -61,17 +61,29 @@ PY
   )
 fi
 
-# ── the APK this run produced ───────────────────────────────────────────────
+# ── the APKs this run produced ──────────────────────────────────────────────
+#
+# v465 — ONE DIRECTORY PER EDITION. The `edition` flavor dimension moved these
+# from `apk/release/` to `apk/<flavor>/release/`, so the glob carries the extra
+# level. The table names EVERY APK (both editions build on a push) and reports
+# the size and hash of the first — the core edition's universal, since `core`
+# sorts before `full` — with the row saying so, because one number standing in
+# for two different files is how a summary starts lying.
 apk_name="—"
 apk_size="—"
 apk_sha="—"
 shopt -s nullglob
-apks=(app/build/outputs/apk/release/*.apk)
+apks=(app/build/outputs/apk/*/release/*.apk)
 shopt -u nullglob
 if [ "${#apks[@]}" -gt 0 ]; then
   apk="${apks[0]}"
-  apk_name="$(basename "$apk")"
-  apk_size="$(du -h "$apk" | cut -f1)"
+  names=""
+  for one in "${apks[@]}"; do
+    if [ -n "$names" ]; then names="$names, "; fi
+    names="$names$(basename "$one")"
+  done
+  apk_name="$names"
+  apk_size="$(du -h "$apk" | cut -f1) (first of ${#apks[@]})"
   apk_sha="$(sha256sum "$apk" | cut -d' ' -f1)"
 fi
 

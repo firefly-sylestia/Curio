@@ -90,6 +90,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioQuality
 import com.curio.app.data.AudioQualitySettings
@@ -1575,10 +1576,23 @@ private fun RecordingSection(highlightKey: String? = null) {
                 showQualityDialog = true
             }
         }
-        SettingsOptionDivider()
-        SettingsRowPulse(highlightKey == "recording-offline-model") {
-            SettingsOptionRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
-                showModelDialog = true
+        // ── v465 — AND THE OFFLINE MODEL IS THE FULL EDITION'S ROW ─────────
+        //
+        // The CORE edition ships no Vosk and offers no models, so this row's
+        // picker would be a door onto an empty room — and the member's own line
+        // for that edition is that the offline stack is what it does without.
+        // Everything ELSE built on the catalog closes by itself (the core
+        // edition's `VoskModels.CATALOG` is empty, so `byId` finds nothing,
+        // `isDownloaded` is false, and the entry detail page's Transcribe
+        // affordance — drawn only when a model IS downloaded — never appears; see
+        // the core twin of `OfflineTranscriber`). This row is the one door that
+        // would still open onto nothing, so it wears the edition flag.
+        if (BuildConfig.EDITION_OFFLINE_TRANSCRIPTION) {
+            SettingsOptionDivider()
+            SettingsRowPulse(highlightKey == "recording-offline-model") {
+                SettingsOptionRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
+                    showModelDialog = true
+                }
             }
         }
     }

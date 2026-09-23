@@ -1,4 +1,5 @@
 ADD:
+- Curio ships in two editions that install side by side: **Curio** (the smaller app) and **Curio Full**. Full carries the on-device offline voice-to-text models; Curio keeps everything else and is the lighter download. An existing install stays the app it was, so a member who never chooses keeps exactly what they have.
 - Books: a book with a document opens straight into the reader — tapping its card used to land on the book's page first, so the page in the middle of a reader and their own reading is gone (a book with no file still opens its page, which is where a file gets attached).
 - Books: hold a book on the shelf and it offers its own actions — Open in reader, Pin to Home, and Remove — instead of the removal being the only thing a hold could say.
 - Home: pin a book to the shelf row and it leads the row wearing a small pin, so the book you are actually reading is always the first chip; the shelf shows the same mark, because that is where the pin is set.
