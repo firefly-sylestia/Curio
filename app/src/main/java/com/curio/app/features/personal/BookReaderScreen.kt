@@ -167,6 +167,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
+import com.curio.app.data.NeuralSpeaker
+import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.ReaderMarkEntity
 import com.curio.app.data.ReaderMarkKind
@@ -1153,6 +1155,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     DisposableEffect(bookId, document) {
         onDispose {
             ReaderSpeaker.release()
+            // v465c — a downloaded pack's model is the other thing that must not
+            // outlive the reader: it holds onnxruntime's memory and, for Kokoro,
+            // hundreds of megabytes of it. Released on exactly the same event as
+            // the system engine, so the two voices have one lifetime rule.
+            NeuralSpeaker.release()
         }
     }
     val startSpeaking = {
@@ -1254,10 +1261,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 // sentence in the block already on screen must not scroll the page
                 // out from under the member's eye.
                 if (sentence.block != liveTextBlock) jumpToBlock(sentence.block)
-                ReaderSpeaker.say(
+                sayAloud(
+                    context = context,
                     text = sentence.text,
-                    speed = ReaderLook.speakSpeed,
-                    voiceName = ReaderLook.speakVoice
+                    speed = ReaderLook.speakSpeed
                 ) {
                     // THE END OF THE BOOK IS THE ONLY THING THAT STOPS IT. There is
                     // no next sentence to move to, and an engine cannot be asked to
@@ -1295,10 +1302,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                 } else {
                     jumpToPage(page)
-                    ReaderSpeaker.say(
+                    sayAloud(
+                        context = context,
                         text = said,
-                        speed = ReaderLook.speakSpeed,
-                        voiceName = ReaderLook.speakVoice
+                        speed = ReaderLook.speakSpeed
                     ) {
                         if (after >= loaded.pageCount) {
                             voiceOn = false
@@ -1575,6 +1582,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     voiceOn -> {
                         voicePaused = true
                         ReaderSpeaker.stop()
+                        // v465c — and the neural voice, for the same reason: a
+                        // pause that only silenced one of the two engines would
+                        // be a pause that did not pause.
+                        NeuralSpeaker.stop()
                     }
                     else -> startSpeaking()
                 }
@@ -7500,6 +7511,72 @@ private fun ReaderDictionaryChip(
 }
 
 /** One sentence of [passage], split the way a reader reads them. Compiled once. */
+/**
+ * ── v465c — WHICH VOICE THE READER ACTUALLY USES ────────────────────────────
+ *
+ * [ReaderLook.speakEngine] has always held an Android speech-engine *package*
+ * name, and `""` has always meant "the phone's own". A downloaded voice pack is
+ * neither — it is Curio's own runtime, not a service — so it is named with a
+ * sentinel that a package name can never be: every real package has at least one
+ * dot and starts with a letter, and `"curio:"` is not a legal Android package
+ * prefix. That keeps ONE stored field as the whole choice, so every existing
+ * install's setting keeps meaning exactly what it meant.
+ */
+internal object ReaderEngine {
+    /** The phone's own engine — the v440 default, and the empty package. */
+    const val PHONE = ""
+
+    /** A downloaded sherpa-onnx voice pack, chosen by its PACK ID in `speakVoice`. */
+    const val NEURAL = "curio:neural"
+
+    /** The hidden Dev-page Edge TTS experiment. */
+    const val EDGE = "curio:edge"
+}
+
+/**
+ * Says [text] in whatever voice the member chose, and calls [onDone] when it is
+ * finished — the one place the reader has to ask for speech.
+ *
+ * **The fallback is the point.** A member can select a voice pack and then delete
+ * it (or clear Curio's storage, or move to a phone where the 305 MB Kokoro pack
+ * was never downloaded), and the stored setting survives all three. So a neural
+ * choice that cannot be honoured falls back to the phone's own voice rather than
+ * to silence: a reading session that quietly says nothing is far worse than one
+ * read in the wrong voice, and it looks like a hang.
+ *
+ * The pack is loaded HERE, on the first sentence, rather than when the member
+ * taps play — loading a 305 MB Kokoro model takes seconds, and spending them
+ * before the button responds would read as a dead control. [NeuralSpeaker.prepare]
+ * is idempotent, so only the first sentence of a session pays for it.
+ */
+private suspend fun sayAloud(
+    context: Context,
+    text: String,
+    speed: Float,
+    onDone: () -> Unit
+) {
+    if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+        val pack = NeuralVoicePacks.byId(ReaderLook.speakVoice)
+        if (pack != null) {
+            val ready = NeuralSpeaker.isReady || withContext(Dispatchers.IO) {
+                NeuralSpeaker.prepare(context, pack)
+            }
+            if (ready) {
+                // Speaker 0 of the pack. Piper narrates with one voice and ignores
+                // it; Kokoro's default (af_alloy) is a neutral reader that suits a
+                // book, and the rest of its eleven remain reachable as the pack's
+                // voice list grows into its own picker.
+                NeuralSpeaker.say(text, speed, 0, onDone)
+                return
+            }
+        }
+        ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
+        ReaderSpeaker.say(text, speed, "", onDone)
+        return
+    }
+    ReaderSpeaker.say(text, speed, ReaderLook.speakVoice, onDone)
+}
+
 private val ReaderSentenceSplit = Regex("(?<=[.!?])\\s+")
 
 /** What a word looks like inside a sentence, for the context line's own search. */

@@ -289,6 +289,7 @@ android {
             buildConfigField("String", "EDITION", "\"core\"")
             buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "false")
             buildConfigField("boolean", "EDITION_ISBN_SCANNER", "false")
+            buildConfigField("boolean", "EDITION_NEURAL_VOICES", "false")
         }
         create("full") {
             dimension = "edition"
@@ -296,6 +297,7 @@ android {
             buildConfigField("String", "EDITION", "\"full\"")
             buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "true")
             buildConfigField("boolean", "EDITION_ISBN_SCANNER", "true")
+            buildConfigField("boolean", "EDITION_NEURAL_VOICES", "true")
         }
     }
 
@@ -469,6 +471,27 @@ dependencies {
     // editions, so no file under `main` may import `org.vosk.*`. Any future
     // Vosk-based work goes in `src/full`, never in `main`.
     "fullImplementation"(libs.com.alphacephei.vosk.android)
+
+    // ── v465c — THE NEURAL READ-ALOUD VOICE PACKS, FULL EDITION ONLY ──────
+    // The vendored runtime, as a LOCAL AAR: sherpa-onnx publishes
+    // `sherpa-onnx-1.13.8.aar` (~48 MB) from its own GitHub release and has NO
+    // official Maven Central coordinate — the Maven hits are third-party
+    // repackages — so the binary is committed under `app/libs/` rather than
+    // resolved. It carries all four ABIs' `.so` files on purpose: the RELEASE
+    // build's `ndk.abiFilters` (see the release buildType) keeps only the two
+    // arm ones in the APK, while debug builds keep all four so an x86_64
+    // emulator can still exercise the neural voice path.
+    //
+    // ⚠️ THIS AAR NEEDS `app/proguard-rules.pro`, NOT JUST A DEPENDENCY LINE.
+    // The native side looks its config up by FIELD NAME (`GetFieldID(...,
+    // "vits", ...)`) — verified by reading the literal strings out of
+    // libsherpa-onnx-jni.so — so R8 renaming those fields would leave a release
+    // APK whose voice silently does nothing while the debug build worked. The
+    // keep rules are already written there; do not remove them.
+    "fullImplementation"(files("libs/sherpa-onnx-1.13.8.aar"))
+    // BZIP2 + TAR, and it is not optional: every sherpa-onnx TTS pack is a
+    // `.tar.bz2` and Android cannot decompress bzip2 (see libs.versions.toml).
+    "fullImplementation"(libs.org.apache.commons.commons.compress)
 
     // ── v465b — THE ISBN SCANNER'S LENS STACK, FULL EDITION ONLY ──────────
     // Five dependencies, and every one of them is FULL-only for the same reason

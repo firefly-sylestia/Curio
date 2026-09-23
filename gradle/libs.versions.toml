@@ -67,6 +67,14 @@ vosk = "0.3.47"
 # The versions are the pair that shipped with the scanner before v458 removed it.
 mlkitBarcode = "17.3.0"
 cameraX = "1.4.2"
+# v465c — Apache Commons Compress, for the FULL edition's neural voice packs.
+# It is here because of ONE unavoidable fact: every sherpa-onnx TTS model is
+# published as `.tar.bz2` (the Piper pack is 64 MB, Kokoro 305 MB), and neither
+# java.util.zip nor the Android framework can decompress BZIP2 — so the pack
+# downloader would otherwise have to hand-roll a bzip2 decoder on the device.
+# This one library supplies both halves of the job: `BZip2CompressorInputStream`
+# and `TarArchiveInputStream`.
+commonsCompress = "1.28.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -145,6 +153,10 @@ backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 # Compose Multiplatform material3 (desktop port) — declared directly because
 # the `compose.material3` String accessor is deprecated in CMP 1.11+.
 compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3" }
+
+# v465c — Apache Commons Compress (BZIP2 + TAR), FULL edition only: the neural
+# voice packs ship as .tar.bz2 and Android cannot decompress bzip2 at all.
+org-apache-commons-commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
 
 # v465b — the ISBN scanner's lens stack, FULL edition only (see app/build.gradle.kts).
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }

@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.BuildConfig
+import com.curio.app.data.NeuralSpeaker
+import com.curio.app.data.NeuralVoiceDownloads
+import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -422,7 +427,7 @@ internal fun ReaderSettingsScreen(
                 // Re-asked whenever a picker has been open, so an engine installed WHILE
                 // this page was open appears without the member having to leave it.
                 LaunchedEffect(enginePicker, picker) {
-                    engines = ReaderSpeaker.engines(context)
+                    engines = readerEngines(context)
                 }
                 val engineLabel = engines.firstOrNull { it.first == ReaderLook.speakEngine }?.second
                     ?: if (ReaderLook.speakEngine.isBlank()) "The phone's own"
@@ -519,18 +524,25 @@ internal fun ReaderSettingsScreen(
                 // [ReaderLook.speakVoice]).
                 Surface(
                     onClick = {
-                        // v464 — the list is filled from the ENGINE'S OWN callback now, so
-                        // the first open of this row no longer says "no voices are
-                        // installed" while the engine is still binding: binding a speech
-                        // engine is asynchronous, and the old call read the voice list on
-                        // the line after asking for the engine — which is always too
-                        // early (see [ReaderSpeaker.prepare]).
-                        ReaderSpeaker.prepare(
-                            context,
-                            ReaderLook.speakEngine,
-                            onReady = { voices = ReaderSpeaker.voices() }
-                        )
-                        voices = ReaderSpeaker.voices()
+                        if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+                            // v465c — a downloaded pack IS this engine's voice, so the
+                            // same row lists it. One row for the choice, whichever
+                            // kind of engine the choice names.
+                            voices = downloadedPacks(context)
+                        } else {
+                            // v464 — the list is filled from the ENGINE'S OWN callback now, so
+                            // the first open of this row no longer says "no voices are
+                            // installed" while the engine is still binding: binding a speech
+                            // engine is asynchronous, and the old call read the voice list on
+                            // the line after asking for the engine — which is always too
+                            // early (see [ReaderSpeaker.prepare]).
+                            ReaderSpeaker.prepare(
+                                context,
+                                ReaderLook.speakEngine,
+                                onReady = { voices = ReaderSpeaker.voices() }
+                            )
+                            voices = ReaderSpeaker.voices()
+                        }
                         picker = true
                     },
                     shape = RoundedCornerShape(50),
@@ -552,15 +564,23 @@ internal fun ReaderSettingsScreen(
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            // The label when the picker has been opened in this visit,
-                            // and otherwise the voice's own name — never "the phone's
-                            // own" over a voice the member has CHOSEN: a row that
-                            // describes the wrong state is worse than a terse one.
-                            voices.firstOrNull { it.first == ReaderLook.speakVoice }?.second
-                                ?: ReaderLook.speakVoice.substringAfterLast('#', "").ifBlank {
-                                    if (ReaderLook.speakVoice.isBlank()) "The phone's own"
-                                    else ReaderLook.speakVoice
-                                },
+                            // v465c — the neural engine's voice is a PACK, and naming
+                            // it through the system-voice path below would read "The
+                            // phone's own" over a voice that is anything but.
+                            if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+                                NeuralVoicePacks.byId(ReaderLook.speakVoice)?.displayName
+                                    ?: "Choose a voice"
+                            } else {
+                                // The label when the picker has been opened in this visit,
+                                // and otherwise the voice's own name — never "the phone's
+                                // own" over a voice the member has CHOSEN: a row that
+                                // describes the wrong state is worse than a terse one.
+                                voices.firstOrNull { it.first == ReaderLook.speakVoice }?.second
+                                    ?: ReaderLook.speakVoice.substringAfterLast('#', "").ifBlank {
+                                        if (ReaderLook.speakVoice.isBlank()) "The phone's own"
+                                        else ReaderLook.speakVoice
+                                    }
+                            },
                             style = MaterialTheme.typography.labelMedium,
                             color = palette.accent,
                             maxLines = 1,
@@ -588,11 +608,13 @@ internal fun ReaderSettingsScreen(
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                VoiceChoice(
-                                    label = "The phone's own",
-                                    live = ReaderLook.speakVoice.isBlank(),
-                                    palette = palette
-                                ) { ReaderLook.speakVoice = "" }
+                                if (ReaderLook.speakEngine != ReaderEngine.NEURAL) {
+                                    VoiceChoice(
+                                        label = "The phone's own",
+                                        live = ReaderLook.speakVoice.isBlank(),
+                                        palette = palette
+                                    ) { ReaderLook.speakVoice = "" }
+                                }
                                 voices.forEach { (name, label) ->
                                     VoiceChoice(
                                         label = label,
@@ -602,7 +624,11 @@ internal fun ReaderSettingsScreen(
                                 }
                                 if (voices.isEmpty()) {
                                     Text(
-                                        "No voices are installed on this phone yet.",
+                                        if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+                                            "No voice packs are downloaded yet — download one below."
+                                        } else {
+                                            "No voices are installed on this phone yet."
+                                        },
                                         style = MaterialTheme.typography.bodySmall,
                                         color = palette.ink.copy(alpha = 0.6f),
                                         modifier = Modifier.padding(vertical = 8.dp)
@@ -616,6 +642,132 @@ internal fun ReaderSettingsScreen(
                             }
                         }
                     )
+                }
+
+                // ── v465c — THE VOICE PACKS THEMSELVES (FULL EDITION) ───────
+                //
+                // A pack is a one-time download and then a voice the reader uses
+                // for ever, offline. The rows state the price BEFORE the tap (the
+                // byte size, on the row, from the release's own published length)
+                // because a 305 MB download on mobile data is a decision, not a
+                // surprise. Kokoro also says out loud that it is the slower of the
+                // two — its RTF on a phone-class CPU is close to real time, and a
+                // row that sold only its voice would be selling a stutter.
+                if (BuildConfig.EDITION_NEURAL_VOICES && NeuralVoicePacks.CATALOG.isNotEmpty()) {
+                    val downloads by NeuralVoiceDownloads.states.collectAsState()
+                    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                        ReaderSettingsSection("Voice packs", palette)
+                        Text(
+                            "Downloaded once, then yours — these read with no engine, no network " +
+                                "and no account.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.ink.copy(alpha = 0.6f)
+                        )
+                        NeuralVoicePacks.CATALOG.forEach { pack ->
+                            val state = downloads[pack.id]
+                            val here = NeuralVoicePacks.isDownloaded(context, pack.id)
+                            // The percentages and the on-disk size are read off
+                            // NON-NULL LOCALS rather than off `state?.`: a smart cast
+                            // does not follow `state?.status == X`, and a nullable
+                            // field access there does not compile.
+                            val progress = state?.progress ?: 0f
+                            val failure = state?.error
+                            val failed = state?.status == NeuralVoiceDownloads.Status.Failed
+                            val busy = state?.status == NeuralVoiceDownloads.Status.Downloading ||
+                                state?.status == NeuralVoiceDownloads.Status.Extracting
+                            // ⚠️ MEMOISED ON PURPOSE. `sizeOnDisk` walks the pack's
+                            // whole directory tree — and a pack is espeak-ng-data, which
+                            // is hundreds of files. Walking that on every recomposition
+                            // of a settings page is exactly the kind of main-thread I/O
+                            // the power pass (§7.6) removed elsewhere; keyed on the two
+                            // things that can change the answer, it walks once.
+                            val onDisk = remember(pack.id, here) {
+                                if (here) NeuralVoicePacks.sizeOnDisk(context, pack.id) else 0L
+                            }
+                            val action = when {
+                                state?.status == NeuralVoiceDownloads.Status.Extracting -> "Finishing"
+                                state?.status == NeuralVoiceDownloads.Status.Downloading ->
+                                    "${(progress * 100).toInt()}% \u00b7 Stop"
+                                here -> "Remove"
+                                else -> "Download"
+                            }
+                            val subtitle = when {
+                                here -> pack.voiceLabel + " \u00b7 " +
+                                    NeuralVoicePacks.formatSize(onDisk) + " on this phone"
+                                busy -> pack.voiceLabel
+                                failed -> failure ?: "The download did not finish."
+                                else -> pack.voiceLabel + " \u00b7 " + pack.sizeLabel
+                            }
+                            Surface(
+                                onClick = {
+                                    when {
+                                        busy -> NeuralVoiceDownloads.cancel(context, pack.id)
+                                        here -> {
+                                            // Removing the pack the reader is CURRENTLY
+                                            // using would leave the stored choice pointing
+                                            // at nothing, so the choice is handed back to
+                                            // the phone's own voice in the same tap — and
+                                            // the engine is unloaded so its memory goes
+                                            // with it.
+                                            NeuralVoicePacks.delete(context, pack.id)
+                                            if (ReaderLook.speakVoice == pack.id) {
+                                                ReaderLook.speakVoice = ""
+                                                if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+                                                    ReaderLook.speakEngine = ReaderEngine.PHONE
+                                                }
+                                                NeuralSpeaker.release()
+                                            }
+                                            voices = emptyList()
+                                        }
+                                        else -> {
+                                            NeuralVoiceDownloads.start(context, pack)
+                                            // CHOSEN AS IT IS DOWNLOADED, not after: a
+                                            // member who just spent 305 MB should not have
+                                            // to find a second row to make it the voice.
+                                            ReaderLook.speakEngine = ReaderEngine.NEURAL
+                                            ReaderLook.speakVoice = pack.id
+                                        }
+                                    }
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = palette.ink.copy(alpha = 0.06f),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    CurioIcon(
+                                        if (here) CurioIcons.Check else CurioIcons.Download,
+                                        null,
+                                        tint = palette.accent,
+                                        size = 17.dp
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            pack.displayName,
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                            color = palette.ink.copy(alpha = 0.8f)
+                                        )
+                                        Text(
+                                            subtitle,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = palette.ink.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                    Text(
+                                        action,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = palette.accent,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -733,6 +885,38 @@ private const val SPEAK_FAST = 2f
  * female_1") and a chip that ellipsises them tells the member nothing — which is
  * the one thing a picker has to do.
  */
+/**
+ * v465c — THE ENGINES A MEMBER CAN POINT READ-ALOUD AT: the phone's own, every
+ * speech engine installed, and — full edition only — **Curio's own voice**, once
+ * the member has a pack available to use it with.
+ *
+ * Deliberately NOT `@Composable`: it is called from inside a `LaunchedEffect`,
+ * and a composable call in that lambda cannot compile (the same rule that catches
+ * `remember` inside a callback).
+ *
+ * The Curio entry is offered even with NOTHING downloaded, and says so in its own
+ * label. Hiding it until a pack existed would hide the feature from the only
+ * person who does not yet know it is there — and the row is what leads them to
+ * the packs below.
+ */
+private fun readerEngines(context: Context): List<Pair<String, String>> {
+    val system = ReaderSpeaker.engines(context)
+    if (!BuildConfig.EDITION_NEURAL_VOICES) return system
+    val count = NeuralVoicePacks.CATALOG.count { NeuralVoicePacks.isDownloaded(context, it.id) }
+    val label = when (count) {
+        0 -> "Curio's own voice \u00b7 nothing downloaded yet"
+        1 -> "Curio's own voice \u00b7 1 downloaded"
+        else -> "Curio's own voice \u00b7 $count downloaded"
+    }
+    return system + (ReaderEngine.NEURAL to label)
+}
+
+/** The downloaded packs, as the Voice picker's own list: pack id to its name. */
+private fun downloadedPacks(context: Context): List<Pair<String, String>> =
+    NeuralVoicePacks.CATALOG
+        .filter { NeuralVoicePacks.isDownloaded(context, it.id) }
+        .map { it.id to it.displayName }
+
 @Composable
 private fun VoiceChoice(
     label: String,

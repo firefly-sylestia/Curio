@@ -79,6 +79,42 @@
 # through JNA reflection — keep them whole too.
 -keep class org.vosk.** { *; }
 
+# v465c — SHERPA-ONNX (the FULL edition's neural read-aloud voice packs). Same
+# class of rule as JNA and Vosk above, and this one was VERIFIED rather than
+# assumed: `jni/arm64-v8a/libsherpa-onnx-jni.so` inside the vendored AAR carries
+# the literal field names `vits`, `matcha`, `kokoro`, `kitten`, `model`, `tokens`,
+# `voices`, `dataDir`, `lexicon`, `numThreads`, `ruleFsts`, `ruleFars`,
+# `maxNumSentences`, `silenceScale`, `noiseScale`, `lengthScale`, `lang`,
+# `provider` and `debug` — the native side reaches its config through
+# `GetFieldID(..., "vits", ...)` and builds the class from the Kotlin object it
+# was handed, so R8 renaming either the classes or their fields breaks it AT
+# RUNTIME with no compile error and no build warning. The debug build is
+# unobfuscated, so it would have kept working: the release APK would be the only
+# one with a silent voice, which is the same "flawless in debug" shape the
+# Incursion rule above was written for.
+#
+# The package is small (classes.jar is ~239 KB) and the whole of it is a
+# binding surface, so it is kept whole rather than field-by-field.
+-keep class com.k2fsa.sherpa.onnx.** { *; }
+-keepclassmembers class com.k2fsa.sherpa.onnx.** { *; }
+
+# Apache Commons Compress (the pack downloader's BZIP2 + TAR reader, the same
+# full-only dependency as above) declares THREE optional compression backends as
+# `optional=true` dependencies — XZ, Zstandard and Brotli — which means they are
+# deliberately NOT on the classpath, while the library's own code still names
+# their classes. That is precisely the PdfBox/JP2 shape further down this file:
+# R8 finds the reference, cannot find the class, and fails the RELEASE build's
+# missing-class check for a code path nothing here calls. A `.tar.bz2` pack needs
+# none of the three. Same treatment, same reason.
+-dontwarn org.tukaani.xz.**
+-dontwarn com.github.luben.zstd.**
+-dontwarn org.brotli.dec.**
+
+# The JNI entry points are `external fun`s on those classes; AGP's default
+# proguard file already carries `-keepclasseswithmembernames class * { native
+# <methods>; }`, so no native-method rule is needed here — recorded so the next
+# reader does not add a redundant one.
+
 # v339 — Share hub crash fix (on-device VerifyError). R8's optimizer
 # outlines repeated code from the giant share-card composables into shared
 # synthetic methods; for these files the outline ended up with ~60 parameters

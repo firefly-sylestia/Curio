@@ -43,12 +43,19 @@ jobs:
   verify:
     name: Curio Android (validate · lint · release)
     runs-on: ubuntu-latest
+    # v465c — 60 minutes, not 45: the FULL edition now links a vendored 48 MB
+    # native AAR (sherpa-onnx) and R8 has to process it whole, on top of the two
+    # editions' compile and lint. The 45-minute ceiling was set when the only
+    # extra weight was Vosk; a timeout that binds on the build that is supposed
+    # to take longest is a timeout that fails a healthy run, which is worse than
+    # a generous one.
+    #
     # v465 — 45 minutes, not 30: TWO editions are compiled and linted now (core
     # + full). Each edition is named explicitly (`lintCoreRelease` /
     # `assembleCoreRelease` and their `full` twins) — the bare `lintRelease` /
     # `assembleRelease` names are ambiguous under the flavor dimension and fail
     # at task selection, so CI is the thing that proves BOTH editions build.
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     outputs:
       build_outcome: ${{ steps.build.outcome }}
