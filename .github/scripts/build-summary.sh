@@ -7,8 +7,16 @@
 # correct when a step is re-ordered, and it never fails the run: it is a reader.
 #
 # Contract:
-#   build-summary.sh [signing-story] [build-outcome]
+#   build-summary.sh [signing-story] [build-outcome] [edition]
 #   → markdown on $GITHUB_STEP_SUMMARY
+#   → a one-line JSON row at ci-report/curio-<edition>.json for the report job
+#
+# v465e — THE EDITION ARGUMENT, AND WHY THE SUMMARY GREW A MACHINE-READABLE
+# HALF. Two editions now build in PARALLEL on separate runners, so each one
+# reads its own APK directory and writes its own page — and there is no longer
+# any single job whose step outputs the standalone report could quote. The
+# report job therefore reads these JSON rows instead of `needs.*.outputs`, which
+# is the only aggregation that is actually well-defined for a matrix job.
 #
 # What it reports, and why each line earns its place:
 #   Version      — the numbers the APK will actually carry (single source of
@@ -36,6 +44,7 @@ set -uo pipefail
 
 signing="${1:-unknown}"
 outcome="${2:-unknown}"
+edition="${3:-}"
 summary="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
 
 # ── the version the APK carries ─────────────────────────────────────────────
@@ -72,8 +81,16 @@ fi
 apk_name="—"
 apk_size="—"
 apk_sha="—"
+# v465e — THIS RUNNER BUILT ONE EDITION, so it reads ONE directory. The
+# wildcard stays as the fallback so the script still works when it is invoked
+# without an edition (a local run, or any caller that has not been updated).
+if [ -n "$edition" ]; then
+  apk_glob="app/build/outputs/apk/${edition}/release/*.apk"
+else
+  apk_glob="app/build/outputs/apk/*/release/*.apk"
+fi
 shopt -s nullglob
-apks=(app/build/outputs/apk/*/release/*.apk)
+apks=($apk_glob)
 shopt -u nullglob
 if [ "${#apks[@]}" -gt 0 ]; then
   apk="${apks[0]}"
@@ -83,11 +100,17 @@ if [ "${#apks[@]}" -gt 0 ]; then
     names="$names$(basename "$one")"
   done
   apk_name="$names"
-  apk_size="$(du -h "$apk" | cut -f1) (first of ${#apks[@]})"
+  # The ABI-split set and the universal APK both land here, so the size line
+  # says which file it is describing rather than implying it covers the set.
+  apk_size="$(du -h "$apk" | cut -f1)"
+  [ "${#apks[@]}" -gt 1 ] && apk_size="${apk_size} (first of ${#apks[@]})"
   apk_sha="$(sha256sum "$apk" | cut -d' ' -f1)"
 fi
 
 # ── the lint totals ─────────────────────────────────────────────────────────
+# v465e — the report name carries the VARIANT now that one runner lints one
+# edition (`lint-results-coreRelease.txt`), so the glob keeps the old bare name
+# as a fallback rather than dropping to "no report" on every run.
 lint_line="no report"
 report=$(ls app/build/reports/lint-results*.txt 2>/dev/null | head -1 || true)
 if [ -n "$report" ]; then
@@ -121,7 +144,11 @@ add_provider "Account site" CURIO_AUTH_SITE_URL
 
 {
   echo ""
-  echo "## Curio Android CI — build summary"
+  if [ -n "$edition" ]; then
+    echo "## Curio Android CI — build summary · ${edition}"
+  else
+    echo "## Curio Android CI — build summary"
+  fi
   echo ""
   echo "| | |"
   echo "| --- | --- |"
@@ -133,6 +160,9 @@ add_provider "Account site" CURIO_AUTH_SITE_URL
     echo "| Build | ${outcome} |"
   fi
   echo "| Version | ${version_name:-1.1.1} (${version_code:-unknown}) |"
+  if [ -n "$edition" ]; then
+    echo "| Edition | \`${edition}\` |"
+  fi
   echo "| Variant | release · universal APK (ABI splits off) |"
   echo "| Topic catalogs | ${catalogs} file(s) · ${topics} topics |"
   echo "| Signing | ${signing} |"
@@ -141,9 +171,44 @@ add_provider "Account site" CURIO_AUTH_SITE_URL
   echo "| Lint | ${lint_line} |"
   echo "| Keyed providers | ${providers%, } |"
   echo ""
-  echo "The per-file Kotlin diagnostics, the full Gradle log and the lint reports"
-  echo "are on the **verify** job — the diagnostics are annotations, not log lines."
+  if [ -n "$edition" ]; then
+    echo "The per-file Kotlin diagnostics are annotations on the \`${edition}\`"
+    echo "job's own **Checks** entry; the Gradle log and lint reports are its"
+    echo "artifacts."
+  else
+    echo "The per-file Kotlin diagnostics, the full Gradle log and the lint reports"
+    echo "are on the **verify** job — the diagnostics are annotations, not log lines."
+  fi
 } >> "$summary"
+
+# ── v465e — THE MACHINE-READABLE ROW, for the report job ────────────────────
+#
+# The report used to be a table of `needs.verify.outputs.*`. A MATRIX JOB HAS NO
+# SUCH THING: `needs.<matrixed job>.outputs` is an aggregation whose winner is
+# not specified, so a roll-up built on it would silently report one edition and
+# look like it had reported both. Each edition therefore leaves its own row on
+# disk, uploads it as an artifact, and the report job merges them.
+#
+# Written even when the job failed, because "which edition broke" is the first
+# question a red run has to answer. Best-effort: a writer that throws must never
+# be what fails the build.
+if [ -n "$edition" ]; then
+  mkdir -p ci-report 2>/dev/null || true
+  json_escape() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n'; }
+  cat > "ci-report/curio-${edition}.json" <<EOF
+{
+  "edition": "$(json_escape "$edition")",
+  "outcome": "$(json_escape "$outcome")",
+  "version": "$(json_escape "${version_name:-unknown} (${version_code:-unknown})")",
+  "catalogs": "$(json_escape "${catalogs} file(s) · ${topics} topics")",
+  "signing": "$(json_escape "$signing")",
+  "apk": "$(json_escape "${apk_name} · ${apk_size}")",
+  "sha": "$(json_escape "$apk_sha")",
+  "lint": "$(json_escape "$lint_line")",
+  "providers": "$(json_escape "${providers%, }")"
+}
+EOF
+fi
 
 # ── the postmortem, only when the build failed ───────────────────────────────
 # The Gradle log names the failing tasks (`> Task :x:y FAILED`) and the

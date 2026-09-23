@@ -41,8 +41,38 @@ concurrency:
 
 jobs:
   verify:
-    name: Curio Android (validate · lint · release)
+    name: Curio Android · ${{ matrix.edition }} (validate · lint · release)
     runs-on: ubuntu-latest
+    # ── v465e — ONE EDITION PER RUNNER, STARTING TOGETHER ────────────────────
+    #
+    # The member: *"start the workflow build of the two version in a separate …
+    # make it start simultaneously"*. One job built both editions in a single
+    # Gradle invocation, which is why a run took ~30 minutes; a matrix puts one
+    # edition on each runner so they compile at the same time and wall-clock
+    # roughly halves, at the cost of the fixed per-job overhead (checkout, JDK,
+    # SDK, catalog bundling) being paid twice.
+    #
+    # `fail-fast: false` ON PURPOSE: this job's whole job is proving that BOTH
+    # editions still build, and fail-fast would cancel `full` the moment `core`
+    # broke — which is the one run where the second answer is most wanted.
+    #
+    # ⚠️ NO JOB-LEVEL `outputs:` HERE, AND THAT IS THE POINT. This used to
+    # publish eleven step outputs for the standalone report job to quote. A
+    # MATRIX JOB CANNOT OFFER A SINGLE JOB'S OUTPUTS — `needs.verify.outputs`
+    # becomes an aggregation whose winner GitHub does not specify, so a roll-up
+    # built on it would print one edition's numbers under a heading implying
+    # both. Each edition therefore WRITES its row to `ci-report/` and uploads it
+    # (see build-summary.sh and run-report.py); the report merges artifacts.
+    # Do not reintroduce `needs.verify.outputs.*` in the report job.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - edition: core
+            # The Gradle task's own capitalisation: `assembleCoreRelease`.
+            cap: Core
+          - edition: full
+            cap: Full
     # v465c — 60 minutes, not 45: the FULL edition now links a vendored 48 MB
     # native AAR (sherpa-onnx) and R8 has to process it whole, on top of the two
     # editions' compile and lint. The 45-minute ceiling was set when the only
@@ -56,19 +86,6 @@ jobs:
     # `assembleRelease` names are ambiguous under the flavor dimension and fail
     # at task selection, so CI is the thing that proves BOTH editions build.
     timeout-minutes: 60
-
-    outputs:
-      build_outcome: ${{ steps.build.outcome }}
-      version: ${{ steps.summary.outputs.version }}
-      apk_name: ${{ steps.apk.outputs.name }}
-      apk_size: ${{ steps.apk.outputs.size }}
-      apk_sha: ${{ steps.apk.outputs.sha }}
-      signature: ${{ steps.summary.outputs.signature }}
-      warnings: ${{ steps.annotate.outputs.warnings }}
-      errors: ${{ steps.annotate.outputs.errors }}
-      catalogs: ${{ steps.topics.outputs.catalogs }}
-      lint_errors: ${{ steps.lint.outputs.errors }}
-      lint_warnings: ${{ steps.lint.outputs.warnings }}
 
     steps:
       - name: Check out Curio
@@ -227,7 +244,12 @@ jobs:
           else
             echo "Supabase project URL + publishable key were provided to the build."
           fi
-          ./gradlew lintCoreRelease lintFullRelease validateTopics assembleCoreRelease assembleFullRelease -PcurioAbiSplits=false --stacktrace 2>&1 \
+          # v465e — ONE EDITION's tasks, from the matrix. `${{ matrix.cap }}` is
+          # `Core`/`Full` to match Gradle's own task capitalisation, and the two
+          # names are paired on purpose: `lint<Cap>Release` runs first so the
+          # `assemble<Cap>Release` beside it reuses that variant's compilation
+          # instead of redoing it (the v412 optimisation, kept per edition).
+          ./gradlew lint${{ matrix.cap }}Release validateTopics assemble${{ matrix.cap }}Release -PcurioAbiSplits=false --stacktrace 2>&1 \
             | tee gradle-build.log
 
       # ── SURFACE 2: THE CHECKS TAB ──────────────────────────────────────────
@@ -251,9 +273,13 @@ jobs:
           shopt -s nullglob
           # v465 — one directory per edition: the `edition` flavor dimension
           # moved the outputs from `apk/release/` to `apk/<flavor>/release/`, so
-          # the extra level is part of the glob now. Every APK found here is
-          # signature-checked, so both editions are verified, not just the first.
-          apks=(app/build/outputs/apk/*/release/*.apk)
+          # the extra level is part of the glob now.
+          #
+          # v465e — NARROWED TO THIS RUNNER'S EDITION. The wildcard would still
+          # find the right directory (one edition builds here), but naming it
+          # means a mis-set matrix axis fails as "no APK" instead of silently
+          # checking the OTHER edition's output and passing.
+          apks=(app/build/outputs/apk/${{ matrix.edition }}/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
             echo "::error::No signed release APK was produced."
             exit 1
@@ -272,10 +298,11 @@ jobs:
               exit 1
             fi
           done
-          # v465 — two editions build now, so the summary NAMES EVERY APK instead
-          # of the first one. Size and SHA-256 stay the first of them (the core
-          # edition's, since `core` sorts before `full` in the glob) and the row
-          # says so rather than implying the number covers the whole set.
+          # v465 — every APK found is NAMED, not just the first, because a
+          # release build emits a universal APK AND one per ABI.
+          #
+          # v465e — this runner holds ONE edition, so there is no longer a
+          # question of which edition a size refers to; the count is the ABI set.
           apk="${apks[0]}"
           names=""
           for one in "${apks[@]}"; do
@@ -328,7 +355,12 @@ jobs:
           # v412 — the outcome rides along so the summary can open with the
           # verdict and, on a failure, carry the failed tasks and the first
           # compiler errors (see build-summary.sh's postmortem block).
-          .github/scripts/build-summary.sh "$signature" "$BUILD_OUTCOME"
+          #
+          # v465e — and the EDITION, which is what tells the script to read this
+          # runner's APK directory rather than every edition's, and what makes it
+          # write `ci-report/curio-<edition>.json` for the report job.
+          chmod +x .github/scripts/run-report.py
+          .github/scripts/build-summary.sh "$signature" "$BUILD_OUTCOME" "${{ matrix.edition }}"
           echo "version=${version_name:-1.1.1} (${version_code:-20260922})" >> "$GITHUB_OUTPUT"
           echo "signature=${signature}" >> "$GITHUB_OUTPUT"
 
@@ -342,7 +374,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: curio-gradle-log-${{ github.run_number }}
+          name: curio-gradle-log-${{ matrix.edition }}-${{ github.run_number }}
           path: gradle-build.log
           if-no-files-found: ignore
           retention-days: 1
@@ -351,7 +383,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: curio-lint-reports-${{ github.run_number }}
+          name: curio-lint-reports-${{ matrix.edition }}-${{ github.run_number }}
           path: |
             app/build/reports/lint-results*.*
             app/build/reports/lint/**/*.html
@@ -367,13 +399,29 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v6
         with:
-          name: curio-pr-release-apks-${{ github.run_number }}
+          name: curio-pr-release-apks-${{ matrix.edition }}-${{ github.run_number }}
           # v465 — one directory per edition (apk/<flavor>/release/).
-          path: app/build/outputs/apk/*/release/*.apk
+          # v465e — this runner's directory only, so the two editions' artifacts
+          # never collide on one name and stay tellable apart in the run.
+          path: app/build/outputs/apk/${{ matrix.edition }}/release/*.apk
           if-no-files-found: error
           # v26 — CI PR/push APKs are throwaway test builds: shrink to the
           # minimum so artifact storage barely accumulates. The official
           # APKs attached to tag RELEASES (release.yml) stay permanent.
+          retention-days: 1
+
+      # ── v465e — THIS EDITION'S ROW, FOR THE REPORT JOB ──────────────────
+      # Written by build-summary.sh above, even on a failed build, because
+      # "which edition broke" is the first question a red run has to answer.
+      # `if: always()` so the row exists whatever happened before it.
+      - name: Upload this edition's report row
+        id: report_row
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: curio-ci-report-${{ matrix.edition }}
+          path: ci-report/curio-${{ matrix.edition }}.json
+          if-no-files-found: warn
           retention-days: 1
 
       - name: Note the signing fallback
@@ -388,9 +436,13 @@ jobs:
   # ── SURFACE 3 + 4: THE REPORT JOB AND THE PULL REQUEST ─────────────────────
   #
   # A second job so the run's own list carries a "Curio CI report" entry: it
-  # needs nothing from the machine that built the APK, only the numbers the
-  # build job already published, which is why it is cheap. `if: always()` so a
-  # failed build still produces the reader-facing summary.
+  # needs nothing from the machines that built the APKs, only the rows they
+  # published, which is why it is cheap. `if: always()` so a failed build still
+  # produces the reader-facing summary.
+  #
+  # v465e — ONE COLUMN PER EDITION, FROM ARTIFACTS. `verify` is now a matrix, so
+  # there is no single job whose outputs a report could quote (see the note on
+  # that job's missing `outputs:` block, and on the steps below).
   report:
     name: Curio CI report
     needs: verify
@@ -402,34 +454,46 @@ jobs:
       pull-requests: write
 
     steps:
+      # v465e — THIS JOB IS A READER OF ARTIFACTS NOW, NOT OF STEP OUTPUTS.
+      #
+      # `verify` is a MATRIX (one parallel job per edition), and
+      # `needs.<matrixed job>.outputs` is an aggregation whose winner GitHub
+      # does not specify — a roll-up built on it would print ONE edition's
+      # numbers under a heading that implied both, which is worse than printing
+      # nothing when the only question this check answers is "did BOTH editions
+      # build?". So each edition writes its own row to `ci-report/` and uploads
+      # it, and `run-report.py` merges whatever arrived. Do not reintroduce
+      # `needs.verify.outputs.*` here.
+      #
+      # Checkout is needed because the report is a script now, not inline shell
+      # (it is called twice — once for the summary, once for the PR body — and a
+      # heredoc duplicated at both call sites is two things to keep in step).
+      - name: Check out Curio
+        uses: actions/checkout@v5
+
+      # `if: always()` and a TOLERANT reader: the report must still appear when
+      # one edition's job never got as far as uploading its row (it died before
+      # its summary step). That absence IS the finding — run-report.py names the
+      # edition instead of leaving a column quietly empty.
+      - name: Collect each edition's row
+        if: always()
+        uses: actions/download-artifact@v6
+        with:
+          pattern: curio-ci-report-*
+          path: ci-report
+          merge-multiple: true
+
       - name: Publish the run report
-        run: |
-          set -uo pipefail
-          {
-            echo "# Curio Android CI — report"
-            echo ""
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Build | ${{ needs.verify.outputs.build_outcome == 'success' && '✅ passed' || '❌ failed' }} |"
-            echo "| Version | ${{ needs.verify.outputs.version }} |"
-            echo "| Topic catalogs | ${{ needs.verify.outputs.catalogs }} files |"
-            echo "| Compiler warnings | ${{ needs.verify.outputs.warnings }} |"
-            echo "| Compiler errors | ${{ needs.verify.outputs.errors }} |"
-            echo "| Lint | ${{ needs.verify.outputs.lint_errors }} error(s) · ${{ needs.verify.outputs.lint_warnings }} warning(s) |"
-            echo "| Signing | ${{ needs.verify.outputs.signature }} |"
-            echo "| APK | ${{ needs.verify.outputs.apk_name }} |"
-            echo "| APK size | ${{ needs.verify.outputs.apk_size }} |"
-            echo "| SHA-256 | \`${{ needs.verify.outputs.apk_sha }}\` |"
-            echo ""
-            echo "The Kotlin diagnostics are in the **Checks** tab of this run (one"
-            echo "annotation per file, line and column). The full Gradle log and the"
-            echo "lint reports are attached to the \`verify\` job as artifacts."
-          } >> "$GITHUB_STEP_SUMMARY"
+        if: always()
+        run: python3 .github/scripts/run-report.py
 
       # SURFACE 4 — the pull request. Same-repo PRs only: GitHub hands a fork
       # PR a read-only token, so this is skipped rather than failing. `gh pr
       # comment` upserts nothing, so the step deletes its own previous comment
-      # first (marked below) to keep one live comment instead of one per push.
+      # first — matched by the `<!-- curio-ci-report -->` marker that
+      # run-report.py writes as the FIRST LINE of its --pr-body output, which is
+      # why the marker is no longer spelled out here (two copies of a marker
+      # drift apart, and the one that drifts is the one nothing finds).
       - name: Comment the report on the pull request
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
@@ -437,16 +501,7 @@ jobs:
         run: |
           set -uo pipefail
           marker="<!-- curio-ci-report -->"
-          body=$(printf '%s\n\n%s\n\n| | |\n| --- | --- |\n| Build | %s |\n| Version | %s |\n| Compiler warnings | %s |\n| Lint | %s error(s) · %s warning(s) |\n| Signing | %s |\n| APK | %s (%s) |\n| SHA-256 | %s |\n\n_Kotlin diagnostics are in the Checks tab of this run._\n' \
-            "$marker" "## Curio Android CI" \
-            "${{ needs.verify.outputs.build_outcome == 'success' && '✅ passed' || '❌ failed' }}" \
-            "${{ needs.verify.outputs.version }}" \
-            "${{ needs.verify.outputs.warnings }}" \
-            "${{ needs.verify.outputs.lint_errors }}" \
-            "${{ needs.verify.outputs.lint_warnings }}" \
-            "${{ needs.verify.outputs.signature }}" \
-            "${{ needs.verify.outputs.apk_name }}" "${{ needs.verify.outputs.apk_size }}" \
-            "${{ needs.verify.outputs.apk_sha }}")
+          body=$(python3 .github/scripts/run-report.py --pr-body)
           existing=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
             --paginate -q ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
           if [ -n "$existing" ]; then
