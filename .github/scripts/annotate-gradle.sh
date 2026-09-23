@@ -44,14 +44,33 @@ escape() {
 
 if [ -f "$log" ]; then
   while IFS= read -r line; do
+    # ── ⚠️ v465e — THE PREFIX IS STRIPPED BY NAME, NEVER WITH `#*: ` ────────
+    #
+    # This read `rest="${line#*: }"`, which is GREEDY: it removes the longest
+    # prefix ending in a colon-space, and a diagnostic like
+    # `e: file:///…/File.kt:902:36 Unresolved reference 'Context'.` has TWO
+    # (`e: ` at the front, `:36 ` in the middle). So `rest` came out as
+    # `Unresolved reference 'Context'.`, `path` became `Unresolved`, `lineno`
+    # became `reference` — non-numeric, so the guard below `continue`d, and the
+    # split returned nothing. **SURFACE 2 HAS THEREFORE BEEN SILENTLY
+    # ANNOTATING NOTHING**, which is why a 3-minute red run showed an empty
+    # Checks tab and every compiler error had to be dug out of the uploaded log
+    # by hand (most recently the v465e `Unresolved reference 'Context'`, two
+    # lines, both editions red).
+    #
+    # The prefix is a known, FIXED-LENGTH literal, so it is dropped by LENGTH.
+    # That is deliberate rather than `#"e: file://"`: a quoted pattern inside a
+    # parameter expansion is easy to over-escape (it landed as `#\"e: …\"`, whose
+    # pattern contains literal backslashes and matches nothing — the same class
+    # of silent no-op this whole fix is about), and `"e: file://"` and
+    # `"w: file://"` are both exactly 10 characters, so one number serves both.
     case "$line" in
-      "e: file://"*) severity=error ;;
-      "w: file://"*) severity=warning ;;
+      "e: file://"*) severity=error; rest="${line:10}" ;;
+      "w: file://"*) severity=warning; rest="${line:10}" ;;
       *) continue ;;
     esac
 
-    # e: file:///home/runner/work/Curio/Curio/app/src/…/File.kt:275:58 'msg'
-    rest="${line#*: }"
+    # rest: /home/runner/work/Curio/Curio/app/src/…/File.kt:275:58 'msg'
     path="${rest%%:*}"
     after="${rest#*:}"           # LINE:COL message
     lineno="${after%%:*}"

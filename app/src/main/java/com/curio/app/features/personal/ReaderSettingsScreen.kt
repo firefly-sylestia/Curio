@@ -1,5 +1,10 @@
 package com.curio.app.features.personal
 
+// v465e — the two helpers at the foot of this file name `Context` in their
+// signatures, and the composables above them never had to (they read
+// `LocalContext.current`, which needs no type name), so this import is the
+// difference between a file that compiles and two editions that do not.
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
