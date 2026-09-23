@@ -6,6 +6,8 @@ ADD:
 - Settings: an Advanced page gathers the doors you rarely need — Recording, Experiments and the Pet designer moved there, so Appearance and Preferences are what the settings list actually shows.
 - The intro ends with an online step: what signing in gives you (your captures, journals and shelf on another phone, friends, and posting what a topic made you think about), with a Sign in door — and everything in Curio still works without an account.
 - Settings: Home's writing rows each have their own switch — turn the pages row off, the shelf row off, or both, without touching your journals or your books.
+- Reading: read aloud marks the sentence it is on and follows it — the voice reads a sentence at a time instead of a pageful, that sentence wears a soft wash and the rest of the page stands back, so you can see where it is without losing the thread.
+- Reading: the read-aloud control is a bar now — pause and carry on, step back or on a sentence, and jump a whole chapter, instead of the single play/pause pill.
 
 FIX:
 - Reading: the dictionary page has no blank band at its foot — the word list was a fixed-height window inside the page's own scroll, so a letter with a few words reserved three hundred pixels of empty paper under them; the list is as tall as its words now, and only a big letter gets the window and scrolls inside it.
@@ -20,6 +22,7 @@ FIX:
 - Reading: a locked page scrolls like a page — the motion lock re-decided its axis on every event, so a drag that started a hair sideways froze the page.
 - Writing: dictation in Save your take no longer closes the moment you tap the mic, and it types into the note while you speak — Cancel puts the note back, and the dialog's door is Done.
 - Home: the Pages and My shelf rows are already drawn when you come back.
+- Reading: a PDF read aloud stops at its last page — the reader used to come back round and read the final page again, for ever.
 
 REMOVE:
 - Books: the ISBN barcode scanner is gone, and the camera permission goes with it — Search and Type are the two doors that remain.

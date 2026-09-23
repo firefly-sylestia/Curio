@@ -110,6 +110,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
@@ -1116,8 +1117,36 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     //  · **A PAGE WITH NOTHING TO SAY IS STEPPED OVER, NOT STUCK ON.** A PDF of
     //    plates has pages with no words on them; the driver moves to the next one
     //    instead of going quiet (and stops at the book's own end).
-    var speaking by remember(bookId, document) { mutableStateOf(false) }
+    // ── v463 — THE VOICE READS SENTENCES NOW (see [ReaderSentence]) ────
+    //
+    // v440 handed the engine four paragraphs at a time, which is the right unit for a
+    // speech engine and the wrong one for a reader: the screen could place the voice no
+    // more precisely than "somewhere in this block", so there was nothing to draw a
+    // mark on and nothing to skip to. The driver steps one SENTENCE per utterance, and
+    // that same sentence index is what draws the read-along wash and what the skip
+    // controls move — one cursor, three readers of it.
+    //
+    // The session has TWO states rather than one, and that is what makes pausing mean
+    // something: [voiceOn] is "a voice belongs to this book", [voicePaused] is "it is
+    // holding its breath". A pause keeps the sentence marked (the member can see where
+    // they stopped) and takes the dimming away (the page is theirs to read again).
+    val hasText = content is ReaderContent.Text
+    // Built ONCE per file, never per frame: the keys are the file that was opened, so a
+    // re-layout, a theme change or a scroll cannot walk the whole book again.
+    val sentences = remember(bookId, document, hasText) {
+        speechSentences((content as? ReaderContent.Text)?.blocks.orEmpty())
+    }
+    var voiceOn by remember(bookId, document) { mutableStateOf(false) }
+    var voicePaused by remember(bookId, document) { mutableStateOf(false) }
     var speakCursor by remember(bookId, document) { mutableIntStateOf(-1) }
+    // WHAT THE PAGE IS TOLD TO LIGHT, AND TO STAND BACK FROM.
+    val spoken = sentences.getOrNull(speakCursor)
+    val spokenRun = if (voiceOn && spoken != null) {
+        ReaderSpoken(spoken.block, spoken.from, spoken.to)
+    } else {
+        null
+    }
+    val readingAloud = voiceOn && !voicePaused
     // The engine is a service binding, so it is brought up when the member ASKS for
     // the voice and released the moment the reader closes — never merely because a
     // book was opened (see [ReaderSpeaker.prepare]).
@@ -1127,48 +1156,121 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
     }
     val startSpeaking = {
-        val at = when (val loaded = content) {
+        val at = when (content) {
             is ReaderContent.Pages -> livePlace?.index ?: shownPage
-            is ReaderContent.Text -> liveTextBlock
+            is ReaderContent.Text -> sentences.indexOfFirst { it.block >= liveTextBlock }
             null -> 0
         }
         speakCursor = at.coerceAtLeast(0)
         ReaderSpeaker.prepare(context)
-        speaking = true
+        voiceOn = true
+        voicePaused = false
         Unit
     }
-    LaunchedEffect(speaking, speakCursor) {
-        if (!speaking) return@LaunchedEffect
+
+    /**
+     * v463 — A SKIP, IN SENTENCES (or, for a PDF, in pages — a page is that book's own
+     * unit and it has no sentences to step through).
+     *
+     * A skip with no session OPEN is still a reasonable thing to ask for — "read from
+     * here" — so it opens one. With a session on it moves the cursor and lets the driver
+     * speak the new sentence at once; the engine's own `QUEUE_FLUSH` is the other half of
+     * that, so the sentence being abandoned cannot finish first (see [ReaderSpeaker.say]).
+     */
+    fun stepSentence(step: Int) {
         when (val loaded = content) {
             is ReaderContent.Text -> {
-                val blocks = loaded.blocks
-                if (blocks.isEmpty()) {
-                    speaking = false
+                val list = sentences
+                if (list.isEmpty()) return
+                val at = if (voiceOn && speakCursor in list.indices) {
+                    speakCursor
+                } else {
+                    list.indexOfFirst { it.block >= liveTextBlock }.coerceAtLeast(0)
+                }
+                speakCursor = (at + step).coerceIn(0, list.size - 1)
+            }
+
+            is ReaderContent.Pages -> {
+                val last = (loaded.pageCount - 1).coerceAtLeast(0)
+                speakCursor = (speakCursor.coerceIn(0, last) + step).coerceIn(0, last)
+            }
+
+            null -> return
+        }
+        ReaderSpeaker.prepare(context)
+        voiceOn = true
+        voicePaused = false
+    }
+
+    /**
+     * v463 — A SKIP, IN CHAPTERS.
+     *
+     * A chapter is a change of [ReaderSentence.section], so the target is "the first
+     * sentence whose section is the next one along" — which lands on the chapter's own
+     * heading rather than on a paragraph, and is why this needs no lookup table of its
+     * own. A PDF has no chapters in its text, so there a chapter step is a jump to an end.
+     */
+    fun stepChapter(step: Int) {
+        when (val loaded = content) {
+            is ReaderContent.Text -> {
+                val list = sentences
+                if (list.isEmpty()) return
+                val here = list.getOrNull(speakCursor.coerceIn(0, list.size - 1))
+                    ?: list.first()
+                val sections = list.map { it.section }.distinct()
+                val want = (sections.indexOf(here.section) + step)
+                    .coerceIn(0, sections.size - 1)
+                val index = list.indexOfFirst { it.section == sections[want] }
+                if (index < 0) return
+                speakCursor = index
+                jumpToBlock(list[index].block)
+            }
+
+            is ReaderContent.Pages -> {
+                val last = (loaded.pageCount - 1).coerceAtLeast(0)
+                speakCursor = if (step < 0) 0 else last
+                jumpToPage(speakCursor)
+            }
+
+            null -> return
+        }
+        ReaderSpeaker.prepare(context)
+        voiceOn = true
+        voicePaused = false
+    }
+
+    LaunchedEffect(voiceOn, voicePaused, speakCursor) {
+        if (!voiceOn || voicePaused) return@LaunchedEffect
+        when (val loaded = content) {
+            is ReaderContent.Text -> {
+                val list = sentences
+                if (list.isEmpty()) {
+                    voiceOn = false
                     return@LaunchedEffect
                 }
-                val from = speakCursor.coerceIn(0, blocks.size - 1)
-                var next = from
-                val said = buildString {
-                    while (next < blocks.size && next - from < SPEAK_BLOCKS &&
-                        length < SPEAK_CHARS
-                    ) {
-                        val block = blocks[next]
-                        next += 1
-                        if (block.text.isNotBlank()) append(block.text).append(' ')
-                    }
-                }.trim()
-                if (said.isBlank()) {
-                    speaking = false
-                    return@LaunchedEffect
-                }
-                // The page follows the voice, which is the whole of "then follow on".
-                jumpToBlock(from)
-                val after = next
+                val from = speakCursor.coerceIn(0, list.size - 1)
+                val sentence = list[from]
+                // The page follows the voice — but only when it has to MOVE. A
+                // sentence in the block already on screen must not scroll the page
+                // out from under the member's eye.
+                if (sentence.block != liveTextBlock) jumpToBlock(sentence.block)
                 ReaderSpeaker.say(
-                    text = said,
+                    text = sentence.text,
                     speed = ReaderLook.speakSpeed,
                     voiceName = ReaderLook.speakVoice
-                ) { speakCursor = after }
+                ) {
+                    // THE END OF THE BOOK IS THE ONLY THING THAT STOPS IT. There is
+                    // no next sentence to move to, and an engine cannot be asked to
+                    // speak nothing — so the session closes and the last mark stays,
+                    // which is where a reader would leave the page anyway.
+                    val next = from + 1
+                    if (next >= list.size) {
+                        voiceOn = false
+                        voicePaused = false
+                    } else {
+                        speakCursor = next
+                    }
+                }
             }
 
             is ReaderContent.Pages -> {
@@ -1182,18 +1284,33 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 }.trim()
                 val after = page + 1
                 if (said.isBlank()) {
-                    if (after < loaded.pageCount) speakCursor = after else speaking = false
+                    // A PLATE HAS NOTHING TO SAY (v440's rule), and the book's own end
+                    // is the end (the v463 fix: the old code came back round and read
+                    // the last page of a PDF for ever).
+                    if (after < loaded.pageCount) {
+                        speakCursor = after
+                    } else {
+                        voiceOn = false
+                        voicePaused = false
+                    }
                 } else {
                     jumpToPage(page)
                     ReaderSpeaker.say(
                         text = said,
                         speed = ReaderLook.speakSpeed,
                         voiceName = ReaderLook.speakVoice
-                    ) { speakCursor = after }
+                    ) {
+                        if (after >= loaded.pageCount) {
+                            voiceOn = false
+                            voicePaused = false
+                        } else {
+                            speakCursor = after
+                        }
+                    }
                 }
             }
 
-            null -> speaking = false
+            null -> voiceOn = false
         }
     }
 
@@ -1339,7 +1456,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             onPageCount = { count -> textPageCount = count },
             ownPages = loaded.ownPages,
             pendingBlock = pendingBlock,
-            onPendingConsumed = { pendingBlock = null }
+            onPendingConsumed = { pendingBlock = null },
+            spoken = spokenRun,
+            readingAloud = readingAloud
         )
 
                 is ReaderContent.Pages -> PageReader(
@@ -1445,15 +1564,25 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // pausing stops the engine as well as the driver, so a resumed tap starts
             // from where the member IS rather than finishing a stale sentence (the
             // driver's `QUEUE_FLUSH` is the other half of that).
-            speaking = speaking,
+            speaking = voiceOn,
+            paused = voicePaused,
             onToggleSpeak = {
-                if (speaking) {
-                    speaking = false
-                    ReaderSpeaker.stop()
-                } else {
-                    startSpeaking()
+                when {
+                    // v463 — the two states are one button: a running voice holds its
+                    // breath, a held one carries on, and a book with no voice yet
+                    // starts one at the page the member is looking at.
+                    voicePaused -> voicePaused = false
+                    voiceOn -> {
+                        voicePaused = true
+                        ReaderSpeaker.stop()
+                    }
+                    else -> startSpeaking()
                 }
             },
+            onSpeakPrevSentence = { stepSentence(-1) },
+            onSpeakNextSentence = { stepSentence(1) },
+            onSpeakPrevChapter = { stepChapter(-1) },
+            onSpeakNextChapter = { stepChapter(1) },
             search = searching,
             onClose = { navController.popBackStack() },
             onSearch = {
@@ -2288,7 +2417,15 @@ private fun TextReader(
     ownPages: Boolean,
     /** A block to land on, asked for from outside (a chapter, a search find). */
     pendingBlock: Int?,
-    onPendingConsumed: () -> Unit
+    onPendingConsumed: () -> Unit,
+    /**
+     * v463 — THE RUN OF WORDS A VOICE IS ON, and whether the page should stand back
+     * from everything that is not it (see the reader's own driver). Handed in rather
+     * than read here because the voice belongs to the SCREEN: this surface draws the
+     * mark, it does not own the cursor.
+     */
+    spoken: ReaderSpoken? = null,
+    readingAloud: Boolean = false
 ) {
     val state = listState
 
@@ -2401,7 +2538,9 @@ private fun TextReader(
             query = query,
             hitIndex = hitIndex,
             pendingBlock = pendingBlock,
-            onPendingConsumed = onPendingConsumed
+            onPendingConsumed = onPendingConsumed,
+            spoken = spoken,
+            readingAloud = readingAloud
         )
         return
     }
@@ -2467,7 +2606,10 @@ private fun TextReader(
                 // the matches in the same block still read as matches, which is
                 // what a search's highlighting is for.
                 hitHere = hitIndex == index && query.isNotBlank(),
-                hitLength = hitLength
+                hitLength = hitLength,
+                // v463 — the read-along mark belongs to the block it is a run OF.
+                spokenRange = spoken?.takeIf { it.block == index }?.let { it.from..it.to },
+                readingAloud = readingAloud
             )
         }
         item("the-end") {
@@ -3080,7 +3222,10 @@ private fun TextPagedReader(
     query: String,
     hitIndex: Int,
     pendingBlock: Int?,
-    onPendingConsumed: () -> Unit
+    onPendingConsumed: () -> Unit,
+    /** v463 — the read-along mark and the page's own standing back (see [TextReader]). */
+    spoken: ReaderSpoken? = null,
+    readingAloud: Boolean = false
 ) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -3259,7 +3404,10 @@ private fun TextPagedReader(
                     },
                     query = query,
                     hitHere = hitIndex == index && query.isNotBlank(),
-                    hitLength = query.length
+                    hitLength = query.length,
+                    // v463 — the read-along mark belongs to the block it is a run OF.
+                    spokenRange = spoken?.takeIf { it.block == index }?.let { it.from..it.to },
+                    readingAloud = readingAloud
                 )
             }
         }
@@ -3803,7 +3951,16 @@ private fun ReaderParagraphBlock(
     onSelect: (IntRange, String) -> Unit,
     query: String,
     hitHere: Boolean,
-    hitLength: Int
+    hitLength: Int,
+    /**
+     * v463 — THE RUN A VOICE IS READING, as offsets into THIS block (null: not here).
+     *
+     * The mark is a wash on the words rather than a bar down the side, so it cannot be
+     * confused with a highlight the member made (see the span pass below).
+     */
+    spokenRange: IntRange? = null,
+    /** v463 — whether a voice is running, so the rest of the page stands back. */
+    readingAloud: Boolean = false
 ) {
     // A PAGE-ANCHOR BLOCK (v389c) IS A TARGET, NOT A LINE.
     //
@@ -3870,8 +4027,17 @@ private fun ReaderParagraphBlock(
             color = palette.ink
         )
     }.copy(textAlign = align)
+    // ── v463 — AND THE REST OF THE PAGE STANDS BACK ────────────────────
+    //
+    // The wash is only half of "which sentence is being read": the other half is the
+    // page agreeing not to compete with it. The block the voice is IN keeps its full
+    // contrast (the wash alone says which sentence), and every other block steps back —
+    // and only while the voice is actually RUNNING, so a paused session marks the place
+    // without dimming the page the member has gone back to reading by eye.
+    val standBack = readingAloud && spokenRange == null
     Column(
         modifier = Modifier
+            .then(if (standBack) Modifier.alpha(READ_ALOUD_DIM) else Modifier)
             .fillMaxWidth()
             .then(
                 if (marked) {
@@ -3928,7 +4094,15 @@ private fun ReaderParagraphBlock(
         // and every SEARCH FIND (the wash and a heavier weight). So the runs are
         // worked out from the spans themselves — each stretch of characters wears
         // every span that covers it — instead of one `if` picking a winner.
-        val shown = remember(block.text, block.emphasis, query, hitHere, highlights, selection) {
+        val shown = remember(
+            block.text,
+            block.emphasis,
+            query,
+            hitHere,
+            highlights,
+            selection,
+            spokenRange
+        ) {
             val needle = query.trim()
             val spans = ArrayList<ReaderTextSpan>()
             // v398 — the BOOK's OWN emphasis goes in first: it is the paragraph's
@@ -3986,6 +4160,27 @@ private fun ReaderParagraphBlock(
                     // under it) still has to say WHERE it was: the whole block.
                     spans.add(
                         ReaderTextSpan(0, block.text.length, SpanStyle(background = passage.ink.copy(alpha = 0.18f)))
+                    )
+                }
+            }
+            // ── v463 — THE SENTENCE THE VOICE IS ON ──────────────────
+            //
+            // A WASH, not the bar the member's own highlights wear: a mark THEY made
+            // draws a rule down the side of the paragraph it lives in, and a read-along
+            // that borrowed that furniture would be mistaken for one of their own. It
+            // is added BEFORE the find wash and the live selection below, so both paint
+            // over it rather than under it — a search hit must never be hidden by the
+            // voice, and a sweep the member is making is the more important of the two.
+            spokenRange?.let { range ->
+                val from = range.first.coerceIn(0, block.text.length)
+                val to = (range.last + 1).coerceIn(from, block.text.length)
+                if (to > from) {
+                    spans.add(
+                        ReaderTextSpan(
+                            from,
+                            to,
+                            SpanStyle(background = palette.accent.copy(alpha = 0.18f))
+                        )
                     )
                 }
             }
@@ -4153,8 +4348,22 @@ private fun ReaderChrome(
      * component draws the pill, the reader owns the cursor and the engine.
      */
     speaking: Boolean = false,
-    /** The speak pill's own door; null leaves the pill out entirely. */
+    /**
+     * v463 — WHETHER THE VOICE IS HOLDING ITS BREATH rather than gone.
+     *
+     * A paused session is still a session: the bar stays up (so there is always a way
+     * to carry on) and the sentence keeps its mark. Only the word on the bar and the
+     * fill of its disc change, which is why this is a second flag rather than a third
+     * meaning bolted onto [speaking].
+     */
+    paused: Boolean = false,
+    /** The speak bar's own door; null leaves the bar out entirely. */
     onToggleSpeak: (() -> Unit)? = null,
+    /** v463 — the four ways to move the voice (see [ReaderSpeakBar]); null hides them. */
+    onSpeakPrevSentence: (() -> Unit)? = null,
+    onSpeakNextSentence: (() -> Unit)? = null,
+    onSpeakPrevChapter: (() -> Unit)? = null,
+    onSpeakNextChapter: (() -> Unit)? = null,
     /** v431 — while the search bar is up the head hands its row over to it. */
     search: ReaderSearch?,
     onClose: () -> Unit,
@@ -4378,26 +4587,53 @@ private fun ReaderChrome(
                     .navigationBarsPadding()
                     .padding(start = 12.dp, bottom = 78.dp)
             ) {
-                ReaderSpeakPill(palette = palette, speaking = speaking, onToggle = onToggleSpeak)
+                ReaderSpeakBar(
+                    palette = palette,
+                    speaking = speaking,
+                    paused = paused,
+                    onToggle = onToggleSpeak,
+                    onPrevSentence = onSpeakPrevSentence,
+                    onNextSentence = onSpeakNextSentence,
+                    onPrevChapter = onSpeakPrevChapter,
+                    onNextChapter = onSpeakNextChapter
+                )
             }
         }
     }
 }
 
 /**
- * v440 — THE VOICE'S OWN PILL: play, or pause.
+ * v463 — THE VOICE'S OWN BAR: where the voice is, and the four ways to move it.
  *
- * One glyph and no words, like the motion lock beside it, and for the same reason: a
- * pill that floats over a page the member is reading says what it is with its shape.
- * It wears the accent while it is reading, so "is it still going" is answerable at a
- * glance from across the room — which is the only way it is ever asked.
+ * v440's pill had one glyph and one job (play, or pause) and it said what it was with its
+ * SHAPE, which is right for a control that only ever does one thing. A member listening to
+ * a book wants three more things a thumb can find without reading a label: back a
+ * sentence, on a sentence, and an escape from a chapter they do not want. So the pill
+ * became a bar — the chapter steps at the two ends (the bigger jump, so they wear the
+ * up/down pair), the sentence steps either side of the mark, and the mark itself is the
+ * one FILLED thing on it.
+ *
+ * It wears the accent while it is reading, so "is it still going" is answerable at a glance
+ * from across the room, which is the only way it is ever asked. The state word stays
+ * ("Listen" / "Reading" / "Paused") because a first-time member should not have to decode
+ * a media bar to find out that the app can read to them at all.
  */
 @Composable
-private fun ReaderSpeakPill(palette: ReaderPalette, speaking: Boolean, onToggle: () -> Unit) {
-    // v451 — the voice's pill refracts the page as well, tinted by its state (see
+private fun ReaderSpeakBar(
+    palette: ReaderPalette,
+    speaking: Boolean,
+    paused: Boolean,
+    onToggle: () -> Unit,
+    onPrevSentence: (() -> Unit)?,
+    onNextSentence: (() -> Unit)?,
+    onPrevChapter: (() -> Unit)?,
+    onNextChapter: (() -> Unit)?
+) {
+    // v451 — the voice's bar refracts the page as well, tinted by its state (see
     // [ReaderMotionLockPill]).
     val glass = ambientGlassOn()
-    val body = if (speaking) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
+    val running = speaking && !paused
+    val body = if (running) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
     Surface(
         shape = RoundedCornerShape(50),
         color = if (glass) Color.Transparent else body,
@@ -4408,29 +4644,93 @@ private fun ReaderSpeakPill(palette: ReaderPalette, speaking: Boolean, onToggle:
             modifier = Modifier
                 .height(40.dp)
                 .clip(RoundedCornerShape(50))
-                .curioPressClickable(
-                    pressedScale = 0.92f,
-                    onClickLabel = if (speaking) "Stop reading aloud" else "Read this page aloud",
-                    onClick = onToggle
-                )
-                .padding(horizontal = 13.dp),
+                .padding(start = 5.dp, end = 13.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            CurioIcon(
-                if (speaking) CurioIcons.Pause else CurioIcons.PlayArrow,
-                null,
-                tint = if (speaking) palette.ink else palette.accent,
-                size = 18.dp
-            )
+            onPrevChapter?.let { step ->
+                ReaderSpeakStep(palette, CurioIcons.KeyboardArrowUp, "Previous chapter", step)
+            }
+            onPrevSentence?.let { step ->
+                ReaderSpeakStep(palette, CurioIcons.ChevronLeft, "Previous sentence", step)
+            }
+            // THE ONE CONTROL WITH WEIGHT: a filled disc, so a thumb finds it without
+            // reading the bar.
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (running) palette.accent else palette.accent.copy(alpha = 0.16f)
+                    )
+                    .curioPressClickable(
+                        pressedScale = 0.90f,
+                        onClickLabel = when {
+                            running -> "Pause the voice"
+                            speaking -> "Carry on reading aloud"
+                            else -> "Read this page aloud"
+                        },
+                        onClick = onToggle
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    if (running) CurioIcons.Pause else CurioIcons.PlayArrow,
+                    null,
+                    tint = if (running) palette.ink else palette.accent,
+                    size = 17.dp
+                )
+            }
+            onNextSentence?.let { step ->
+                ReaderSpeakStep(palette, CurioIcons.ChevronRight, "Next sentence", step)
+            }
+            onNextChapter?.let { step ->
+                ReaderSpeakStep(palette, CurioIcons.KeyboardArrowDown, "Next chapter", step)
+            }
             Text(
-                if (speaking) "Reading" else "Listen",
+                when {
+                    running -> "Reading"
+                    speaking -> "Paused"
+                    else -> "Listen"
+                },
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = palette.ink.copy(alpha = 0.85f)
+                color = palette.ink.copy(alpha = 0.85f),
+                modifier = Modifier.padding(start = 7.dp)
             )
         }
+    }
+}
+
+/**
+ * v463 — ONE STEP OF THE VOICE'S BAR, and the only one that is a plain glyph.
+ *
+ * 30dp of touch for a 17dp mark: the bar carries five controls in the room one pill used
+ * to take, so each target is smaller than the 40dp a lone control gets — which is exactly
+ * why the four steps are the ones a thumb may legitimately miss and the filled disc is
+ * not. Each carries its own spoken label, so the bar is never a row of unlabelled arrows
+ * to a screen reader.
+ */
+@Composable
+private fun ReaderSpeakStep(
+    palette: ReaderPalette,
+    glyph: String,
+    label: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .clip(CircleShape)
+            .curioPressClickable(
+                pressedScale = 0.90f,
+                onClickLabel = label,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(glyph, null, tint = palette.ink.copy(alpha = 0.72f), size = 17.dp)
     }
 }
 
@@ -9371,16 +9671,15 @@ internal object ReaderLook {
 }
 
 /**
- * v440 — HOW MUCH OF A BOOK GOES TO THE VOICE AT ONCE.
+ * v463 — HOW FAR THE PAGE STANDS BACK while a voice is reading one of its sentences.
  *
- * A few paragraphs, or a screenful of characters, whichever comes first: the engine
- * is told one piece and reports when it is finished (see the reader's driver), so
- * this is the size of the step the reader takes between utterances. Too small and
- * the gap between chunks is audible; too large and the pause lands a page after the
- * member tapped it.
+ * The member asked for the sentence being read to be the one thing that reads, with the
+ * rest of the page going quiet behind it — but not so quiet that a member following along
+ * by eye cannot make the next paragraph out. It is applied ONLY while the voice is
+ * actually running: a paused voice keeps its sentence marked and hands the page its
+ * contrast back, because a page dimmed indefinitely is a page that is hard to read.
  */
-private const val SPEAK_BLOCKS = 4
-private const val SPEAK_CHARS = 900
+private const val READ_ALOUD_DIM = 0.38f
 
 /**
  * v434 — how the lines sit in their column (see [ReaderLook.justify]).
@@ -11427,6 +11726,174 @@ private data class ReaderBlock(
 
 /** One stretch of a paragraph the BOOK emphasised (see [ReaderBlock.emphasis]). */
 private data class ReaderEmphasis(val start: Int, val end: Int, val bold: Boolean, val italic: Boolean)
+
+/**
+ * v463 — ONE SENTENCE OF THE BOOK, AND WHERE IT IS.
+ *
+ * The voice used to be handed four paragraphs at a time, which is a fine unit for an
+ * ENGINE and a useless one for a READER: all the screen could say about where the voice
+ * had got to was "somewhere in this block", so there was nothing to highlight and
+ * nothing to skip to. A sentence is the unit a read-along mark needs (a run of the
+ * block's own text) and the unit a skip needs (the next thing worth hearing), so the
+ * reader is driven in sentences now and a block is merely the row a sentence is drawn in.
+ */
+private data class ReaderSentence(
+    /** The index of the block this sentence is a run of. */
+    val block: Int,
+    /** The sentence's own bounds INSIDE that block's text. */
+    val from: Int,
+    val to: Int,
+    /** 1-based chapter, so a chapter skip is a change of this number. */
+    val section: Int,
+    val text: String
+)
+
+/**
+ * v463 — WHICH RUN OF WHICH BLOCK A VOICE IS ON (see [ReaderSentence]).
+ *
+ * Handed to the paragraph renderer as offsets rather than as the sentence itself: a
+ * block knows its own text and nothing about the book, so the only thing it may be told
+ * is "this range of YOUR words".
+ */
+private data class ReaderSpoken(val block: Int, val from: Int, val to: Int)
+
+/**
+ * v463 — THE BOOK, CUT INTO SENTENCES.
+ *
+ * Built once per file and kept: a book is opened once and read for hours, so this is one
+ * walk over the text rather than a scan per frame — and the point of doing it up front is
+ * that the driver, the highlight and the skip controls all read the SAME list, so the
+ * sentence being spoken and the sentence being lit cannot disagree.
+ *
+ * A heading is a sentence of its own whatever its punctuation (it is a line the book set
+ * apart, and reading it into the paragraph under it would be wrong), and a block that is
+ * blank is skipped entirely — a page-anchor block exists only to be a scroll target and
+ * has no words to say.
+ */
+private fun speechSentences(blocks: List<ReaderBlock>): List<ReaderSentence> {
+    val out = ArrayList<ReaderSentence>(blocks.size * 4)
+    blocks.forEachIndexed { index, block ->
+        if (block.text.isBlank()) return@forEachIndexed
+        val ranges = if (block.isHeading) {
+            listOf(block.text.indices)
+        } else {
+            ReaderSentenceSplit.split(block.text)
+        }
+        ranges.forEach { range ->
+            if (range.isEmpty()) return@forEach
+            val raw = block.text.substring(range.first, range.last + 1)
+            val lead = raw.indexOfFirst { !it.isWhitespace() }
+            if (lead < 0) return@forEach
+            val trail = raw.indexOfLast { !it.isWhitespace() }
+            out.add(
+                ReaderSentence(
+                    block = index,
+                    from = range.first + lead,
+                    to = range.first + trail,
+                    section = block.section,
+                    text = raw.substring(lead, trail + 1)
+                )
+            )
+        }
+    }
+    return out
+}
+
+/**
+ * v463 — WHERE A SENTENCE ENDS.
+ *
+ * A full stop is not a sentence end by itself, and the ways it lies are exactly what this
+ * has to survive: an ABBREVIATION ("Mr. Knightley"), an INITIAL ("J. R. R."), and a
+ * DECIMAL or a dotted acronym. A sentence also never continues in lower case, which is
+ * the one check that gets the overwhelming majority of prose right.
+ *
+ * It is deliberately a heuristic and deliberately a FORGIVING one: a mis-split costs the
+ * member one odd breath, whereas an over-eager splitter would cut every "No. 5" in half
+ * — and a voice that keeps stopping mid-clause is worse than one that occasionally reads
+ * a sentence long.
+ *
+ * The abbreviation list is therefore kept SHORT and to words that are not English words
+ * in their own right. "no", "sat", "mar", "sun" and "rev" were all in an earlier
+ * draft and each one silently merged two real sentences ("The answer is no. She left"
+ * read as one line), which is precisely the failure this is meant to avoid.
+ */
+private object ReaderSentenceSplit {
+
+    /** Words whose full stop belongs to the word. None is also an English word. */
+    private val ABBREVIATIONS = setOf(
+        "mr", "mrs", "ms", "dr", "prof", "sr", "jr", "st", "vs", "etc",
+        "eg", "ie", "fig", "vol", "ch", "pp", "inc", "ltd", "corp", "dept",
+        "univ", "capt", "lt", "sgt", "sept", "approx", "eds"
+    )
+
+    /** A close after the stop belongs to the sentence the stop closes. */
+    private const val CLOSERS = "\"'\u201D\u2019)]}"
+
+    fun split(text: String): List<IntRange> {
+        if (text.isBlank()) return emptyList()
+        val out = ArrayList<IntRange>(4)
+        val n = text.length
+        var start = 0
+        var i = 0
+        while (i < n) {
+            if (!isTerminator(text[i])) {
+                i += 1
+                continue
+            }
+            var run = i + 1
+            while (run < n && isTerminator(text[run])) run += 1
+            var end = run
+            while (end < n && text[end] in CLOSERS) end += 1
+            if (!endsSentence(text, i, end)) {
+                i = run
+                continue
+            }
+            out.add(start..(end - 1))
+            start = end
+            i = end
+        }
+        if (start < n) out.add(start..(n - 1))
+        return out
+    }
+
+    private fun isTerminator(c: Char): Boolean =
+        c == '.' || c == '!' || c == '?' || c == '\u2026'
+
+    private fun endsSentence(text: String, stop: Int, end: Int): Boolean {
+        val n = text.length
+        var p = end
+        while (p < n && text[p].isWhitespace()) p += 1
+        // The paragraph simply ran out: that is an end whatever it stopped on.
+        if (p >= n) return true
+        // A sentence never continues in lower case.
+        if (text[p].isLowerCase()) return false
+        if (text[stop] == '.') {
+            // "3.14" — a full stop between two digits is a decimal point.
+            if (stop > 0 && text[stop - 1].isDigit() &&
+                stop + 1 < n && text[stop + 1].isDigit()
+            ) {
+                return false
+            }
+            val word = wordBefore(text, stop)
+            // A single letter is an initial ("J. R. R. Tolkien").
+            if (word.length == 1) return false
+            if (word.lowercase() in ABBREVIATIONS) return false
+        }
+        return true
+    }
+
+    /** The word a stop is attached to, read backwards from it. */
+    private fun wordBefore(text: String, stop: Int): String {
+        var at = stop - 1
+        if (at >= 0 && isTerminator(text[at])) at -= 1
+        val end = at
+        while (at >= 0 && (text[at].isLetter() || text[at] == '\'' || text[at] == '\u2019')) {
+            at -= 1
+        }
+        if (end <= at) return ""
+        return text.substring(at + 1, end + 1)
+    }
+}
 
 /** What a long press was aimed at. */
 private data class ReaderParagraph(
