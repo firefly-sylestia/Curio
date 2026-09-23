@@ -4743,7 +4743,13 @@ private fun ReaderChrome(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(horizontal = 12.dp, bottom = 78.dp)
+                    // Two calls, not one: `padding` has a SIDE overload
+                    // (start/end/top/bottom) and a HORIZONTAL/VERTICAL one, and
+                    // there is no overload taking `horizontal` and `bottom`
+                    // together — the mixed form is a compile error, not a
+                    // silently-ignored parameter.
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 78.dp)
             ) {
                 ReaderSpeakBar(
                     palette = palette,

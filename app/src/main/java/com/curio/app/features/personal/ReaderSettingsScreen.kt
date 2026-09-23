@@ -952,6 +952,18 @@ internal fun ReaderSettingsScreen(
             // leaves the reader is exactly the same experience.
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 ReaderSettingsSection("Background", palette)
+                // ── v465h — A CONTEXT OF THIS SCOPE'S OWN ──────────────────────
+                // There is already a `val context = LocalContext.current` near the
+                // top of this screen, but it belongs to a DIFFERENT composable: a
+                // local val does not reach a sibling, so inside this block the
+                // name `context` fell back to whatever else resolves it and the
+                // build said `Function invocation 'context(...)' expected.` on
+                // each use. Reading it here keeps that fix local, and it has to be
+                // read HERE rather than inline in `onSelect` below, because
+                // `onSelect` is an ordinary lambda and not a @Composable scope —
+                // which is also the exact trap the root compile-safety rules
+                // name for callbacks.
+                val sectionContext = LocalContext.current
                 ReaderSegmentRow(
                     segments = listOf(
                         ReaderSegment("Keep reading", CurioIcons.Check),
@@ -960,7 +972,7 @@ internal fun ReaderSettingsScreen(
                     selectedIndex = if (AppPreferences.readAloudBackgroundEnabledState) 0 else 1,
                     palette = palette,
                     onSelect = { at ->
-                        AppPreferences.setReadAloudBackgroundEnabled(context, at == 0)
+                        AppPreferences.setReadAloudBackgroundEnabled(sectionContext, at == 0)
                         // ── AND ASK THE SERVICE TO RE-RENDER ───────────
                         // The service re-reads the setting on every render, so this
                         // is what takes a running notification down (or re-arms it)
@@ -969,7 +981,7 @@ internal fun ReaderSettingsScreen(
                         // The call belongs to the ROW rather than to the setter, to
                         // keep the data layer out of the service layer — the same
                         // shape the pet-overlay switch uses.
-                        ReadAloudService.sync(context)
+                        ReadAloudService.sync(sectionContext)
                     }
                 )
             }

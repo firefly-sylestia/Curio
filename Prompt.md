@@ -43,7 +43,15 @@ from the state rather than from memory.
 
 Along the same line, the summary's `Signing`/`APK`/`SHA-256`/`Keyed providers` rows are gated to the build phase — a lint runner carries none of the provider secrets, and `none (keyless build)` there would have described a **keyless APK that runner never produced**.
 
-**NOT VERIFIED: none of this has run.** Everything above is validated by executing the scripts against fixtures (four report states — all present, one missing, a legacy row with no phase, none at all — plus both summary phases and a red lint log), never by CI. The claim that the split lands near 10 minutes is arithmetic from one measured run, not an observation of a split run. **The reading-bar commit (`7bdda717`) is also still unverified and was pushed with this at the member's instruction.**
+**NOT VERIFIED: none of this has run.** Everything above is validated by executing the scripts against fixtures (four report states — all present, one missing, a legacy row with no phase, none at all — plus both summary phases and a red lint log), never by CI. The claim that the split lands near 10 minutes is arithmetic from one measured run, not an observation of a split run.
+
+**AND THE PREVIOUS PUSH WENT RED — THREE COMPILE ERRORS, ALL MINE, ALL IN THE READING-BAR WORK, AND THE CHECK-ON-PUSH CONTRACT IS WHAT CAUGHT THEM.** Run `35892702470` failed in **3m51s** (a wall that short is itself the diagnostic: it is a compile, not a build). Both editions, same three errors:
+
+1. `BookReaderScreen.kt:4746` — `.padding(horizontal = 12.dp, bottom = 78.dp)`. `Modifier.padding` has a **side** overload (start/end/top/bottom) and a **horizontal/vertical** one, and there is no overload taking `horizontal` with `bottom`; the mixed form is a compile error, not an ignored parameter. It is now two calls. A repo-wide grep for the same mix found **no other instance**.
+2. `ReaderSettingsScreen.kt:963` and `:972` — `Function invocation 'context(...)' expected.` The file already had a `val context = LocalContext.current` near the top, but it belongs to a **different composable**: a local `val` does not reach a sibling scope, so the name `context` fell through to something else entirely and each use became an error that names neither the file's real problem nor the fix. This is the root compile-safety rule about **non-composable lambdas** biting in the same place from the other direction — the context had to be read in the composable scope and **hoisted** into the `onSelect` lambda, which is not a `@Composable` and therefore cannot read `LocalContext` itself.
+
+**The annotation surface earned its keep here:** the Checks tab listed both errors with exact `file#line` entries, on **both** edition jobs, which is what the v465e `rest="${line:10}"` fix was for — the previous red build had shown an empty tab and had to be read by downloading the log artifact by hand. **The JOB LIST also confirmed the v465e matrix was real, not assumed:** `Curio Android · full (validate · lint · release)` and `Curio Android · core (validate · lint · release)` as separate jobs, which is why the same three errors cost two minutes of wall clock instead of being found one edition at a time.
+
 
 ---
 
