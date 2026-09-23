@@ -428,6 +428,9 @@ internal fun ReaderSettingsScreen(
                 var engines by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
                 var enginePicker by remember { mutableStateOf(false) }
                 var picker by remember { mutableStateOf(false) }
+                // v465e — the narrator picker is its own dialog: the Voice row
+                // chooses the PACK, and a pack can carry eleven voices inside it.
+                var narratorPicker by remember { mutableStateOf(false) }
                 var voices by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
                 // Re-asked whenever a picker has been open, so an engine installed WHILE
                 // this page was open appears without the member having to leave it.
@@ -647,6 +650,91 @@ internal fun ReaderSettingsScreen(
                             }
                         }
                     )
+                }
+
+                // ── v465e — WHICH NARRATOR, WHEN THE PACK HAS MORE THAN ONE ─────
+                //
+                // Kokoro carries eleven voices and Piper exactly one, so this row
+                // exists only while a multi-voice pack is chosen — a one-voice
+                // pack gets no row rather than a row that lists one option.
+                //
+                // The names come from the CATALOG, not from the loaded model:
+                // sherpa exposes a speaker COUNT, never a name, and the ids are
+                // copied from the model's own published map (see the `speakers`
+                // field). Reading them from the catalog also means the row can
+                // be drawn without loading 305 MB to say what the options are.
+                val narrators = if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
+                    NeuralVoicePacks.byId(ReaderLook.speakVoice)?.speakers.orEmpty()
+                } else {
+                    emptyList()
+                }
+                if (narrators.size > 1) {
+                    Surface(
+                        onClick = { narratorPicker = true },
+                        shape = RoundedCornerShape(50),
+                        color = palette.ink.copy(alpha = 0.06f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            CurioIcon(CurioIcons.Mic, null, tint = palette.accent, size = 17.dp)
+                            Text(
+                                "Narrator",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = palette.ink.copy(alpha = 0.8f),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                narrators.getOrNull(ReaderLook.speakSpeaker)
+                                    ?: narrators.first(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = palette.accent,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    if (narratorPicker) {
+                        AlertDialog(
+                            onDismissRequest = { narratorPicker = false },
+                            containerColor = palette.paper,
+                            title = {
+                                Text(
+                                    "Who reads it",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontFamily = readerTypeFamily(ReaderLook.typeFace)
+                                    ),
+                                    color = palette.ink
+                                )
+                            },
+                            text = {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    narrators.forEachIndexed { at, name ->
+                                        VoiceChoice(
+                                            label = name,
+                                            live = ReaderLook.speakSpeaker == at,
+                                            palette = palette
+                                        ) { ReaderLook.speakSpeaker = at }
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(onClick = { narratorPicker = false }) {
+                                    Text("Done", color = palette.accent)
+                                }
+                            }
+                        )
+                    }
                 }
 
                 // ── v465c — THE VOICE PACKS THEMSELVES (FULL EDITION) ───────

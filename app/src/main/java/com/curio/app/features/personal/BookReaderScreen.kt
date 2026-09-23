@@ -7562,11 +7562,13 @@ private suspend fun sayAloud(
                 NeuralSpeaker.prepare(context, pack)
             }
             if (ready) {
-                // Speaker 0 of the pack. Piper narrates with one voice and ignores
-                // it; Kokoro's default (af_alloy) is a neutral reader that suits a
-                // book, and the rest of its eleven remain reachable as the pack's
-                // voice list grows into its own picker.
-                NeuralSpeaker.say(text, speed, 0, onDone)
+                // THE MEMBER'S NARRATOR, CLAMPED TO THE PACK ACTUALLY LOADED.
+                // The stored sid can outlive the table it came from (see
+                // [ReaderLook.speakSpeaker]), so it is bounded by the model's own
+                // count here rather than trusted: out of range lands on the last
+                // real voice instead of a generation that returns nothing.
+                val last = (NeuralSpeaker.speakerCount() - 1).coerceAtLeast(0)
+                NeuralSpeaker.say(text, speed, ReaderLook.speakSpeaker.coerceIn(0, last), onDone)
                 return
             }
         }
@@ -9724,6 +9726,19 @@ internal object ReaderLook {
     var speakEngine by mutableStateOf("")
 
     /**
+     * v465e — WHICH NARRATOR INSIDE THE DOWNLOADED PACK, as a speaker id.
+     *
+     * A `sid` is an INDEX into the pack's own speaker table, not a name — "3"
+     * means `af_sarah` for Kokoro and nothing at all for Piper, which has one
+     * voice and ignores it (see [NeuralVoicePacks.Pack.speakers]). It is stored
+     * as an Int and clamped at the reading edge rather than validated on write,
+     * because the table a sid belongs to can change under a member's feet: they
+     * pick narrator 8, then delete the 11-voice pack and download one with four.
+     * A stale 8 must land on a real voice, not on silence or a crash.
+     */
+    var speakSpeaker by mutableStateOf(0)
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -9812,6 +9827,8 @@ internal object ReaderLook {
         // v464 — and which engine reads (the v434 rule: a field left out of here saves
         // every other setting and silently forgets this one).
         speakEngine,
+        // v465e — and which narrator inside a downloaded pack (the v434 rule again).
+        speakSpeaker.toString(),
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
@@ -9885,6 +9902,7 @@ internal object ReaderLookStore {
     private const val SPEAK_SPEED = "reader_speak_speed"
     private const val SPEAK_VOICE = "reader_speak_voice"
     private const val SPEAK_ENGINE = "reader_speak_engine"
+    private const val SPEAK_SPEAKER = "reader_speak_speaker"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -9947,6 +9965,7 @@ internal object ReaderLookStore {
             ReaderLook.speakVoice = prefs.getString(SPEAK_VOICE, ReaderLook.speakVoice).orEmpty()
             ReaderLook.speakEngine =
                 prefs.getString(SPEAK_ENGINE, ReaderLook.speakEngine).orEmpty()
+            ReaderLook.speakSpeaker = prefs.getInt(SPEAK_SPEAKER, ReaderLook.speakSpeaker)
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -9979,6 +9998,7 @@ internal object ReaderLookStore {
                 .putFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
                 .putString(SPEAK_VOICE, ReaderLook.speakVoice)
                 .putString(SPEAK_ENGINE, ReaderLook.speakEngine)
+                .putInt(SPEAK_SPEAKER, ReaderLook.speakSpeaker)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)

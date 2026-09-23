@@ -101,7 +101,10 @@ internal object NeuralSpeaker {
                         // Kokoro is the heavier model and the one whose RTF is
                         // closest to the line, so it is the one that wants the
                         // threads: Piper's 0.357 already has room to spare.
-                        numThreads = threadsFor(6),
+                        // 4 is not a guess — it is what sherpa-onnx's OWN Kotlin
+                        // helper uses for a voices-carrying (Kokoro/Kitten) model
+                        // (`getOfflineTtsConfig`: 4 when `voices` is set, else 2).
+                        numThreads = threadsFor(4),
                         provider = "cpu",
                     )
                 // Piper (and any future VITS pack): the model and espeak alone.
@@ -113,7 +116,7 @@ internal object NeuralSpeaker {
                             dataDir = dataDir.absolutePath,
                             lexicon = lexicon,
                         ),
-                        numThreads = threadsFor(4),
+                        numThreads = threadsFor(2),
                         provider = "cpu",
                     )
             }

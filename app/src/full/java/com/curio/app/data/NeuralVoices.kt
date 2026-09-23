@@ -83,6 +83,20 @@ object NeuralVoicePacks {
         val tier: Tier,
         /** The single directory the archive wraps its files in. */
         val archiveRoot: String,
+        /**
+         * The narrators inside the pack, in SPEAKER-ID ORDER — the index into
+         * this list IS the `sid` handed to the model. Empty for a single-voice
+         * pack (Piper), which is also what hides the narrator row.
+         *
+         * **These are copied from the model's own published map, never
+         * inferred.** Kokoro's ids are NOT alphabetical-by-luck and NOT guessable
+         * from a voice list: `0` is the bare `af` and the ids run
+         * af ×5 → am ×2 → bf ×2 → bm ×2, so a plausible-looking slice of some
+         * other ordering would put a British male's name on an American female's
+         * voice. Source: sherpa-onnx's own page for this exact model
+         * (kokoro-en-v0_19: 11 speakers, 24 kHz, "speaker ID to speaker name").
+         */
+        val speakers: List<String>,
     )
 
     /**
@@ -101,6 +115,9 @@ object NeuralVoicePacks {
             kind = Kind.PIPER,
             tier = Tier.RECOMMENDED,
             archiveRoot = "vits-piper-en_US-lessac-medium",
+            // One voice, so no narrator row: Piper's model has a single speaker
+            // and `numSpeakers()` answers 1 for it.
+            speakers = emptyList(),
         ),
         Pack(
             id = "kokoro-en",
@@ -113,6 +130,22 @@ object NeuralVoicePacks {
             kind = Kind.KOKORO,
             tier = Tier.BEST,
             archiveRoot = "kokoro-en-v0_19",
+            // sid order, verbatim from the model's published map — do not sort,
+            // do not "tidy" the bare `af` into something prettier, and do not
+            // reorder: the index is the id the model is asked for.
+            speakers = listOf(
+                "af \u00b7 American female",
+                "af_bella \u00b7 American female",
+                "af_nicole \u00b7 American female",
+                "af_sarah \u00b7 American female",
+                "af_sky \u00b7 American female",
+                "am_adam \u00b7 American male",
+                "am_michael \u00b7 American male",
+                "bf_emma \u00b7 British female",
+                "bf_isabella \u00b7 British female",
+                "bm_george \u00b7 British male",
+                "bm_lewis \u00b7 British male",
+            ),
         ),
     )
 

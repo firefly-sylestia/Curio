@@ -49,6 +49,8 @@ object NeuralVoicePacks {
         val kind: Kind,
         val tier: Tier,
         val archiveRoot: String,
+        /** See the full edition's twin: speaker-id order, or empty for one voice. */
+        val speakers: List<String>,
     )
 
     /** Empty, and that emptiness is what closes the rows (see the header). */
