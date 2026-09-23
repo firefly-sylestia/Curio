@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
 import com.curio.app.data.PersonalKinds
@@ -944,8 +945,19 @@ private fun AddBookSheet(
                 color = ink
             )
 
-            // v458 — TWO doors now: search by title, or type it yourself. The
-            // third (scan the ISBN barcode) is gone with the camera permission.
+            // ── v465b — THE DOOR ROW IS PER EDITION ────────────────────────
+            // Search and Type are always here. "Scan ISBN" is a FULL-edition
+            // door, and it is the ONLY difference the member asked for in this
+            // row: the scanner needs CameraX + ML Kit and a CAMERA permission,
+            // all three of which the core edition deliberately does not carry,
+            // so its APK claims no camera at all.
+            //
+            // The flag is not decoration. The sheet itself is a seam — the real
+            // camera screen lives in `src/full`, and `src/core` carries a no-op
+            // twin with the same signature — so drawing the door without the
+            // flag on the core edition would open a black rectangle. Read the
+            // flag, never the seam's existence.
+            var scannerOpen by remember { mutableStateOf(false) }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -953,19 +965,40 @@ private fun AddBookSheet(
                 AddDoor(
                     glyph = CurioIcons.Search,
                     label = "Search",
-                    selected = !manual,
+                    selected = !manual && !scannerOpen,
                     accent = accent,
                     ink = ink,
-                    onClick = { manual = false }
+                    onClick = { manual = false; scannerOpen = false }
                 )
+                if (BuildConfig.EDITION_ISBN_SCANNER) {
+                    AddDoor(
+                        glyph = CurioIcons.Screenshot,
+                        label = "Scan ISBN",
+                        selected = scannerOpen,
+                        accent = accent,
+                        ink = ink,
+                        onClick = { manual = false; scannerOpen = true }
+                    )
+                }
                 AddDoor(
                     glyph = CurioIcons.Edit,
                     label = "Type",
-                    selected = manual,
+                    selected = manual && !scannerOpen,
                     accent = accent,
                     ink = ink,
-                    onClick = { manual = true }
+                    onClick = { manual = true; scannerOpen = false }
                 )
+            }
+
+            // The scanner takes the whole sheet while it is open, the same way
+            // a picked file does: a live viewfinder behind a search field is
+            // two screens fighting for the same tap.
+            if (scannerOpen) {
+                IsbnScannerSheet(
+                    onDismiss = { scannerOpen = false },
+                    onAdded = onAdded
+                )
+                return@Column
             }
 
             if (manual) {
@@ -1400,9 +1433,9 @@ private val bookHttp: OkHttpClient by lazy {
 }
 
 /**
- * One of the add-book sheet's doors — Search or Type. (v458 — the third, Scan
- * ISBN, is gone with the camera permission.) A selected door is the accent
- * mixed into the fill it replaces: opaque, never alpha-laid (v412).
+ * One of the add-book sheet's doors — Search, Type, and in the full edition
+ * Scan ISBN. A selected door is the accent mixed into the fill it replaces:
+ * opaque, never alpha-laid (v412).
  */
 @Composable
 private fun AddDoor(

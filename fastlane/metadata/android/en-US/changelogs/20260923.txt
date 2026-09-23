@@ -1,5 +1,6 @@
 ADD:
-- Curio ships in two editions that install side by side: **Curio** (the smaller app) and **Curio Full**. Full carries the on-device offline voice-to-text models; Curio keeps everything else and is the lighter download. An existing install stays the app it was, so a member who never chooses keeps exactly what they have.
+- Curio ships in two editions that install side by side: **Curio** (the smaller app) and **Curio Full**. Full carries the on-device offline voice-to-text models and the ISBN barcode scanner; Curio keeps everything else, is the lighter download, and asks your phone for no camera at all. An existing install stays the app it was, so a member who never chooses keeps exactly what they have.
+- Books: scanning a barcode is back, in Curio Full — the add-a-book sheet has its three doors again (Search, Scan ISBN, Type), pointing the lens at an ISBN fills in the title, author, cover and length from Open Library, and "Add to shelf" is one tap away. The core edition leaves the scanner and its camera permission to the full one, so the smaller app is smaller on purpose.
 - Books: a book with a document opens straight into the reader — tapping its card used to land on the book's page first, so the page in the middle of a reader and their own reading is gone (a book with no file still opens its page, which is where a file gets attached).
 - Books: hold a book on the shelf and it offers its own actions — Open in reader, Pin to Home, and Remove — instead of the removal being the only thing a hold could say.
 - Home: pin a book to the shelf row and it leads the row wearing a small pin, so the book you are actually reading is always the first chip; the shelf shows the same mark, because that is where the pin is set.
@@ -29,6 +30,5 @@ FIX:
 - Reading: the Voice list is filled the first time you open it — starting a speech engine takes a moment, so the picker used to say no voices were installed until it was opened a second time.
 
 REMOVE:
-- Books: the ISBN barcode scanner is gone, and the camera permission goes with it — Search and Type are the two doors that remain.
 - Privacy: the app no longer asks for all-files access; its only user was the wallpaper experiment retired earlier.
 - Reading: the abridged Webster's 1913 download is gone — the complete 1913 sits beside WordNet and holds the same text in full.

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  v465b — THE FULL EDITION'S CAMERA PERMISSION, AND ONLY THE FULL EDITION'S.
+
+  This file is the whole reason the permission lives in a FLAVOR source set
+  rather than in `main`: the ISBN scanner is a full-edition feature (the core
+  edition has neither the scanner's screen nor its five CameraX / ML Kit
+  dependencies), and `android.permission.CAMERA` exists for nothing else in the
+  app. The v458 removal commit checked that claim before removing it — every
+  other image door (an avatar, a pet, a note's photo, a gallery wall) hands the
+  job to the system picker, whose camera belongs to that app, not to Curio.
+
+  So the core edition declares NO camera permission and the Play listing shows
+  no camera line for it, while the full edition restores exactly what v458 took:
+  the permission, and `android.hardware.camera` as `required="false"` (a tablet
+  without a camera must still be able to install, and the scanner's own
+  permission gate is the screen's "Camera access is needed" state).
+
+  AGP merges this with `app/src/main/AndroidManifest.xml`, so nothing here is
+  duplicated from it and nothing here is required to be complete — the merged
+  result is what the full edition installs.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+</manifest>

@@ -288,12 +288,14 @@ android {
             // the other edition — an install that fails on the last tap.
             buildConfigField("String", "EDITION", "\"core\"")
             buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "false")
+            buildConfigField("boolean", "EDITION_ISBN_SCANNER", "false")
         }
         create("full") {
             dimension = "edition"
             applicationId = "com.curio.app.full"
             buildConfigField("String", "EDITION", "\"full\"")
             buildConfigField("boolean", "EDITION_OFFLINE_TRANSCRIPTION", "true")
+            buildConfigField("boolean", "EDITION_ISBN_SCANNER", "true")
         }
     }
 
@@ -467,6 +469,35 @@ dependencies {
     // editions, so no file under `main` may import `org.vosk.*`. Any future
     // Vosk-based work goes in `src/full`, never in `main`.
     "fullImplementation"(libs.com.alphacephei.vosk.android)
+
+    // ── v465b — THE ISBN SCANNER'S LENS STACK, FULL EDITION ONLY ──────────
+    // Five dependencies, and every one of them is FULL-only for the same reason
+    // Vosk is: they exist solely to serve the scanner, and the member's line for
+    // the split was that the core edition stays the smaller app. They reach the
+    // build as `fullImplementation`, never `implementation` — `implementation`
+    // would put them in BOTH editions and quietly undo the split.
+    //
+    // The scanner is the one feature that comes BACK in the full edition: v458
+    // removed it (and its CAMERA permission) because it was the app's largest
+    // remaining binary cost, which was the right call at the time and the wrong
+    // one once size stopped being what the build optimises for.
+    //
+    // ⚠️ Same structural rule as Vosk: the scanner's screen imports
+    // `androidx.camera.*` and `com.google.mlkit.*`, so the REAL screen lives in
+    // `app/src/full/java/.../IsbnScannerScreen.kt` and `app/src/core` carries an
+    // identical-signature no-op twin. `main` (the add-a-book sheet) may only
+    // call the composable and read `BuildConfig.EDITION_ISBN_SCANNER` — never
+    // import a camera or ML Kit type.
+    //
+    // `kotlinx-coroutines-play-services` is deliberately NOT re-added: the
+    // scanner's ML Kit call is driven by `addOnSuccessListener` /
+    // `addOnCompleteListener`, and the one `kotlinx.coroutines.tasks.await`
+    // import the old file carried was dead (no `.await()` call existed in it).
+    "fullImplementation"(libs.mlkit.barcode.scanning)
+    "fullImplementation"(libs.androidx.camera.core)
+    "fullImplementation"(libs.androidx.camera.camera2)
+    "fullImplementation"(libs.androidx.camera.lifecycle)
+    "fullImplementation"(libs.androidx.camera.view)
 
     // v458 — the test scaffolding is gone with the tests it never had: there is
     // no source in `app/src/test` and no `androidTest` source set at all, so
