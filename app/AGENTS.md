@@ -9055,12 +9055,42 @@ only ever catches taps that mean "not in any of these".
   them, so they cannot disagree — do not hand-place points in that path
   again. The ruled lines stop clear of the gutter (the binding margin) and
   the ribbon falls past the book's own foot.
-- **Opening a Cabinet level ANIMATES.** `CabinetV2Content` wraps its
-  `key(openLevel)` content in one `Box` whose `graphicsLayer` reads
-  `levelSwap` (alpha + 0.975 to 1 scale + 16dp rise, tween 300): the layer
-  updates without recomposing the grid, and the level's own scroll position is
-  created fresh by `key(openLevel)`, so the motion covers it. Every level
-  change — a collection, a shelf, the Cupboard, back home — goes through it.
+- **Opening a Cabinet level CROSSES OVER (v467; the v407 rise-and-fade is gone,
+  and the member rejected building this on the Felicity layer — *"remove the
+  felicity implementation and do the best smooth animation what u prefer"*).**
+  `CabinetV2Content` wraps its level content in
+  `AnimatedContent(targetState = openLevel)`, so the outgoing and incoming levels
+  are **composed at the same time**. The v407 shape was `ENter-ONLY`: one
+  `Animatable` (`levelSwap`) snapped to 0 and eased back to 1, so the level that
+  was leaving was disposed in the SAME FRAME the incoming one mounted at alpha 0
+  — **the page went visibly empty and then rose**, which is what read as a
+  glitch. That is a shape fault, not a curve fault, and no easing change would
+  have fixed it. Direction comes from the level (`initialState.isEmpty()` →
+  descending, so it drifts in from the right; back returns from the left, and a
+  level→level move passes through the root so two directions are enough), each
+  half drifts about 6% of the width rather than a full page — one screen changing
+  its contents, not a push — and the incoming fade is held back 110ms so the
+  crossing reads as one movement. `SizeTransform(clip = false)` because the two
+  levels are the same size and clipping would crop the drift into the hard seam
+  this replaces.
+  - **`key(level)` is KEPT even though `AnimatedContent` already keys content by
+    target state.** The FRESH `rememberLazyGridState()` per level is what makes
+    every level open from the TOP (v3xx — one shared remembered scroll made a
+    collection land mid-list); relying on the animation library's internal
+    keying for that would be relying on an implementation detail.
+  - **The body reads `level`, not `openLevel`.** `openCollection` (the outer
+    val) derives from `openLevel` — the level being animated TOWARDS — so inside
+    the transition the outgoing frame would resolve the level that is LEAVING to
+    the collection that is ARRIVING. The grid resolves its own
+    `levelCollection = collections.firstOrNull { it.id == level }`. The outer val
+    keeps its own job: the hero's title and subtitle.
+  - **⚠️ THE HERO IS DELIBERATELY STILL OUTSIDE THE TRANSITION**, so its title
+    swaps instantly while the content crosses over. Moving it in would compose
+    two torn banners with two glass backdrops for the length of every level
+    change, and `CabinetHeroHeader` is shared with the legacy Cabinet (`if (!wide)`
+    renders it as a sibling after the grid; wide windows render it as the grid's
+    FIRST ITEM, so there it DOES cross over with everything else). Recorded rather
+    than silently left undone.
 - **The empty-Cabinet suggestion rails are REMOVED** (user request, 2026-09-19).
   There is no "Your Cabinet is empty" block, no shuffled picks and no Shuffle
   pill: `v2HomeItems` leads with the Cupboard card and the shelves.
@@ -10212,7 +10242,8 @@ Asked for in the same breath as the API fixes — *"also fetching artworks, pain
 - **THE INTRO HAS AN ONLINE STEP (`OnlineSlide`, `OnboardingScreen`).** The member: *"add online in intro, with log in in that, and exlaing you can share your thoughts"*. The tour explained the deck, the theme and the search engine and said nothing about the half of the app that only exists with an account, so a member met Social as a stranger with no idea why they would want one. It is the **same shape as the theme and search steps** (kicker, headline, one paragraph in the editorial face) with **one door**, and it sits **before** setup — signing in is something to offer while the member is still being shown around, and the permission cards are the last thing they should be asked. It never blocks: the step is skippable like every other, and `onSignIn` **finishes the intro first** and opens the account page over Home, so nothing here can strand a member inside the tour. The pager's count, the index branches and the page pills all move by one (`OnboardingSlides.size + 4`, `isLastSlide = size + 3`, pills `0..size + 2`).
 
 - **A BOOK YOU CAN OPEN OPENS, AND A HELD BOOK HAS ACTIONS (`BookShelfScreen`, `AppPreferences.pinnedBookIdState`, `BookChip`/`BookShelfCard`).** The member asked for two things in one breath: *"a way for user to open the added book directly without going through the book detail"* and *"when added a pdf in book, user can pin it in home screen shelf door and it shows with the small in icon"*. The card went to the book's PAGE because that page is where a file is attached — once a book HAS a document, that page is a detour between a reader and their reading — so the tap now asks the question the detail page's own pill asks (`BookFiles.documentOf(book.documentPath, book.coverUrl)`) and lands in the reader when there is something to read, in the detail page when there is not (which is exactly where a file can be attached). The hold used to mean ONE thing — *Remove?* — which made the destructive door the only door a hold had on a card too small for a row of buttons; it is the book's action list now (**Open in reader** when a document exists, **Pin to Home** / **Unpin**, Remove), with the removal as a row inside it rather than the question the panel asked. **One pin, not a set**: the shelf door is a strip of chips and the point of a pin is that the book you are reading LEADS it — a list of pins would be the shelf again in a worse order — so `pinned_book_id` holds one id, the pinned book sorts to the front before the row's `take`, and both the Home chip and the shelf card wear the same top-corner disc (the tick owns top-right; the pin takes top-left, same size, same accent, same on-accent ink — one family of marks, so neither reads as decoration). The pin rides `initHomeRows`'s seeding rather than a fourth call site, because it must be read at exactly the same moments.
-- **THE JOURNALS READ AS A COLLECTION (`JournalListScreen`'s `JournalGridCell` + `LazyVerticalGrid(GridCells.Fixed(3))`).** The member: *"in collections use 3 grid for books etc"* — and the shelf has been a three-column grid since it was built, so the journals were the half that did not match. A cell keeps what a day IS (the day figure in the display face, the title, the mood glyph, the word count) and drops what only fits in a row (the preview line, the time, the checklist preview) — **the preview and the checklist were not lost, they moved to the day's own screen, one tap away**. The month heads keep the full width (`GridItemSpan(maxLineSpan)`) because a month label squeezed into a third of the page reads as a cell. The accent spine survives, turned across the top: a coloured day must still be findable down the grid without opening it, and a vertical spine in a narrow cell eats the width the title needs.
+- **⚠️ THE JOURNALS ARE ROWS AGAIN — THE v461 GRID IS REVERTED (v467).** The member: *"sho the 3 grid in collections ersonals etc not in journals resture the row view of jurnal"*. v461 had read the earlier *"in collections use 3 grid for books etc"* as covering journals too, on the reasoning that the shelf and the journals list are two halves of one collection; the member has now drawn the line, and the reasoning cuts the other way — **a journal day carries a mood, a word count and a line of its own writing, and a third of a phone is about fifteen characters wide**, which is why the pre-v461 row exists. `JournalListScreen` is a `LazyColumn` of `MonthHead` + `JournalRow` again, `JournalGridCell` is **deleted**, and the four `androidx.compose.foundation.lazy.grid.*` imports went with it (`LazyColumn` + `lazy.items` were already imported and had been left behind, unused, by v461). **The grouping and the month heads are untouched** — the heads are ordinary list items again rather than `GridItemSpan(maxLineSpan)` items, and the grouping still follows the list's ORDER, so reversing that list reverses the months with it.
+- **The 3-up lives in the CABINET now, and only on the levels whose cells are covers (v467).** `CabinetV2Content`'s level grid is `GridCells.Fixed(3)` on a phone for a **collection's own level** (`levelCollection != null` — its members, and "Currently reading", which is books, so covers) and for **`SHELF_LEVEL_PERSONAL`** (journal days and books). Favorites / Completed / Saved / Notes keep **two across**, because their cells carry sentences — a liked-topic row or a saved capture in a third of the width loses the title that is the reason to show it. The split is by CONTENT, not by level name, and wide windows keep `Adaptive(176.dp)` untouched. **Caveat worth knowing:** a collection's members are `V2LikedRow`/`CurioEntryCard` — cards, not covers — so those cells are the ones to watch at ~101dp on a narrow phone.
 - **SETTINGS IS RE-CUT, WITH ONE ADVANCED PAGE (`SettingsPage.ADVANCED`, `CurioRoutes.SETTINGS_ADVANCED`, `AdvancedSection`).** The member: *"maybe simplifying settings, like yk some are realy confusing to find"*, and to the scope question **"re-cut + move rarely-used rows into one Advanced page + remove what's concluded"**. The offenders in the hub's first card were three doors that are SETUP rather than settings — Recording (you pick a voice-note quality once), the Pet designer (you draw your pet once) and Experiments (a try-before-ship door) — and all three sat BETWEEN the member and the rows they do change. They live on an Advanced page now, one row away from the hub (its own section screen, registered in the nav host like every other settings section so it arrives with the family's shared-element motion), and **every door still exists**: the rows navigate to exactly the screens they always did, and only their deep-search keys are new (`adv-*`). **The "remove what's concluded" half is deliberately NOT in this pass**: the audit's list of concluded flags (nine preferences the UI still reads but nothing can write) needs each read site walked before anything is deleted, and a settings row removed on a guess is a feature someone loses quietly.
 
 ### v460 — the posters are TMDB's, the sky's glow has no edges, and the version steps to 1.4.0

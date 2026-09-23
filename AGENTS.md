@@ -178,10 +178,26 @@ definition file**. Do not assume parameter names from memory.
     field'` — at the FIRST inserted declaration — followed by thirty-odd
     `@Composable invocations can only happen from the context of a @Composable
     function` errors INSIDE the function that lost it. Neither line names the
-    insertion. The checker must therefore flag BOTH shapes: the same annotation
-    twice in one run, AND an annotation whose next declaration is a
+    insertion. The checker must therefore flag THREE shapes: the same annotation
+    twice in one run; an annotation whose next declaration is a
     `val`/`var`/`const val` (a *local* `@Suppress` on a local `val`, and a local
-    `@Composable fun`, are legal and must not be flagged).
+    `@Composable fun`, are legal and must not be flagged); and — v467 — **a doc
+    comment IMMEDIATELY followed by an annotation IMMEDIATELY followed by
+    ANOTHER doc comment**.
+
+    **The third shape is the quietest one and it is worth knowing why.** When an
+    insertion lands *between* a declaration's doc comment and its annotation, the
+    annotation is captured by the inserted function and the ORIGINAL function is
+    left with no annotation at all — so nothing is duplicated and the
+    "appears twice" check cannot see it. **The tell is structural: two doc blocks
+    in a row with an annotation between them means that annotation has been
+    displaced from the function the FIRST block describes.** It compiles more
+    often than the other two shapes (the annotation may be redundant where it
+    lands, or the function that lost it may not need it), which is exactly why it
+    survives for months. v461's `JournalGridCell` did this to `JournalRow`'s
+    `@OptIn(ExperimentalFoundationApi::class)` in `JournalListScreen.kt`; it was
+    found in v467 only because the cell was being deleted and the strand was
+    visible at the seam.
 
     Five of these landed in one session (v458's snapped `@Composable`, v461's
     `SearchSlide` and the v460 gradient helper, v462's `JournalGridCell` and
@@ -189,6 +205,14 @@ definition file**. Do not assume parameter names from memory.
     this rule was written, which is the point: **the rule only works if the
     scan runs after the edit**, on the whole tree, not on the file you were
     reading). It is the most expensive habit in this codebase.
+
+    **⚠️ AND THE PROOF OF THAT IS `JournalGridCell` ITSELF: this rule named it in
+    v462 and the damage was STILL IN THE TREE until v467**, when the cell's
+    deletion exposed the displaced `@OptIn` and `JournalRow`'s stranded doc
+    comment. A named instance is not a fixed one. **There is no checker script in
+    this repository** (`.github/scripts/` holds the CI readers only) despite this
+    rule requiring one — so the scan is done by hand or not at all, and the v467
+    run of it found the tree otherwise clean for all three shapes.
 
     **The habit that prevents all of it:** before writing an insertion whose
     anchor is a declaration, `grep -n -B2` that anchor — if either line above

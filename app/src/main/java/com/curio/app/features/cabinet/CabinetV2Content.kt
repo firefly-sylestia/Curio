@@ -41,11 +41,19 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -659,8 +667,10 @@ fun CabinetV2Content(navController: NavController) {
         // ── The scrolling grid — runs UNDER the hero.
         // v3xx — each level owns a FRESH grid state: the single shared
         // remembered scroll made opening a collection land MID-list and made
-        // page switches visibly jump (the glitch). key(openLevel) recreates
-        // the grid per level, so every level opens from the TOP.
+        // page switches visibly jump (the glitch). A per-level key recreates
+        // the grid per level, so every level opens from the TOP (v467: the key
+        // is now `key(level)` inside the `AnimatedContent` below, which is also
+        // what lets both levels be composed at once — see the swap machinery).
         // The wide-window hero — the grid's first item on tablets/landscape
         // (shared by the regular grid and the Everything masonry below).
         val wideHero: @Composable () -> Unit = {
@@ -679,38 +689,66 @@ fun CabinetV2Content(navController: NavController) {
             )
         }
 
-        // ── OPENING A LEVEL ANIMATES (v407: "opening collections doesnt have
-        // any animations"). The swap used to be an instant cut: tapping a
-        // collection replaced the whole grid in the same frame, so going INTO
-        // something read as a glitch. Now every level change — a collection, a
-        // shelf, the Cupboard, back home — rises 14dp and fades in over 300ms
-        // with a whisper of scale, the same idiom the Cupboard's filter swap
-        // already uses. The content itself is recreated per level (the key
-        // below), so the motion also covers the fresh scroll position.
-        val levelSwap = remember { Animatable(1f) }
-        var lastLevel by remember { mutableStateOf(openLevel) }
-        LaunchedEffect(openLevel) {
-            if (lastLevel == openLevel) return@LaunchedEffect
-            lastLevel = openLevel
-            levelSwap.snapTo(0f)
-            levelSwap.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(300, easing = FastOutSlowInEasing)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    val v = levelSwap.value
-                    alpha = v
-                    val scale = 0.975f + 0.025f * v
-                    scaleX = scale
-                    scaleY = scale
-                    translationY = (1f - v) * 16.dp.toPx()
-                }
-        ) {
-        key(openLevel) {
+        // ── v467 — THE LEVEL SWAP CROSSES OVER INSTEAD OF CUTTING.
+        //
+        // v407 gave this a rise-and-fade because tapping a collection used to
+        // replace the whole grid in a single frame. It was still glitchy, and the
+        // reason is the SHAPE of that animation, not its curve: it was
+        // ENTER-ONLY. `levelSwap` snapped to 0 and eased back to 1 on every level
+        // change, so the outgoing level was disposed in the SAME FRAME the
+        // incoming one mounted at alpha 0 — the page went visibly empty and then
+        // rose into place. A fade with nothing behind it is a blank frame.
+        //
+        // `AnimatedContent` composes BOTH levels at once, so there is no frame
+        // where the page is empty: the outgoing one leaves while the incoming one
+        // arrives, and neither ever holds the screen alone. Direction comes from
+        // the level itself — going INTO something descends, coming back returns —
+        // and each half drifts a small opposite amount (~6% of the width, not a
+        // full page: this is one screen changing its contents, not a push), with
+        // the incoming fade held back 110ms so the cross reads as one movement
+        // rather than a blur.
+        //
+        // ⚠️ THE HERO IS DELIBERATELY STILL OUTSIDE THIS. `CabinetHeroHeader` is
+        // a sibling drawn after the content, and it owns the torn banner, the
+        // sheet extent and the search field. Moving it in would compose two torn
+        // banners with two glass backdrops for the length of the transition, and
+        // the header is shared with the legacy Cabinet — so the banner keeps its
+        // instant title swap and only the content crosses over. Recorded rather
+        // than silently left undone.
+        AnimatedContent(
+            targetState = openLevel,
+            transitionSpec = {
+                // Root → level descends (in from the right); level → root
+                // returns (in from the left). A level → level move cannot happen
+                // without passing through the root, so two directions are enough.
+                val descending = initialState.isEmpty() && targetState.isNotEmpty()
+                val drift = if (descending) 1 else -1
+                val enter = slideInHorizontally(
+                    animationSpec = tween(340, easing = FastOutSlowInEasing),
+                    initialOffsetX = { full -> drift * full / 16 }
+                ) + fadeIn(
+                    animationSpec = tween(240, delayMillis = 110)
+                )
+                val leave = slideOutHorizontally(
+                    animationSpec = tween(340, easing = FastOutLinearInEasing),
+                    targetOffsetX = { full -> -drift * full / 22 }
+                ) + fadeOut(
+                    animationSpec = tween(170)
+                )
+                // `clip = false`: the two levels are the same size, so there is
+                // nothing to size-animate, and clipping would crop the drift at
+                // the edges and give back the hard seam this replaces.
+                (enter togetherWith leave) using SizeTransform(clip = false)
+            },
+            label = "cabinetLevel",
+            modifier = Modifier.fillMaxSize()
+        ) { level ->
+        // `key` is kept even though AnimatedContent already keys its content by
+        // target state: the FRESH LazyGridState per level is what makes every
+        // level open from the TOP (v3xx — a single shared remembered scroll made
+        // opening a collection land mid-list). One brace open for one brace open,
+        // which is why the body below needed no restructuring at all.
+        key(level) {
         // ── THE CUPBOARD — the JSX masonry wall: a dense STAGGERED grid of
         // covers-only posters (books tall jackets, albums squares, series
         // posters — no cards, no titles, no boxes, just the art with a
@@ -719,7 +757,7 @@ fun CabinetV2Content(navController: NavController) {
         // changes, and (v3xx43) keeps its OWN size while it moves.
         // Favorites is the LIKED-TOPIC shelf now, so it renders in the
         // regular grid below instead of wearing this media wall.
-        if (openLevel == "everything") {
+        if (level == "everything") {
             // v3xx45 — THE CUPBOARD WALL IS A PACKED SHELF MOSAIC.
             //
             // The wall used to be an 8-column LazyVerticalGrid with a span
@@ -801,9 +839,37 @@ fun CabinetV2Content(navController: NavController) {
                 }
             }
         } else {
+        // ── v467 — THE LEVEL'S OWN COLLECTION, RESOLVED FROM THE ANIMATED LEVEL.
+        //
+        // `openCollection` (the outer val) is derived from `openLevel`, which is
+        // the level being animated TOWARDS. Inside `AnimatedContent` the outgoing
+        // frame is still composed while the incoming one arrives, so reading the
+        // outer val there would resolve the level that is LEAVING to the
+        // collection that is ARRIVING. This one reads the level this frame is
+        // actually showing. The outer val keeps its own job — the hero's title and
+        // subtitle, which should name the destination the member just chose.
+        val levelCollection = collections.firstOrNull { it.id == level }
         LazyVerticalGrid(
             state = rememberLazyGridState(),
-            columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
+            // ── v467 — THE TILE LEVELS ARE THREE ACROSS, THE CARD LEVELS STAY TWO.
+            //
+            // The member: *"sho the 3 grid in collections ersonals etc"* (and
+            // explicitly *not* in journals, which went back to rows in the same
+            // change). Three columns suit a cell that IS a cover — a book jacket,
+            // a journal day — which is why the book shelf and the journals list
+            // have used three since they were built. They do not suit a cell that
+            // carries sentences: a liked-topic row or a saved capture in a third
+            // of the width loses the title that is the reason to show it.
+            //
+            // So the split is by CONTENT, not by level name:
+            //   `levelCollection != null` — a collection's members, and
+            //   "Currently reading" (books, so covers);
+            //   `SHELF_LEVEL_PERSONAL` — journal days and books.
+            // Favorites / Completed / Saved / Notes keep two across.
+            columns = if (wide) GridCells.Adaptive(minSize = 176.dp)
+                else if (levelCollection != null || level == SHELF_LEVEL_PERSONAL)
+                    GridCells.Fixed(3)
+                else GridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
@@ -825,9 +891,9 @@ fun CabinetV2Content(navController: NavController) {
             }
 
             when {
-                openCollection != null -> {
+                levelCollection != null -> {
                 v2DetailItems(
-                    collection = openCollection,
+                    collection = levelCollection,
                     entriesById = entriesById,
                     searching = searching,
                     searchQuery = searchQuery,
@@ -844,15 +910,15 @@ fun CabinetV2Content(navController: NavController) {
                     onOpenEntry = { id ->
                         navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
                     },
-                    onMemberLongPress = { index -> pillTarget = PillTarget.Member(openCollection.id, index) },
-                    onAdd = { addTarget = AddTarget.Collection(openCollection) },
-                    onRename = { renameTarget = openCollection.id },
-                    onDelete = { deleteTarget = openCollection.id }
+                    onMemberLongPress = { index -> pillTarget = PillTarget.Member(levelCollection.id, index) },
+                    onAdd = { addTarget = AddTarget.Collection(levelCollection) },
+                    onRename = { renameTarget = levelCollection.id },
+                    onDelete = { deleteTarget = levelCollection.id }
                 )
                 // v389 — "Curiying now" also holds the member's OWN shelf books
                 // that are part-way through (additive: the collection's saved
                 // members keep their grid above and their door below).
-                if (openCollection.id == "shelf:currently-reading") {
+                if (levelCollection.id == "shelf:currently-reading") {
                     v2ReadingNowItems(
                         books = readingBooks,
                         searchQuery = searchQuery,
@@ -867,7 +933,7 @@ fun CabinetV2Content(navController: NavController) {
                 // v3xx43 — FAVORITES = the topics you liked (the reveal
                 // heart), listed as topic rows; the media covers live in the
                 // Cupboard, so the two shelves are no longer identical.
-                openLevel == SHELF_LEVEL_FAVORITES || openLevel == SHELF_LEVEL_COMPLETED -> v2LikedTopicItems(
+                level == SHELF_LEVEL_FAVORITES || level == SHELF_LEVEL_COMPLETED -> v2LikedTopicItems(
                     likes = likedTopics,
                     searchQuery = searchQuery,
                     catalogReady = catalogReady,
@@ -885,9 +951,9 @@ fun CabinetV2Content(navController: NavController) {
                 // v389e — NOTES IS NOT THAT SHELF ANY MORE: it lists the
                 // member's own notes and to-do lists, so it waits on the PERSONAL
                 // store and not on the capture archive (see the shelf below).
-                openLevel == SHELF_LEVEL_SAVED && !archiveReady ->
+                level == SHELF_LEVEL_SAVED && !archiveReady ->
                     v2SkeletonItems(count = skeletonCount)
-                openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
+                level == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
                     likes = emptyList(),
                     entries = entries,
@@ -920,7 +986,7 @@ fun CabinetV2Content(navController: NavController) {
                 // they keep their own shelf, the Cupboard, search and Everything
                 // (user decision: "Replaced by the notes and lists … saved
                 // capture entries stop appearing on that shelf").
-                openLevel == SHELF_LEVEL_NOTES -> v2PersonalWritingItems(
+                level == SHELF_LEVEL_NOTES -> v2PersonalWritingItems(
                     journals = notePages,
                     books = emptyList(),
                     searchQuery = searchQuery,
@@ -946,7 +1012,7 @@ fun CabinetV2Content(navController: NavController) {
                 // v387 — the PERSONAL shelf: journals + books, each in its
                 // own small view, with the collection's saved members one tap
                 // away at the foot (nothing that lived here was removed).
-                openLevel == SHELF_LEVEL_PERSONAL -> v2PersonalWritingItems(
+                level == SHELF_LEVEL_PERSONAL -> v2PersonalWritingItems(
                     // v389e — the days only: a note and a list live in the Notes
                     // collection (see `journalDays`).
                     journals = journalDays,

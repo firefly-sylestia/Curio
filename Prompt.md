@@ -6,7 +6,37 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §60 — the pipeline: lint off the critical path, and two asks that could not be built as asked (v466, CI ONLY)
+## 0. THE CURRENT REQUEST — §61 — the Cabinet's level animation, a 3-up for the tile levels, and the journals back to rows (v467; PLAN)
+
+> the collection ui opening closing upboard nd collections is very visual glitchy, also sho the 3 grid in collections ersonals etc not in journals resture the row view of jurnal
+
+**THREE ASKS, AND THE THIRD ONE IS A REVERT OF A v461 DECISION.** Asked first (a new measure with a permanent layout consequence, and one of these was a genuine fork):
+
+| The question | The member's answer |
+| --- | --- |
+| Which levels go 3-across | **Only the cover/tile levels** — the Personal shelf's journals + books, and the collections; the text-card levels stay 2 |
+| The level open/close motion | **"remove the felicity implementation and do the best smooth animation what u prefer"** |
+| The orphaned 3-column journal cell | **Delete it** |
+
+**The "felicity" note, read carefully:** the Cabinet's level animation is **already hand-rolled** — it uses a private `Animatable`, not the Felicity motion layer (the only `CurioMotion` use in the whole Cabinet package is two `animateColorAsState` calls on the hero's fill/ink, in `CabinetScreen.kt`). So the instruction is taken as *"do not build this on that layer; write the smoothing yourself"*, and the app-wide Felicity experiment is **left alone** — removing a shipped, default-off experiment is a mass deletion and was not what was asked.
+
+### What is actually wrong with the open/close — read from the code, not guessed
+
+The animation is a single `Animatable` (`levelSwap`) that `snapTo(0f)` then eases to `1f` on every `openLevel` change, applied through one `graphicsLayer` (alpha, 0.975→1 scale, a 16dp rise) around the grid. Two defects fall out of that shape:
+
+1. **IT IS ENTER-ONLY.** The outgoing level is disposed in the same frame the incoming one mounts at alpha 0, so the page goes **visibly empty** and then rises. That is the glitch: not a bad curve, a missing half.
+2. **THE HERO IS OUTSIDE THE ANIMATED BOX** (`CabinetHeroHeader` is a sibling, drawn after the grid), so the banner's title swaps instantly while the grid fades — the two halves of one level change disagree.
+
+### The plan
+
+- **The transition becomes `AnimatedContent(targetState = openLevel)`**, so outgoing and incoming are composed **at the same time** and the screen never empties. Direction is derived (root → level descends, level → root returns) and each half gets a small opposite drift plus a fade, with the incoming held back a beat so the crossing reads as one movement instead of a blur. `SizeTransform(clip = false)` so the container never clips the slide.
+- **The body keeps its shape.** AnimatedContent's content lambda supplies the level as a parameter named `level`, the inner `key(level)` (which guarantees "every level opens from the TOP") is kept, and the level-dependent reads inside the grid body become `level` / a locally-resolved `levelCollection`. **The brace structure is untouched** — one brace open replaces one brace open — which is the whole reason this can be a surgical edit in a 4,300-line file.
+- **3-across**: `GridCells.Fixed(3)` for the levels that show covers/tiles (`openCollection != null`, including "Currently reading" — covers; and `SHELF_LEVEL_PERSONAL` — journals + books), `Fixed(2)` for the card levels, `Adaptive(176.dp)` unchanged on wide windows.
+- **Journals revert to the row view** in `JournalListScreen` (a `LazyColumn` of `MonthHead` + `JournalRow`, exactly the pre-v461 shape), and v461's `JournalGridCell` is deleted — `JournalRow` is still fully intact, so this is a restore and not a rewrite.
+
+---
+
+## 0 (previous). §60 — the pipeline: lint off the critical path, and two asks that could not be built as asked (v466, CI ONLY)
 
 > also make the post set up and set up be one if it possible and build release apk difernt so more faster and yk much better branching and also more faster build with cache or something analayse the full log of revious sucess build
 
