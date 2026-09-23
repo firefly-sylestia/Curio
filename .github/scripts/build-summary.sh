@@ -96,8 +96,11 @@ fi
 # the size and hash of the first — the core edition's universal, since `core`
 # sorts before `full` — with the row saying so, because one number standing in
 # for two different files is how a summary starts lying.
-apk_name="—"
-apk_size="—"
+apk_name="— (no APK was produced)"
+# Empty ON PURPOSE, not "—": it is what [apk_line] below tests to decide whether
+# there is a size worth printing. An em-dash here would be a non-empty string and
+# would put `— · —` back on the page.
+apk_size=""
 apk_sha="—"
 # v465e — THIS RUNNER BUILT ONE EDITION, so it reads ONE directory. The
 # wildcard stays as the fallback so the script still works when it is invoked
@@ -124,6 +127,13 @@ if [ "${#apks[@]}" -gt 0 ]; then
   [ "${#apks[@]}" -gt 1 ] && apk_size="${apk_size} (first of ${#apks[@]})"
   apk_sha="$(sha256sum "$apk" | cut -d' ' -f1)"
 fi
+
+# v466b — ONE LINE, BUILT ONCE, BECAUSE THE EMPTY CASE IS THE COMMON CASE.
+# A build runner that produced no APK is a FAILED build, and the first version of
+# this row printed `— · —` for it, which reads as a missing report rather than as
+# the state a red run is actually in. Seen on real run 35894296802. The separator
+# is only added when there is a second half to separate.
+apk_line="${apk_name}${apk_size:+ · ${apk_size}}"
 
 # ── the lint totals ─────────────────────────────────────────────────────────
 # v465e — the report name carries the VARIANT now that one runner lints one
@@ -209,7 +219,7 @@ add_provider "Account site" CURIO_AUTH_SITE_URL
   if [ "$phase" = "build" ]; then
     echo "| Variant | release · universal APK (ABI splits off) |"
     echo "| Signing | ${signing} |"
-    echo "| APK | ${apk_name} · ${apk_size} |"
+    echo "| APK | ${apk_line} |"
     echo "| SHA-256 | \`${apk_sha}\` |"
     # Only the runners that actually BUILD carried the keys, so only they can
     # answer this. A lint runner has no provider secrets in its environment at
@@ -250,7 +260,7 @@ if [ -n "$edition" ]; then
   # honest too, since it is the artifact of record.)
   if [ "$phase" = "build" ]; then
     row_signing="$signing"
-    row_apk="${apk_name} · ${apk_size}"
+    row_apk="$apk_line"
     row_sha="$apk_sha"
     row_providers="${providers%, }"
     row_catalogs="${catalogs} file(s) · ${topics} topics"
