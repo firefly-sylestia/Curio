@@ -245,6 +245,14 @@ object AppPreferences {
     // Experimental voice-to-text/dictation. Default OFF so microphone
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
+    // v465f — THE EDGE TTS EXPERIMENT (Settings → Experiments → Dev page).
+    // Default OFF, and it is the ONLY experimental flag in this file whose
+    // feature talks to a service that is not an API: Edge TTS is the Edge
+    // BROWSER's own read-aloud endpoint, undocumented and unsanctioned by
+    // Microsoft, so it can be changed or blocked without notice. That is exactly
+    // why it ships behind a switch that is off until a member goes looking for
+    // it, and why it is never a default and never the only voice.
+    private const val KEY_EDGE_VOICE_ENABLED = "edge_voice_enabled"
     // v125 — the selected offline transcription model id (Vosk catalog id).
     private const val KEY_OFFLINE_MODEL = "offline_model_id"
     // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
@@ -1744,6 +1752,15 @@ object AppPreferences {
     // dictation in Sound Bite fields and saved voice-note details; ordinary
     // microphone recording remains available regardless of this toggle.
     var voiceToTextEnabledState by mutableStateOf(false)
+
+    /**
+     * v465f — whether the Edge TTS experiment is on (default OFF).
+     *
+     * Read by the reader's Engine row to offer the extra voice, and by nothing
+     * else: no audio is generated, no socket is opened and no endpoint is
+     * contacted until a member both turns this on AND selects the voice.
+     */
+    var edgeVoiceEnabledState by mutableStateOf(false)
         private set
 
     // v125 — the OFFLINE transcription model for pre-recorded sound bites
@@ -2045,6 +2062,7 @@ object AppPreferences {
         socialNotificationsState = isSocialNotificationsEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
+        edgeVoiceEnabledState = isEdgeVoiceEnabled(context)
         offlineModelIdState = getOfflineModelId(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
@@ -3080,6 +3098,24 @@ object AppPreferences {
     fun setVoiceToTextEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_VOICE_TO_TEXT_ENABLED, enabled).apply()
         voiceToTextEnabledState = enabled
+    }
+
+    /** v465f — whether the Edge TTS read-aloud experiment is on (default OFF). */
+    fun isEdgeVoiceEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_EDGE_VOICE_ENABLED, false)
+
+    fun setEdgeVoiceEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_EDGE_VOICE_ENABLED, enabled).apply()
+        edgeVoiceEnabledState = enabled
+        // NOTE — nothing is cleared from the reader's stored voice here, and that
+        // is deliberate on two counts. (1) LAYERING: this is the data layer, and
+        // `ReaderLook` belongs to the reader's screen; reaching into it from here
+        // to tidy one field is a dependency the data layer should not have.
+        // (2) BEHAVIOUR: the reader already refuses a voice it cannot honour and
+        // falls back to the phone's own (see `sayAloud`), which checks THIS flag
+        // before it will use the Edge voice. So switching the experiment off takes
+        // effect immediately, and switching it back on restores the member's
+        // choice instead of having silently discarded it.
     }
 
     // ── Offline transcription model (v125) ─────────────────────────────

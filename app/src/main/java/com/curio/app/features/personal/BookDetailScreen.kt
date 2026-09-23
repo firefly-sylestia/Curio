@@ -269,8 +269,12 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
         enrichedTick = lookupTick
         lookingUp = true
         if (manual) lookupNote = null
+        // v465g — the tap is passed THROUGH, so the lookup actually happens.
+        // Without it a complete book (which is every book shelved from Curio's
+        // own catalogue) reached Open Library for nothing and the pill reported
+        // "Nothing more found" over no search at all.
         val report = withContext(Dispatchers.IO) {
-            runCatching { BookEnrichment.enrich(current) }.getOrNull()
+            runCatching { BookEnrichment.enrich(current, manual = manual) }.getOrNull()
         }
         if (report != null && report.book != current) {
             withContext(Dispatchers.IO) {
@@ -297,6 +301,18 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     if (com.curio.app.data.PersonalKinds.asksComicSources(current.kind))
                         "Lookups are off in Settings — turn them on to search the comics sources."
                     else "Book lookups are off in Settings — turn them on to search Open Library."
+                // v465g — THE OTHER WAY THE OLD MESSAGE COULD LIE. A book Curio
+                // knows is not reported as needing consent (its record is local),
+                // so with lookups off it fell past the branch above and was told
+                // "nothing more found" — for a search the off switch had already
+                // forbidden. The switch is the honest thing to name.
+                !AppPreferences.bookFetchEnabledState ->
+                    "Book lookups are off in Settings — turn them on to search Open Library."
+                // v465g — AND WHEN IT DID LOOK. The pass reached Open Library and
+                // the catalogue agreed this book is already complete, which is a
+                // different fact from "found nothing", and the only sentence the
+                // member was ever given was the wrong one.
+                report.consulted -> "Open Library has this book — nothing new to add."
                 else -> "Nothing more found for this book."
             }
         }

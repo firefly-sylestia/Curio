@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.BuildConfig
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.NeuralSpeaker
 import com.curio.app.data.NeuralVoiceDownloads
 import com.curio.app.data.NeuralVoicePacks
@@ -537,6 +538,12 @@ internal fun ReaderSettingsScreen(
                             // same row lists it. One row for the choice, whichever
                             // kind of engine the choice names.
                             voices = downloadedPacks(context)
+                        } else if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
+                            // v465f — and for the Edge experiment the voice name IS
+                            // the endpoint's own voice id, which is the same shape
+                            // the Android engine uses, so one more branch is all
+                            // this row needs.
+                            voices = EdgeVoice.VOICES
                         } else {
                             // v464 — the list is filled from the ENGINE'S OWN callback now, so
                             // the first open of this row no longer says "no voices are
@@ -578,6 +585,10 @@ internal fun ReaderSettingsScreen(
                             if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
                                 NeuralVoicePacks.byId(ReaderLook.speakVoice)?.displayName
                                     ?: "Choose a voice"
+                            } else if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
+                                EdgeVoice.VOICES.firstOrNull {
+                                    it.first == ReaderLook.speakVoice
+                                }?.second ?: "Aria \u00b7 American female"
                             } else {
                                 // The label when the picker has been opened in this visit,
                                 // and otherwise the voice's own name — never "the phone's
@@ -616,7 +627,14 @@ internal fun ReaderSettingsScreen(
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                if (ReaderLook.speakEngine != ReaderEngine.NEURAL) {
+                                // "The phone's own" is a choice OF the phone's own
+                                // engine. Under Curio's packs or the Edge voice it
+                                // names a voice that engine does not have — and under
+                                // Edge, picking it would send a blank voice name to
+                                // the endpoint.
+                                if (ReaderLook.speakEngine != ReaderEngine.NEURAL &&
+                                    ReaderLook.speakEngine != ReaderEngine.EDGE
+                                ) {
                                     VoiceChoice(
                                         label = "The phone's own",
                                         live = ReaderLook.speakVoice.isBlank(),
@@ -993,15 +1011,25 @@ private const val SPEAK_FAST = 2f
  * the packs below.
  */
 private fun readerEngines(context: Context): List<Pair<String, String>> {
-    val system = ReaderSpeaker.engines(context)
-    if (!BuildConfig.EDITION_NEURAL_VOICES) return system
-    val count = NeuralVoicePacks.CATALOG.count { NeuralVoicePacks.isDownloaded(context, it.id) }
-    val label = when (count) {
-        0 -> "Curio's own voice \u00b7 nothing downloaded yet"
-        1 -> "Curio's own voice \u00b7 1 downloaded"
-        else -> "Curio's own voice \u00b7 $count downloaded"
+    var engines = ReaderSpeaker.engines(context)
+    // Curio's own downloaded packs — the FULL edition only, since the runtime
+    // that reads them is not in the core APK at all.
+    if (BuildConfig.EDITION_NEURAL_VOICES) {
+        val count = NeuralVoicePacks.CATALOG.count { NeuralVoicePacks.isDownloaded(context, it.id) }
+        val label = when (count) {
+            0 -> "Curio's own voice \u00b7 nothing downloaded yet"
+            1 -> "Curio's own voice \u00b7 1 downloaded"
+            else -> "Curio's own voice \u00b7 $count downloaded"
+        }
+        engines = engines + (ReaderEngine.NEURAL to label)
     }
-    return system + (ReaderEngine.NEURAL to label)
+    // v465f — the Edge experiment, offered only while it is switched on. It is
+    // NOT edition-gated: it is plain OkHttp plus MediaPlayer, so the smaller
+    // edition can use it too, and the flag is the whole gate.
+    if (AppPreferences.edgeVoiceEnabledState) {
+        engines = engines + (ReaderEngine.EDGE to "Edge \u00b7 experimental")
+    }
+    return engines
 }
 
 /** The downloaded packs, as the Voice picker's own list: pack id to its name. */

@@ -72,7 +72,16 @@ internal object BookEnrichment {
         val book: PersonalBookEntity,
         /** "12 chapters", "416 pages", "the description" … in pass order. */
         val learned: List<String>,
-        val needsConsent: Boolean
+        val needsConsent: Boolean,
+        /**
+         * Whether a remote catalogue actually ANSWERED during this pass — as
+         * opposed to the pass never asking, which is what an automatic pass over
+         * a complete book does on purpose (v410). Only the manual message reads
+         * it: reporting "nothing more found" over a search that never happened
+         * is the lie the member reported (§59: *"it says nothing more found for
+         * this book without doing the look up"*).
+         */
+        val consulted: Boolean = false
     ) {
         /** True when the row has to be written back. */
         val changed: Boolean get() = learned.isNotEmpty()
@@ -83,9 +92,15 @@ internal object BookEnrichment {
      * catalog first, then Open Library's table of contents, page count and
      * description. A catalog match no longer ends the pass — a book Curio
      * knows can still be missing its page count or an about-text.
+     *
+     * [manual] is a member tapping **Look it up** rather than the pass running
+     * behind a screen they just opened. It guarantees one real Open Library
+     * visit even for a book nothing is missing from (see the v465g note at the
+     * call), so the pill can no longer report on a search it never ran.
      */
-    suspend fun enrich(book: PersonalBookEntity): EnrichReport {
+    suspend fun enrich(book: PersonalBookEntity, manual: Boolean = false): EnrichReport {
         val learned = mutableListOf<String>()
+        var consulted = false
         var updated = book
 
         // v426 — A MANGA IS NOT ASKED OF A BOOKS CATALOGUE.
@@ -137,10 +152,42 @@ internal object BookEnrichment {
         // page count and the description all come out of that single visit
         // (member report: "the look up is slow … the look up should do look up
         // in open library first check all").
-        if (wantChapters || wantPages || wantDescription) {
-            openLibraryPass(updated.title, updated.author, wantChapters, wantPages, wantDescription)
+        // ── v465g — A MANUAL PASS ACTUALLY ASKS ──────────────────────────
+        //
+        // The member's §59 report: *"i tap it and it says nothing more found
+        // for this book WITHOUT DOING THE LOOK UP"*. They were right, and this
+        // was the whole cause. v410 makes each question conditional on the book
+        // not already answering it ("so a pass over a complete book opens no
+        // socket at all") — which is exactly right for the pass that runs BEHIND
+        // a screen the member just opened, and exactly wrong for one they
+        // deliberately asked for. A book shelved from Curio's own catalogue has
+        // its chapters, its page count and its about-text already, so all three
+        // questions were false, NO REQUEST WAS MADE, and the pill answered
+        // "Nothing more found" without having looked. The pill's promise is a
+        // look-up; a pill that reports on a search it did not run is worse than
+        // a slow one.
+        //
+        // So the QUESTIONS widen for [manual] and nothing else does: the pass is
+        // guaranteed to reach Open Library once, which is the source that answers
+        // all three at the price of one visit (v410). The later doors — Standard
+        // Ebooks, Google Books, Wikipedia — stay on the ORIGINAL conditions
+        // below, because they exist only to fill a blank about-text and a
+        // complete book has none.
+        val askChapters = wantChapters || manual
+        val askPages = wantPages || manual
+        val askDescription = wantDescription || manual
+        if (askChapters || askPages || askDescription) {
+            openLibraryPass(updated.title, updated.author, askChapters, askPages, askDescription)
                 ?.let { pass ->
-                    pass.chapters?.let { list ->
+                    consulted = true
+                    // ── AND THE WRITES STAY GAP-ONLY ─────────────────────
+                    // Widening the questions was about making the visit happen,
+                    // never about replacing what the row already holds: an
+                    // edition's median page count is not this edition's page
+                    // count, and the catalogue's own about-text is the one the
+                    // book's page reads live. A manual tap fills gaps; it does
+                    // not second-guess the member's shelf.
+                    if (wantChapters) pass.chapters?.let { list ->
                         updated = updated.copy(
                             chaptersJson = PersonalChapterCodec.encode(list),
                             totalChapters = if (updated.totalChapters <= 0) list.size
@@ -148,11 +195,11 @@ internal object BookEnrichment {
                         )
                         learned += "${list.size} chapters"
                     }
-                    pass.pages?.let { pages ->
+                    if (wantPages) pass.pages?.let { pages ->
                         updated = updated.copy(pageCount = pages)
                         learned += "$pages pages"
                     }
-                    pass.description?.let { text ->
+                    if (wantDescription) pass.description?.let { text ->
                         updated = updated.copy(synopsis = text)
                         learned += "the description"
                     }
@@ -250,7 +297,8 @@ internal object BookEnrichment {
             learned = learned,
             needsConsent = learned.isEmpty() &&
                 updated.catalogId.isBlank() &&
-                !AppPreferences.bookFetchEnabledState
+                !AppPreferences.bookFetchEnabledState,
+            consulted = consulted
         )
     }
 

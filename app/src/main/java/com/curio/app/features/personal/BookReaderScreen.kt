@@ -167,6 +167,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.NeuralSpeaker
 import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.data.PersonalRepositoryHolder
@@ -1158,8 +1159,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // v465c — a downloaded pack's model is the other thing that must not
             // outlive the reader: it holds onnxruntime's memory and, for Kokoro,
             // hundreds of megabytes of it. Released on exactly the same event as
-            // the system engine, so the two voices have one lifetime rule.
+            // the system engine, so the three voices have one lifetime rule.
             NeuralSpeaker.release()
+            // v465f — and the Edge voice's socket and player, for the same reason:
+            // a WebSocket outliving the reader is a connection for a screen that
+            // is gone.
+            EdgeVoice.stop()
         }
     }
     val startSpeaking = {
@@ -1586,6 +1591,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         // pause that only silenced one of the two engines would
                         // be a pause that did not pause.
                         NeuralSpeaker.stop()
+                        // v465f — and the Edge voice. A pause that silenced two of
+                        // the reader's three voices would be a pause that did not
+                        // pause, and this one is a socket plus a MediaPlayer.
+                        EdgeVoice.stop()
                     }
                     else -> startSpeaking()
                 }
@@ -7555,6 +7564,23 @@ private suspend fun sayAloud(
     speed: Float,
     onDone: () -> Unit
 ) {
+    if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
+        // ⚠️ THE FLAG IS CHECKED AT THE MOMENT OF SPEAKING, NOT WHEN THE VOICE WAS
+        // CHOSEN. The experiment can be switched OFF in Settings while the reader
+        // is already pointed at this voice, and a stored choice outliving its
+        // feature is the normal case rather than an odd one (see
+        // [AppPreferences.setEdgeVoiceEnabled] for why nothing clears it). So the
+        // flag here is what makes switching the experiment off take effect at
+        // once — the reader falls back to the phone's own voice instead of
+        // opening a socket to an endpoint the member just turned away from.
+        if (AppPreferences.edgeVoiceEnabledState) {
+            EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone)
+            return
+        }
+        ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
+        ReaderSpeaker.say(text, speed, "", onDone)
+        return
+    }
     if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
         val pack = NeuralVoicePacks.byId(ReaderLook.speakVoice)
         if (pack != null) {

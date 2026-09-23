@@ -259,6 +259,21 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // ── v465f — THE EDGE VOICE EXPERIMENT ──────────────────────────
+            // Its own section rather than a row beside the pet switch: it is a
+            // READING voice, and the caveat it has to carry is the reason it is
+            // an experiment at all. The hint is not decoration — a member turning
+            // this on is relying on an endpoint nobody promised them.
+            item { SettingsSectionHeading("Reading voice \u00b7 experimental") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Edge voice",
+                        "Read aloud through the Edge browser's own endpoint. No key and no account, and the voices are good \u2014 but it is undocumented, so it can stop working at any time. Your phone's voice takes over when it does.",
+                        AppPreferences.edgeVoiceEnabledState
+                    ) { AppPreferences.setEdgeVoiceEnabled(context, it) }                }
+            }
+
             item { SettingsSectionHeading("Pet & explore") }
             item {
                 SettingsOptionCard {
