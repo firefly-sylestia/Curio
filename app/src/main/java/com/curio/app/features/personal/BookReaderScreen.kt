@@ -1162,7 +1162,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             null -> 0
         }
         speakCursor = at.coerceAtLeast(0)
-        ReaderSpeaker.prepare(context)
+        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
         voiceOn = true
         voicePaused = false
         Unit
@@ -1197,7 +1197,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
-        ReaderSpeaker.prepare(context)
+        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
         voiceOn = true
         voicePaused = false
     }
@@ -1234,7 +1234,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
-        ReaderSpeaker.prepare(context)
+        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
         voiceOn = true
         voicePaused = false
     }
@@ -9578,6 +9578,22 @@ internal object ReaderLook {
     var speakVoice by mutableStateOf("")
 
     /**
+     * v464 — WHICH TEXT-TO-SPEECH ENGINE READS (see [ReaderSpeaker.engines]).
+     *
+     * The member: *"wire the read-aloud voice engine to any installed system TTS engine,
+     * so I can point Curio at a better voice I install myself"*. Android lets any app
+     * provide speech by answering `android.intent.action.TTS_SERVICE`, and the platform's
+     * own engine is usually the plainest one on the phone — so the reader can be pointed
+     * at whichever engine the member prefers, including one they installed for exactly
+     * that reason. That is the whole feature: no model to download into Curio, no bundled
+     * runtime, and a better voice is a better ENGINE rather than a bigger APK.
+     *
+     * Empty means THE PHONE'S OWN, which is what the platform would have used anyway — so
+     * a member who never opens the row hears exactly the voice they always heard.
+     */
+    var speakEngine by mutableStateOf("")
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -9663,6 +9679,9 @@ internal object ReaderLook {
         dictionary.key,
         speakSpeed.toString(),
         speakVoice,
+        // v464 — and which engine reads (the v434 rule: a field left out of here saves
+        // every other setting and silently forgets this one).
+        speakEngine,
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
@@ -9735,6 +9754,7 @@ internal object ReaderLookStore {
     private const val DICTIONARY = "reader_dictionary"
     private const val SPEAK_SPEED = "reader_speak_speed"
     private const val SPEAK_VOICE = "reader_speak_voice"
+    private const val SPEAK_ENGINE = "reader_speak_engine"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -9795,6 +9815,8 @@ internal object ReaderLookStore {
             ReaderLook.speakSpeed = prefs.getFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
                 .coerceIn(0.5f, 2.5f)
             ReaderLook.speakVoice = prefs.getString(SPEAK_VOICE, ReaderLook.speakVoice).orEmpty()
+            ReaderLook.speakEngine =
+                prefs.getString(SPEAK_ENGINE, ReaderLook.speakEngine).orEmpty()
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -9826,6 +9848,7 @@ internal object ReaderLookStore {
                 .putString(DICTIONARY, ReaderLook.dictionary.key)
                 .putFloat(SPEAK_SPEED, ReaderLook.speakSpeed)
                 .putString(SPEAK_VOICE, ReaderLook.speakVoice)
+                .putString(SPEAK_ENGINE, ReaderLook.speakEngine)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)

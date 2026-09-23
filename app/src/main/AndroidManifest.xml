@@ -41,6 +41,13 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="http" />
         </intent>
+        <!-- v464 — read-aloud's engine picker. Android 11+ package visibility means
+             the reader cannot see the OTHER text-to-speech engines on the phone
+             without this, so "point read-aloud at a better engine" would list only
+             the one that already had it — the exact opposite of the feature. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
 
     <application

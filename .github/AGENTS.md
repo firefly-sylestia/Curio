@@ -134,11 +134,15 @@ pushes build the desktop module. Re-enable by flipping both gates to
 - Validates the build output with hard guards: the `.msi` must exist, the
   app image must contain `Curio.exe`; unmatched upload files fail the run.
 
-### Editable release note (`RELEASE_NOTES.md`)
+### Editable release note (`docs/RELEASE_NOTES.md`)
 
-`RELEASE_NOTES.md` at the repo root is the EDITABLE release note the
-user maintains. Both tag workflows embed it at the TOP of the GitHub
-release body when they create the release:
+`docs/RELEASE_NOTES.md` is the EDITABLE release note the user maintains.
+**It was `RELEASE_NOTES.md` at the repo root until the root-cleanup pass**
+(the root keeps its DOX rail, its build files and its two standard files);
+the path is read literally by both workflows below, so moving it again means
+editing them too — the "file is missing" branch is silent, and a misplaced
+note would simply stop reaching releases. Both tag workflows embed it at the
+TOP of the GitHub release body when they create the release:
 
 - `release.yml` (Android) and `desktop-release.yml` (Windows) read the
   file on tag runs and prepend its content, followed by a `---` rule,

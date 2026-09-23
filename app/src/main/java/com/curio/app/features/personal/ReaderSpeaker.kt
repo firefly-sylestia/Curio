@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import android.content.Context
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -36,6 +37,30 @@ internal object ReaderSpeaker {
     private var engine: TextToSpeech? = null
     private var ready = false
 
+    /**
+     * v464 — THE ENGINE THIS VOICE IS BOUND TO, as its package name ("" = the phone's
+     * own default).
+     *
+     * Kept beside [engine] because a CHANGE of engine is a change of ENGINE: the old one
+     * has to be stopped and shut down before the new one is built, or two speech services
+     * hold the audio focus at once. Comparing this against the asked-for package is also
+     * what makes [prepare] idempotent — it is called on every play, every skip and every
+     * settings row, and must not rebuild the engine each time.
+     */
+    private var bound = ""
+
+    /**
+     * v464 — THE CALLERS WANTING TO KNOW WHEN THE ENGINE ANSWERS.
+     *
+     * Binding an engine is asynchronous, so a settings row that read [voices] the line
+     * after [prepare] was ALWAYS reading an engine that had not answered yet — which is
+     * why the voice list showed "No voices are installed on this phone yet" the first
+     * time it was opened, and only filled on the second. These run on the main thread
+     * once the engine is ready, and are dropped when it is not (an engine that failed has
+     * no voices to offer, and a row waiting for one would spin for ever).
+     */
+    private val waitingForVoices = ArrayList<() -> Unit>()
+
     /** A request that arrived before the engine answered (see the rule above). */
     private var waiting: (() -> Unit)? = null
 
@@ -56,15 +81,42 @@ internal object ReaderSpeaker {
      * a book nobody is listening to is exactly the kind of background cost the
      * power pass (§7.6) was about.
      */
-    fun prepare(context: Context) {
-        if (engine != null) return
+    fun prepare(context: Context, enginePackage: String = "", onReady: (() -> Unit)? = null) {
+        // THE VOICE LIST ASKED TO BE TOLD, and it is answered either way: from here when
+        // the engine is already up, or from the binding's own callback when it is not.
+        if (onReady != null) {
+            if (engine != null && bound == enginePackage && ready) {
+                main.post(onReady)
+                return
+            }
+            waitingForVoices.add(onReady)
+        }
+        if (engine != null && bound == enginePackage) return
         val app = context.applicationContext
+        // A DIFFERENT ENGINE MEANS THE OLD ONE GOES FIRST (see [bound]).
+        if (engine != null) release()
+        bound = enginePackage
         engine = runCatching {
-            TextToSpeech(app) { status ->
+            val listener = TextToSpeech.OnInitListener { status ->
                 ready = status == TextToSpeech.SUCCESS
                 val pending = waiting
                 waiting = null
-                if (ready && pending != null) main.post { pending() }
+                val waiters = waitingForVoices.toList()
+                waitingForVoices.clear()
+                if (ready) {
+                    main.post {
+                        pending?.invoke()
+                        waiters.forEach { it() }
+                    }
+                }
+            }
+            // THE PACKAGE IS THE WHOLE OF THE FEATURE (see [engines]): the platform's
+            // own constructor takes it, so pointing the reader at a better engine is
+            // one argument rather than a second speech stack.
+            if (enginePackage.isBlank()) {
+                TextToSpeech(app, listener)
+            } else {
+                TextToSpeech(app, listener, enginePackage)
             }
         }.getOrNull()
     }
@@ -116,6 +168,40 @@ internal object ReaderSpeaker {
         runCatching { engine?.stop() }
     }
 
+    /**
+     * v464 — THE ENGINES THE PHONE HAS, for the picker: package name to a label.
+     *
+     * Asked of the PLATFORM rather than the engine's own list. Android lets any app
+     * provide speech by answering `android.intent.action.TTS_SERVICE`, which is what the
+     * platform's `TextToSpeech` constructor reads when it is given a package — so the
+     * set of engines that can be pointed at is exactly the set of services answering that
+     * intent. Querying the intent asks the same question AOSP's own TtsEngines asks, and
+     * it needs no engine bound and no process-wide state: a member who only ever opens
+     * the picker must not have to boot a speech engine to be told what speech engines
+     * exist, which is the cost every rule in this file is written against.
+     *
+     * The FIRST entry is always the phone's default, spelled as the empty package, because
+     * "" is what the constructor means by "whatever the phone reads with" — so a member
+     * who never opens this row reads in the voice they always had.
+     */
+    fun engines(context: Context): List<Pair<String, String>> {
+        val pm = context.packageManager
+        val found = runCatching {
+            pm.queryIntentServices(Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE), 0)
+        }.getOrNull().orEmpty()
+        val installed = found
+            .mapNotNull { it.serviceInfo?.packageName }
+            .distinct()
+            .map { name ->
+                val label = runCatching {
+                    pm.getApplicationLabel(pm.getApplicationInfo(name, 0)).toString()
+                }.getOrNull().orEmpty().ifBlank { name }
+                name to label
+            }
+            .sortedBy { it.second }
+        return listOf("" to "The phone's own") + installed
+    }
+
     /** The engine's voices, for the picker — name to a label a member can read. */
     fun voices(): List<Pair<String, String>> {
         val all = runCatching { engine?.voices }.getOrNull() ?: return emptyList()
@@ -136,7 +222,9 @@ internal object ReaderSpeaker {
     /** The way out: stop, release, and forget — the reader calls this as it closes. */
     fun release() {
         waiting = null
+        waitingForVoices.clear()
         ready = false
+        bound = ""
         runCatching {
             engine?.stop()
             engine?.shutdown()

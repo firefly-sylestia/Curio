@@ -188,13 +188,14 @@ jobs:
           body="$GITHUB_WORKSPACE/release-body.md"
           : > "$body"
 
-          # Editable release note — RELEASE_NOTES.md at the repo root. Its
+          # Editable release note — docs/RELEASE_NOTES.md, moved there from the
+          # repo root to keep the root to its rail and its build files. Its
           # content is embedded at the TOP of the release body, above the
           # install guide, so "what's new" reads first. The user updates this
           # file before tagging; it is always included as-is.
-          if [ -f "$GITHUB_WORKSPACE/RELEASE_NOTES.md" ]; then
+          if [ -f "$GITHUB_WORKSPACE/docs/RELEASE_NOTES.md" ]; then
             {
-              cat "$GITHUB_WORKSPACE/RELEASE_NOTES.md"
+              cat "$GITHUB_WORKSPACE/docs/RELEASE_NOTES.md"
               echo ""
               echo "---"
               echo ""

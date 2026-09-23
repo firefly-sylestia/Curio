@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -399,19 +400,136 @@ internal fun ReaderSettingsScreen(
                     trailingGlyph = CurioIcons.Add,
                     trailingLabel = "Faster"
                 )
-                // ── AND WHICH VOICE ────────────────────────────────────
+                // ── v464 — AND WHICH ENGINE READS AT ALL ───────────────
                 //
-                // The phone's own list, read from the engine the first time this door
-                // is opened ([ReaderSpeaker.prepare] + `voices()`) — so nothing is
-                // downloaded and the row says what the member has. The stored value is
-                // the engine's own voice NAME, and blank means "whatever the phone
-                // reads with" (see [ReaderLook.speakVoice]).
+                // The member: *"wire the read-aloud voice engine to any installed system
+                // TTS engine, so I can point Curio at a better voice I install myself"*.
+                // The platform's own engine is usually the plainest voice a phone has, and
+                // Android lets ANY app supply speech — so the reader asks the platform
+                // which engines answer `android.intent.action.TTS_SERVICE` and lets the
+                // member point it at one (see [ReaderSpeaker.engines]). Nothing is
+                // downloaded into Curio and no runtime is bundled: a better voice is a
+                // better ENGINE, not a bigger APK.
+                //
+                // The list is asked for ONCE per visit (it is a PackageManager query, and
+                // one on every recomposition is not a thing a settings page gets to do),
+                // and the row names the engine rather than showing a raw package.
                 val context = LocalContext.current
+                var engines by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+                var enginePicker by remember { mutableStateOf(false) }
                 var picker by remember { mutableStateOf(false) }
                 var voices by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+                // Re-asked whenever a picker has been open, so an engine installed WHILE
+                // this page was open appears without the member having to leave it.
+                LaunchedEffect(enginePicker, picker) {
+                    engines = ReaderSpeaker.engines(context)
+                }
+                val engineLabel = engines.firstOrNull { it.first == ReaderLook.speakEngine }?.second
+                    ?: if (ReaderLook.speakEngine.isBlank()) "The phone's own"
+                    else ReaderLook.speakEngine
+                Surface(
+                    onClick = { enginePicker = true },
+                    shape = RoundedCornerShape(50),
+                    color = palette.ink.copy(alpha = 0.06f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CurioIcon(CurioIcons.Tune, null, tint = palette.accent, size = 17.dp)
+                        Text(
+                            "Engine",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = palette.ink.copy(alpha = 0.8f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            engineLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = palette.accent,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                if (enginePicker) {
+                    AlertDialog(
+                        onDismissRequest = { enginePicker = false },
+                        containerColor = palette.paper,
+                        title = {
+                            Text(
+                                "Which engine reads",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = readerTypeFamily(ReaderLook.typeFace)
+                                ),
+                                color = palette.ink
+                            )
+                        },
+                        text = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                engines.forEach { (name, label) ->
+                                    VoiceChoice(
+                                        label = label,
+                                        live = ReaderLook.speakEngine == name,
+                                        palette = palette
+                                    ) {
+                                        if (ReaderLook.speakEngine != name) {
+                                            ReaderLook.speakEngine = name
+                                            // A VOICE NAME BELONGS TO ITS ENGINE, so the
+                                            // old one goes with it: leaving it would point
+                                            // the new engine at a voice it has never heard
+                                            // of — harmless, but a lie in the row above.
+                                            ReaderLook.speakVoice = ""
+                                            voices = emptyList()
+                                        }
+                                        enginePicker = false
+                                    }
+                                }
+                                Text(
+                                    "A better voice means a better engine — a neural " +
+                                        "text-to-speech engine you install shows up here.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = palette.ink.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { enginePicker = false }) {
+                                Text("Done", color = palette.accent)
+                            }
+                        }
+                    )
+                }
+                // ── AND WHICH VOICE ────────────────────────────────────
+                //
+                // The chosen ENGINE's own list, read the first time this door is opened
+                // ([ReaderSpeaker.prepare] + `voices()`) — so nothing is downloaded and
+                // the row says what the member has. The stored value is the engine's own
+                // voice NAME, and blank means "whatever the phone reads with" (see
+                // [ReaderLook.speakVoice]).
                 Surface(
                     onClick = {
-                        ReaderSpeaker.prepare(context)
+                        // v464 — the list is filled from the ENGINE'S OWN callback now, so
+                        // the first open of this row no longer says "no voices are
+                        // installed" while the engine is still binding: binding a speech
+                        // engine is asynchronous, and the old call read the voice list on
+                        // the line after asking for the engine — which is always too
+                        // early (see [ReaderSpeaker.prepare]).
+                        ReaderSpeaker.prepare(
+                            context,
+                            ReaderLook.speakEngine,
+                            onReady = { voices = ReaderSpeaker.voices() }
+                        )
                         voices = ReaderSpeaker.voices()
                         picker = true
                     },
