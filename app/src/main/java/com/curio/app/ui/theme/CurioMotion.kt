@@ -137,6 +137,22 @@ object CurioMotion {
             dampingRatio = 0.65f,
             stiffness = 800f
         )
+
+        /**
+         * v465h — [Bouncy]'s physics, TYPED FOR A `Dp`.
+         *
+         * A width is a `Dp`, and a `SpringSpec<Float>` cannot animate one, so a
+         * caller would otherwise restate 0.55/380 at the call site — which is the
+         * exact habit the pill clock above exists to stop (*"no floating surface
+         * invents its own milliseconds"*; the same is true of damping ratios).
+         * The reader's speak bar is the first user: it morphs between its full
+         * width and its own disc, and the overshoot is what makes the sweep read
+         * as a bounce rather than a resize.
+         */
+        val BouncyDp: SpringSpec<Dp> = spring(
+            dampingRatio = 0.55f,
+            stiffness = 380f
+        )
     }
 
     object Durations {
@@ -204,6 +220,19 @@ object CurioMotion {
 
         /** Breathing / ambient pulse cycle. */
         const val Breathe: Int = 3200
+
+        /**
+         * v465h — HOW LONG THE READING VOICE'S BAR STAYS OPEN.
+         *
+         * The voice's bar rests as its own disc while it reads (the member's
+         * §60 choice: *"collapse to one round play/pause disc"*), and this is the
+         * dwell before it closes: long enough to read the four controls and reach
+         * one of them, short enough that a member who is listening rather than
+         * steering gets their page back. It is a DWELL, not an animation clock, so
+         * it is deliberately longer than anything in the pill clock above — and it
+         * is a token rather than a literal for the same reason those are.
+         */
+        const val SpeakRest: Int = 4200
     }
 
     /** Particle count for the confetti burst (per section 0.5: 6 to 10 tiny shapes). */

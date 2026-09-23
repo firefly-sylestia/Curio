@@ -46,6 +46,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -105,6 +106,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
@@ -181,6 +183,8 @@ import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.rememberCurioGlassScreen
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.infrastructure.ReadAloudService
+import com.curio.app.infrastructure.ReadAloudSession
 import com.curio.app.ui.theme.CurioMotion
 // v455 phase 3 — the reader's sheets take the motion system's clock and curve
 // when the experiment is on (see the note in [ReaderSheetFrame]).
@@ -1142,6 +1146,19 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     var voiceOn by remember(bookId, document) { mutableStateOf(false) }
     var voicePaused by remember(bookId, document) { mutableStateOf(false) }
     var speakCursor by remember(bookId, document) { mutableIntStateOf(-1) }
+    // ── v465h — A NUDGE, SO A VOICE CHANGE IS HEARD AT ONCE ──────────────
+    //
+    // The engine and the voice are read PER SENTENCE (see [sayAloud]), which is
+    // what lets a change land mid-book — but it also means a change made while
+    // listening would take effect on the NEXT sentence, up to half a minute of the
+    // voice the member just replaced. Bumping this restarts the driver on the SAME
+    // cursor with the new voice, so picking a voice is answered by the voice. It is
+    // in the driver's keys for exactly that reason and for no other.
+    var speakEpoch by remember(bookId, document) { mutableIntStateOf(0) }
+    // v465h — the reader's own voice picker, opened from the voice bar (see
+    // [ReaderVoiceSheet]): a voice is the one reading choice a member makes WHILE
+    // listening, and it used to be four screens away.
+    var voiceSheet by remember { mutableStateOf(false) }
     // WHAT THE PAGE IS TOLD TO LIGHT, AND TO STAND BACK FROM.
     val spoken = sentences.getOrNull(speakCursor)
     val spokenRun = if (voiceOn && spoken != null) {
@@ -1165,6 +1182,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // a WebSocket outliving the reader is a connection for a screen that
             // is gone.
             EdgeVoice.stop()
+            // v465h — and the session's keep-alive, with the session itself: the
+            // service exists to keep a reading alive, and there is no reading once
+            // the reader is gone. `clear()` also drops the four notification
+            // lambdas, because a control wired to a screen that no longer exists is
+            // worse than a dead button — it would look alive.
+            ReadAloudSession.clear()
+            ReadAloudService.stop(context)
         }
     }
     val startSpeaking = {
@@ -1174,7 +1198,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             null -> 0
         }
         speakCursor = at.coerceAtLeast(0)
-        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
+        ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
         Unit
@@ -1209,7 +1233,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
-        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
+        ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
     }
@@ -1246,12 +1270,86 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
-        ReaderSpeaker.prepare(context, ReaderLook.speakEngine)
+        ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
     }
 
-    LaunchedEffect(voiceOn, voicePaused, speakCursor) {
+    // ── v465h — ONE VOICE, TWO DOORS ────────────────────────────────────
+    //
+    // The bar on the page and the four buttons in the notification are the SAME
+    // control, so both call these two functions rather than the notification
+    // growing its own copy of the `when` below. That is the whole reason the
+    // session carries lambdas instead of intents (see [ReadAloudSession]): a
+    // member pausing from the shade and a member pausing on the page must not be
+    // two code paths that can disagree about what "paused" means.
+    fun toggleVoice() {
+        when {
+            // v463 — the two states are one button: a running voice holds its
+            // breath, a held one carries on, and a book with no voice yet starts
+            // one at the page the member is looking at.
+            voicePaused -> voicePaused = false
+            voiceOn -> {
+                voicePaused = true
+                ReaderSpeaker.stop()
+                // v465c — and the neural voice, for the same reason: a pause that
+                // only silenced one of the two engines would be a pause that did
+                // not pause.
+                NeuralSpeaker.stop()
+                // v465f — and the Edge voice: a socket plus a MediaPlayer.
+                EdgeVoice.stop()
+            }
+            else -> startSpeaking()
+        }
+    }
+
+    /**
+     * Ends the session, from the page or from the shade's Stop.
+     *
+     * Every engine is silenced for the same reason pause silences all three, and
+     * `voiceOn = false` is what stands the keep-alive service down (see the
+     * session effect below) — so a stop is a stop wherever it came from.
+     */
+    fun stopVoice() {
+        voiceOn = false
+        voicePaused = false
+        ReaderSpeaker.stop()
+        NeuralSpeaker.stop()
+        EdgeVoice.stop()
+    }
+
+    // ── v465h — THE SESSION THAT OUTLIVES THE SCREEN ────────────────────
+    //
+    // Read aloud is driven HERE, and it stays here (see [ReadAloudSession] for
+    // why). What leaves is the promise that the phone will not stop it: a
+    // backgrounded app's threads are freezable, and a voice that goes quiet
+    // mid-sentence with no error anywhere IS that freeze. These two effects are the
+    // whole of the fix — the controls and the description are written into the
+    // session on every recomposition, and the keep-alive service is started,
+    // re-rendered or stood down when the voice's STATE changes.
+    //
+    // Re-registered every recomposition on purpose: these close over the PAGE the
+    // member is looking at (a skip with no session open starts one from the block
+    // on screen), so a lambda captured once when the session began would keep
+    // starting from wherever they were then.
+    SideEffect {
+        ReadAloudSession.onToggle = { toggleVoice() }
+        ReadAloudSession.onPrev = { stepSentence(-1) }
+        ReadAloudSession.onNext = { stepSentence(1) }
+        ReadAloudSession.onStop = { stopVoice() }
+    }
+    // A STATE CHANGE, NOT A SENTENCE: what the notification says is the book and
+    // whether it is speaking, both of which change a handful of times in a session
+    // — one call per sentence would be hundreds of service starts to redraw a line
+    // that never moved.
+    LaunchedEffect(voiceOn, voicePaused, book?.title) {
+        ReadAloudSession.active = voiceOn
+        ReadAloudSession.playing = voiceOn && !voicePaused
+        ReadAloudSession.title = book?.title.orEmpty()
+        if (voiceOn) ReadAloudService.sync(context) else ReadAloudService.stop(context)
+    }
+
+    LaunchedEffect(voiceOn, voicePaused, speakCursor, speakEpoch) {
         if (!voiceOn || voicePaused) return@LaunchedEffect
         when (val loaded = content) {
             is ReaderContent.Text -> {
@@ -1578,27 +1676,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // driver's `QUEUE_FLUSH` is the other half of that).
             speaking = voiceOn,
             paused = voicePaused,
-            onToggleSpeak = {
-                when {
-                    // v463 — the two states are one button: a running voice holds its
-                    // breath, a held one carries on, and a book with no voice yet
-                    // starts one at the page the member is looking at.
-                    voicePaused -> voicePaused = false
-                    voiceOn -> {
-                        voicePaused = true
-                        ReaderSpeaker.stop()
-                        // v465c — and the neural voice, for the same reason: a
-                        // pause that only silenced one of the two engines would
-                        // be a pause that did not pause.
-                        NeuralSpeaker.stop()
-                        // v465f — and the Edge voice. A pause that silenced two of
-                        // the reader's three voices would be a pause that did not
-                        // pause, and this one is a socket plus a MediaPlayer.
-                        EdgeVoice.stop()
-                    }
-                    else -> startSpeaking()
-                }
-            },
+            // v465h — the bar's own button and the shade's button are the same
+            // call now (see [toggleVoice]), so the page and the notification cannot
+            // drift into two ideas of what "paused" means.
+            onToggleSpeak = { toggleVoice() },
+            // v465h — and the voice is changeable from the page: a voice is the one
+            // reading choice a member makes WHILE listening, and it used to be four
+            // screens away from the thing they were listening to.
+            onVoice = { voiceSheet = true },
             onSpeakPrevSentence = { stepSentence(-1) },
             onSpeakNextSentence = { stepSentence(1) },
             onSpeakPrevChapter = { stepChapter(-1) },
@@ -2073,6 +2158,32 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     val continueAtNow: (Int) -> Unit = { index ->
         sheet = null
         scope.launch { jumpToMark(index) }
+    }
+
+    // ── v465h — THE VOICE PICKER, FROM THE VOICE'S OWN BAR ─────────────
+    //
+    // Its own dialog rather than a `ReaderSheet`: the sheets are about the BOOK
+    // (its places, its marks, its look), and this is about the voice reading it.
+    // `onChanged` re-speaks the sentence being read in the new voice — see the
+    // driver's `speakEpoch` — because a member who changes the voice mid-sentence
+    // and hears nothing different for another twenty seconds concludes it did not
+    // work.
+    if (voiceSheet) {
+        ReaderVoiceSheet(
+            palette = palette,
+            onDismiss = { voiceSheet = false },
+            onChanged = {
+                if (voiceOn && !voicePaused) {
+                    // Stop first: the old voice's sentence is already in flight, and
+                    // for the system engine that is a queue that would finish before
+                    // the new sentence began.
+                    ReaderSpeaker.stop()
+                    NeuralSpeaker.stop()
+                    EdgeVoice.stop()
+                    speakEpoch++
+                }
+            }
+        )
     }
 
     when (sheet) {
@@ -4400,6 +4511,8 @@ private fun ReaderChrome(
     paused: Boolean = false,
     /** The speak bar's own door; null leaves the bar out entirely. */
     onToggleSpeak: (() -> Unit)? = null,
+    /** v465h — the speak bar's voice door; null draws the bar without it. */
+    onVoice: (() -> Unit)? = null,
     /** v463 — the four ways to move the voice (see [ReaderSpeakBar]); null hides them. */
     onSpeakPrevSentence: (() -> Unit)? = null,
     onSpeakNextSentence: (() -> Unit)? = null,
@@ -4623,16 +4736,21 @@ private fun ReaderChrome(
                 visible = (visible || speaking) && !footHidden,
                 enter = CurioMotion.popArrive(),
                 exit = CurioMotion.popLeave(),
+                // v465h — the bar is the page's own width now, and centred: it
+                // rests as a single disc in the middle of the foot (see
+                // [ReaderSpeakBar]), and a disc that slid to one corner as it closed
+                // would be a move nobody asked for.
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(start = 12.dp, bottom = 78.dp)
+                    .padding(horizontal = 12.dp, bottom = 78.dp)
             ) {
                 ReaderSpeakBar(
                     palette = palette,
                     speaking = speaking,
                     paused = paused,
                     onToggle = onToggleSpeak,
+                    onVoice = onVoice,
                     onPrevSentence = onSpeakPrevSentence,
                     onNextSentence = onSpeakNextSentence,
                     onPrevChapter = onSpeakPrevChapter,
@@ -4665,6 +4783,7 @@ private fun ReaderSpeakBar(
     speaking: Boolean,
     paused: Boolean,
     onToggle: () -> Unit,
+    onVoice: (() -> Unit)?,
     onPrevSentence: (() -> Unit)?,
     onNextSentence: (() -> Unit)?,
     onPrevChapter: (() -> Unit)?,
@@ -4675,74 +4794,235 @@ private fun ReaderSpeakBar(
     val glass = ambientGlassOn()
     val running = speaking && !paused
     val body = if (running) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = if (glass) Color.Transparent else body,
-        shadowElevation = if (glass) 0.dp else 8.dp,
-        modifier = Modifier.curioAmbientGlass(body, shape = RoundedCornerShape(50))
+
+    // ── v465h — IT RESTS AS ITS OWN DISC ─────────────────────────────────
+    //
+    // The member: *"it shouldnt always show the buttons etc"*. They are right, and
+    // the reason is the surface rather than the controls: a full bar parked across
+    // the foot of a page is a slab over the words for the whole of a chapter, which
+    // is the opposite of what a reading page wants. So while it READS the bar closes
+    // down to the one control still worth having in reach, and opens back up when
+    // the member touches it. **While it is PAUSED it stays open**, because a paused
+    // member is steering rather than listening — and the dwell only ever runs while
+    // `running`, so a pause can never close the bar under a thumb that is using it.
+    var expanded by remember { mutableStateOf(true) }
+    LaunchedEffect(running, expanded) {
+        if (!running || !expanded) return@LaunchedEffect
+        delay(CurioMotion.Durations.SpeakRest.toLong())
+        expanded = false
+    }
+
+    // THE MORPH IS THE WIDTH AND NOTHING ELSE. Both states are the same Surface at
+    // the same place with the same height, and the disc sits in a slot of its own in
+    // the middle of both — so the disc does not move a single pixel as the bar
+    // breathes, and there is nothing for the eye to follow except the two edges
+    // sweeping in. The overshoot is [CurioMotion.Springs.BouncyDp]: a width that
+    // springs is what makes this read as the bar BOUNCING shut rather than as a
+    // resize.
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(SPEAK_BAR_HEIGHT)
     ) {
-        Row(
+        val openWidth = maxWidth
+        val width by animateDpAsState(
+            targetValue = if (expanded) openWidth else SPEAK_BAR_HEIGHT,
+            animationSpec = CurioMotion.Springs.BouncyDp,
+            label = "readerSpeakBarWidth"
+        )
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = if (glass) Color.Transparent else body,
+            shadowElevation = if (glass) 0.dp else 8.dp,
             modifier = Modifier
-                .height(40.dp)
-                .clip(RoundedCornerShape(50))
-                .padding(start = 5.dp, end = 13.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                .align(Alignment.Center)
+                .width(width)
+                .curioAmbientGlass(body, shape = RoundedCornerShape(50))
         ) {
-            onPrevChapter?.let { step ->
-                ReaderSpeakStep(palette, CurioIcons.KeyboardArrowUp, "Previous chapter", step)
-            }
-            onPrevSentence?.let { step ->
-                ReaderSpeakStep(palette, CurioIcons.ChevronLeft, "Previous sentence", step)
-            }
-            // THE ONE CONTROL WITH WEIGHT: a filled disc, so a thumb finds it without
-            // reading the bar.
+            // The clip is explicit: the word and the voice door are pinned to the
+            // two ENDS of the bar, so during the sweep they must be cut off by the
+            // surface's own edge rather than drawn over the page.
             Box(
                 modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (running) palette.accent else palette.accent.copy(alpha = 0.16f)
-                    )
-                    .curioPressClickable(
-                        pressedScale = 0.90f,
-                        onClickLabel = when {
-                            running -> "Pause the voice"
-                            speaking -> "Carry on reading aloud"
-                            else -> "Read this page aloud"
-                        },
-                        onClick = onToggle
-                    ),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(50))
             ) {
-                CurioIcon(
-                    if (running) CurioIcons.Pause else CurioIcons.PlayArrow,
-                    null,
-                    tint = if (running) palette.ink else palette.accent,
-                    size = 17.dp
-                )
+                // ── THE TRANSPORT, CENTRED, AND SYMMETRIC ABOUT THE DISC ──
+                // The two step groups arrive as a pair, so the disc they flank stays
+                // at the bar's centre all the way through — a morph that moved the one
+                // control with weight would be a morph that moved the thing the member
+                // is aiming at.
+                Row(
+                    modifier = Modifier.align(Alignment.Center),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AnimatedVisibility(visible = expanded) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            onPrevChapter?.let { step ->
+                                ReaderSpeakStep(
+                                    palette,
+                                    CurioIcons.KeyboardArrowUp,
+                                    "Previous chapter",
+                                    step
+                                )
+                            }
+                            onPrevSentence?.let { step ->
+                                ReaderSpeakStep(
+                                    palette,
+                                    CurioIcons.ChevronLeft,
+                                    "Previous sentence",
+                                    step
+                                )
+                            }
+                        }
+                    }
+                    // THE ONE CONTROL WITH WEIGHT: a filled disc, so a thumb finds it
+                    // without reading the bar — and its own slot, so it is in exactly
+                    // the same place whether the bar is open or closed.
+                    Box(
+                        modifier = Modifier.size(SPEAK_BAR_HEIGHT),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (running) palette.accent
+                                    else palette.accent.copy(alpha = 0.16f)
+                                )
+                                .curioPressClickable(
+                                    pressedScale = 0.90f,
+                                    onClickLabel = when {
+                                        !expanded -> "Show the reading controls"
+                                        running -> "Pause the voice"
+                                        speaking -> "Carry on reading aloud"
+                                        else -> "Read this page aloud"
+                                    },
+                                    // ── WHAT A TAP ON THE CLOSED BAR DOES ──
+                                    // It does what the glyph says AND opens the bar,
+                                    // because a member who pauses is the member who is
+                                    // about to steer: skip a sentence, change the voice,
+                                    // leave a mark. The two are one tap rather than a
+                                    // tap to open and a second to pause, and the closed
+                                    // bar is never a control that lies about what it
+                                    // will do.
+                                    onClick = {
+                                        if (!expanded) {
+                                            expanded = true
+                                            onToggle()
+                                        } else {
+                                            onToggle()
+                                        }
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                if (running) CurioIcons.Pause else CurioIcons.PlayArrow,
+                                null,
+                                tint = if (running) palette.ink else palette.accent,
+                                size = 17.dp
+                            )
+                        }
+                    }
+                    AnimatedVisibility(visible = expanded) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            onNextSentence?.let { step ->
+                                ReaderSpeakStep(
+                                    palette,
+                                    CurioIcons.ChevronRight,
+                                    "Next sentence",
+                                    step
+                                )
+                            }
+                            onNextChapter?.let { step ->
+                                ReaderSpeakStep(
+                                    palette,
+                                    CurioIcons.KeyboardArrowDown,
+                                    "Next chapter",
+                                    step
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ── WHERE IT IS, AT THE LEADING END ──────────────────────
+                // The state word stays ("Listen" / "Reading" / "Paused") because a
+                // first-time member should not have to decode a media bar to find out
+                // that the app can read to them at all.
+                AnimatedVisibility(
+                    visible = expanded,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Text(
+                        when {
+                            running -> "Reading"
+                            speaking -> "Paused"
+                            else -> "Listen"
+                        },
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = palette.ink.copy(alpha = 0.85f),
+                        modifier = Modifier.padding(start = 18.dp, end = 6.dp)
+                    )
+                }
+
+                // ── AND WHOSE VOICE, AT THE TRAILING END (v465h) ──────────
+                // The door the member asked for: *"changing voice in that screen"*. A
+                // voice is the one reading choice a member makes WHILE listening, and
+                // it used to be four screens away from the thing they were listening
+                // to. It is a glyph and one word rather than the voice's own name,
+                // deliberately — naming it here would mean either binding a speech
+                // engine or holding a pack's label, and a bar that shows a stale name
+                // over the voice actually speaking is worse than one that says where
+                // the choice lives (the picker itself names what is live).
+                onVoice?.let { open ->
+                    AnimatedVisibility(
+                        visible = expanded,
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .curioPressClickable(
+                                    pressedScale = 0.92f,
+                                    onClickLabel = "Change the reading voice",
+                                    onClick = open
+                                )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(start = 8.dp, end = 18.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CurioIcon(CurioIcons.Tune, null, tint = palette.accent, size = 16.dp)
+                                Text(
+                                    "Voice",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = palette.ink.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                }
             }
-            onNextSentence?.let { step ->
-                ReaderSpeakStep(palette, CurioIcons.ChevronRight, "Next sentence", step)
-            }
-            onNextChapter?.let { step ->
-                ReaderSpeakStep(palette, CurioIcons.KeyboardArrowDown, "Next chapter", step)
-            }
-            Text(
-                when {
-                    running -> "Reading"
-                    speaking -> "Paused"
-                    else -> "Listen"
-                },
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = palette.ink.copy(alpha = 0.85f),
-                modifier = Modifier.padding(start = 7.dp)
-            )
         }
     }
 }
+
+/**
+ * The voice bar's own height — and its CLOSED WIDTH, which is the same number.
+ *
+ * The bar rests as a circle (see [ReaderSpeakBar]), so the disc's slot and the
+ * surface's collapsed width have to be one measurement: derive them separately and
+ * the closed bar becomes an ellipse.
+ */
+private val SPEAK_BAR_HEIGHT = 40.dp
 
 /**
  * v463 — ONE STEP OF THE VOICE'S BAR, and the only one that is a plain glyph.
@@ -7535,11 +7815,45 @@ internal object ReaderEngine {
     /** The phone's own engine — the v440 default, and the empty package. */
     const val PHONE = ""
 
+    /**
+     * The prefix both of Curio's own engines carry — see [isSentinel].
+     *
+     * ⚠️ THE TWO VALUES BELOW ARE STORED SETTINGS, so they are built from this
+     * prefix rather than written out again: changing either string renames every
+     * member's saved choice, and a member whose stored engine no longer matches
+     * any row silently reads with the phone's voice instead.
+     */
+    const val PREFIX = "curio:"
+
     /** A downloaded sherpa-onnx voice pack, chosen by its PACK ID in `speakVoice`. */
-    const val NEURAL = "curio:neural"
+    const val NEURAL = PREFIX + "neural"
 
     /** The hidden Dev-page Edge TTS experiment. */
-    const val EDGE = "curio:edge"
+    const val EDGE = PREFIX + "edge"
+
+    /**
+     * Whether [engine] is one of Curio's own rather than an Android package.
+     *
+     * Called at the moment of speaking: a sentinel must never reach
+     * `TextToSpeech(context, listener, package)` as if it were one, and the two
+     * cases that fall through to the system engine (an Edge engine with the
+     * experiment switched off, a pack that cannot be honoured) are exactly the
+     * ones where the member's stored value IS a sentinel.
+     */
+    fun isSentinel(engine: String): Boolean = engine.startsWith(PREFIX)
+
+    /**
+     * The engine PACKAGE to hand the platform for [engine].
+     *
+     * ⚠️ A SENTINEL IS NOT A PACKAGE NAME, and this is the one place that is
+     * settled: `TextToSpeech(context, listener, "curio:neural")` asks the platform for
+     * an engine that cannot exist, which binds nothing and logs an init failure — so
+     * every `ReaderSpeaker.prepare` in the reader goes through here. Both sentinels
+     * map to [PHONE], which is exactly what they fall back to when their own voice
+     * cannot be honoured (a pack that was deleted, the Edge experiment switched off),
+     * and any real package is passed through untouched.
+     */
+    fun packageFor(engine: String): String = if (isSentinel(engine)) PHONE else engine
 }
 
 /**
@@ -7564,21 +7878,17 @@ private suspend fun sayAloud(
     speed: Float,
     onDone: () -> Unit
 ) {
-    if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
-        // ⚠️ THE FLAG IS CHECKED AT THE MOMENT OF SPEAKING, NOT WHEN THE VOICE WAS
-        // CHOSEN. The experiment can be switched OFF in Settings while the reader
-        // is already pointed at this voice, and a stored choice outliving its
-        // feature is the normal case rather than an odd one (see
-        // [AppPreferences.setEdgeVoiceEnabled] for why nothing clears it). So the
-        // flag here is what makes switching the experiment off take effect at
-        // once — the reader falls back to the phone's own voice instead of
-        // opening a socket to an endpoint the member just turned away from.
-        if (AppPreferences.edgeVoiceEnabledState) {
-            EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone)
-            return
-        }
-        ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
-        ReaderSpeaker.say(text, speed, "", onDone)
+    // ⚠️ THE FLAG IS CHECKED AT THE MOMENT OF SPEAKING, NOT WHEN THE VOICE WAS
+    // CHOSEN. The experiment can be switched OFF in Settings while the reader is
+    // already pointed at this voice, and a stored choice outliving its feature is
+    // the normal case rather than an odd one (see
+    // [AppPreferences.setEdgeVoiceEnabled] for why nothing clears it). So the flag
+    // is read HERE, which is what makes switching the experiment off take effect at
+    // once: an Edge engine with the flag off simply falls through to the tail below
+    // and reads in the phone's own voice, rather than opening a socket to an
+    // endpoint the member just turned away from.
+    if (ReaderLook.speakEngine == ReaderEngine.EDGE && AppPreferences.edgeVoiceEnabledState) {
+        EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone)
         return
     }
     if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
@@ -7598,11 +7908,31 @@ private suspend fun sayAloud(
                 return
             }
         }
-        ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
-        ReaderSpeaker.say(text, speed, "", onDone)
-        return
+        // A PACK THAT CANNOT BE HONOURED FALLS THROUGH to the tail below — deleted,
+        // never downloaded, or the model failed to load — which reads in the
+        // phone's own voice rather than in silence (the rule this function's own
+        // note states).
     }
-    ReaderSpeaker.say(text, speed, ReaderLook.speakVoice, onDone)
+    // ── v465h — AND EVERYTHING ELSE IS THE MEMBER'S OWN VOICE ────────────
+    //
+    // This tail used to bind `ReaderEngine.PHONE` and speak with an EMPTY voice
+    // name, which quietly undid v464: choosing a speech engine the member installed
+    // (a neural engine, an F-Droid TTS) prepared that engine on the play tap, and
+    // then the next sentence's line here released it and bound the phone's own
+    // instead — so the engine they had just chosen read in exactly the voice they
+    // had just replaced, in both the read-aloud and every skip.
+    //
+    // ⚠️ AND A CURIO SENTINEL IS NOT A PACKAGE NAME. `ReaderEngine.NEURAL` and
+    // `ReaderEngine.EDGE` are `"curio:"`-prefixed values that no Android package can
+    // be, and handing one to `TextToSpeech(context, listener, package)` binds
+    // nothing — so the two sentinels are mapped to the empty package ("the phone's
+    // own", which is exactly what they fall back to by design) and to no voice name
+    // at all, since their stored voice is a pack id or an endpoint voice, not a
+    // system voice. An empty `speakEngine` IS the phone's own, so a member who never
+    // opened the picker hears exactly what they always heard.
+    val curioEngine = ReaderEngine.isSentinel(ReaderLook.speakEngine)
+    ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
+    ReaderSpeaker.say(text, speed, if (curioEngine) "" else ReaderLook.speakVoice, onDone)
 }
 
 private val ReaderSentenceSplit = Regex("(?<=[.!?])\\s+")

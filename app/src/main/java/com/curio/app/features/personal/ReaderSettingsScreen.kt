@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.NeuralSpeaker
+import com.curio.app.infrastructure.ReadAloudService
 import com.curio.app.data.NeuralVoiceDownloads
 import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.ui.theme.CurioIcon
@@ -933,6 +934,46 @@ internal fun ReaderSettingsScreen(
                 )
             }
 
+            // ── v465h — READING WITH THE SCREEN OFF ─────────────────────
+            //
+            // The member: *"let it play in backgroud too"*, and — asked how it
+            // should ship — *"a switch in Reading settings"*. Read aloud is driven
+            // from the reader itself, and a backgrounded app's threads are
+            // FREEZABLE by the phone, which is what a voice that goes quiet the
+            // moment Curio leaves the screen actually is: no error, no log, just a
+            // book that stopped being read. On, a foreground service keeps the
+            // session alive and puts the transport (previous sentence, pause, next
+            // sentence, Stop) in the shade, so a chapter can be listened to with
+            // the phone in a pocket.
+            //
+            // A SEGMENT ROW RATHER THAN A SWITCH, to match every other either/or
+            // on this page — and because OFF IS NOT BROKEN: it is "whatever the
+            // phone does with an app it cannot see", which for a member who never
+            // leaves the reader is exactly the same experience.
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Background", palette)
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Keep reading", CurioIcons.Check),
+                        ReaderSegment("Only on screen", CurioIcons.Close)
+                    ),
+                    selectedIndex = if (AppPreferences.readAloudBackgroundEnabledState) 0 else 1,
+                    palette = palette,
+                    onSelect = { at ->
+                        AppPreferences.setReadAloudBackgroundEnabled(context, at == 0)
+                        // ── AND ASK THE SERVICE TO RE-RENDER ───────────
+                        // The service re-reads the setting on every render, so this
+                        // is what takes a running notification down (or re-arms it)
+                        // the moment the row is touched, rather than leaving "Curio
+                        // is reading this aloud" in the shade after an off switch.
+                        // The call belongs to the ROW rather than to the setter, to
+                        // keep the data layer out of the service layer — the same
+                        // shape the pet-overlay switch uses.
+                        ReadAloudService.sync(context)
+                    }
+                )
+            }
+
             // ── THE PAGE'S OWN GESTURES ─────────────────────────────────
             if (canPlaceZones) {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -1010,7 +1051,7 @@ private const val SPEAK_FAST = 2f
  * person who does not yet know it is there — and the row is what leads them to
  * the packs below.
  */
-private fun readerEngines(context: Context): List<Pair<String, String>> {
+internal fun readerEngines(context: Context): List<Pair<String, String>> {
     var engines = ReaderSpeaker.engines(context)
     // Curio's own downloaded packs — the FULL edition only, since the runtime
     // that reads them is not in the core APK at all.
@@ -1033,13 +1074,13 @@ private fun readerEngines(context: Context): List<Pair<String, String>> {
 }
 
 /** The downloaded packs, as the Voice picker's own list: pack id to its name. */
-private fun downloadedPacks(context: Context): List<Pair<String, String>> =
+internal fun downloadedPacks(context: Context): List<Pair<String, String>> =
     NeuralVoicePacks.CATALOG
         .filter { NeuralVoicePacks.isDownloaded(context, it.id) }
         .map { it.id to it.displayName }
 
 @Composable
-private fun VoiceChoice(
+internal fun VoiceChoice(
     label: String,
     live: Boolean,
     palette: ReaderPalette,

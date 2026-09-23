@@ -253,6 +253,16 @@ object AppPreferences {
     // why it ships behind a switch that is off until a member goes looking for
     // it, and why it is never a default and never the only voice.
     private const val KEY_EDGE_VOICE_ENABLED = "edge_voice_enabled"
+
+    // v465h — read aloud in the BACKGROUND, default ON (opt-OUT: the member chose
+    // a switch they "can turn off", not one they have to find). Unlike the two
+    // experiments above, background listening is not a behaviour swap being
+    // A/B-tested — it is what a reading voice is for — so the default is the
+    // feature and the switch is the escape hatch. A phone that freezes a cached
+    // app is the reason this exists at all: without a foreground service the
+    // reader's own driver is frozen mid-sentence the moment Curio leaves the
+    // foreground, which reads as the voice stopping for no reason.
+    private const val KEY_READ_ALOUD_BACKGROUND = "read_aloud_background"
     // v125 — the selected offline transcription model id (Vosk catalog id).
     private const val KEY_OFFLINE_MODEL = "offline_model_id"
     // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
@@ -1763,6 +1773,19 @@ object AppPreferences {
     var edgeVoiceEnabledState by mutableStateOf(false)
         private set
 
+    /**
+     * v465h — whether read-aloud keeps going when Curio is not on screen.
+     *
+     * Read by the reader when it starts a voice (and mirrored into the service's
+     * notification), never by the driver itself: switching this off does not stop
+     * a session that is already running — it stops the session being *kept alive*,
+     * so the next time the member leaves the app the phone's own rules apply.
+     * Deliberately NOT in the reader's saved look: it is an app preference like
+     * the dictation switch beside it, not a per-book reading choice.
+     */
+    var readAloudBackgroundEnabledState by mutableStateOf(true)
+        private set
+
     // v125 — the OFFLINE transcription model for pre-recorded sound bites
     // (Vosk). "" = none downloaded/selected; the value is the model id from
     // [VoskModels.CATALOG]. Dictation (live OS recognizer) is unaffected —
@@ -2063,6 +2086,7 @@ object AppPreferences {
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         edgeVoiceEnabledState = isEdgeVoiceEnabled(context)
+        readAloudBackgroundEnabledState = isReadAloudBackgroundEnabled(context)
         offlineModelIdState = getOfflineModelId(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
@@ -3101,6 +3125,22 @@ object AppPreferences {
     }
 
     /** v465f — whether the Edge TTS read-aloud experiment is on (default OFF). */
+    /** v465h — whether read aloud may keep reading with Curio off screen. */
+    fun isReadAloudBackgroundEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_READ_ALOUD_BACKGROUND, true)
+
+    fun setReadAloudBackgroundEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_READ_ALOUD_BACKGROUND, enabled).apply()
+        readAloudBackgroundEnabledState = enabled
+        // ⚠️ NOTHING HERE REACHES INTO THE SERVICE. The running notification has to
+        // be taken down when this is switched off, but the DATA LAYER is the wrong
+        // hand to do it — the same layering rule the Edge-voice setter above states
+        // for `ReaderLook`. The SETTING'S OWN ROW asks the service to re-render
+        // (the pattern the pet-overlay switch already uses), and the service
+        // re-reads this key on every render, so a live session is stood down there
+        // rather than from here.
+    }
+
     fun isEdgeVoiceEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_EDGE_VOICE_ENABLED, false)
 

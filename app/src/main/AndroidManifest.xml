@@ -115,6 +115,21 @@
                 android:value="petCompanionOverlay" />
         </service>
 
+        <!-- v465h — read aloud with Curio off screen: a foreground service so
+             the phone cannot freeze the reading mid-sentence. It drives no audio
+             of its own (the reader does), which is why it is `specialUse` rather
+             than `mediaPlayback` — that type wants a MediaSession and the
+             FOREGROUND_SERVICE_MEDIA_PLAYBACK permission, and both are additions
+             to what the app already declares (FOREGROUND_SERVICE_SPECIAL_USE). -->
+        <service
+            android:name=".infrastructure.ReadAloudService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="readAloudSession" />
+        </service>
+
         <receiver
             android:name=".infrastructure.ExploreReminderReceiver"
             android:exported="false" />
