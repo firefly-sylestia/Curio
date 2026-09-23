@@ -1778,6 +1778,27 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                             )
                         }
                     },
+                    // ── v465 — THE PASSAGE'S OWN DICTIONARY DOOR ────────────
+                    //
+                    // Handed to the bar only when the selection is NOT one word,
+                    // because one word has the pill above it (see [singleWord]):
+                    // two doors to the same sheet, one of them anonymous, would
+                    // make the row read as a mistake. The passage goes to the
+                    // sheet as it is — the sheet's own candidate chips
+                    // ([ReaderDictionary.wordsIn]) pick the word out of it, which
+                    // is the same path the ⋯ menu's Dictionary tile takes for a
+                    // whole paragraph — and the selection is deliberately LEFT UP
+                    // behind the sheet, so closing it puts the member back on the
+                    // words they asked about (the pill above does the same).
+                    onDictionary = if (singleWord) {
+                        null
+                    } else {
+                        {
+                            dictionarySeed = swept.text
+                            dictionarySearch = false
+                            sheet = ReaderSheet.DICTIONARY
+                        }
+                    },
                     onMore = {
                         // The whole-place sheet is still here, one tap away:
                         // selecting words ADDS a way to mark a book up, it does
@@ -6314,20 +6335,17 @@ private fun ReaderAppearanceSheet(
                 ReaderAlignRow(palette)
             }
 
-            // ── v440 — WHERE A LOOKUP GOES (see [ReaderDictionarySource]) ──
-            ReaderSheetLabel("Dictionary", palette)
-            ReaderSegmentRow(
-                segments = ReaderDictionarySource.entries.map {
-                    ReaderSegment(it.label, CurioIcons.MenuBook)
-                },
-                selectedIndex = ReaderDictionarySource.entries.indexOf(ReaderLook.dictionary),
-                palette = palette,
-                onSelect = { at ->
-                    ReaderDictionarySource.entries.getOrNull(at)?.let { source ->
-                        ReaderLook.dictionary = source
-                    }
-                }
-            )
+            // ── v465 — THE DICTIONARY'S SOURCE ROW IS NOT IN THE QUICK SHEET ──
+            //
+            // The member: *"just its option from the reader appearance bottom
+            // sheet"*. A source switch (Wiktionary or the free dictionary) is an
+            // either/or a member decides ONCE, and the appearance sheet is the
+            // surface for the few things a reader changes WHILE reading — paper,
+            // type, lines, the night's dim. It was the sheet's only row that
+            // governs a different screen, so it read as a promise the sheet does
+            // not keep. The choice still exists, in the one place it belongs: the
+            // reader's own Reading settings page ([ReaderSettingsScreen]), which
+            // every lookup reads ([ReaderLook.dictionary]).
 
             // ── AND THE NIGHT'S TWO (v434) ────────────────────────────
             ReaderSheetLabel("Screen", palette)
@@ -9133,6 +9151,17 @@ private fun ReaderSelectionBar(
     onHighlight: (ReaderHighlighter) -> Unit,
     onNote: () -> Unit,
     onBookmark: () -> Unit,
+    /**
+     * v465 — THE DICTIONARY DOOR, WHICH ONLY A PASSAGE NEEDS.
+     *
+     * Null when the selection is a single word: that one already has the pill
+     * ABOVE this dock, which NAMES the word it will answer for — offering the
+     * same door twice, once anonymously, would make the row the poorer of the
+     * two. A passage has no such pill (see the caller), so the door belongs
+     * here, beside the note and the bookmark, where the rest of the row's tools
+     * live.
+     */
+    onDictionary: (() -> Unit)? = null,
     onMore: () -> Unit
 ) {
     // ── v438 — ONE WORD GETS THE WHOLE BAR BACK ──────────────────────
@@ -9184,6 +9213,15 @@ private fun ReaderSelectionBar(
     // the row reads as tools rather than as ticks. The dictionary door went with it
     // — it is its own pill ABOVE this dock when one word is picked (see the caller),
     // which is the only time a meaning is what the member means.
+    //
+    // ── v465 — AND IT CAME BACK, FOR THE SELECTION THE PILL CANNOT SERVE ──
+    //
+    // That reasoning holds for ONE word and fails for a passage: the pill is drawn
+    // only while `singleWord` is true, so a multi-word sweep had no dictionary door
+    // anywhere on the page. The member's report is exactly that — *"when i select a
+    // paragraph the dictionary option doesnt show"*. So a passage gets the door in
+    // this row ([onDictionary], non-null only then) and the single word keeps the
+    // pill: the two selections each have one dictionary door, and neither has two.
     val body = lerp(palette.surface, palette.ink, 0.06f)
     val edge = lerp(palette.surface, palette.ink, 0.16f)
     Surface(
@@ -9255,6 +9293,21 @@ private fun ReaderSelectionBar(
                     palette,
                     onBookmark
                 )
+                // ── v465 — AND A PASSAGE CAN BE LOOKED UP ──────────────────
+                //
+                // Drawn only when the caller hands it over (see [onDictionary]):
+                // a single word's door is the pill above, a passage's is here. The
+                // sheet it opens is handed the WHOLE passage, so its own candidate
+                // chips can offer the word the member actually meant rather than
+                // this bar guessing at the first one.
+                if (onDictionary != null) {
+                    SelectionBarAction(
+                        CurioIcons.MenuBook,
+                        "Look up a word in this passage",
+                        palette,
+                        onDictionary
+                    )
+                }
                 SelectionBarAction(
                     CurioIcons.MoreHoriz,
                     "More about this passage",
