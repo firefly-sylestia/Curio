@@ -9,7 +9,7 @@ A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand
 ![Stars](https://img.shields.io/github/stars/firefly-sylestia/Curio?label=Stars&logo=github)
 ![License](https://img.shields.io/github/license/firefly-sylestia/Curio?label=License)
 ![Platform](https://img.shields.io/badge/Platform-Android_8.0%2B-3DDC84?logo=android&logoColor=white)
-![AI-assisted](https://img.shields.io/badge/AI--assisted-Codebuff-6C47FF)
+![AI-assisted](https://img.shields.io/badge/AI--assisted-Codebuff_%2B_Freebuff-6C47FF)
 
 <!-- Future store badges: add Google Play / F-Droid download badges here when the store listings go live. -->
 
@@ -335,7 +335,9 @@ Live **release downloads** (every release ships a signed APK):
 
 **Made by Firefly** — design, code, and curated topic catalog.
 
-> **Note:** Approximately 70% of this project's codebase was written and iterated on with AI assistance (Codebuff). Human direction, design decisions, product judgment, and curation drove every feature — AI handled the heavy lifting of implementation, debugging, and polish across thousands of commits.
+**The AI used to build it:** **Codebuff (Buffy)** — the main agent, and **Freebuff Agent**.
+
+> **Note:** Approximately 70% of this project's codebase was written and iterated on with AI assistance — Codebuff (Buffy) doing the bulk of the implementation, debugging and polish across thousands of commits, with Freebuff Agent alongside it. Human direction, design decisions, product judgment, and curation drove every feature.
 
 Special thanks to the early testers and people who shared topics and feedback.
 
