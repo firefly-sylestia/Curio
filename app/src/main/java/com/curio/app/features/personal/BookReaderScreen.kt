@@ -11800,7 +11800,7 @@ private fun speechSentences(blocks: List<ReaderBlock>): List<ReaderSentence> {
         val ranges = if (block.isHeading) {
             listOf(block.text.indices)
         } else {
-            ReaderSentenceSplit.split(block.text)
+            ReaderSentenceScanner.split(block.text)
         }
         ranges.forEach { range ->
             if (range.isEmpty()) return@forEach
@@ -11839,8 +11839,15 @@ private fun speechSentences(blocks: List<ReaderBlock>): List<ReaderSentence> {
  * in their own right. "no", "sat", "mar", "sun" and "rev" were all in an earlier
  * draft and each one silently merged two real sentences ("The answer is no. She left"
  * read as one line), which is precisely the failure this is meant to avoid.
+ *
+ * **IT IS CALLED A SCANNER AND NOT A SPLITTER BECAUSE THE NAME WAS TAKEN.** This file
+ * already had a `private val ReaderSentenceSplit = Regex(...)` (the dictionary's lookup
+ * context line), and a second top-level declaration of that name is a compile error —
+ * which it duly was. Before adding a top-level name here, `grep` the NAME, not the shape
+ * of the declaration you are about to write (`grep -rw Name`): searching for
+ * "object ReaderSentenceSplit" finds nothing while the name is very much in use.
  */
-private object ReaderSentenceSplit {
+private object ReaderSentenceScanner {
 
     /** Words whose full stop belongs to the word. None is also an English word. */
     private val ABBREVIATIONS = setOf(
