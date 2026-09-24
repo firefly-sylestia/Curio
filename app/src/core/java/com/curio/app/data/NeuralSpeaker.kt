@@ -38,7 +38,18 @@ internal object NeuralSpeaker {
 
     fun prepare(context: Context, pack: NeuralVoicePacks.Pack): Boolean = false
 
-    fun say(text: String, speed: Float, speakerId: Int, onDone: () -> Unit) = onDone()
+    /**
+     * v468 — [onFail] exists so this twin's signature stays the full edition's
+     * (see its own note on why a pack that answers nothing is a failure and not a
+     * finished sentence). Nothing here can fail, so nothing here ever calls it.
+     */
+    fun say(
+        text: String,
+        speed: Float,
+        speakerId: Int,
+        onDone: () -> Unit,
+        onFail: () -> Unit
+    ) = onDone()
 
     fun stop() = Unit
 

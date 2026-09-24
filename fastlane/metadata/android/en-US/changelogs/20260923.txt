@@ -19,6 +19,9 @@ ADD:
 - Reading: Experiments carries one more voice — a hidden door that reads aloud through the Edge browser's own endpoint, with five neural voices and no account or key. It is undocumented, so it can stop working at any time, and your phone's voice reads instead when it does.
 
 FIX:
+- Reading: a voice pack no longer clips the end of a sentence — the last block of unplayed audio was being thrown away when playback stopped, which is why the words before a full stop went missing and no pause was heard after it. Sentences keep their own break now.
+- Reading: the online Edge voice no longer stalls at every full stop — the next sentence is fetched while the current one is being read, instead of only after it finishes.
+- Reading: a downloaded voice pack that cannot speak says so — it used to read the whole book in silence with nothing anywhere to see — and that sentence is read in the phone's own voice instead.
 - Reading: the Kokoro voice pack actually speaks — choosing it after another pack had downloaded kept the previous pack's voice reading instead, because an already-loaded engine was taken as the engine you had asked for.
 - Reading: the hidden Edge voice answers again — the connection identifies itself the way the endpoint expects now (the browser's own user agent and origin, and a current Edge build), instead of being refused every time.
 - Reading: a voice you install reads your books again — with a speech engine chosen in Reading settings, read aloud had been dropping back to the phone's own voice on the very first sentence, so the engine you picked never spoke. The same fault silenced a downloaded pack's voice and the Edge voice on every skip.

@@ -89,6 +89,26 @@ internal object ReadAloudSession {
     var edgeUnavailable: Boolean = false
 
     /**
+     * ── v468 — THE VOICE PACK THAT ANSWERED NOTHING, BY PACK ID ────────────
+     *
+     * The same remedy as [edgeUnavailable], for the downloaded packs. A pack is a
+     * 300 MB model an offline runtime either loads or does not, and until v468 a pack
+     * that answered nothing was indistinguishable from a sentence being read: the
+     * reader counted it as spoken and moved on in silence (the member: *"kokoro doesnt
+     * work at all, like totally it doesnt work"*).
+     *
+     * So a pack that fails says so ONCE, is remembered for the rest of this reading,
+     * and every later sentence is read in the phone's own voice instead of paying a
+     * model load to hear nothing again. **The ID is the value, not a flag**, because a
+     * member may have both packs: `kokoro-en` failing must not disable
+     * `piper-lessac-medium`, which is the pack the app recommends first and the one
+     * known to work. Choosing a different pack clears it by itself (`sayAloud` compares
+     * this against the id it was asked for), and so does stopping the reading.
+     */
+    @Volatile
+    var packUnavailable: String? = null
+
+    /**
      * The member's controls, registered by the reader on every recomposition.
      *
      * **RE-REGISTERED RATHER THAN CAPTURED ONCE, ON PURPOSE.** The reader's toggle
@@ -139,6 +159,7 @@ internal object ReadAloudSession {
         playing = false
         title = ""
         edgeUnavailable = false
+        packUnavailable = null
         onToggle = null
         onPrev = null
         onNext = null

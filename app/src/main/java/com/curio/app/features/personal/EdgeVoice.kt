@@ -155,6 +155,34 @@ internal object EdgeVoice {
     private var player: MediaPlayer? = null
 
     /**
+     * ── v468 — THE SENTENCE THAT IS ALREADY FETCHED, AND ITS CUE ─────────
+     *
+     * The member: *"the edge tts stops way too long at full stops maybe sentence by
+     * sentence or is it playing online and that show much time it takes to load, fix the
+     * loading and pre load the next paragraph so its not slow like rn"*. It is playing
+     * online, and the pause is the whole round trip: a fresh WebSocket handshake and a
+     * fresh synthesis per sentence, started only once the previous one has finished.
+     *
+     * So the next sentence is fetched WHILE this one is being read ([prefetch], driven by
+     * `sayAloud`'s `nextText`) and its bytes wait here. Three fields, and the CUE is what
+     * makes them safe: a clip belongs to `voice|speed|text`, so a change of voice, of
+     * speed or of sentence simply misses rather than playing the wrong sentence in the
+     * right voice — which is the one way a cache like this can lie to a member.
+     */
+    @Volatile
+    private var readyClip: File? = null
+
+    @Volatile
+    private var readyKey: String? = null
+
+    /** The cue being fetched right now, so one promise is never paid for twice. */
+    @Volatile
+    private var fetchingKey: String? = null
+
+    /** The cue a clip belongs to: who is reading, how fast, and which words. */
+    private fun cue(text: String, voice: String, speed: Float): String = "$voice|$speed|$text"
+
+    /**
      * How far this phone's clock is from the endpoint's, in milliseconds.
      *
      * **THE ONE PART OF THE TOKEN THAT IS NOT OURS TO GET RIGHT.** [gec] signs
@@ -173,8 +201,14 @@ internal object EdgeVoice {
     /** Bumped per utterance so a late completion cannot resume a newer one. */
     @Volatile private var utterance = 0
 
-    /** Where the clip is written; one file, overwritten per sentence. */
-    private fun clipFile(context: Context): File = File(context.cacheDir, "edge-voice.mp3")
+    /**
+     * Where a clip is written. TWO SLOTS, because one is not enough any more (v468):
+     * the sentence being PLAYED holds one file and the sentence being FETCHED holds the
+     * other, and they must never be the same file or a prefetch would overwrite the
+     * audio coming out of the speaker.
+     */
+    private fun clipFile(context: Context, next: Boolean = false): File =
+        File(context.cacheDir, if (next) "edge-voice-next.mp3" else "edge-voice.mp3")
 
     /**
      * Says [text] in [voiceName], calling [onDone] on the MAIN thread — after the
@@ -209,7 +243,7 @@ internal object EdgeVoice {
         val app = context.applicationContext
         val voice = voiceName.ifBlank { DEFAULT_VOICE }
         Thread {
-            val clip = runCatching { fetch(app, text, speed, voice) }.getOrNull()
+            val clip = clipFor(app, text, speed, voice)
             // A NEWER SENTENCE, OR A PAUSE, ARRIVED WHILE THIS ONE WAS IN FLIGHT:
             // nobody is waiting on this one any more — the run that superseded it
             // owns the cursor — so it reports NOTHING. Reporting "done" here was
@@ -222,6 +256,75 @@ internal object EdgeVoice {
             }
             main.post { play(clip, mine, onDone, onFail) }
         }.start()
+    }
+
+    /**
+     * ── v468 — FETCH THE SENTENCE AFTER THIS ONE, WHILE THIS ONE PLAYS ───────
+     *
+     * Called by `sayAloud` with the text the reader is about to want next, and does
+     * nothing at all unless there IS a next sentence to fetch. Runs on its own thread and
+     * publishes into [readyClip] only if nothing newer was asked for meanwhile, so two
+     * promises can never race each other into the wrong audio.
+     *
+     * **A failure is remembered as an empty slot, not as an error.** The prefetched clip
+     * is an optimisation: if the fetch is refused (the endpoint is having one of its
+     * days, or the phone just went through a tunnel) then [say] simply makes the request
+     * itself, gets its own verdict, and reports the failure through the ordinary path —
+     * which is where the reader's fallback to the phone's voice lives. A prefetch that
+     * could fail the reading would be a cache deciding a sentence's fate.
+     *
+     * ⚠️ It shares this object's single [socket] field, so pausing or skipping cancels a
+     * prefetch that happens to be in flight. That is a wasted head start on one sentence
+     * and nothing more: the reading itself never depends on it.
+     */
+    fun prefetch(context: Context, text: String, speed: Float, voiceName: String) {
+        if (text.isBlank()) return
+        val app = context.applicationContext
+        val voice = voiceName.ifBlank { DEFAULT_VOICE }
+        val key = cue(text, voice, speed)
+        if (readyKey == key && readyClip?.isFile == true) return
+        if (fetchingKey == key) return
+        fetchingKey = key
+        Thread {
+            val clip = runCatching { fetch(app, text, speed, voice, next = true) }.getOrNull()
+            // Only publish when this is still the cue that was wanted: a newer
+            // prefetch supersedes this one, and its own thread owns the slot.
+            if (fetchingKey == key) {
+                readyClip = clip?.takeIf { it.isFile }
+                readyKey = key
+                fetchingKey = null
+            }
+        }.start()
+    }
+
+    /**
+     * The clip for one utterance: the prefetched one when it is EXACTLY this sentence's,
+     * otherwise a fresh fetch. Runs on the caller's worker thread — the copy below is
+     * file I/O and must never be on the main one.
+     */
+    private fun clipFor(app: Context, text: String, speed: Float, voice: String): File? {
+        val ready = takeReady(text, voice, speed)
+        if (ready != null) {
+            // ⚠️ COPIED INTO THE PLAYING SLOT, NEVER PLAYED IN PLACE. The prefetch slot
+            // is written again by the NEXT prefetch, and that write must not land in the
+            // file `MediaPlayer` is reading. A tenth of a megabyte, off the main thread.
+            val copied = runCatching {
+                val live = clipFile(app)
+                ready.copyTo(live, overwrite = true)
+                live
+            }.getOrNull()
+            if (copied != null) return copied
+        }
+        return runCatching { fetch(app, text, speed, voice) }.getOrNull()
+    }
+
+    /** Takes the prefetched clip when it belongs to this cue, and only then. */
+    private fun takeReady(text: String, voice: String, speed: Float): File? {
+        if (readyKey != cue(text, voice, speed)) return null
+        val file = readyClip
+        readyKey = null
+        readyClip = null
+        return file?.takeIf { it.isFile }
     }
 
     /** Stops whatever is being said. Safe to call when nothing is. */
@@ -243,8 +346,15 @@ internal object EdgeVoice {
      * Opens the socket, asks for [text], and returns the finished MP3 — or null
      * if the turn never completed. Runs on a background thread.
      */
-    private fun fetch(context: Context, text: String, speed: Float, voice: String): File? {
-        val clip = clipFile(context)
+    private fun fetch(
+        context: Context,
+        text: String,
+        speed: Float,
+        voice: String,
+        /** True for a PREFETCH: writes the other slot, never the one being played. */
+        next: Boolean = false
+    ): File? {
+        val clip = clipFile(context, next)
         if (clip.exists()) clip.delete()
         var turn = fetchOnce(text, speed, voice)
         // ── ONE RETRY, AND ONLY EVER BECAUSE OF THE CLOCK (v465j) ─────────

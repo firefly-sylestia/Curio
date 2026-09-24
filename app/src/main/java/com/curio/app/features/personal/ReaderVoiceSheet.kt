@@ -115,6 +115,28 @@ internal fun ReaderVoiceSheet(
                         modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp)
                     )
                 }
+                // ── v468 — AND THE PACK'S OWN VERSION OF THAT SENTENCE ──────
+                //
+                // A downloaded pack that answered nothing used to be a download that
+                // silently read the book in the phone's voice for ever — the member's
+                // *"kokoro doesnt work at all, like totally it doesnt work"*, reported
+                // from the page where there is nothing at all to see. The pack is
+                // remembered by id for this reading (see `ReadAloudSession.packUnavailable`),
+                // so the message goes where the choice was made, and it names the two
+                // things that actually help: try the pack again from scratch, or read
+                // with the other voice — which for these two packs is Piper, the one
+                // offered first because it is the one that reliably loads.
+                if (ReadAloudSession.packUnavailable != null &&
+                    ReadAloudSession.packUnavailable == ReaderLook.speakVoice
+                ) {
+                    Text(
+                        "This voice pack is not answering \u2014 this reading is in the phone's own " +
+                            "voice. Remove it and download it again, or choose another voice.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.ink.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp)
+                    )
+                }
                 ReaderVoiceHeading("Engine", palette)
                 engines.forEach { (name, label) ->
                     VoiceChoice(label = label, live = ReaderLook.speakEngine == name, palette = palette) {

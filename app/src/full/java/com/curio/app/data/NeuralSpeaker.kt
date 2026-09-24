@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.os.SystemClock
+import android.util.Log
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
@@ -102,7 +104,7 @@ internal object NeuralSpeaker {
         val model = NeuralVoicePacks.findModel(app, pack) ?: return false
         val tokens = NeuralVoicePacks.tokensFile(app, pack).takeIf { it.isFile } ?: return false
         val dataDir = NeuralVoicePacks.espeakDataDir(app, pack).takeIf { it.isDirectory } ?: return false
-        val built = runCatching {
+        val attempt = runCatching {
             val voices = NeuralVoicePacks.voicesFile(app, pack)
             val lexicon = NeuralVoicePacks.lexicons(app, pack)
             val modelConfig = when {
@@ -149,8 +151,30 @@ internal object NeuralSpeaker {
                         provider = "cpu",
                     )
             }
-            OfflineTts(config = OfflineTtsConfig(model = modelConfig))
-        }.getOrNull() ?: return false
+            OfflineTts(
+                config = OfflineTtsConfig(
+                    model = modelConfig,
+                    // ── v468 — A SENTENCE HAS TO END, AUDIBLY ─────────────
+                    // sherpa's own default trims every silence the model draws to a
+                    // fifth (0.2) — right for a short UI phrase, wrong for a book:
+                    // the pause at a full stop becomes a click, so consecutive
+                    // sentences run together as one breathless line (the member,
+                    // about Piper · Lessac: *"not taking a break"*). 0.6 keeps a real
+                    // break at the punctuation without stretching the gaps between
+                    // words. THE KNOB, if it ever reads too slow: this constant.
+                    silenceScale = SENTENCE_SILENCE_SCALE
+                )
+            )
+        }
+        // ⚠️ A PACK THAT WILL NOT LOAD IS NEVER SILENT ABOUT IT (v468). The member's
+        // *"kokoro doesnt work at all"* reached us as nothing at all — no error, no
+        // state, just the phone's own voice reading the book, which is
+        // indistinguishable from a feature that ignored them. The reason is logged
+        // now (it is the line a bug report would carry), so a pack the runtime
+        // refuses says WHY wherever anyone looks.
+        val built = attempt
+            .onFailure { Log.e(TAG, "The voice pack '${pack.id}' could not be loaded", it) }
+            .getOrNull() ?: return false
         tts = built
         loaded = id
         return true
@@ -170,8 +194,30 @@ internal object NeuralSpeaker {
      * Says [text] in the loaded pack's voice ([speakerId]), calling [onDone] on
      * the calling thread once the audio has finished or failed.
      */
-    fun say(text: String, speed: Float, speakerId: Int, onDone: () -> Unit) {
-        val engine = tts ?: run { onDone(); return }
+    fun say(
+        text: String,
+        speed: Float,
+        speakerId: Int,
+        onDone: () -> Unit,
+        /**
+         * ── v468 — THE PACK SAID NOTHING, AND THAT IS NOT A SENTENCE ─────────
+         *
+         * This path used to report [onDone] whatever happened: a model that threw, a
+         * frontend that could not phonemize a word, an empty sample array. The reader
+         * counts `onDone` as *that sentence has been read*, so a 305 MB pack that
+         * answers nothing was a pack that read the whole book in silence — the
+         * member's *"kokoro doesnt work at all, like totally it doesnt work"* seen
+         * from the page, where the voice they chose simply never makes a sound and
+         * nothing anywhere says so.
+         *
+         * A failure now SAYS it is a failure, and the reader answers it exactly as it
+         * answers a refused Edge socket: this pack is dropped for the rest of the
+         * session and the SAME sentence is read in the phone's own voice, so the
+         * member always hears a reading and always learns which voice is speaking.
+         */
+        onFail: () -> Unit
+    ) {
+        val engine = tts ?: run { onFail(); return }
         if (text.isBlank()) { onDone(); return }
         cancelled = false
         val mine = utterance.incrementAndGet()
@@ -180,10 +226,26 @@ internal object NeuralSpeaker {
                 // sherpa's own speed knob, pinned to the same window the system
                 // voice is held to in ReaderSpeaker so the two paths feel alike.
                 engine.generate(text, speakerId, speed.coerceIn(0.5f, 2.5f))
-            }.getOrNull()
+            }
+                .onFailure { Log.e(TAG, "A voice pack could not say a sentence", it) }
+                .getOrNull()
+            // ── ⚠️ AN EMPTY SOUND IS A FAILURE, NOT A FINISHED SENTENCE ────
+            //
+            // Both shapes matter and both are reported: `null` (the model threw, or
+            // the frontend could not turn the text into tokens) and a zero-length
+            // result (the runtime accepted the sentence and produced nothing). The
+            // one thing that must NOT happen is the reader being told the sentence is
+            // spoken.
+            if (audio == null || audio.samples.isEmpty() || audio.sampleRate <= 0) {
+                Log.e(TAG, "A voice pack returned no audio for a sentence (${audio?.samples?.size ?: -1} samples)")
+                // A pause or a skip is not this pack's fault: it is nobody's, and the
+                // newer utterance owns the cursor.
+                if (!cancelled && utterance.get() == mine) onFail() else onDone()
+                return@Thread
+            }
             // A newer utterance (or a pause) arrived while this one was being
             // made: drop it rather than playing over the member's place.
-            if (audio == null || cancelled || utterance.get() != mine) {
+            if (cancelled || utterance.get() != mine) {
                 onDone()
                 return@Thread
             }
@@ -234,9 +296,41 @@ internal object NeuralSpeaker {
                 if (written <= 0) break
                 offset += written
             }
-            // Drain rather than cut: a sentence that is stopped the instant after
-            // its last block is written should still finish being heard, or the
-            // reader's own pause sounds like a glitch.
+            // ── ⚠️ THE AUDIO IN THE BUFFER HAS TO BE HEARD, NOT DISCARDED (v468) ──
+            //
+            // `AudioTrack.write` returns as soon as a block is COPIED into the
+            // buffer, not when it has been played — so at the end of a sentence there
+            // is still up to a buffer (~1 s at 24 kHz; see the buffer size below) of
+            // UNPLAYED audio, and that buffer is the END of the sentence: the words
+            // before its full stop and the packet of silence after them. `stop()` in
+            // MODE_STREAM throws that whole buffer away.
+            //
+            // The member, twice, and about Piper · Lessac specifically: *"i was
+            // skipping comma and full stop words like the words which were before
+            // those 2 were getting skipped"*, then *"the lessac is skipping the words
+            // which are before full stop and not taking a break"*. **One bug, both
+            // halves of it**: the missing words were this buffer, and the missing
+            // break was the trailing silence sitting in the same buffer.
+            //
+            // So the tail is DRAINED first. `playbackHeadPosition` counts the frames
+            // the device has actually played, and the loop waits for the last of them.
+            // It polls in short sleeps rather than awaiting a marker callback so that a
+            // pause or a skip still interrupts it on the next poll — a drain that could
+            // not be interrupted would make Stop feel broken instead of late.
+            if (!cancelled && utterance.get() == mine) {
+                // The clip's own duration, plus half a second of slack for the
+                // device's own latency. Bounded by the audio itself, so a long
+                // sentence waits longer than a short one and neither can hang.
+                val deadline = SystemClock.elapsedRealtime() +
+                    samples.size.toLong() * 1000L / sampleRate + DRAIN_SLACK_MS
+                while (
+                    !cancelled && utterance.get() == mine &&
+                    track.playbackHeadPosition < samples.size &&
+                    SystemClock.elapsedRealtime() < deadline
+                ) {
+                    Thread.sleep(DRAIN_POLL_MS)
+                }
+            }
             if (!cancelled && utterance.get() == mine) track.stop()
         }
         runCatching { track.release() }
@@ -266,4 +360,26 @@ internal object NeuralSpeaker {
 
     /** A block big enough to keep the audio thread fed, small enough to interrupt. */
     private const val BLOCK = 4096
+
+    /**
+     * How much of every silence the model draws survives, for a sentence's sake.
+     *
+     * sherpa's default is 0.2 (a fifth). See the note where it is set: a book needs
+     * a break at its full stops, and the default turns that break into a click.
+     */
+    private const val SENTENCE_SILENCE_SCALE = 0.6f
+
+    /** Slack added to a clip's own length before the drain gives up on it. */
+    private const val DRAIN_SLACK_MS = 500L
+
+    /**
+     * How often the drain re-checks the playback head, in milliseconds.
+     *
+     * Small enough that a pause mid-drain lands within a frame or two of the tap
+     * (~15 ms is under one frame at 60 Hz), large enough that the poll is not a spin.
+     */
+    private const val DRAIN_POLL_MS = 15L
+
+    /** The tag every refusal from this object is logged under. */
+    private const val TAG = "NeuralSpeaker"
 }

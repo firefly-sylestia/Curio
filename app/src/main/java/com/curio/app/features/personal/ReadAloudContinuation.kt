@@ -219,7 +219,21 @@ internal object ReadAloudContinuation {
                     continue
                 }
                 val done = CompletableDeferred<Unit>()
-                sayAloud(ctx, text, ReaderLook.speakSpeed) { done.complete(Unit) }
+                // ── v468 — THE SAME HEAD START THE PAGE GIVES THE ONLINE VOICE ──
+                //
+                // The next sentence is fetched while this one plays (see `sayAloud`'s
+                // `nextText`), which is the whole difference between a reading that
+                // pauses at every full stop and one that does not. **It is asked for
+                // ONLY when the voice is the online experiment**: this provider may be
+                // a PDF's, whose every call is a text extraction of the file, so asking
+                // it for a sentence nobody is going to prefetch would cost a parse per
+                // sentence to save nothing.
+                val next = if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
+                    provider?.invoke(index + 1)?.trim().orEmpty().ifBlank { null }
+                } else {
+                    null
+                }
+                sayAloud(ctx, text, ReaderLook.speakSpeed, nextText = next) { done.complete(Unit) }
                 if (withTimeoutOrNull(ALOUD_STALL_MS) { done.await() } == null) {
                     end()
                     return@launch

@@ -1447,7 +1447,16 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 // a sentence nobody reports on within [ALOUD_STALL_MS] ends the
                 // session where it stands instead of hanging on it.
                 val done = CompletableDeferred<Unit>()
-                sayAloud(context, sentence.text, ReaderLook.speakSpeed) { done.complete(Unit) }
+                // ⚠️ THE NEXT SENTENCE IS FREE HERE, AND IT IS WHAT THE ONLINE VOICE
+                // NEEDS (see `sayAloud`'s `nextText`): the page already holds the
+                // whole list, so handing over the next one costs a single index and
+                // saves a handshake at every full stop.
+                sayAloud(
+                    context,
+                    sentence.text,
+                    ReaderLook.speakSpeed,
+                    nextText = list.getOrNull(from + 1)?.text
+                ) { done.complete(Unit) }
                 if (withTimeoutOrNull(ALOUD_STALL_MS) { done.await() } == null) {
                     stopVoice()
                     return@LaunchedEffect
@@ -1493,6 +1502,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     // sentence gets: a page's last words are words too, and a page
                     // that never reports back must not freeze the reading either.
                     val donePage = CompletableDeferred<Unit>()
+                    // No `nextText` here, deliberately: a PDF's next page costs a text
+                    // extraction of the file, and paying that on every page to warm a
+                    // voice the member may not even be using is a worse trade than the
+                    // silence it would save.
                     sayAloud(context, said, ReaderLook.speakSpeed) { donePage.complete(Unit) }
                     if (withTimeoutOrNull(ALOUD_STALL_MS) { donePage.await() } == null) {
                         stopVoice()
@@ -7974,6 +7987,30 @@ internal suspend fun sayAloud(
     context: Context,
     text: String,
     speed: Float,
+    /**
+     * ── v468 — THE NEXT SENTENCE, WHEN THE CALLER ALREADY KNOWS IT ────────
+     *
+     * The member: *"the edge tts stops way too long at full stops maybe sentence by
+     * sentence or is it playing online and that show much time it takes to load, fix
+     * the loading and pre load the next paragraph so its not slow"*. It IS the second
+     * thing: every sentence is a fresh WebSocket handshake and a fresh synthesis, and
+     * the fetch only starts once the previous sentence has finished — so the whole of
+     * that round trip sits in the silence at every full stop.
+     *
+     * A caller that already holds the next sentence (both readers do: the page keeps
+     * its sentence list, the continuation asks its own provider) can hand it over, and
+     * the Edge voice fetches it WHILE this one plays. Only the online experiment uses
+     * it — a downloaded pack synthesises locally in a moment and needs no head start —
+     * and it is optional by design, so a caller with nothing to offer (a PDF, whose
+     * next page would cost a parse) simply does not pass it.
+     *
+     * ⚠️ **IT SITS BEFORE [onDone] ON PURPOSE.** Every existing call site ends with a
+     * trailing lambda for `onDone`; adding a parameter AFTER it would silently re-bind
+     * those lambdas to the new one — the classic shape this codebase's own rules warn
+     * about — so the new parameter is defaulted and placed before it, and not one
+     * caller had to change to keep compiling.
+     */
+    nextText: String? = null,
     onDone: () -> Unit
 ) {
     // ⚠️ THE FLAG IS CHECKED AT THE MOMENT OF SPEAKING, NOT WHEN THE VOICE WAS
@@ -7988,6 +8025,16 @@ internal suspend fun sayAloud(
     if (ReaderLook.speakEngine == ReaderEngine.EDGE && AppPreferences.edgeVoiceEnabledState &&
         !ReadAloudSession.edgeUnavailable
     ) {
+        // ── v468 — THE NEXT SENTENCE IS FETCHED WHILE THIS ONE PLAYS ──────
+        //
+        // Started BEFORE the say (both are async — `say` returns as soon as its own
+        // worker is running), so the handshake and the synthesis of the next sentence
+        // happen under this sentence's audio instead of in the silence after it. This
+        // is the whole fix for the long stop at every full stop: nothing else about
+        // the request changed, the request simply started earlier.
+        if (!nextText.isNullOrBlank()) {
+            EdgeVoice.prefetch(context, nextText, speed, ReaderLook.speakVoice)
+        }
         EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone) {
             // ── v465i — A REFUSED SOCKET IS NOT A READ SENTENCE ─────────
             //
@@ -8008,7 +8055,17 @@ internal suspend fun sayAloud(
     }
     if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
         val pack = NeuralVoicePacks.byId(ReaderLook.speakVoice)
-        if (pack != null) {
+        // ── v468 — A PACK THAT ALREADY FAILED IS NOT LOADED AGAIN ─────────
+        //
+        // `packUnavailable` holds the ID of the pack that answered nothing during THIS
+        // reading — the ID, not a flag — so this guard stops matching the moment the
+        // member chooses a different voice, and the read starts trying again. A failure
+        // belongs to one pack, and the other pack on the phone is usually the one that
+        // works (Piper is the recommended tier precisely because it is the one that
+        // reliably loads).
+        if (pack != null && ReadAloudSession.packUnavailable == pack.id) {
+            // Falls through to the tail below, which reads in the phone's own voice.
+        } else if (pack != null) {
             // ⚠️ READY FOR **THIS** PACK — `NeuralSpeaker.isReady` alone is the
             // bug it looks like the fix for (v465j). It is true whenever ANY pack
             // is loaded, so a member who listened to Piper and then chose the
@@ -8025,7 +8082,26 @@ internal suspend fun sayAloud(
                 // count here rather than trusted: out of range lands on the last
                 // real voice instead of a generation that returns nothing.
                 val last = (NeuralSpeaker.speakerCount() - 1).coerceAtLeast(0)
-                NeuralSpeaker.say(text, speed, ReaderLook.speakSpeaker.coerceIn(0, last), onDone)
+                // ── v468 — A PACK THAT SAYS NOTHING IS READ AROUND ────────
+                //
+                // Exactly the rule a refused Edge socket follows: dropping the pack
+                // for this reading and reading the SAME sentence in the phone's own
+                // voice. Without it a 305 MB pack that answered nothing counted as a
+                // whole book read aloud — silence, page after page, with the member
+                // told nothing anywhere (their *"kokoro doesnt work at all"*).
+                NeuralSpeaker.say(
+                    text,
+                    speed,
+                    ReaderLook.speakSpeaker.coerceIn(0, last),
+                    onDone
+                ) {
+                    ReadAloudSession.packUnavailable = pack.id
+                    NeuralSpeaker.stop()
+                    ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
+                    // An empty voice name: the fallback is the PHONE's own voice, and a
+                    // pack id here is a name no system engine has ever heard of.
+                    ReaderSpeaker.say(text, speed, "", onDone)
+                }
                 return
             }
         }
