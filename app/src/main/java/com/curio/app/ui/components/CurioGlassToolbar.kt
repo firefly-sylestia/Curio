@@ -51,7 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.features.settings.settingsRoseAccent
-import com.curio.app.ui.floatingPillHeader
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioPillTintLift
@@ -114,7 +114,14 @@ fun CurioGlassToolbar(
     // header that is 48dp and gone. A pill that kept them would be the bar again with
     // its edges rounded — so `trailing` (the screen's own action pills, which fit on a
     // single 48dp row) is what carries over, and the rest is what the member scrolls to.
-    if (floatingPillHeader()) {
+    // ⚠️ `CurioLayout.floatingPillHeader()`, NOT an imported `floatingPillHeader()`.
+    // A member of an object is not a top-level declaration and cannot be imported as
+    // one; the first version of this line did import it that way, which is a
+    // "Unresolved reference" at the IMPORT rather than at the call — the same red build
+    // on four jobs for one character of form (v468). An object whose members are meant
+    // to be read from all over the app is imported as the OBJECT, and its members are
+    // called through it.
+    if (CurioLayout.floatingPillHeader()) {
         CurioPillHeader(
             title = title,
             onBack = onBack,
