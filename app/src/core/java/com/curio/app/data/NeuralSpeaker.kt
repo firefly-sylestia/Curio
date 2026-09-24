@@ -36,6 +36,13 @@ internal object NeuralSpeaker {
 
     fun speakerCount(): Int = 1
 
+    /**
+     * v469 — the full edition's synthesis-ahead (see its own note on why the
+     * sentence after this one is made while this one plays). Nothing here ever
+     * speaks, so there is never a sentence to make ahead of anything.
+     */
+    fun prefetch(text: String, speed: Float, speakerId: Int) = Unit
+
     fun prepare(context: Context, pack: NeuralVoicePacks.Pack): Boolean = false
 
     /**

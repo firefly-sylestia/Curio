@@ -51,15 +51,18 @@ import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.NeuralSpeaker
 import com.curio.app.infrastructure.ReadAloudService
+import com.curio.app.infrastructure.ReadAloudSession
 import com.curio.app.data.NeuralVoiceDownloads
 import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * v434 — THE READING SETTINGS, AS A PAGE OF ITS OWN.
@@ -113,6 +116,17 @@ internal fun ReaderSettingsScreen(
     /** False when no book is open, so there are no zones to place. */
     canPlaceZones: Boolean = false,
     onGestures: (() -> Unit)? = null,
+    /**
+     * ── v469 — THE DOOR TO THE READ-ALOUD SETTINGS ──────────────────────
+     *
+     * The member: *"the read aloud settings from the setting page … its own
+     * screen"*. Engine, voice, narrator, speed and the voice packs used to be five
+     * lists of their own inside this page, and none of them are about the PAGE —
+     * so they moved to [ReadAloudSettingsPage] and this page kept the door. The
+     * callback is required rather than optional: a door that cannot open is worse
+     * than no door, and both call sites have somewhere to send the member.
+     */
+    onReadAloud: () -> Unit,
     onBack: () -> Unit
 ) {
     var moreInks by remember { mutableStateOf(false) }
@@ -396,6 +410,44 @@ internal fun ReaderSettingsScreen(
                 )
             }
 
+            // ── v469 — THE READ-ALOUD SETTINGS HAVE A PAGE OF THEIR OWN ───
+            //
+            // The member: *"the read aloud settings from the setting page … its own
+            // screen"*. Engine, voice, narrator, speed and the voice packs are five
+            // lists of their own, and not one of them is about the PAGE — which is
+            // the whole reason they read badly wedged between the paper and the
+            // dictionary. So the lists moved ([ReadAloudSettingsBody] below,
+            // [ReadAloudSettingsPage] for the page around them) and the Reading page
+            // kept this door, in the place the section used to stand.
+            ReadAloudDoor(palette, onReadAloud)
+
+            // ── AND THE SECTIONS THAT COME AFTER IT ───────────────────
+            // Emitted by [ReaderSettingsTail], because the read-aloud body below sits
+            // between them in this file and a page is a run of siblings.
+            ReaderSettingsTail(palette, canPlaceZones, onGestures)
+        }
+    }
+}
+
+/**
+ * ── v469 — THE READ-ALOUD SETTINGS THEMSELVES, ON A PAGE OF THEIR OWN ────
+ *
+ * Everything a reading voice needs in one place: how fast, WHICH ENGINE, which
+ * voice, which narrator inside a downloaded pack, the packs themselves (download,
+ * stop, remove and test), and whether a reading survives Curio leaving the
+ * screen. It is a surface of its own rather than a section of the Reading page
+ * because a voice is not a property of the page — the member said so themselves
+ * (*"the read aloud settings … its own screen"*), and the alternative was five
+ * long lists interrupting a page about paper and type.
+ *
+ * ⚠️ **THE BODY IS THE OLD SECTION, MOVED WHOLE.** Its lines are the ones that
+ * stood between the Screen and Dictionary sections of [ReaderSettingsScreen], at
+ * their original indentation, because a move that re-indents 600 lines is how a
+ * working surface acquires a typo. Read it here for what it is; the shell that
+ * gives it a head, a back button and its own scroll is [ReadAloudSettingsPage].
+ */
+@Composable
+internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
             // ── v440 — THE VOICE: HOW FAST, AND WHOSE (see [ReaderSpeaker]) ──
             //
             // The member's own pick from the settings list: *"Read-aloud: a speed and
@@ -986,14 +1038,63 @@ internal fun ReaderSettingsScreen(
                                                                 val ok = runCatching {
                                                                     NeuralSpeaker.prepare(context, pack)
                                                                 }.getOrDefault(false)
-                                                                when {
-                                                                    !ok -> "Could not be loaded \u2014 the phone's voice reads instead."
-                                                                    else -> {
-                                                                        val speakers = NeuralSpeaker.speakerCount()
-                                                                        if (speakers > 1) {
-                                                                            "Loaded \u00b7 $speakers voices"
+                                                                if (!ok) {
+                                                                    "Could not be loaded \u2014 the phone's voice reads instead."
+                                                                } else {
+                                                                    val speakers = NeuralSpeaker.speakerCount()
+                                                                    val loaded = if (speakers > 1) {
+                                                                        "Loaded \u00b7 $speakers voices"
+                                                                    } else {
+                                                                        "Loaded"
+                                                                    }
+                                                                    // ── v469 — AND THEN IT IS ASKED TO SPEAK ────
+                                                                    //
+                                                                    // *"it says loaded 11 voices it doesnt show or
+                                                                    // work when choosen"* is the whole lesson of
+                                                                    // this row: **loading is not speaking.** Kokoro
+                                                                    // loaded, answered 11 speakers, and generated
+                                                                    // NOTHING (an espeak voice espeak-ng does not
+                                                                    // have; see `NeuralSpeaker.prepare`), and this
+                                                                    // test reported the load it had asked for and
+                                                                    // nothing else \u2014 so the member's only clue was a
+                                                                    // voice that stayed silent in the book. A pack
+                                                                    // that loads and says nothing is a pack that
+                                                                    // cannot read, and the row says so now.
+                                                                    //
+                                                                    // A LIVE READING IS NOT TALKED OVER (see
+                                                                    // [ReadAloudSession]): the member is already
+                                                                    // hearing that voice, so the load is the whole
+                                                                    // answer it is honest to give.
+                                                                    if (ReadAloudSession.active) {
+                                                                        loaded
+                                                                    } else {
+                                                                        val heard = CompletableDeferred<Boolean>()
+                                                                        val startedAt = System.currentTimeMillis()
+                                                                        val sid = ReaderLook.speakSpeaker.coerceIn(
+                                                                            0,
+                                                                            (speakers - 1).coerceAtLeast(0)
+                                                                        )
+                                                                        NeuralSpeaker.say(
+                                                                            PACK_TEST_SENTENCE,
+                                                                            1f,
+                                                                            sid,
+                                                                            { heard.complete(true) }
+                                                                        ) { heard.complete(false) }
+                                                                        val spoke = withTimeoutOrNull(PACK_TEST_TIMEOUT_MS) {
+                                                                            heard.await()
+                                                                        } == true
+                                                                        if (!spoke) {
+                                                                            "$loaded, but it made no sound \u2014 " +
+                                                                                "the phone's voice reads instead."
                                                                         } else {
-                                                                            "Loaded"
+                                                                            val seconds =
+                                                                                (System.currentTimeMillis() - startedAt) / 1000f
+                                                                            String.format(
+                                                                                java.util.Locale.US,
+                                                                                "%s \u00b7 spoke in %.1fs",
+                                                                                loaded,
+                                                                                seconds
+                                                                            )
                                                                         }
                                                                     }
                                                                 }
@@ -1019,6 +1120,69 @@ internal fun ReaderSettingsScreen(
                 }
             }
 
+            // ── v465h (v469: MOVED HERE FROM THE READING PAGE) ──────────
+            //
+            // The member: *"let it play in backgroud too"*, and — asked how it
+            // should ship — *"a switch in Reading settings"*. It lives with the
+            // voice now, which is what it is about: read aloud is driven from the
+            // reader itself, and a backgrounded app's threads are FREEZABLE by the
+            // phone, which is what a voice that goes quiet the moment Curio leaves
+            // the screen actually is — no error, no log, just a book that stopped
+            // being read. On, a foreground service keeps the session alive and puts
+            // the transport (previous sentence, pause, next sentence, Stop) in the
+            // shade, so a chapter can be listened to with the phone in a pocket.
+            //
+            // A SEGMENT ROW RATHER THAN A SWITCH, to match every other either/or
+            // on these pages — and because OFF IS NOT BROKEN: it is "whatever the
+            // phone does with an app it cannot see", which for a member who never
+            // leaves the reader is exactly the same experience.
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                ReaderSettingsSection("Background", palette)
+                // ── v465h — A CONTEXT OF THIS SCOPE'S OWN ──────────────────────
+                // The read-aloud body has no `context` of its own, and `onSelect`
+                // below is an ordinary lambda rather than a @Composable scope — the
+                // exact trap the root compile-safety rules name for callbacks — so
+                // the context is read HERE, in the composition, and closed over.
+                val sectionContext = LocalContext.current
+                ReaderSegmentRow(
+                    segments = listOf(
+                        ReaderSegment("Keep reading", CurioIcons.Check),
+                        ReaderSegment("Only on screen", CurioIcons.Close)
+                    ),
+                    selectedIndex = if (AppPreferences.readAloudBackgroundEnabledState) 0 else 1,
+                    palette = palette,
+                    onSelect = { at ->
+                        AppPreferences.setReadAloudBackgroundEnabled(sectionContext, at == 0)
+                        // ── AND ASK THE SERVICE TO RE-RENDER ───────────
+                        // The service re-reads the setting on every render, so this
+                        // is what takes a running notification down (or re-arms it)
+                        // the moment the row is touched, rather than leaving "Curio
+                        // is reading this aloud" in the shade after an off switch.
+                        // The call belongs to the ROW rather than to the setter, to
+                        // keep the data layer out of the service layer — the same
+                        // shape the pet-overlay switch uses.
+                        ReadAloudService.sync(sectionContext)
+                    }
+                )
+            }
+}
+
+/**
+ * ── v469 — THE READING PAGE'S OWN SECTIONS, AFTER THE READ-ALOUD DOOR ────
+ *
+ * A function rather than the rest of [ReaderSettingsScreen]'s body for one
+ * reason: the read-aloud settings sat between these sections and the ones above
+ * them, and moving that block whole (see [ReadAloudSettingsBody]) left them on
+ * the other side of it. The page is a run of siblings; this is the second half
+ * of the run, called from the page itself.
+ */
+@Composable
+internal fun ReaderSettingsTail(
+    palette: ReaderPalette,
+    canPlaceZones: Boolean,
+    onGestures: (() -> Unit)?
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             // ── v440 — WHERE A LOOKUP GOES ──────────────────────────────
             //
             // The member, asked what "bundled vs online" should mean once they heard
@@ -1067,58 +1231,6 @@ internal fun ReaderSettingsScreen(
                     selectedIndex = if (ReaderLook.lowPower) 0 else 1,
                     palette = palette,
                     onSelect = { at -> ReaderLook.lowPower = at == 0 }
-                )
-            }
-
-            // ── v465h — READING WITH THE SCREEN OFF ─────────────────────
-            //
-            // The member: *"let it play in backgroud too"*, and — asked how it
-            // should ship — *"a switch in Reading settings"*. Read aloud is driven
-            // from the reader itself, and a backgrounded app's threads are
-            // FREEZABLE by the phone, which is what a voice that goes quiet the
-            // moment Curio leaves the screen actually is: no error, no log, just a
-            // book that stopped being read. On, a foreground service keeps the
-            // session alive and puts the transport (previous sentence, pause, next
-            // sentence, Stop) in the shade, so a chapter can be listened to with
-            // the phone in a pocket.
-            //
-            // A SEGMENT ROW RATHER THAN A SWITCH, to match every other either/or
-            // on this page — and because OFF IS NOT BROKEN: it is "whatever the
-            // phone does with an app it cannot see", which for a member who never
-            // leaves the reader is exactly the same experience.
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                ReaderSettingsSection("Background", palette)
-                // ── v465h — A CONTEXT OF THIS SCOPE'S OWN ──────────────────────
-                // There is already a `val context = LocalContext.current` near the
-                // top of this screen, but it belongs to a DIFFERENT composable: a
-                // local val does not reach a sibling, so inside this block the
-                // name `context` fell back to whatever else resolves it and the
-                // build said `Function invocation 'context(...)' expected.` on
-                // each use. Reading it here keeps that fix local, and it has to be
-                // read HERE rather than inline in `onSelect` below, because
-                // `onSelect` is an ordinary lambda and not a @Composable scope —
-                // which is also the exact trap the root compile-safety rules
-                // name for callbacks.
-                val sectionContext = LocalContext.current
-                ReaderSegmentRow(
-                    segments = listOf(
-                        ReaderSegment("Keep reading", CurioIcons.Check),
-                        ReaderSegment("Only on screen", CurioIcons.Close)
-                    ),
-                    selectedIndex = if (AppPreferences.readAloudBackgroundEnabledState) 0 else 1,
-                    palette = palette,
-                    onSelect = { at ->
-                        AppPreferences.setReadAloudBackgroundEnabled(sectionContext, at == 0)
-                        // ── AND ASK THE SERVICE TO RE-RENDER ───────────
-                        // The service re-reads the setting on every render, so this
-                        // is what takes a running notification down (or re-arms it)
-                        // the moment the row is touched, rather than leaving "Curio
-                        // is reading this aloud" in the shade after an off switch.
-                        // The call belongs to the ROW rather than to the setter, to
-                        // keep the data layer out of the service layer — the same
-                        // shape the pet-overlay switch uses.
-                        ReadAloudService.sync(sectionContext)
-                    }
                 )
             }
 
@@ -1171,12 +1283,32 @@ internal fun ReaderSettingsScreen(
 
             Spacer(Modifier.height(6.dp))
         }
-    }
 }
 
 /** v440 — how slow and how fast the voice may read (see [ReaderSpeaker]). */
 private const val SPEAK_SLOW = 0.6f
 private const val SPEAK_FAST = 2f
+
+/**
+ * v469 — WHAT A PACK IS ASKED TO SAY WHEN IT IS TESTED.
+ *
+ * One short sentence, because the point of the test is that it SPEAKS: a full
+ * stop's worth of ordinary prose is enough to prove the frontend phonemized, the
+ * model ran, and the audio came back — which is the whole difference between a
+ * pack that loads and a pack that reads. It is a sentence of no particular
+ * meaning, so no part of it can be mistaken for the app talking about itself.
+ */
+private const val PACK_TEST_SENTENCE = "This is how this voice sounds when it reads."
+
+/**
+ * How long a tested pack may take to answer before it is called silent (v469).
+ *
+ * Generous on purpose: a 305 MB model on a mid-range phone can take several
+ * seconds to make even a short sentence, and calling that "no sound" would be a
+ * lie about a pack that works. A pack that answers NOTHING answers in
+ * milliseconds, so this ceiling is never what decides the common case.
+ */
+private const val PACK_TEST_TIMEOUT_MS = 30_000L
 
 /**
  * v440 — ONE VOICE IN THE PICKER, in the reader's own capsule language.
@@ -1269,13 +1401,16 @@ internal fun VoiceChoice(
  * changes belong to the PROCESS, not to one novel (see [ReaderLook]).
  */
 @Composable
-internal fun ReaderSettingsRoute(onBack: () -> Unit) {
+internal fun ReaderSettingsRoute(onBack: () -> Unit, onReadAloud: () -> Unit) {
     val palette = readerPalette(ReaderLook.inkKey)
     ReaderSettingsScreen(
         palette = palette,
         showType = true,
         paged = ReaderLook.textFlow == ReaderFlow.PAGED,
         onTogglePaged = { ReaderLook.textFlow = ReaderLook.textFlow.flipped() },
+        // v469 — and its door to the read-aloud page, which is a destination of its
+        // own on this side (the reader opens the same page OVER the book instead).
+        onReadAloud = onReadAloud,
         onBack = onBack
     )
 }

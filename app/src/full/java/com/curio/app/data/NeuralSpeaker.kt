@@ -11,7 +11,9 @@ import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 
 /**
  * ── v465c — THE NEURAL VOICE, PLAYING WHAT IT MAKES (FULL EDITION ONLY) ─────
@@ -57,6 +59,75 @@ internal object NeuralSpeaker {
     private val utterance = AtomicInteger(0)
 
     @Volatile private var cancelled = false
+
+    /**
+     * ── v469 — WHICH ENGINE A QUEUED JOB BELONGS TO ────────────────────────
+     *
+     * Synthesis runs on a QUEUE now (see [synth]), so a job can be waiting when
+     * the member leaves the reader — and [release] frees the model. A job captures
+     * this number when it is queued and gives up if the engine has been replaced
+     * since, and the free is queued on the SAME LANE so it can never land in the
+     * middle of a synthesis that is already running.
+     */
+    private val engineGen = AtomicInteger(0)
+
+    /**
+     * ── v469 — THE SENTENCE MADE AHEAD OF THE ONE PLAYING ─────────────────
+     *
+     * The member: *"they stop way too long on full stops like maybe for 2 sec or
+     * something fix it and make it natural"*. On a phone a neural pack cannot keep
+     * up with its own voice — Piper medium is 0.357 RTF on a Raspberry Pi 4 with
+     * four threads and this device runs it on two — so when the next sentence was
+     * only asked for AFTER the last one had finished playing, every full stop paid
+     * the whole synthesis. That wait IS the two seconds.
+     *
+     * So the sentence after this one is synthesised WHILE this one is in the
+     * speaker ([prefetch], called by `sayAloud` with the text it already holds) and
+     * waits here. One slot is enough: a reading walks forward one sentence at a
+     * time, and the speaker is the only thing that can be listening.
+     */
+    @Volatile private var ahead: Ahead? = null
+
+    /** The text a prefetch job is making right now, so one promise is paid once. */
+    @Volatile private var making: String? = null
+
+    /**
+     * ── v469 — THE READING'S OWN GENERATION FOR WORK MADE AHEAD ───────────
+     *
+     * Bumped by [stop] — a pause, a skip, a voice change, the end of a reading:
+     * the sentence a queued prefetch was making is not the one wanted any more, and
+     * on a phone synthesising it anyway is seconds of the member's battery spent on
+     * words nobody will hear. (A skip that leaves four stale sentences queued would
+     * otherwise stall the sentence they DID ask for behind all four.)
+     *
+     * ⚠️ WHY THIS IS SAFE HERE AND WAS NOT FOR [EdgeVoice]: that voice's `say` calls
+     * its own `stop` before EVERY sentence, so a generation bumped by a stop there
+     * would throw away the head start on every single line. This object's `say`
+     * never stops anything, so a stop only ever means what it says.
+     */
+    @Volatile private var prefetchGen = 0
+
+    /**
+     * ── v469 — ONE LANE FOR MAKING AUDIO, ONE FOR PLAYING IT ───────────────
+     *
+     * Two `generate` calls at once on a phone's two cores do not overlap, they
+     * halve each other — so synthesis is serial and FIFO, and **the sentence being
+     * spoken is queued BEFORE the sentence after it** (that is what `sayAloud`
+     * does, and it is the one ordering rule this pipeline has).
+     *
+     * Playback is a lane of its own because `play` blocks for the whole clip while
+     * it drains the audio the device has not played yet: on one lane, every
+     * prefetch would have to wait for the sentence in front of it to finish
+     * sounding — which is exactly the wait this pipeline exists to remove.
+     */
+    private val synth = Executors.newSingleThreadExecutor { job ->
+        // Daemon: these two lanes outlive a reading, and a parked thread that
+        // could hold a process open is not worth the microseconds it saves.
+        Thread(job, "curio-voice-synth").apply { isDaemon = true }
+    }
+    private val playback = Executors.newSingleThreadExecutor { job ->
+        Thread(job, "curio-voice-play").apply { isDaemon = true }
+    }
 
     val isReady: Boolean get() = tts != null
 
@@ -117,17 +188,46 @@ internal object NeuralSpeaker {
                             tokens = tokens.absolutePath,
                             dataDir = dataDir.absolutePath,
                             lexicon = lexicon,
-                            // ⚠️ ISO 639-3, NOT THE "en" IT READS LIKE. This value
-                            // is the espeak-ng voice the Kokoro frontend phonemizes
-                            // with, and sherpa-onnx's own Android engine is explicit
-                            // about it: its `kokoro-en-v0_19` entry passes `eng`
-                            // (`scripts/apk/generate-tts-apk-script.py` converts the
-                            // ISO 639-1 code it is written with through `Lang.pt3`,
-                            // and the generated `TtsEngine.kt` carries the 639-3
-                            // form). Left empty the model's own `voice` metadata is
-                            // used instead — also "en-us" — but a value that is
-                            // neither is a language espeak-ng cannot resolve.
-                            lang = "eng",
+                            // ── v469 — ⚠️ EMPTY, AND THAT IS THE KOKORO FIX ────
+                            //
+                            // This field was `"eng"`, chosen (v465j) on the
+                            // reasoning that the runtime wants an ISO 639-3 code.
+                            // It does not, and the mistake is worth recording
+                            // because it produced a pack that LOADED PERFECTLY and
+                            // said nothing at all.
+                            //
+                            // `kokoro-en-v0_19` is a v0.19 model, and sherpa-onnx
+                            // gives every such model a `PiperPhonemizeLexicon`
+                            // frontend — whose `ConvertTextToTokenIds(text, voice)`
+                            // hands this value to **espeak-ng as the VOICE NAME**:
+                            //
+                            //   config.voice = voice; // e.g., voice is en-us
+                            //   piper::phonemize_eSpeak(text, config, phonemes);
+                            //
+                            // and that call THROWS when espeak-ng cannot resolve
+                            // the name (the library's own comment: "throws if
+                            // espeak-ng does not recognize config.voice, e.g., when
+                            // a user passes an unsupported --kokoro-lang").
+                            // `OfflineTtsKokoroImpl::Generate` catches nothing — it
+                            // clears the phonemes, gets no token ids, and returns an
+                            // EMPTY result. The engine was up, `numSpeakers()`
+                            // answered 11, the health test said "Loaded · 11 voices"
+                            // and the model generated 0 samples (the member: *"it
+                            // says loaded 11 voices it doesnt show or work when
+                            // choosen"*).
+                            //
+                            // **`"eng"` is not a voice espeak-ng has.** Its voices
+                            // are named `en`, `en-us`, `en-gb`; `"eng"` is the kind
+                            // of plausible-looking code that no test in this
+                            // environment could ever have caught. Left EMPTY, the
+                            // runtime uses the model's own `voice` metadata —
+                            // "en-us" for this pack, which is the very example the
+                            // source comments give — so the voice comes from the
+                            // model rather than from a guess. See
+                            // `OfflineTtsKokoroImpl::Generate`:
+                            // `lang = config_.model.kokoro.lang.empty() ?
+                            // meta_data.voice : config_.model.kokoro.lang`.
+                            lang = "",
                         ),
                         // Kokoro is the heavier model and the one whose RTF is
                         // closest to the line, so it is the one that wants the
@@ -221,14 +321,28 @@ internal object NeuralSpeaker {
         if (text.isBlank()) { onDone(); return }
         cancelled = false
         val mine = utterance.incrementAndGet()
-        Thread {
-            val audio = runCatching {
-                // sherpa's own speed knob, pinned to the same window the system
-                // voice is held to in ReaderSpeaker so the two paths feel alike.
-                engine.generate(text, speakerId, speed.coerceIn(0.5f, 2.5f))
-            }
-                .onFailure { Log.e(TAG, "A voice pack could not say a sentence", it) }
-                .getOrNull()
+        val gen = engineGen.get()
+        // ── v469 — THE SENTENCE THE PREFETCH ALREADY MADE ───────────────────
+        //
+        // [prefetch] synthesises the sentence AFTER this one while this one plays,
+        // and this is where that promise is cashed: a clip made for exactly these
+        // words, in this voice, at this speed is played at once — with no synthesis
+        // at all between the two sentences. `Ahead.matches` is deliberately exact,
+        // because a cache that guesses is a cache that plays the wrong sentence in
+        // the right voice.
+        val ready = ahead?.takeIf { it.matches(text, speed, speakerId) }
+        if (ready != null) ahead = null
+        // ⚠️ QUEUED, NOT THREADED. See [synth]: one synthesis at a time keeps the
+        // sentence the member is waiting to hear from being slowed down by the
+        // sentence after it, and it is what makes the prefetch below a head start
+        // rather than a competitor.
+        synth.execute {
+            // The engine was replaced (or freed) while this job sat in the queue.
+            if (engineGen.get() != gen) { onDone(); return@execute }
+            // A newer sentence (or a pause) landed first: nobody is waiting on this
+            // one any more, and making its audio would be seconds of wasted work.
+            if (utterance.get() != mine) { onDone(); return@execute }
+            val clip = ready ?: synthesise(engine, text, speed, speakerId)
             // ── ⚠️ AN EMPTY SOUND IS A FAILURE, NOT A FINISHED SENTENCE ────
             //
             // Both shapes matter and both are reported: `null` (the model threw, or
@@ -236,22 +350,131 @@ internal object NeuralSpeaker {
             // result (the runtime accepted the sentence and produced nothing). The
             // one thing that must NOT happen is the reader being told the sentence is
             // spoken.
-            if (audio == null || audio.samples.isEmpty() || audio.sampleRate <= 0) {
-                Log.e(TAG, "A voice pack returned no audio for a sentence (${audio?.samples?.size ?: -1} samples)")
+            if (clip == null) {
                 // A pause or a skip is not this pack's fault: it is nobody's, and the
                 // newer utterance owns the cursor.
                 if (!cancelled && utterance.get() == mine) onFail() else onDone()
-                return@Thread
+                return@execute
             }
             // A newer utterance (or a pause) arrived while this one was being
             // made: drop it rather than playing over the member's place.
             if (cancelled || utterance.get() != mine) {
                 onDone()
-                return@Thread
+                return@execute
             }
-            play(audio.samples, audio.sampleRate, mine)
-            onDone()
-        }.start()
+            // The speaker is its own lane, so this blocks only the PLAYBACK queue
+            // while the synthesis lane is already free for the next sentence.
+            playback.execute {
+                play(clip.samples, clip.sampleRate, mine)
+                onDone()
+            }
+        }
+    }
+
+    /**
+     * ── v469 — MAKE THE SENTENCE AFTER THIS ONE, WHILE THIS ONE PLAYS ─────
+     *
+     * Called by `sayAloud` with the text the reading is about to want (the page
+     * already holds it — one index into its own sentence list), and does nothing at
+     * all when there is nothing ahead to make.
+     *
+     * ⚠️ **THE ORDER MATTERS: THIS IS CALLED AFTER [say], NEVER BEFORE IT.** Both
+     * jobs go on one FIFO lane, and the sentence being spoken has to be made first —
+     * a prefetch queued in front of it would delay the very words the member asked
+     * for by the whole length of the one they have not asked for yet.
+     *
+     * A failure is silent on purpose: this is an optimisation, so a pack that cannot
+     * make the next sentence makes it in [say] instead, where the reader's own
+     * failure path (the fallback to the phone's voice) lives. A cache that could fail
+     * a sentence would be a cache deciding the reading.
+     */
+    fun prefetch(text: String, speed: Float, speakerId: Int) {
+        val engine = tts ?: return
+        if (text.isBlank()) return
+        val held = ahead
+        if (held != null && held.matches(text, speed, speakerId)) return
+        if (making == text) return
+        making = text
+        val gen = engineGen.get()
+        val reading = prefetchGen
+        synth.execute {
+            if (engineGen.get() == gen && prefetchGen == reading) {
+                val clip = synthesise(engine, text, speed, speakerId)
+                if (clip != null && engineGen.get() == gen && prefetchGen == reading) {
+                    ahead = clip
+                }
+            }
+            if (making == text) making = null
+        }
+    }
+
+    /**
+     * One sentence, made whole: synthesis, then the trim that makes its ending
+     * sound like a reader rather than a machine (see [trimmed]).
+     *
+     * Returns null when the pack gave nothing back — the model threw, the frontend
+     * could not phonemize, or the result was silent from end to end — and logs it,
+     * because that log line is what a bug report about a pack carries.
+     */
+    private fun synthesise(engine: OfflineTts, text: String, speed: Float, speakerId: Int): Ahead? {
+        val audio = runCatching {
+            // sherpa's own speed knob, pinned to the same window the system voice is
+            // held to in ReaderSpeaker so the two paths feel alike.
+            engine.generate(text, speakerId, speed.coerceIn(0.5f, 2.5f))
+        }
+            .onFailure { Log.e(TAG, "A voice pack could not say a sentence", it) }
+            .getOrNull()
+        if (audio == null || audio.samples.isEmpty() || audio.sampleRate <= 0) {
+            Log.e(
+                TAG,
+                "A voice pack returned no audio for a sentence " +
+                    "(${audio?.samples?.size ?: -1} samples)"
+            )
+            return null
+        }
+        val samples = trimmed(audio.samples, audio.sampleRate)
+        if (samples.isEmpty()) {
+            Log.e(TAG, "A voice pack returned a sentence of pure silence")
+            return null
+        }
+        return Ahead(text, speed, speakerId, samples, audio.sampleRate)
+    }
+
+    /**
+     * ── v469 — THE PAUSE AT A FULL STOP IS THE READER'S, NOT THE MODEL'S ────
+     *
+     * A neural model draws its own silence around every sentence, and sherpa's own
+     * `silenceScale` only scales it — this object keeps 0.6 (see
+     * [SENTENCE_SILENCE_SCALE]) — so a clip can end with most of a second of
+     * nothing, and the reader
+     * then holds its own grace on top of it. Together that is the *"they stop way
+     * too long on full stops like maybe for 2 sec"* the member hears, even with the
+     * synthesis out of the way.
+     *
+     * So the clip is trimmed to what a reader actually does: a SHORT breath at the
+     * end ([TAIL_BREATH_MS]) and no dead air at the front. Silence INSIDE the
+     * sentence is untouched — a comma's pause is the model's and belongs to the
+     * words — because only the run at each END is removed.
+     *
+     * A clip that is silent from end to end trims to nothing, and an empty clip is
+     * treated exactly as a pack that said nothing at all (see [synthesise]) — which
+     * is the shape a broken pack takes, and it must never be counted as a read
+     * sentence.
+     */
+    private fun trimmed(samples: FloatArray, sampleRate: Int): FloatArray {
+        if (samples.isEmpty() || sampleRate <= 0) return samples
+        val perMs = sampleRate / 1000f
+        fun quiet(at: Int) = abs(samples[at]) < SILENCE_LEVEL
+        var first = 0
+        while (first < samples.size && quiet(first)) first++
+        if (first >= samples.size) return FloatArray(0)
+        // A whisker of the original lead is kept so the first syllable is not
+        // clipped into a click.
+        first = maxOf(0, first - (LEAD_PAD_MS * perMs).toInt())
+        var last = samples.size - 1
+        while (last > first && quiet(last)) last--
+        val end = minOf(samples.size, last + 1 + (TAIL_BREATH_MS * perMs).toInt())
+        return if (first == 0 && end == samples.size) samples else samples.copyOfRange(first, end)
     }
 
     /**
@@ -341,6 +564,14 @@ internal object NeuralSpeaker {
     fun stop() {
         cancelled = true
         utterance.incrementAndGet()
+        // ── v469 — AND THE WORK MADE AHEAD GOES WITH IT ──────────────────
+        //
+        // A pause, a skip, a voice change or the end of a reading: whatever was
+        // being made for the sentence after this one is not wanted any more, and a
+        // queued job that synthesises it anyway is the member's battery spent on
+        // words nobody will hear. The clip ALREADY made is kept — a pause resumed
+        // on the same sentence should not have to make it again.
+        prefetchGen += 1
         val track = this.track
         this.track = null
         runCatching {
@@ -350,16 +581,73 @@ internal object NeuralSpeaker {
         }
     }
 
-    /** The way out: stop, free the engine, forget the pack. */
+    /**
+     * The way out: stop, free the engine, forget the pack.
+     *
+     * ── v469 — THE FREE IS QUEUED ON THE SYNTHESIS LANE ──────────────────
+     *
+     * `OfflineTts.free()` releases the onnxruntime session, and running it while a
+     * sentence is being made in that very session is a crash rather than a leak. The
+     * synthesis lane is FIFO, so queueing the free behind the jobs that were queued
+     * before it means it can only ever run when nothing is using the engine — and
+     * jobs queued AFTER it carry the new [engineGen] and give up on their own. (The
+     * reader calls this from a `DisposableEffect`, i.e. on the main thread, so the
+     * free must not be waited on here either.)
+     */
     fun release() {
         stop()
-        runCatching { tts?.free() }
+        val engine = tts
         tts = null
         loaded = null
+        ahead = null
+        making = null
+        engineGen.incrementAndGet()
+        if (engine != null) {
+            runCatching { synth.execute { runCatching { engine.free() } } }
+        }
+    }
+
+    /**
+     * ── v469 — ONE SENTENCE'S AUDIO, MADE AND NOT YET PLAYED ───────────────
+     *
+     * The cue is `text | speed | speaker`, and [matches] is exact on all three:
+     * a narrator picked mid-book, a speed nudged, a sentence skipped all miss this
+     * deliberately — the one failure a cache like this can have is playing the
+     * wrong sentence in the right voice, and an exact match is the whole guard.
+     */
+    private class Ahead(
+        val text: String,
+        val speed: Float,
+        val speakerId: Int,
+        val samples: FloatArray,
+        val sampleRate: Int,
+    ) {
+        fun matches(otherText: String, otherSpeed: Float, otherSpeaker: Int): Boolean =
+            text == otherText && speed == otherSpeed && speakerId == otherSpeaker
     }
 
     /** A block big enough to keep the audio thread fed, small enough to interrupt. */
     private const val BLOCK = 4096
+
+    /**
+     * Where a sample stops counting as silence (v469).
+     *
+     * About \u221242 dBFS: a real recording's noise floor is far below it, and a
+     * value any lower would fail to find the end of a clip that fades rather than
+     * stops.
+     */
+    private const val SILENCE_LEVEL = 0.008f
+
+    /**
+     * How much of the model's silence is left after a sentence, in milliseconds
+     * (v469). A full stop in a well-read book is a breath, not a gap: this is that
+     * breath, and it is the whole of the pause a neural pack gets (see
+     * `aloudTailGraceMs`, which adds nothing on top of it for this voice).
+     */
+    private const val TAIL_BREATH_MS = 260f
+
+    /** The sliver of the clip's own lead kept so a first syllable is not clipped. */
+    private const val LEAD_PAD_MS = 20f
 
     /**
      * How much of every silence the model draws survives, for a sentence's sake.

@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -27,6 +28,37 @@ import kotlinx.coroutines.withTimeoutOrNull
  * reading, one grace, wherever it is being driven from.
  */
 internal const val ALOUD_TAIL_GRACE_MS = 180L
+
+/**
+ * ── v469 — THE SENTENCE'S OWN ENDING, NOT ONE GRACE FOR EVERY VOICE ────────
+ *
+ * The member: *"the behavior of piper and edge read aloud is bad as they stop way
+ * too long on full stops like maybe for 2 sec or something fix it and make it
+ * natural"*. Half of that wait was the reader's own: [ALOUD_TAIL_GRACE_MS] was
+ * added for the PHONE's engine, whose `onDone` can land while its last words are
+ * still sounding (the next utterance's `QUEUE_FLUSH` is what used to truncate
+ * them), and every other voice was paying it as well — on top of the silence the
+ * model had already drawn at the end of its own clip.
+ *
+ * So the grace follows the voice:
+ *
+ *  · **A downloaded pack adds nothing.** Its clip was TRIMMED to a reader's own
+ *    breath at the full stop before it was ever played (see
+ *    `NeuralSpeaker.trimmed`), and its playback lane drains the audio the device
+ *    has not played yet before it reports — so its ending is already exact, and a
+ *    grace on top of it is a pause nobody wrote.
+ *  · **Edge keeps half.** `MediaPlayer` reports the end of the FILE, which can
+ *    arrive with a bufferful of the tail still to sound — so a guard is real —
+ *    but the endpoint's own clip already ends with a short silence, which is the
+ *    rest of the pause.
+ *  · **The phone's own engine keeps all of it**, because truncating the words
+ *    before a comma is the bug this constant was written for.
+ */
+internal fun aloudTailGraceMs(): Long = when (ReaderLook.speakEngine) {
+    ReaderEngine.NEURAL -> 0L
+    ReaderEngine.EDGE -> ALOUD_TAIL_GRACE_MS / 2
+    else -> ALOUD_TAIL_GRACE_MS
+}
 
 /**
  * v465i — HOW LONG ONE SENTENCE MAY GO UNREPORTED BEFORE THE READING GIVES UP.
@@ -223,13 +255,27 @@ internal object ReadAloudContinuation {
                 //
                 // The next sentence is fetched while this one plays (see `sayAloud`'s
                 // `nextText`), which is the whole difference between a reading that
-                // pauses at every full stop and one that does not. **It is asked for
-                // ONLY when the voice is the online experiment**: this provider may be
-                // a PDF's, whose every call is a text extraction of the file, so asking
-                // it for a sentence nobody is going to prefetch would cost a parse per
-                // sentence to save nothing.
-                val next = if (ReaderLook.speakEngine == ReaderEngine.EDGE) {
-                    provider?.invoke(index + 1)?.trim().orEmpty().ifBlank { null }
+                // pauses at every full stop and one that does not.
+                //
+                // ── v469 — AND IT IS THE SAME HEAD START A PACK NEEDS ───────
+                //
+                // A neural pack does not fetch, it SYNTHESISES: a phone makes a
+                // sentence slower than it speaks it, so a pack that is only asked for
+                // the next sentence once this one has finished reads every full stop
+                // as a two-second gap (the member's own number). The pack is handed
+                // the same next text and makes it under this sentence's audio (see
+                // `NeuralSpeaker.prefetch`).
+                //
+                // ⚠️ **THE PROVIDER IS ASKED OFF THE MAIN THREAD.** This loop runs on
+                // the main dispatcher, and for a PDF the provider is a text
+                // extraction of the file — the reader's own driver pays that on the IO
+                // dispatcher, so an extra ask here does too.
+                val next = if (ReaderLook.speakEngine == ReaderEngine.EDGE ||
+                    ReaderLook.speakEngine == ReaderEngine.NEURAL
+                ) {
+                    withContext(Dispatchers.IO) {
+                        provider?.invoke(index + 1)?.trim().orEmpty().ifBlank { null }
+                    }
                 } else {
                     null
                 }
@@ -238,7 +284,7 @@ internal object ReadAloudContinuation {
                     end()
                     return@launch
                 }
-                delay(ALOUD_TAIL_GRACE_MS)
+                delay(aloudTailGraceMs())
                 if (!live || !speaking) return@launch
                 if (index + 1 >= count) {
                     end()

@@ -143,6 +143,20 @@ fun ExperimentsScreen(navController: NavController) {
                         "Reading settings",
                         "Paper, type, face, orientation and the page's tap zones"
                     ) { navController.navigate(CurioRoutes.READER_SETTINGS) }
+                    // ── v469 — AND THE READ-ALOUD SETTINGS, ONE DOOR IN ──────
+                    //
+                    // They were a section of the Reading page and are a page of
+                    // their own now (the member: *"the read aloud settings from the
+                    // setting page … its own screen"*), so the settings side needs
+                    // a door of its own to them — this one, beside the Reading one,
+                    // because they are the same family: the reader's own world,
+                    // opened from here until the app grows a real Reading hub.
+                    CurioSettingsDivider()
+                    SettingsOptionRow(
+                        CurioIcons.PlayArrow,
+                        "Read aloud",
+                        "Speed, engine, voice, narrator and the voice packs"
+                    ) { navController.navigate(CurioRoutes.READ_ALOUD_SETTINGS) }
                 }
             }
 

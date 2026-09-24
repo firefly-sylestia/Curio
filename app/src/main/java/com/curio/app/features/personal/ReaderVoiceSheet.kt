@@ -158,6 +158,20 @@ internal fun ReaderVoiceSheet(
                                 ReaderSpeaker.prepare(context, name, onReady = {
                                     voices = ReaderSpeaker.voices()
                                 })
+                            } else {
+                                // ── v469 — AND THE LIST FOLLOWS THE ENGINE ────
+                                //
+                                // It did not: the list was asked for ONCE, when
+                                // the sheet OPENED, so a member who arrived on the
+                                // phone's own engine and then tapped "Curio's own
+                                // voice" went on looking at the PHONE's voices —
+                                // the downloaded pack, and with it every narrator
+                                // inside it, simply never appeared in this sheet
+                                // (the member's *"it says loaded 11 voices it
+                                // doesnt show … when choosen"*). The two Curio
+                                // engines are lists this app already holds, so the
+                                // answer is immediate and needs no binding.
+                                voices = voicesFor(context)
                             }
                         }
                         onChanged()

@@ -1382,6 +1382,21 @@ composable(CurioRoutes.COMMUNITY) {
             composable(CurioRoutes.READER_SETTINGS) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     com.curio.app.features.personal.ReaderSettingsRoute(
+                        onBack = { navController.popBackStack() },
+                        // v469 — and its own door to the read-aloud page, which is a
+                        // destination rather than a section now (see the route below).
+                        onReadAloud = { navController.navigate(CurioRoutes.READ_ALOUD_SETTINGS) }
+                    )
+                }
+            }
+            // ── v469 — THE READ-ALOUD SETTINGS, ON A PAGE OF THEIR OWN ──────
+            //
+            // The same page the reader opens OVER the book (see
+            // `ReadAloudSettingsScreen.kt`): the settings side's door is the Reading
+            // page's own row, and this is where that row goes.
+            composable(CurioRoutes.READ_ALOUD_SETTINGS) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    com.curio.app.features.personal.ReadAloudSettingsRoute(
                         onBack = { navController.popBackStack() }
                     )
                 }

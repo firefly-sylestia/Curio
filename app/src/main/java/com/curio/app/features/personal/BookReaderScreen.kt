@@ -328,6 +328,15 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // than to the app: it opens OVER the book, in the reader's own paper, and
     // back returns to the page that was being read (see [ReaderSettingsScreen]).
     var readerSettingsOpen by remember { mutableStateOf(false) }
+    // ── v469 — AND THE READ-ALOUD SETTINGS, ONE DOOR FURTHER IN ───────────
+    //
+    // The member: *"the read aloud settings from the setting page … its own
+    // screen"*. They are a page of their own now ([ReadAloudSettingsPage]), opened
+    // from the Reading page's door — OVER the book, exactly as the Reading page
+    // is, so back puts the member on the words they were reading. It is a second
+    // layer rather than a replacement: back gets the Reading page first, which is
+    // the page they came through.
+    var readAloudOpen by remember { mutableStateOf(false) }
     // The back handler itself lives further down, beside the state it answers for
     // (v448 moved it: a selection and a snapshot are things back must put down, and
     // both are declared below this line) — see "BACK CLOSES WHAT IS OPEN".
@@ -375,8 +384,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // selection are the two newest things it puts down; either of them used to
     // hand the back to the navigation stack and leave the book with them still up.
     BackHandler(
-        enabled = readerSettingsOpen || ReaderLook.zonesEditing || sheet != null || scrubOpen ||
-            selection != null || snapshot != null || snapshotArmed
+        enabled = readerSettingsOpen || readAloudOpen || ReaderLook.zonesEditing ||
+            sheet != null || scrubOpen || selection != null || snapshot != null || snapshotArmed
     ) {
         when {
             snapshot != null -> {
@@ -388,6 +397,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 snapshotArmed = false
                 chrome = true
             }
+            // v469 — the INNERMOST layer first: the read-aloud page opened out of
+            // the Reading page, so it is the first thing back takes down.
+            readAloudOpen -> readAloudOpen = false
             readerSettingsOpen -> readerSettingsOpen = false
             ReaderLook.zonesEditing -> ReaderLook.zonesEditing = false
             sheet != null -> sheet = null
@@ -1493,8 +1505,11 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     stopVoice()
                     return@LaunchedEffect
                 }
-                // The grace, so the engine's own tail is not cut by the next flush.
-                delay(ALOUD_TAIL_GRACE_MS)
+                // The grace, so the engine's own tail is not cut by the next flush —
+                // and, since v469, the amount of it the voice actually needs
+                // ([aloudTailGraceMs]: none for a trimmed pack, half for Edge, all of
+                // it for the phone's own engine).
+                delay(aloudTailGraceMs())
                 // THE END OF THE BOOK IS THE ONLY THING THAT STOPS IT. There is
                 // no next sentence to move to, and an engine cannot be asked to
                 // speak nothing — so the session closes and the last mark stays,
@@ -1543,7 +1558,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                         stopVoice()
                         return@LaunchedEffect
                     }
-                    delay(ALOUD_TAIL_GRACE_MS)
+                    delay(aloudTailGraceMs())
                     if (after >= loaded.pageCount) {
                         voiceOn = false
                         voicePaused = false
@@ -2659,8 +2674,30 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 readerSettingsOpen = false
                 ReaderLook.zonesEditing = true
             },
-            onBack = { readerSettingsOpen = false }
+            // v469 — the door to the read-aloud page, which is a page of its own
+            // now ([ReadAloudSettingsPage]). It opens OVER this one, so back
+            // unwinds one layer at a time and the Reading page is never lost on the
+            // way in.
+            onReadAloud = { readAloudOpen = true },
+            onBack = {
+                readAloudOpen = false
+                readerSettingsOpen = false
+            }
         )
+    }
+
+    // ── v469 — THE READ-ALOUD SETTINGS, OVER THE READING PAGE ───────────
+    //
+    // The same page the settings side reaches through its own route; opened here
+    // so a member can point the voice at what they like without leaving the book
+    // for four screens.
+    AnimatedVisibility(
+        visible = readAloudOpen,
+        enter = fadeIn(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Soften)) +
+            slideInVertically(tween(CurioMotion.ENTER_MS.toInt(), easing = CurioMotion.Enter)) { it / 8 },
+        exit = CurioMotion.leaveFade()
+    ) {
+        ReadAloudSettingsPage(palette = palette, onBack = { readAloudOpen = false })
     }
 }
 
@@ -8114,6 +8151,7 @@ internal suspend fun sayAloud(
                 // count here rather than trusted: out of range lands on the last
                 // real voice instead of a generation that returns nothing.
                 val last = (NeuralSpeaker.speakerCount() - 1).coerceAtLeast(0)
+                val sid = ReaderLook.speakSpeaker.coerceIn(0, last)
                 // ── v468 — A PACK THAT SAYS NOTHING IS READ AROUND ────────
                 //
                 // Exactly the rule a refused Edge socket follows: dropping the pack
@@ -8121,18 +8159,30 @@ internal suspend fun sayAloud(
                 // voice. Without it a 305 MB pack that answered nothing counted as a
                 // whole book read aloud — silence, page after page, with the member
                 // told nothing anywhere (their *"kokoro doesnt work at all"*).
-                NeuralSpeaker.say(
-                    text,
-                    speed,
-                    ReaderLook.speakSpeaker.coerceIn(0, last),
-                    onDone
-                ) {
+                NeuralSpeaker.say(text, speed, sid, onDone) {
                     ReadAloudSession.packUnavailable = pack.id
                     NeuralSpeaker.stop()
                     ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
                     // An empty voice name: the fallback is the PHONE's own voice, and a
                     // pack id here is a name no system engine has ever heard of.
                     ReaderSpeaker.say(text, speed, "", onDone)
+                }
+                // ── v469 — AND THE SENTENCE AFTER THIS ONE IS MADE WHILE THIS
+                // ONE PLAYS ─────────────────────────────────────────────────
+                //
+                // The member: *"they stop way too long on full stops like maybe for
+                // 2 sec or something fix it and make it natural"*. A neural pack on a
+                // phone makes a sentence slower than it speaks it, so when the next
+                // sentence was only asked for after this one had finished, EVERY full
+                // stop cost the whole synthesis — that wait was the two seconds. The
+                // page already holds the next sentence (one index away), so it is
+                // handed over here and made under this sentence's audio instead.
+                //
+                // ⚠️ AFTER THE [say] ABOVE, NEVER BEFORE IT: both jobs share one
+                // FIFO synthesis lane, and the words the member asked for have to be
+                // in front of the ones they have not asked for yet.
+                if (!nextText.isNullOrBlank()) {
+                    NeuralSpeaker.prefetch(nextText, speed, sid)
                 }
                 return
             }

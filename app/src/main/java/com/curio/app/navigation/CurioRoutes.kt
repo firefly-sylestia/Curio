@@ -384,6 +384,17 @@ object CurioRoutes {
      */
     const val READER_SETTINGS = "reader/settings"
     /**
+     * ── v469 — THE READ-ALOUD SETTINGS, AS A PAGE OF THEIR OWN ────────
+     *
+     * Engine, voice, narrator, speed, the downloadable voice packs and whether a
+     * reading keeps going with the screen off. They used to be a section of the
+     * Reading page (the member: *"the read aloud settings from the setting page …
+     * its own screen"*), and the reader opens the same page OVER the book from the
+     * Reading page's own door — this route is the settings side's door, wired beside
+     * the Reading one. See `ReadAloudSettingsScreen.kt`.
+     */
+    const val READ_ALOUD_SETTINGS = "reader/aloud"
+    /**
      * v449 — THE DICTIONARY'S OWN PAGE.
      *
      * The reader's dictionary used to live only in its sheet: answer-shaped, drawn
