@@ -6,6 +6,7 @@ package com.curio.app.features.personal
 // difference between a file that compiles and two editions that do not.
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,9 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * v434 — THE READING SETTINGS, AS A PAGE OF ITS OWN.
@@ -769,6 +775,25 @@ internal fun ReaderSettingsScreen(
                 // row that sold only its voice would be selling a stutter.
                 if (BuildConfig.EDITION_NEURAL_VOICES && NeuralVoicePacks.CATALOG.isNotEmpty()) {
                     val downloads by NeuralVoiceDownloads.states.collectAsState()
+                    // ── v468 — A PACK'S HEALTH, AND THE TEST THAT REPORTS IT ──
+                    //
+                    // The member: *"and show pack helath, and a test look if its
+                    // running"*. Until now a pack that could not speak was
+                    // invisible — it loaded, produced nothing, and the reading fell
+                    // back to the phone's voice with no way to ask why (§63 now says
+                    // so WHILE reading, which is still late). This asks the
+                    // question on purpose: `prepare` loads the pack exactly as a
+                    // reading would, and the row says what happened.
+                    //
+                    // ⚠️ IT REPORTS, IT DOES NOT CHOOSE. Testing a pack does not
+                    // make it your voice — the answer is what is being asked for,
+                    // and a health check that quietly repointed the reader would be
+                    // a side effect nobody asked for. `prepare` early-returns when
+                    // the pack is ALREADY the loaded engine, so testing the one you
+                    // are reading with costs nothing at all.
+                    val health = remember { mutableStateMapOf<String, String>() }
+                    var testing by remember { mutableStateOf("") }
+                    val healthScope = rememberCoroutineScope()
                     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                         ReaderSettingsSection("Voice packs", palette)
                         Text(
@@ -923,10 +948,62 @@ internal fun ReaderSettingsScreen(
                                                     modifier = Modifier
                                                         .fillMaxHeight()
                                                         .fillMaxWidth(progress.coerceIn(0f, 1f))
-                                                        .clip(RoundedCornerShape(50))
-                                                        .background(palette.accent)
+                                                    .clip(RoundedCornerShape(50))
+                                                    .background(palette.accent)
                                                 )
                                             }
+                                        }
+                                        // ── v468 — TEST IT ───────────────────────
+                                        // Only offered on a pack that is actually
+                                        // here: there is nothing to load otherwise,
+                                        // and the row's own door already downloads
+                                        // it. A nested tap zone INSIDE the row's
+                                        // own click — the inner one wins, so the
+                                        // test never also selects the pack.
+                                        if (here && !busy) {
+                                            Spacer(Modifier.height(6.dp))
+                                            Text(
+                                                text = when {
+                                                    testing == pack.id -> "Testing\u2026"
+                                                    health[pack.id] != null -> health[pack.id].orEmpty()
+                                                    else -> "Test it"
+                                                },
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = palette.accent,
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(50))
+                                                    .clickable(enabled = testing != pack.id) {
+                                                        testing = pack.id
+                                                        healthScope.launch {
+                                                            // ⚠️ OFF THE MAIN THREAD.
+                                                            // Loading the engine parses
+                                                            // the model and reads the
+                                                            // espeak-ng data — hundreds of
+                                                            // files on a 305 MB pack, and
+                                                            // the very main-thread I/O the
+                                                            // power pass removed elsewhere.
+                                                            val verdict = withContext(Dispatchers.IO) {
+                                                                val ok = runCatching {
+                                                                    NeuralSpeaker.prepare(context, pack)
+                                                                }.getOrDefault(false)
+                                                                when {
+                                                                    !ok -> "Could not be loaded \u2014 the phone's voice reads instead."
+                                                                    else -> {
+                                                                        val speakers = NeuralSpeaker.speakerCount()
+                                                                        if (speakers > 1) {
+                                                                            "Loaded \u00b7 $speakers voices"
+                                                                        } else {
+                                                                            "Loaded"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            health[pack.id] = verdict
+                                                            testing = ""
+                                                        }
+                                                    }
+                                                    .padding(horizontal = 4.dp, vertical = 3.dp)
+                                            )
                                         }
                                     }
                                     Text(
