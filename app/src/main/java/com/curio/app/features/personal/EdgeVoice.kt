@@ -2,10 +2,15 @@ package com.curio.app.features.personal
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -128,6 +133,17 @@ internal object EdgeVoice {
      * voice reads that sentence far better than a click does.
      */
     private const val MIN_CLIP_BYTES = 512L
+
+    /**
+     * Where a sample stops counting as silence when a clip's tail is cut (v471).
+     *
+     * About −42 dBFS, the same floor the downloaded packs use, plus the RELATIVE one
+     * beside it — see [audibleEnd].
+     */
+    private const val TAIL_SILENCE_LEVEL = 0.008f
+
+    /** The share of a clip's own peak that still counts as its tail's silence (v471). */
+    private const val TAIL_LEVEL_SHARE = 0.03f
 
     /** Mono MP3 at 24 kHz — the format the endpoint sends by default. */
     private const val OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3"
@@ -385,8 +401,14 @@ internal object EdgeVoice {
             // file `MediaPlayer` is reading. A tenth of a megabyte, off the main thread.
             val copied = runCatching {
                 val live = clipFile(app)
-                ready.copyTo(live, overwrite = true)
-                live
+                // ⚠️ THE COPY KEEPS THE READY CLIP'S OWN EXTENSION (v471). The
+                // playing slot is NAMED `.mp3`, but the clip that is ready may be
+                // the TRIMMED `.wav` (see [trimToWav]) — copying a WAV's bytes into
+                // a file whose name says it is an MP3 is the kind of lie that works
+                // until the day a player trusts the extension.
+                val target = File(live.parentFile, live.nameWithoutExtension + "." + ready.extension)
+                ready.copyTo(target, overwrite = true)
+                target
             }.getOrNull()
             if (copied != null) return copied
         }
@@ -462,7 +484,236 @@ internal object EdgeVoice {
         // A clip has to be more than a few hundred bytes of MP3 header to be
         // worth a MediaPlayer: anything smaller is a truncated turn, and playing
         // it is a click rather than a sentence.
-        return clip.takeIf { it.length() > MIN_CLIP_BYTES }
+        if (clip.length() <= MIN_CLIP_BYTES) return null
+        // ── v471 — ITS FULL STOP IS CUT TO THE MEMBER'S OWN BREAK ─────────────
+        //
+        // The member: *"the full stop break … is still very long like very long,
+        // not natural at all. for edge tts and kokoro, not the lessac"*. For this
+        // voice the pause was **the endpoint's own trailing silence, played in
+        // full**: the clip was written to disk exactly as it arrived and handed to
+        // `MediaPlayer`, which plays a file to its end — so no amount of care in
+        // the reader could shorten it, and the reader's own half-grace was added on
+        // top of it. The tail is now cut the way a downloaded pack's is, to the
+        // same breath (`aloudBreakMs()` — one setting, both voices).
+        //
+        // **THIS HAPPENS HERE, ON THE FETCH, AND NOT AT PLAYBACK TIME.** `fetch`
+        // already runs off the main thread and already exists to pay for the
+        // sentence the reader has not reached yet, so the decode is hidden under
+        // the previous sentence's audio — exactly like the synthesis it is standing
+        // next to.
+        //
+        // ⚠️ **A FAILURE HERE IS SILENT AND LEAVES TODAY'S BEHAVIOUR STANDING.**
+        // This is a decode of a format we did not write, on a device we cannot
+        // test: if anything at all goes wrong the raw MP3 is returned and the
+        // reading sounds precisely as it did before v471. No fallback needed, and
+        // nothing to break.
+        val wav = File(clip.parentFile, clip.nameWithoutExtension + ".wav")
+        // Never let a PREVIOUS sentence's trimmed audio outlive the MP3 it came
+        // from: the slot names are reused, so a stale WAV would be played in the
+        // place of the sentence the member is waiting for.
+        wav.delete()
+        val trimmed = runCatching { trimToWav(clip, wav) }.getOrNull()
+        return trimmed ?: clip
+    }
+
+    // ── v471 — CUTTING A CLIP'S OWN SILENCE OFF ──────────────────────────────
+
+    /**
+     * Trims [source]'s trailing silence to the member's full stop break and writes the
+     * result as a mono 16-bit WAV at [target]. Returns null when anything goes wrong.
+     *
+     * Runs on a worker thread ([fetch]'s), never the main one: this decodes an MP3 of
+     * a few seconds with `MediaCodec`.
+     */
+    private fun trimToWav(source: File, target: File): File? {
+        val pcm = decodePcm(source) ?: return null
+        if (pcm.samples.isEmpty() || pcm.sampleRate <= 0) return null
+        val end = audibleEnd(pcm.samples, pcm.sampleRate)
+        if (end <= 0) return null
+        writeWav(target, pcm.samples, end, pcm.sampleRate)
+        return target.takeIf { it.isFile && it.length() > MIN_CLIP_BYTES }
+    }
+
+    /** Decoded audio: mono samples in −1..1, plus the rate the device played it at. */
+    private class Pcm(val samples: FloatArray, val sampleRate: Int)
+
+    /**
+     * Decodes [file] to monophonic floats with `MediaExtractor` + `MediaCodec` — the
+     * same pair (and the same little-endian trap) `WaveformExtractor` documents: a fresh
+     * `ByteBuffer` is BIG_ENDIAN, while a decoder emits little-endian PCM, so reading
+     * the shorts without fixing the order byte-swaps every sample.
+     */
+    private fun decodePcm(file: File): Pcm? {
+        val extractor = MediaExtractor()
+        try {
+            extractor.setDataSource(file.absolutePath)
+        } catch (_: Exception) {
+            extractor.release()
+            return null
+        }
+        val track = (0 until extractor.trackCount).firstOrNull { i ->
+            extractor.getTrackFormat(i).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
+        } ?: run { extractor.release(); return null }
+        val format = extractor.getTrackFormat(track)
+        val mime = format.getString(MediaFormat.KEY_MIME) ?: run { extractor.release(); return null }
+        var sampleRate = runCatching { format.getInteger(MediaFormat.KEY_SAMPLE_RATE) }
+            .getOrDefault(24_000).coerceAtLeast(8_000)
+        var channels = runCatching { format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) }
+            .getOrDefault(1).coerceIn(1, 2)
+        extractor.selectTrack(track)
+        val codec = try {
+            MediaCodec.createDecoderByType(mime).apply {
+                configure(format, null, null, 0)
+                start()
+            }
+        } catch (_: Exception) {
+            extractor.release()
+            return null
+        }
+
+        val raw = ByteArrayOutputStream()
+        val info = MediaCodec.BufferInfo()
+        var done = false
+        try {
+            while (!done) {
+                val inIndex = codec.dequeueInputBuffer(10_000)
+                if (inIndex >= 0) {
+                    val input = codec.getInputBuffer(inIndex)
+                    if (input == null) break
+                    val size = extractor.readSampleData(input, 0)
+                    if (size < 0) {
+                        codec.queueInputBuffer(inIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                    } else {
+                        codec.queueInputBuffer(inIndex, 0, size, extractor.sampleTime, 0)
+                        extractor.advance()
+                    }
+                }
+                when (val outIndex = codec.dequeueOutputBuffer(info, 10_000)) {
+                    MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+                        // The decoder's own view is the authority once it speaks: an
+                        // MP3 header can disagree with what comes out of it.
+                        val out = codec.outputFormat
+                        sampleRate = runCatching { out.getInteger(MediaFormat.KEY_SAMPLE_RATE) }
+                            .getOrDefault(sampleRate).coerceAtLeast(8_000)
+                        channels = runCatching { out.getInteger(MediaFormat.KEY_CHANNEL_COUNT) }
+                            .getOrDefault(channels).coerceIn(1, 2)
+                    }
+                    MediaCodec.INFO_TRY_AGAIN_LATER -> { /* keep waiting */ }
+                    else -> if (outIndex >= 0) {
+                        val output = codec.getOutputBuffer(outIndex)
+                        if (output != null && info.size > 0) {
+                            val chunk = ByteArray(info.size)
+                            val dup = output.duplicate()
+                            dup.position(info.offset)
+                            dup.limit(info.offset + info.size)
+                            dup.get(chunk)
+                            raw.write(chunk)
+                        }
+                        codec.releaseOutputBuffer(outIndex, false)
+                        if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) done = true
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Falls through to the null below — a decode that cannot finish leaves
+            // the reading exactly as it was (see [fetch]).
+        }
+        runCatching { codec.stop() }
+        codec.release()
+        extractor.release()
+
+        val bytes = raw.toByteArray()
+        val frames = bytes.size / 2 / channels
+        if (frames <= 0) return null
+        val mono = FloatArray(frames)
+        var at = 0
+        for (frame in 0 until frames) {
+            var sum = 0f
+            for (c in 0 until channels) {
+                val lo = bytes[at].toInt() and 0xFF
+                val hi = bytes[at + 1].toInt()
+                sum += ((hi shl 8) or lo).toShort() / 32768f
+                at += 2
+            }
+            mono[frame] = sum / channels
+        }
+        return Pcm(mono, sampleRate)
+    }
+
+    /**
+     * Where the audio should end: the last audible sample plus the member's full stop
+     * break, in samples. Zero means the clip says nothing at all.
+     *
+     * **THE FLOOR IS RELATIVE TO THE CLIP ITSELF** — the same fix a downloaded pack
+     * needed (see `NeuralSpeaker.trimmed`), and for the same reason: an absolute
+     * threshold cannot hear a quiet tail, and a tail is quiet compared with the speech
+     * in front of it rather than with full scale.
+     */
+    private fun audibleEnd(samples: FloatArray, sampleRate: Int): Int {
+        var peak = 0f
+        for (s in samples) {
+            val level = abs(s)
+            if (level > peak) peak = level
+        }
+        if (peak <= TAIL_SILENCE_LEVEL) return 0
+        val floor = maxOf(TAIL_SILENCE_LEVEL, peak * TAIL_LEVEL_SHARE)
+        var last = samples.size - 1
+        while (last >= 0 && abs(samples[last]) < floor) last--
+        if (last < 0) return 0
+        val breath = (aloudBreakMs() * (sampleRate / 1000f)).toInt()
+        return minOf(samples.size, last + 1 + breath)
+    }
+
+    /** Writes [samples]·[0, end) as a mono 16-bit PCM WAV — the format `MediaPlayer` plays. */
+    private fun writeWav(file: File, samples: FloatArray, end: Int, sampleRate: Int) {
+        val dataBytes = end * 2
+        FileOutputStream(file).use { out ->
+            out.write(wavHeader(dataBytes, sampleRate))
+            val block = ByteArray(8192)
+            var filled = 0
+            for (i in 0 until end) {
+                val value = (samples[i] * 32767f).toInt().coerceIn(-32768, 32767)
+                block[filled++] = (value and 0xFF).toByte()
+                block[filled++] = ((value shr 8) and 0xFF).toByte()
+                if (filled == block.size) {
+                    out.write(block, 0, filled)
+                    filled = 0
+                }
+            }
+            if (filled > 0) out.write(block, 0, filled)
+        }
+    }
+
+    /** The 44-byte canonical WAV header for mono 16-bit PCM at [sampleRate]. */
+    private fun wavHeader(dataBytes: Int, sampleRate: Int): ByteArray {
+        val header = ByteArray(44)
+        fun putAscii(at: Int, text: String) {
+            text.forEachIndexed { i, c -> header[at + i] = c.code.toByte() }
+        }
+        fun putInt(at: Int, value: Int) {
+            header[at] = (value and 0xFF).toByte()
+            header[at + 1] = ((value shr 8) and 0xFF).toByte()
+            header[at + 2] = ((value shr 16) and 0xFF).toByte()
+            header[at + 3] = ((value shr 24) and 0xFF).toByte()
+        }
+        fun putShort(at: Int, value: Int) {
+            header[at] = (value and 0xFF).toByte()
+            header[at + 1] = ((value shr 8) and 0xFF).toByte()
+        }
+        putAscii(0, "RIFF")
+        putInt(4, 36 + dataBytes)
+        putAscii(8, "WAVE")
+        putAscii(12, "fmt ")
+        putInt(16, 16)
+        putShort(20, 1)                       // PCM
+        putShort(22, 1)                       // mono
+        putInt(24, sampleRate)
+        putInt(28, sampleRate * 2)            // byte rate
+        putShort(32, 2)                       // block align
+        putShort(34, 16)                      // bits per sample
+        putAscii(36, "data")
+        putInt(40, dataBytes)
+        return header
     }
 
     /** One turn's audio, and — when the handshake was refused — the server's clock. */

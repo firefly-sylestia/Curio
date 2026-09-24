@@ -57,8 +57,45 @@ internal const val ALOUD_TAIL_GRACE_MS = 180L
 internal fun aloudTailGraceMs(): Long = when (ReaderLook.speakEngine) {
     ReaderEngine.NEURAL -> 0L
     ReaderEngine.EDGE -> ALOUD_TAIL_GRACE_MS / 2
-    else -> ALOUD_TAIL_GRACE_MS
+    // The phone's own engine is the one this constant was written for, and it is
+    // also the one the slider can honestly change: `QUEUE_FLUSH` truncates the last
+    // words unless the reader waits, so the wait is a real number, not a silence
+    // baked into a file (v471).
+    else -> (ALOUD_TAIL_GRACE_MS * (0.6f + aloudBreak() * 1.2f)).toLong()
 }
+
+/**
+ * ── v471 — HOW LONG A FULL STOP IS HELD, AND WHY ONE NUMBER COVERS THREE VOICES ──
+ *
+ * The member: *"the full stop break … is still very long like very long, not natural
+ * at all. for edge tts and kokoro, not the lessac. also for piper lessac its a little
+ * fast in full stop incrase it by just a little. and also add full stop break
+ * customisation"*.
+ *
+ * **Three voices, three mechanisms, one breath.** A downloaded pack's pause is
+ * silence INSIDE its own clip (trimmed before it is played), the online voice's is
+ * silence at the end of the file it downloads (trimmed the same way now), and the
+ * phone's own engine's is the wait before the reader flushes an utterance — there is
+ * no file to trim there at all. So the setting is a POSITION (see
+ * `ReaderLook.speakStop`) and this is the one place a position becomes milliseconds,
+ * which is what keeps the row honest whatever voice is reading.
+ *
+ * **THE DEFAULT IS THE TUNING, AND IT IS THE TUNING THE MEMBER ASKED FOR:**
+ * `0.5` gives a pack a **~360 ms** breath — a little longer than v469's 260 ms, which
+ * is the *"a little fast … increase it by just a little"* on Piper · Lessac — and,
+ * because that is now the tail EVERY pack gets, Kokoro's much longer tail comes down
+ * with it (*"very long … for edge tts and kokoro"*). The phone's own grace is left
+ * exactly where it was at the default and only follows the slider from there.
+ */
+internal fun aloudBreak(): Float = ReaderLook.speakStop.coerceIn(0f, 1f)
+
+/**
+ * The trailing silence a CLIP is trimmed to, in milliseconds — the pack's own tail
+ * and the online voice's alike (see `NeuralSpeaker.trimmed` and `EdgeVoice`).
+ *
+ * 80 ms at the clipped end, 640 ms at the long one, **360 ms at the default**.
+ */
+internal fun aloudBreakMs(): Float = 80f + aloudBreak() * 560f
 
 /**
  * v465i — HOW LONG ONE SENTENCE MAY GO UNREPORTED BEFORE THE READING GIVES UP.

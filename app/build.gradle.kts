@@ -195,11 +195,18 @@ android {
         // release carries new behaviour as well as fixes — the film and Incursion
         // posters are TMDB's (with the year searched for, not guessed), and a
         // topic whose year this app states wrongly is re-asked without it.
-        versionCode = 20260923
+        //
+        // v471 — 20260924 / 1.4.1: **EVERY PUSH BUMPS THE VERSION** (the member's
+        // own rule, 2026-09-24 — see root AGENTS.md). +1 on the date-based code,
+        // +0.0.1 on the name, and the fastlane changelog for the new code is a NEW
+        // file (`changelogs/20260924.txt`): `20260923.txt` is what v1.4.0 shipped
+        // with, so it is left exactly as it was rather than renamed out from under
+        // the release that owns it.
+        versionCode = 20260924
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.0"
+        versionName = envReleaseVersion ?: "1.4.1"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

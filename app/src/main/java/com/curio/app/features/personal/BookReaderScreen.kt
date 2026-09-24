@@ -30,6 +30,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -4975,16 +4976,23 @@ private fun ReaderSpeakBar(
     val running = speaking && !paused
     val body = if (running) lerp(palette.surface, palette.accent, 0.30f) else palette.surface
 
-    // ── v465h — IT RESTS AS ITS OWN DISC ─────────────────────────────────
+    // ── v465h — IT RESTS; v471 — IT RESTS AS A PILL, NOT A DOT ──────────
     //
     // The member: *"it shouldnt always show the buttons etc"*. They are right, and
     // the reason is the surface rather than the controls: a full bar parked across
     // the foot of a page is a slab over the words for the whole of a chapter, which
     // is the opposite of what a reading page wants. So while it READS the bar closes
-    // down to the one control still worth having in reach, and opens back up when
-    // the member touches it. **While it is PAUSED it stays open**, because a paused
-    // member is steering rather than listening — and the dwell only ever runs while
-    // `running`, so a pause can never close the bar under a thumb that is using it.
+    // on its own, and opens back up when the member touches it. **While it is PAUSED
+    // it stays open**, because a paused member is steering rather than listening —
+    // and the dwell only ever runs while `running`, so a pause can never close the
+    // bar under a thumb that is using it.
+    //
+    // ⚠️ **WHAT IT CLOSES TO IS THE v471 CHANGE.** v465h closed it to a single 40dp
+    // disc — *"dont collapse it to just one pause button"* — so the resting form is
+    // a pill carrying the two sentence steps as well, and the member is never one
+    // tap away from a skip. Two doors open it again (the handle at its leading edge,
+    // and a touch on the bar's own background), because a member who has just
+    // watched it shrink needs to know how to get it back without guessing.
     var expanded by remember { mutableStateOf(true) }
     LaunchedEffect(running, expanded) {
         if (!running || !expanded) return@LaunchedEffect
@@ -5005,8 +5013,16 @@ private fun ReaderSpeakBar(
             .height(SPEAK_BAR_HEIGHT)
     ) {
         val openWidth = maxWidth
+        // ── v471 — THE TWO STATES ARE BOTH BARS, NOT A BAR AND A DOT ──────
+        // The member: *"dont collapse it to just one pause button, add way to skip
+        // and also a way to expand it"*. It used to rest as a 40dp disc whose only
+        // control was play/pause, so a member who wanted the next sentence had to
+        // move first and then press — twice the taps for the thing they came to do.
+        // The resting form is a PILL now (see [SPEAK_BAR_REST_WIDTH]) carrying the
+        // two sentence steps either side of the disc, and the full bar adds the
+        // chapter steps, the state word and the voice door around them.
         val width by animateDpAsState(
-            targetValue = if (expanded) openWidth else SPEAK_BAR_HEIGHT,
+            targetValue = if (expanded) openWidth else SPEAK_BAR_REST_WIDTH,
             animationSpec = CurioMotion.Springs.BouncyDp,
             label = "readerSpeakBarWidth"
         )
@@ -5027,6 +5043,60 @@ private fun ReaderSpeakBar(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(50))
             ) {
+                // ── v471 — AND THE BAR ITSELF IS THE SECOND DOOR ───────────
+                // The member, asked how the bar should open, chose **both**: the
+                // handle at its leading edge as the visible tell, and a touch on the
+                // bar's own background. This is that background — drawn FIRST so it
+                // sits under every control, and `indication = null` on purpose: a
+                // ripple across a whole liquid-glass bar is not feedback, it is a
+                // flash, and a haptic for a touch that missed a control is a lie.
+                // A tap that lands ON a control never reaches here; a descendant is
+                // hit first, which is exactly the behaviour wanted.
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClickLabel = if (expanded) "Hide the chapter controls"
+                            else "Show the chapter controls",
+                            onClick = { expanded = !expanded }
+                        )
+                )
+                // ── v471 — AND THE HANDLE, WHICH IS THE VISIBLE TELL ────────
+                // The member, asked how the bar should open, chose **both** — this
+                // is the "both" half that can be seen. It sits at the bar's LEADING
+                // edge in BOTH states, which is the only position that does not
+                // collide with the state word at one end and the voice door at the
+                // other, and it says what it will do with its glyph rather than its
+                // label: an up chevron opens, a down one closes.
+                //
+                // ⚠️ IT IS NOT A CHAPTER STEP, and the two chevrons must not be read
+                // as one family: the chapter steps wear the same SOFT FILL as the
+                // sentence steps (they are transport, and they move the reading),
+                // while this one is the bar's own edge — smaller, quieter, and pinned
+                // to the end the reading does not come from.
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 6.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .curioPressClickable(
+                            pressedScale = 0.90f,
+                            onClickLabel = if (expanded) "Hide the chapter controls"
+                            else "Show the chapter controls",
+                            onClick = { expanded = !expanded }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        if (expanded) CurioIcons.KeyboardArrowDown else CurioIcons.KeyboardArrowUp,
+                        null,
+                        tint = palette.ink.copy(alpha = 0.55f),
+                        size = 16.dp
+                    )
+                }
                 // ── THE TRANSPORT, CENTRED, AND SYMMETRIC ABOUT THE DISC ──
                 // The two step groups arrive as a pair, so the disc they flank stays
                 // at the bar's centre all the way through — a morph that moved the one
@@ -5036,6 +5106,13 @@ private fun ReaderSpeakBar(
                     modifier = Modifier.align(Alignment.Center),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // ⚠️ THE SENTENCE STEP STAYS OUTSIDE THE `expanded` GATE (v471).
+                    // Skipping a sentence is the one thing a member does mid-sentence
+                    // without looking, so it is on the resting bar too; only the
+                    // chapter step (the bigger jump, and the one that needs aiming)
+                    // waits for the bar to be open. The two sides stay SYMMETRIC, so
+                    // the disc is still at the bar's centre in both states and does
+                    // not move a pixel as the bar breathes.
                     AnimatedVisibility(visible = expanded) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             onPrevChapter?.let { step ->
@@ -5046,15 +5123,15 @@ private fun ReaderSpeakBar(
                                     step
                                 )
                             }
-                            onPrevSentence?.let { step ->
-                                ReaderSpeakStep(
-                                    palette,
-                                    CurioIcons.ChevronLeft,
-                                    "Previous sentence",
-                                    step
-                                )
-                            }
                         }
+                    }
+                    onPrevSentence?.let { step ->
+                        ReaderSpeakStep(
+                            palette,
+                            CurioIcons.ChevronLeft,
+                            "Previous sentence",
+                            step
+                        )
                     }
                     // THE ONE CONTROL WITH WEIGHT: a filled disc, so a thumb finds it
                     // without reading the bar — and its own slot, so it is in exactly
@@ -5065,7 +5142,13 @@ private fun ReaderSpeakBar(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(30.dp)
+                                // v471 — one size up: the disc is the bar's anchor and
+                                // the one control with weight, so it reads as the
+                                // biggest thing on it (the steps around it wear a soft
+                                // fill instead of a ring, which is what stops five
+                                // controls of two sizes from reading as a row of
+                                // buttons).
+                                .size(36.dp)
                                 .clip(CircleShape)
                                 .background(
                                     if (running) palette.accent
@@ -5074,27 +5157,20 @@ private fun ReaderSpeakBar(
                                 .curioPressClickable(
                                     pressedScale = 0.90f,
                                     onClickLabel = when {
-                                        !expanded -> "Show the reading controls"
                                         running -> "Pause the voice"
                                         speaking -> "Carry on reading aloud"
                                         else -> "Read this page aloud"
                                     },
-                                    // ── WHAT A TAP ON THE CLOSED BAR DOES ──
-                                    // It does what the glyph says AND opens the bar,
-                                    // because a member who pauses is the member who is
-                                    // about to steer: skip a sentence, change the voice,
-                                    // leave a mark. The two are one tap rather than a
-                                    // tap to open and a second to pause, and the closed
-                                    // bar is never a control that lies about what it
-                                    // will do.
-                                    onClick = {
-                                        if (!expanded) {
-                                            expanded = true
-                                            onToggle()
-                                        } else {
-                                            onToggle()
-                                        }
-                                    }
+                                    // ── v471 — AND IT DOES EXACTLY ONE THING ──
+                                    // A tap on the disc used to ALSO open the bar,
+                                    // because a closed bar had no other way in. With a
+                                    // handle at the bar's leading edge and the bar's own
+                                    // background as the second door, that would be two
+                                    // effects for one tap on the one control a thumb
+                                    // finds without looking — so the disc toggles the
+                                    // voice and nothing else, and the bar opens by the
+                                    // two gestures that say they open it.
+                                    onClick = onToggle
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -5102,20 +5178,20 @@ private fun ReaderSpeakBar(
                                 if (running) CurioIcons.Pause else CurioIcons.PlayArrow,
                                 null,
                                 tint = if (running) palette.ink else palette.accent,
-                                size = 17.dp
+                                size = 19.dp
                             )
                         }
                     }
+                    onNextSentence?.let { step ->
+                        ReaderSpeakStep(
+                            palette,
+                            CurioIcons.ChevronRight,
+                            "Next sentence",
+                            step
+                        )
+                    }
                     AnimatedVisibility(visible = expanded) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            onNextSentence?.let { step ->
-                                ReaderSpeakStep(
-                                    palette,
-                                    CurioIcons.ChevronRight,
-                                    "Next sentence",
-                                    step
-                                )
-                            }
                             onNextChapter?.let { step ->
                                 ReaderSpeakStep(
                                     palette,
@@ -5146,7 +5222,10 @@ private fun ReaderSpeakBar(
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = palette.ink.copy(alpha = 0.85f),
-                        modifier = Modifier.padding(start = 18.dp, end = 6.dp)
+                        // v471 — shifted right to clear the handle at the leading
+                        // edge: the handle is 32dp of touch plus its own 6dp of
+                        // padding, so the word starts after it rather than under it.
+                        modifier = Modifier.padding(start = 44.dp, end = 6.dp)
                     )
                 }
 
@@ -5196,22 +5275,53 @@ private fun ReaderSpeakBar(
 }
 
 /**
- * The voice bar's own height — and its CLOSED WIDTH, which is the same number.
+ * The voice bar's own height, and the disc's slot inside it (v463, v471).
  *
- * The bar rests as a circle (see [ReaderSpeakBar]), so the disc's slot and the
- * surface's collapsed width have to be one measurement: derive them separately and
- * the closed bar becomes an ellipse.
+ * ⚠️ It was ALSO the bar's closed width until v471, because the bar rested as a
+ * circle of exactly this size and the two measurements had to be one number or the
+ * closed bar would be an ellipse. It rests as a PILL now — the handle, the two
+ * sentence steps and the disc — so the closed width is [SPEAK_BAR_REST_WIDTH] and
+ * this is only the height. **The two numbers are separate because the shape is two
+ * different shapes**; deriving one from the other again would rebuild the ellipse.
  */
-private val SPEAK_BAR_HEIGHT = 40.dp
+private val SPEAK_BAR_HEIGHT = 44.dp
+
+/**
+ * ── v471 — HOW WIDE THE BAR IS WHEN IT RESTS ──────────────────────────────
+ *
+ * The member: *"dont collapse it to just one pause button, add way to skip and also
+ * a way to expand it"*. The resting pill carries, left to right: the handle at the
+ * leading edge (32dp of touch plus 6dp of padding), the previous-sentence step, the
+ * disc, and the next-sentence step — the SAME controls, in the SAME order, as the
+ * open bar around them, so nothing moves when it breathes except the two chapter
+ * steps and the two end labels arriving.
+ *
+ * 184dp is the arithmetic with a little slack: ~38dp of handle, 108dp of transport
+ * (32 + 44 + 32), and ~38dp of margin on the other side. **The disc is centred in
+ * BOTH states** because the transport is symmetric about it, which is what keeps the
+ * one control a thumb aims at from moving a pixel as the bar grows.
+ */
+private val SPEAK_BAR_REST_WIDTH = 184.dp
 
 /**
  * v463 — ONE STEP OF THE VOICE'S BAR, and the only one that is a plain glyph.
  *
- * 30dp of touch for a 17dp mark: the bar carries five controls in the room one pill used
+ * 32dp of touch for an 18dp mark: the bar carries five controls in the room one pill used
  * to take, so each target is smaller than the 40dp a lone control gets — which is exactly
- * why the four steps are the ones a thumb may legitimately miss and the filled disc is
+ * why the steps are the ones a thumb may legitimately miss and the filled disc is
  * not. Each carries its own spoken label, so the bar is never a row of unlabelled arrows
  * to a screen reader.
+ *
+ * ── v471 — AND IT WEARS A SOFT FILL NOW ────────────────────────────────────
+ *
+ * The member asked for the buttons' look to be revamped, and this is the honest half of
+ * it: the steps used to be bare glyphs floating on the glass, which is why a row of them
+ * read as decoration rather than as controls — the only thing that said "button" was the
+ * disc, and it said it alone. A **fill of the bar's own ink at 7%** gives every step the
+ * same affordance in the same breath, and it is deliberately much quieter than the disc's
+ * accent fill so the ONE control with weight is still the one that carries it. The fill
+ * is drawn rather than borrowed (no ripple, no elevation): the bar is liquid glass, and a
+ * Material container inside it would be the one opaque thing on a refracting surface.
  */
 @Composable
 private fun ReaderSpeakStep(
@@ -5222,8 +5332,9 @@ private fun ReaderSpeakStep(
 ) {
     Box(
         modifier = Modifier
-            .size(30.dp)
+            .size(32.dp)
             .clip(CircleShape)
+            .background(palette.ink.copy(alpha = 0.07f))
             .curioPressClickable(
                 pressedScale = 0.90f,
                 onClickLabel = label,
@@ -5231,7 +5342,7 @@ private fun ReaderSpeakStep(
             ),
         contentAlignment = Alignment.Center
     ) {
-        CurioIcon(glyph, null, tint = palette.ink.copy(alpha = 0.72f), size = 17.dp)
+        CurioIcon(glyph, null, tint = palette.ink.copy(alpha = 0.78f), size = 18.dp)
     }
 }
 
@@ -10374,6 +10485,32 @@ internal object ReaderLook {
     var speakSpeaker by mutableStateOf(0)
 
     /**
+     * ── v471 — HOW LONG THE PAUSE AT A FULL STOP IS ───────────────────────
+     *
+     * The member: *"the full stop break and waiting for read aloud is still very
+     * long like very long, not natural at all. for edge tts and kokoro, not the
+     * lessac. also for piper lessac its a little fast in full stop incrase it by
+     * just a little. and also add full stop break customisation"*.
+     *
+     * A `Float` from 0 to 1, because the member asked for a **stepless slider** —
+     * the value is a POSITION on the scale, and what a position means in
+     * milliseconds is decided per voice by `aloudBreakMs` (see
+     * `ReadAloudContinuation.kt`), not here. Storing milliseconds would have made
+     * the setting a number that only makes sense for one voice: a downloaded
+     * pack's tail, the online voice's tail and the phone's own grace are three
+     * different mechanisms, and one of them (the phone's) is not silence in a clip
+     * at all — it is how long the reader waits before it flushes the utterance.
+     *
+     * **0.5 is "Natural"** and is the default, so a member who never touches the
+     * slider hears exactly what the tuned defaults give; the ends are a clipped
+     * stop and a long, storybook pause.
+     *
+     * It is part of [rememberKey] (the v434 rule): a field left out of there saves
+     * every other setting and silently forgets this one.
+     */
+    var speakStop by mutableStateOf(0.5f)
+
+    /**
      * v439 — LOW POWER READING, AND IT IS ON FROM THE START.
      *
      * The member: *"in pdf reader, a high charge save turns on which makes the
@@ -10464,6 +10601,8 @@ internal object ReaderLook {
         speakEngine,
         // v465e — and which narrator inside a downloaded pack (the v434 rule again).
         speakSpeaker.toString(),
+        // v471 — and how long a full stop is held (the v434 rule).
+        speakStop.toString(),
         lowPower.toString(),
         // v439 — the motion lock MUST be in here, or it saves all of the other
         // fields and silently forgets this one (the v434 rule).
@@ -10538,6 +10677,7 @@ internal object ReaderLookStore {
     private const val SPEAK_VOICE = "reader_speak_voice"
     private const val SPEAK_ENGINE = "reader_speak_engine"
     private const val SPEAK_SPEAKER = "reader_speak_speaker"
+    private const val SPEAK_STOP = "reader_speak_stop"
     private const val MOTION_LOCK = "reader_motion_lock"
 
     /**
@@ -10601,6 +10741,8 @@ internal object ReaderLookStore {
             ReaderLook.speakEngine =
                 prefs.getString(SPEAK_ENGINE, ReaderLook.speakEngine).orEmpty()
             ReaderLook.speakSpeaker = prefs.getInt(SPEAK_SPEAKER, ReaderLook.speakSpeaker)
+            ReaderLook.speakStop = prefs.getFloat(SPEAK_STOP, ReaderLook.speakStop)
+                .coerceIn(0f, 1f)
             ReaderLook.lowPower = prefs.getBoolean(LOW_POWER, ReaderLook.lowPower)
             ReaderLook.motionLock = prefs.getBoolean(MOTION_LOCK, ReaderLook.motionLock)
         }
@@ -10634,6 +10776,7 @@ internal object ReaderLookStore {
                 .putString(SPEAK_VOICE, ReaderLook.speakVoice)
                 .putString(SPEAK_ENGINE, ReaderLook.speakEngine)
                 .putInt(SPEAK_SPEAKER, ReaderLook.speakSpeaker)
+                .putFloat(SPEAK_STOP, ReaderLook.speakStop)
                 .putBoolean(LOW_POWER, ReaderLook.lowPower)
                 .putBoolean(MOTION_LOCK, ReaderLook.motionLock)
                 .putBoolean(MARK, true)

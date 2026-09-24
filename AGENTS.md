@@ -245,6 +245,29 @@ Follow conventional commit format: `feat:`, `fix:`, `refactor:`, `docs:`, `style
 AI/tool attribution) lines. Commit messages are plain conventional-format
 text only.
 
+### 🔢 EVERY PUSH BUMPS THE VERSION (user directive, 2026-09-24)
+
+**Every `git push` carries a version bump.** In `app/build.gradle.kts`:
+
+- `versionName` **+0.0.1** — `1.4.0` → `1.4.1`
+- `versionCode` **+1** — `20260923` → `20260924` (it is date-based today; a
+  decimal cannot go into an integer, so `0.0.1` means *the next one*)
+
+and because the store changelog is NAMED after the `versionCode`, the bump also
+creates the notes file for the new code:
+**`fastlane/metadata/android/en-US/changelogs/{newVersionCode}.txt`**, carried
+over from the previous file with this push's changes in it.
+
+⚠️ **THE OLD FILE IS NOT RENAMED AND NOT DELETED.** `{versionCode}.txt` is the
+record of the build that code shipped as, so the previous file stays exactly as
+it was — the notes for the new code are a COPY that then moves forward. Renaming
+it would take the shipped release's notes away from the release that owns them
+(see `fastlane/AGENTS.md`).
+
+Do this in the same push, as part of it — a `chore(release)` step, not a
+separate request. A push without the bump is a push that overwrites the previous
+build's identity.
+
 ### 📝 TEXT-ONLY / DOCS CHANGES — COMMIT, BUT PUSH ONLY WITH THE NEXT REAL CHANGE
 
 Text-only and documentation changes — comment rewordings, doc tweaks,

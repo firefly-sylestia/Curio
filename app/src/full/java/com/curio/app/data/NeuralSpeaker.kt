@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.os.SystemClock
 import android.util.Log
+import com.curio.app.features.personal.aloudBreakMs
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
@@ -452,9 +453,28 @@ internal object NeuralSpeaker {
      * synthesis out of the way.
      *
      * So the clip is trimmed to what a reader actually does: a SHORT breath at the
-     * end ([TAIL_BREATH_MS]) and no dead air at the front. Silence INSIDE the
+     * end (`aloudBreakMs()` — the member's own Full stop break setting, 360 ms at
+     * its default) and no dead air at the front. Silence INSIDE the
      * sentence is untouched — a comma's pause is the model's and belongs to the
      * words — because only the run at each END is removed.
+     *
+     * ── v471 — AND THE FLOOR IS RELATIVE, WHICH IS WHAT KOKORO NEEDED ───────
+     *
+     * The member, after v469: *"the full stop break … is still very long like very
+     * long, not natural at all. for edge tts and kokoro, not the lessac"*. Twice
+     * now, and the reason is in this function: [SILENCE_LEVEL] is an ABSOLUTE
+     * floor, so a model whose tail sits at a low hiss (Kokoro's does) has **no
+     * sample below it** — the loop that walks back to the last non-silent sample
+     * walks all the way to the last word and the whole tail is kept, whatever this
+     * file says it trims to. Lessac ends crisply, so it always got its breath; that
+     * is the whole of why one pack was *"a little fast"* and the other *"very
+     * long"* from the same constant.
+     *
+     * The floor is therefore the LOUDER of the absolute one and a small share of
+     * the clip's OWN peak ([TAIL_LEVEL_SHARE]) — a tail is quiet relative to the
+     * speech in front of it, not relative to full scale. The share is small enough
+     * that a trailing unvoiced consonant (a soft `s`, a breath) stays above it and
+     * is never clipped; only the near-silence after it is removed.
      *
      * A clip that is silent from end to end trims to nothing, and an empty clip is
      * treated exactly as a pack that said nothing at all (see [synthesise]) — which
@@ -464,7 +484,15 @@ internal object NeuralSpeaker {
     private fun trimmed(samples: FloatArray, sampleRate: Int): FloatArray {
         if (samples.isEmpty() || sampleRate <= 0) return samples
         val perMs = sampleRate / 1000f
-        fun quiet(at: Int) = abs(samples[at]) < SILENCE_LEVEL
+        // v471 — the clip's own loudest sample, which is what its tail is quiet
+        // AGAINST (see the note above).
+        var peak = 0f
+        for (i in samples.indices) {
+            val level = abs(samples[i])
+            if (level > peak) peak = level
+        }
+        val floor = maxOf(SILENCE_LEVEL, peak * TAIL_LEVEL_SHARE)
+        fun quiet(at: Int) = abs(samples[at]) < floor
         var first = 0
         while (first < samples.size && quiet(first)) first++
         if (first >= samples.size) return FloatArray(0)
@@ -473,7 +501,9 @@ internal object NeuralSpeaker {
         first = maxOf(0, first - (LEAD_PAD_MS * perMs).toInt())
         var last = samples.size - 1
         while (last > first && quiet(last)) last--
-        val end = minOf(samples.size, last + 1 + (TAIL_BREATH_MS * perMs).toInt())
+        // v471 — and the breath comes from the member's own setting, so the row in
+        // the read-aloud settings is the one place this number is decided.
+        val end = minOf(samples.size, last + 1 + (aloudBreakMs() * perMs).toInt())
         return if (first == 0 && end == samples.size) samples else samples.copyOfRange(first, end)
     }
 
@@ -639,12 +669,14 @@ internal object NeuralSpeaker {
     private const val SILENCE_LEVEL = 0.008f
 
     /**
-     * How much of the model's silence is left after a sentence, in milliseconds
-     * (v469). A full stop in a well-read book is a breath, not a gap: this is that
-     * breath, and it is the whole of the pause a neural pack gets (see
-     * `aloudTailGraceMs`, which adds nothing on top of it for this voice).
+     * The share of a clip's own peak that still counts as its tail's silence (v471).
+     *
+     * −30 dB below the clip's loudest moment, which is comfortably under a quiet
+     * trailing consonant and comfortably above the hiss a model leaves behind. The
+     * alternative — an absolute floor — is what made one pack *"a little fast"* and
+     * another *"very long"* from one constant; see [trimmed]'s own note.
      */
-    private const val TAIL_BREATH_MS = 260f
+    private const val TAIL_LEVEL_SHARE = 0.03f
 
     /** The sliver of the clip's own lead kept so a first syllable is not clipped. */
     private const val LEAD_PAD_MS = 20f

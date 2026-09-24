@@ -472,6 +472,43 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                     trailingGlyph = CurioIcons.Add,
                     trailingLabel = "Faster"
                 )
+                // ── v471 — AND HOW LONG A FULL STOP IS HELD ──────────────
+                //
+                // The member: *"add full stop break customisation"* — asked for
+                // in the same breath as *"the full stop break … is still very
+                // long like very long, not natural at all. for edge tts and
+                // kokoro, not the lessac. also for piper lessac its a little
+                // fast in full stop incrase it by just a little"*.
+                //
+                // A STEPLESS SLIDER, as asked — not named levels. The value is a
+                // POSITION ([ReaderLook.speakStop]), and what a position means in
+                // milliseconds is decided per voice by `aloudBreakMs`: a
+                // downloaded pack's tail and the online voice's are silence in a
+                // file, while the phone's own engine's is the wait before the
+                // reader flushes an utterance. One row, and the one place a member
+                // has to look for any of them.
+                //
+                // **0.5 IS "Natural" AND IS THE DEFAULT**, so the row is a
+                // refinement rather than something a member has to set to get a
+                // natural reading — and the word beside the slider is the answer
+                // to "what did I just do", which a bare number would not be.
+                ReaderSliderRow(
+                    label = "Full stop break",
+                    value = ReaderLook.speakStop,
+                    range = 0f..1f,
+                    step = 0.05f,
+                    valueLabel = when {
+                        ReaderLook.speakStop < 0.34f -> "Short"
+                        ReaderLook.speakStop < 0.67f -> "Natural"
+                        else -> "Long"
+                    },
+                    palette = palette,
+                    onValue = { next -> ReaderLook.speakStop = next.coerceIn(0f, 1f) },
+                    leadingGlyph = CurioIcons.Remove,
+                    leadingLabel = "Shorter",
+                    trailingGlyph = CurioIcons.Add,
+                    trailingLabel = "Longer"
+                )
                 // ── v464 — AND WHICH ENGINE READS AT ALL ───────────────
                 //
                 // The member: *"wire the read-aloud voice engine to any installed system
@@ -748,6 +785,13 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                     emptyList()
                 }
                 if (narrators.size > 1) {
+                    // v471 — the preview's own scope and context. The body has no
+                    // `context` of its own (the Background row reads one for exactly
+                    // this reason), and `onSelect` below is an ordinary lambda rather
+                    // than a @Composable scope — the trap the root compile-safety
+                    // rules name for callbacks.
+                    val narratorContext = LocalContext.current
+                    val previewScope = rememberCoroutineScope()
                     Surface(
                         onClick = { narratorPicker = true },
                         shape = RoundedCornerShape(50),
@@ -803,7 +847,21 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                             label = name,
                                             live = ReaderLook.speakSpeaker == at,
                                             palette = palette
-                                        ) { ReaderLook.speakSpeaker = at }
+                                        ) {
+                                            ReaderLook.speakSpeaker = at
+                                            // ── v471 — AND IT SAYS A LINE ──────
+                                            // Picking a narrator IS the preview (see
+                                            // [previewNarrator]): the tap that chooses
+                                            // the voice is the tap that lets the member
+                                            // hear it, rather than a second control
+                                            // they have to find first.
+                                            val pack = NeuralVoicePacks.byId(ReaderLook.speakVoice)
+                                            if (pack != null && !ReadAloudSession.active) {
+                                                previewScope.launch {
+                                                    previewNarrator(narratorContext, pack, at)
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -1309,6 +1367,52 @@ private const val PACK_TEST_SENTENCE = "This is how this voice sounds when it re
  * milliseconds, so this ceiling is never what decides the common case.
  */
 private const val PACK_TEST_TIMEOUT_MS = 30_000L
+
+/**
+ * ── v471 — A NARRATOR, ASKED TO SAY ONE LINE ──────────────────────────────
+ *
+ * The member: *"also adding preview narrator"*. The Narrator row lists a pack's
+ * speakers by name and there was no way to hear one without committing a whole
+ * book to it — a name like `am_michael` is not something a member can audition in
+ * their head, and the pack is 305 MB of model either way.
+ *
+ * So **choosing a narrator says a line in that narrator**. The member picked
+ * *selecting a narrator speaks it* over a separate play button per row, which is
+ * the better trade here: the pick IS the preview, one tap instead of two, and the
+ * row already has the tick to show what is live.
+ *
+ * Four rules, all of them borrowed from the pack test beside it (v469) because
+ * they are the same problem:
+ *
+ *  · **IT IS THE SENTENCE THE TEST USES** ([PACK_TEST_SENTENCE]) — a line of no
+ *    particular meaning, long enough to prove the voice, short enough to sit inside
+ *    a settings page.
+ *  · **IT LOADS OFF THE MAIN THREAD.** `prepare` parses the model and reads the
+ *    espeak-ng data; on Kokoro that is hundreds of files.
+ *  · **A LIVE READING IS NOT TALKED OVER.** While a book is being read aloud the
+ *    member is already hearing that voice, so nothing is spoken at all.
+ *  · **IT CHANGES NOTHING EXCEPT THE CHOICE.** The preview reports whether it was
+ *    heard and throws that away — the row's own tick is the state, and a preview
+ *    that could fail a reading would be a settings page deciding a sentence's fate.
+ */
+private suspend fun previewNarrator(
+    context: Context,
+    pack: NeuralVoicePacks.Pack,
+    speakerId: Int
+): Boolean {
+    val loaded = withContext(Dispatchers.IO) {
+        runCatching { NeuralSpeaker.prepare(context, pack) }.getOrDefault(false)
+    }
+    if (!loaded || NeuralSpeaker.speakerCount() <= 0) return false
+    val heard = CompletableDeferred<Boolean>()
+    NeuralSpeaker.say(
+        PACK_TEST_SENTENCE,
+        1f,
+        speakerId,
+        { heard.complete(true) }
+    ) { heard.complete(false) }
+    return withTimeoutOrNull(PACK_TEST_TIMEOUT_MS) { heard.await() } == true
+}
 
 /**
  * v440 — ONE VOICE IN THE PICKER, in the reader's own capsule language.
