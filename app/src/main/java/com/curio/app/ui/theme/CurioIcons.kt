@@ -69,6 +69,23 @@ object CurioIcons {
     const val Settings = "settings"
     const val MoreVert = "more_vert"
     const val Close = "close"
+    /**
+     * ⚠️ THE BACK CONTROL IS [ChevronLeft], NOT THIS (v468).
+     *
+     * The member: *"instead of arrow for back button use >< these icons app wide"*.
+     * The app had already decided this once and then not followed it: the
+     * `CurioBackButton` pill — the most repeated back control in Curio — has drawn
+     * the plain chevron since v450, while **eleven** surfaces that build their own
+     * back bar were still asking for the arrow-with-a-stem. So the same gesture, a
+     * tap that leaves the screen, wore two different glyphs depending on which
+     * screen you were on (the reader, Chapter, Journal, Todo, notes, the dictionary,
+     * Reader settings, Cabinet v2, Personal canvas, Book review, Edit profile). All
+     * eleven ask for `ChevronLeft` now, so there is one back glyph in the app.
+     *
+     * The constant itself stays: a leftward ARROW is still the right mark for
+     * *back/forward through content* (a carousel step, a pager edge) rather than
+     * *out of this screen*. A NEW back button should not reach for it.
+     */
     const val ArrowBack = "arrow_back"
     const val ArrowForward = "arrow_forward"
     const val ChevronLeft = "chevron_left"

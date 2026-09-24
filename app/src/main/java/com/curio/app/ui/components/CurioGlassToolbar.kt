@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.floatingPillHeader
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioPillTintLift
@@ -97,6 +98,31 @@ fun CurioGlassToolbar(
     // so the back pill refracts the rows scrolling behind the bar.
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    // ── v468 — THE COMPACT FORM IS ONE FLOATING PILL, NOT A BAR ─────────
+    //
+    // The member: *"dont keep headers in landscape, make the header that floating pill
+    // style … in landscape only"*, and — asked how far it should reach — *"all of them
+    // to adjust properly … make sure nothing looks stretched but designed for that
+    // layout"*. Every surface that wears this toolbar (the whole Settings family,
+    // Cabinet, Profile, and everything else that adopted the app-wide header) gets the
+    // pill from HERE, which is why the rule lives in one reader (`CurioLayout`) and not
+    // in thirty screens.
+    //
+    // **THE ACTION CONTENT IS DELIBERATELY DROPPED IN THE COMPACT FORM.** The bar's
+    // `content` row (Home's stat segments), `titleTrailing` (the Topic Database's
+    // Category pill) and `titleLeading` are what MAKE a header tall, and the ask is a
+    // header that is 48dp and gone. A pill that kept them would be the bar again with
+    // its edges rounded — so `trailing` (the screen's own action pills, which fit on a
+    // single 48dp row) is what carries over, and the rest is what the member scrolls to.
+    if (floatingPillHeader()) {
+        CurioPillHeader(
+            title = title,
+            onBack = onBack,
+            trailing = trailing,
+            glassBackdrop = glassBackdrop
+        )
+        return
+    }
     val dark = isCurioDarkTheme()
     // The toolbar's OWN tint: the rose hero accent pushed into the surface
     // glass at a soft weight so the bar reads tinted (not plain gray) while
@@ -690,6 +716,122 @@ fun CurioGlassToolbarMorph(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The compact header's own height, in one place.
+ *
+ * 48dp is not a guess and not a style choice: it is the size of the [CurioBackButton]
+ * this row leads with (a 24dp glyph in 12dp of padding), which is the app's touch
+ * target for going back. A compact header shorter than the control inside it is a
+ * header whose only button is clipped — so the control sets the height, the header
+ * does not. It is also the whole saving: the glass bar it replaces is a content-height
+ * title + subtitle + action row + reserve, and this is one line.
+ */
+private val PILL_HEADER_HEIGHT = 48.dp
+
+/**
+ * ── v468 — THE FLOATING PILL HEADER, AND THE THIRD HEADER SHAPE ───────────
+ *
+ * Curio had two headers and both were a BAR: the torn paper banner, and the
+ * content-height glass toolbar. This is neither — it is a small DETACHED capsule that
+ * floats over the page, the same object the app's own floating nav pills are, which is
+ * what the member asked for (*"make the header that floating pill style"*).
+ *
+ * **WHEN IT IS USED.** Always on a compact window (see [CurioLayout.isCompact] — a
+ * phone in landscape, a short split-screen window), and everywhere in both orientations
+ * when the member turns on Experiments → "Floating pill header". One reader decides; see
+ * [floatingPillHeader].
+ *
+ * **IT IS THE SAME GLASS AS THE BARS, AT THE SAME 1.6× FROST** — a third header must
+ * not be a third visual language, so the tint is the toolbar family's rose-tinted
+ * surface and the backdrop is the screen's own capture, exactly as [CurioGlassToolbar]
+ * does it. The one deliberate difference: the tint is carried at a slightly higher
+ * weight, because a capsule this small on a busy page reads as a smudge at the bar's
+ * softer value.
+ *
+ * **IT STANDS BELOW THE STATUS BAR.** The glass BAR fills that strip (v3xx43) because
+ * it is the top of the page; a floating pill is an object ON the page, so the inset is
+ * padding it sits under rather than a band it swallows. That is also what makes the
+ * landscape result work: the pill is the only chrome left at the top, and the page
+ * below it starts immediately.
+ *
+ * **A TRANSPARENT BACKDROP IS A VALID CALL.** A screen with no glass host passes no
+ * `glassBackdrop`, and the simulated frost or the plain tint takes over — the pill is
+ * never invisible, and never a second refraction pass over a capsule that already has
+ * one (the same rule [CurioBackButton]'s `ambientGlass = false` follows here).
+ */
+@Composable
+fun CurioPillHeader(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    // The screen's own action pills. They fit on the one row, so they carry over from
+    // the bar — see the compact branch's note on what is deliberately dropped.
+    trailing: (@Composable (ink: Color) -> Unit)? = null,
+    glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    val rose = settingsRoseAccent()
+    val container = lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        rose,
+        if (dark) 0.18f else 0.26f
+    )
+    val ink = MaterialTheme.colorScheme.onSurface
+    val shape = CircleShape
+    val glassMod = when {
+        isLiquidGlassPillsActive() && glassBackdrop != null ->
+            Modifier.liquidGlassCapsule(
+                container = container.copy(alpha = 0.92f),
+                washAlpha = 0.62f,
+                backdrop = glassBackdrop,
+                shape = shape,
+                blurMultiplier = 1.6f
+            )
+        isLiquidGlassRequested() ->
+            Modifier.clip(shape).fauxGlassCapsule(container, corner = 26.dp)
+        else -> Modifier.clip(shape).background(container.copy(alpha = 0.97f))
+    }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .height(PILL_HEADER_HEIGHT)
+            .then(glassMod),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        if (onBack != null) {
+            CurioBackButton(
+                onClick = onBack,
+                // This capsule IS the ambient glass for the pill inside it.
+                ambientGlass = false,
+                contentColor = MaterialTheme.colorScheme.primary,
+                shadowElevation = 3.dp,
+                disableRipple = true
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = ink,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        if (trailing != null) {
+            Spacer(Modifier.width(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                trailing(ink)
             }
         }
     }

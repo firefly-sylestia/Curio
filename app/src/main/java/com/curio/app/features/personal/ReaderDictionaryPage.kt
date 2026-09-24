@@ -316,7 +316,7 @@ internal fun ReaderDictionaryPage(onBack: () -> Unit) {
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CurioIcon(
-                            CurioIcons.ArrowBack,
+                            CurioIcons.ChevronLeft,
                             "Go back",
                             tint = palette.ink.copy(alpha = 0.85f),
                             size = 21.dp

@@ -1477,6 +1477,24 @@ object AppPreferences {
     enum class HeaderStyle { TORN, GLASS }
     var headerStyleState by mutableStateOf(HeaderStyle.TORN)
         private set
+    // ── v468 — THE FLOATING-PILL HEADER ────────────────────────────────
+    //
+    // The member: *"make the header that floating pill style … and add a toggle for
+    // floating pill style headers"*. A THIRD header shape: a small detached capsule
+    // (back chevron + title) that floats over the page instead of the
+    // content-height glass bar or the torn banner. Chosen in
+    // Settings → Experiments → "Floating pill header", and **default OFF like every
+    // experiment**.
+    //
+    // **IT IS A FLAG, NOT A THIRD [HeaderStyle], AND THAT IS THE SAFE CHOICE.**
+    // Every header site in the app branches with `== HeaderStyle.GLASS` — a
+    // comparison, not a `when` — so a new enum value would read as TORN at all of
+    // them and the toggle would ship as a switch that changes nothing. A flag is
+    // read through `com.curio.app.ui.CurioLayout.floatingPillHeader`, which is also
+    // where the LANDSCAPE default lives, so one reader serves the switch and the
+    // orientation and no screen has to know about either.
+    var floatingPillHeadersState by mutableStateOf(false)
+        private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
     // vertical gradient.
@@ -2033,6 +2051,7 @@ object AppPreferences {
         paperStatTearState = isPaperStatTearEnabled(context)
         heroTearSheetState = isHeroTearSheetEnabled(context)
         headerStyleState = getHeaderStyle(context)
+        floatingPillHeadersState = isFloatingPillHeadersEnabled(context)
         navPillButtonsState = isNavPillButtonsEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
@@ -2523,6 +2542,8 @@ object AppPreferences {
 
     // ── Paper & header experiments (v27) ────────────────────────────────
     private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
+    // v468 — the floating-pill header (see [floatingPillHeadersState]).
+    private const val KEY_FLOATING_PILL_HEADERS = "floating_pill_headers"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
@@ -2763,6 +2784,15 @@ object AppPreferences {
     fun setHeaderStyle(context: Context, style: HeaderStyle) {
         prefs(context).edit().putString(KEY_HEADER_STYLE, style.name).apply()
         headerStyleState = style
+    }
+
+    /** v468 — the floating-pill header (see [floatingPillHeadersState]). */
+    fun isFloatingPillHeadersEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_FLOATING_PILL_HEADERS, false)
+
+    fun setFloatingPillHeadersEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FLOATING_PILL_HEADERS, enabled).apply()
+        floatingPillHeadersState = enabled
     }
 
     fun isHeroTearSheetEnabled(context: Context): Boolean =

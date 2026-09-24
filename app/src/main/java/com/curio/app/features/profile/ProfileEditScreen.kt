@@ -385,7 +385,7 @@ fun ProfileEditScreen(navController: NavController) {
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CurioIcon(
-                            CurioIcons.ArrowBack,
+                            CurioIcons.ChevronLeft,
                             "Go back",
                             tint = ink.copy(alpha = 0.85f),
                             size = 21.dp

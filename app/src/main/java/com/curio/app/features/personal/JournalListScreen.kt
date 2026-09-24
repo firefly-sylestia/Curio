@@ -1056,7 +1056,7 @@ internal fun PersonalHeader(
             modifier = Modifier.size(42.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 20.dp)
+                CurioIcon(CurioIcons.ChevronLeft, "Back", tint = ink, size = 20.dp)
             }
         }
         // ONE, not two: the head says one thing at a time, and it ROLLS — the

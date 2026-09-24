@@ -1752,7 +1752,7 @@ private fun V2HeroTrailing(
             if (openLevel.isNotEmpty()) {
                 CabinetHeroActionPill(
                     onClick = onBack,
-                    glyph = CurioIcons.ArrowBack,
+                    glyph = CurioIcons.ChevronLeft,
                     contentDescription = "Back to collections",
                     ink = ink, backdrop = fill,
                     modifier = glassMod

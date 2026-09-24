@@ -5250,7 +5250,7 @@ private fun ReaderTopPill(
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CurioIcon(
-                    CurioIcons.ArrowBack,
+                    CurioIcons.ChevronLeft,
                     "Close the reader",
                     tint = palette.ink.copy(alpha = 0.85f),
                     size = 21.dp

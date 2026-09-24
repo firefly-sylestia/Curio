@@ -205,7 +205,7 @@ private fun TodoTopBar(
             modifier = Modifier.size(38.dp)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 19.dp)
+                CurioIcon(CurioIcons.ChevronLeft, "Back", tint = ink, size = 19.dp)
             }
         }
         Column(Modifier.weight(1f)) {

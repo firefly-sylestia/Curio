@@ -383,7 +383,7 @@ fun BookReviewScreen(
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ArrowBack, "Back", tint = ink, size = 20.dp)
+                    CurioIcon(CurioIcons.ChevronLeft, "Back", tint = ink, size = 20.dp)
                 }
             }
             Column(Modifier.weight(1f)) {

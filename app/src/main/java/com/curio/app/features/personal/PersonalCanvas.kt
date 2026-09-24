@@ -5943,7 +5943,7 @@ internal fun PersonalPageEditBar(
                 enabled = state.canNudgePageRows(up = false)
             ) { state.nudgePageRows(up = false) }
             ReachPill(
-                icon = CurioIcons.ArrowBack,
+                icon = CurioIcons.ChevronLeft,
                 label = "One more letter to the left",
                 accent = accent,
                 ink = ink,

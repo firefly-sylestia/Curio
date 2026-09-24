@@ -138,7 +138,7 @@ internal fun ReaderSettingsScreen(
                     .padding(horizontal = 5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ReaderChromeButton(CurioIcons.ArrowBack, "Back to the book", palette) { onBack() }
+                ReaderChromeButton(CurioIcons.ChevronLeft, "Back to the book", palette) { onBack() }
                 Text(
                     "Reading",
                     style = TextStyle(

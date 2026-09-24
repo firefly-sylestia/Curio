@@ -213,6 +213,19 @@ fun ExperimentsScreen(navController: NavController) {
                             if (it) AppPreferences.HeaderStyle.GLASS else AppPreferences.HeaderStyle.TORN
                         )
                     }
+                    // v468 — THE FLOATING PILL HEADER.
+                    //
+                    // Two headers already existed and both are a BAR: the torn
+                    // banner and the content-height glass toolbar. This one is a
+                    // small detached capsule instead, and the member asked for it
+                    // in **both orientations**, not just landscape — so the switch
+                    // is the everywhere form and the compact window is the always-on
+                    // one (see `CurioLayout.floatingPillHeader`).
+                    ExperimentSwitchRow(
+                        "Floating pill header",
+                        "A small detached pill (back chevron + title) floating over the page instead of a full-height header. It is always used in landscape and on short windows; this switch turns it on in portrait too.",
+                        AppPreferences.floatingPillHeadersState
+                    ) { wanted -> AppPreferences.setFloatingPillHeadersEnabled(context, wanted) }
                 }
                 }
             }

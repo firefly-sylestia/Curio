@@ -183,6 +183,14 @@ fun UserExperimentsScreen(navController: NavController) {
                             if (it) AppPreferences.HeaderStyle.GLASS else AppPreferences.HeaderStyle.TORN
                         )
                     }
+                    // v468 — the floating pill header; see ExperimentsScreen's twin
+                    // row for why there are now three header shapes and why the
+                    // landscape half is always-on while this switch is not.
+                    ExperimentSwitchRow(
+                        "Floating pill header",
+                        "A small detached pill (back chevron + title) floating over the page instead of a full-height header. It is always used in landscape and on short windows; this switch turns it on in portrait too.",
+                        AppPreferences.floatingPillHeadersState
+                    ) { wanted -> AppPreferences.setFloatingPillHeadersEnabled(context, wanted) }
                 }
                 }
             }
