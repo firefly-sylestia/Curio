@@ -1,0 +1,238 @@
+package com.curio.app.features.personal
+
+import android.content.Context
+import com.curio.app.data.NeuralSpeaker
+import com.curio.app.infrastructure.ReadAloudService
+import com.curio.app.infrastructure.ReadAloudSession
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * v465i — ONE NUMBER, BOTH DRIVERS: THE GRACE THE END OF A SENTENCE IS GIVEN.
+ *
+ * An engine's `onDone` can land while its last words are still sounding, and the
+ * next utterance's `QUEUE_FLUSH` then truncates them. Every sentence ends at a
+ * comma or a full stop, so the words that went missing were always the ones just
+ * BEFORE the punctuation (member: *"i was skipping comma and full stop words like
+ * the words which were before those 2 were getting skipped"*). A short pause
+ * before the cursor moves lets the sentence finish in its own time.
+ *
+ * The same constant serves the page's driver and [ReadAloudContinuation]: one
+ * reading, one grace, wherever it is being driven from.
+ */
+internal const val ALOUD_TAIL_GRACE_MS = 180L
+
+/**
+ * v465i — HOW LONG ONE SENTENCE MAY GO UNREPORTED BEFORE THE READING GIVES UP.
+ *
+ * An engine can accept a sentence and say nothing about it — no `onDone`, no
+ * error — and both drivers wait on exactly that callback. Without a bound, the
+ * page kept a mark lit and the notification kept promising a reading that had
+ * stopped (the member's *"the 2nd one wasnt playing"*). Two minutes is far longer
+ * than any sentence on this phone can take to read, and far shorter than forever.
+ */
+internal const val ALOUD_STALL_MS = 120_000L
+
+/**
+ * ── v465i — THE READING THAT OUTLIVES ITS PAGE ─────────────────────────────
+ *
+ * The member: *"exiting cancels it"*. They are describing the shape of the old
+ * design, and they are right about it. Read aloud was driven from the reader's own
+ * composition (a `LaunchedEffect` in `BookReaderScreen`, one sentence at a time),
+ * so the moment the reader was popped off the back stack the driver was disposed
+ * with it and the voice stopped mid-book — even though the member had asked, in
+ * Settings, for reading to keep going when Curio is not on screen.
+ *
+ * [ReadAloudSession] and [ReadAloudService] already kept the PROCESS alive; what
+ * was missing was something for the service to keep alive. That is this object:
+ * when the page is left with a session live, the reader hands over the book, the
+ * sentence it had reached and a way to ask for the text of any other one, and this
+ * simple loop carries the reading on. The notification's four controls are
+ * re-registered to point here (they were the reader's lambdas, and those died with
+ * its composition), so pause, skip and stop still work from the shade.
+ *
+ * **ONE DRIVER AT A TIME, AND THE PAGE ALWAYS WINS.** The reader takes the reading
+ * back — at the sentence the voice has reached — the moment it is opened again for
+ * the same book ([takeOver]), and a reader that is closed with its own voice off
+ * ends this loop ([end]), so two loops can never speak over each other. That is the
+ * whole of the contract; nothing here decides what is read beyond "the next one".
+ *
+ * **IT READS PLAIN TEXT AND NOTHING ELSE.** Without the page there is no highlight
+ * to keep in step and no scroll to follow, so all it needs is the words — asked for
+ * one index at a time through [handOff]'s own provider, which is what lets a PDF
+ * keep being read too (its page text is parsed on demand, exactly as the reader
+ * would have done it). The provider closes over the document; the sentences of a
+ * text book are held by the reader and kept alive by this loop for as long as the
+ * reading lasts.
+ *
+ * **A STALL ENDS THE SESSION RATHER THAN RACING IT.** If an engine refuses a
+ * sentence and never reports back, the loop gives up after two minutes and ends the
+ * session: a notification that promises to be reading while nothing is playing is
+ * worse than a reading that stops where it stood.
+ */
+internal object ReadAloudContinuation {
+
+    /** What a page that is opening again needs to carry on: where, and whether. */
+    data class Taken(val index: Int, val playing: Boolean)
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var job: Job? = null
+
+    /** True while a handover is live — so a page can ask whether it owns the voice. */
+    private var live = false
+    private var book = ""
+    private var index = 0
+    private var count = 0
+    private var speaking = false
+    private var app: Context? = null
+    private var textAt: (suspend (Int) -> String?)? = null
+
+    /**
+     * Takes the reading over from the book page that is being disposed.
+     *
+     * [from] is the sentence the page had reached; [playing] is false when the
+     * member had paused, in which case the session is kept (and the notification
+     * keeps saying "Paused") but nothing is read until they press carry on.
+     */
+    fun handOff(
+        context: Context,
+        bookId: String,
+        title: String,
+        count: Int,
+        from: Int,
+        playing: Boolean,
+        textAt: suspend (Int) -> String?
+    ) {
+        stopLoop()
+        val app = context.applicationContext
+        this.app = app
+        book = bookId
+        this.count = count.coerceAtLeast(0)
+        this.textAt = textAt
+        index = from.coerceIn(0, (this.count - 1).coerceAtLeast(0))
+        speaking = playing && this.count > 0
+        live = true
+        ReadAloudSession.active = true
+        ReadAloudSession.playing = speaking
+        ReadAloudSession.title = title
+        ReadAloudSession.onToggle = { toggle() }
+        ReadAloudSession.onPrev = { step(-1) }
+        ReadAloudSession.onNext = { step(1) }
+        ReadAloudSession.onStop = { end() }
+        ReadAloudService.sync(app)
+        if (speaking) startLoop()
+    }
+
+    /**
+     * Gives the reading back to the page that is opening for [bookId], or null when
+     * this object is not reading that book (nothing to take back).
+     *
+     * The loop is stopped and the provider dropped, but the SESSION is left standing:
+     * the page's own driver picks it up in the very next frame, and clearing here
+     * would blink the notification out between two screens.
+     */
+    fun takeOver(bookId: String): Taken? {
+        if (!live || book != bookId) return null
+        val taken = Taken(index, speaking)
+        stopLoop()
+        textAt = null
+        return taken
+    }
+
+    /** Ends the reading — the shade's Stop, the end of the book, or a new page. */
+    fun end() {
+        val ctx = app
+        live = false
+        speaking = false
+        stopLoop()
+        textAt = null
+        book = ""
+        index = 0
+        count = 0
+        this.app = null
+        ReaderSpeaker.stop()
+        NeuralSpeaker.stop()
+        EdgeVoice.stop()
+        ReaderSpeaker.release()
+        NeuralSpeaker.release()
+        ReadAloudSession.clear()
+        if (ctx != null) ReadAloudService.stop(ctx)
+    }
+
+    // ── THE CONTROLS, WHICH ARE THE NOTIFICATION'S OWN BUTTONS ───────────
+
+    private fun toggle() {
+        if (!live) return
+        if (speaking) {
+            speaking = false
+            ReaderSpeaker.stop()
+            NeuralSpeaker.stop()
+            EdgeVoice.stop()
+        } else {
+            speaking = true
+            startLoop()
+        }
+        ReadAloudSession.playing = speaking
+        app?.let { ReadAloudService.sync(it) }
+    }
+
+    private fun step(step: Int) {
+        if (!live || count <= 0) return
+        index = (index + step).coerceIn(0, count - 1)
+        // The sentence being abandoned must not finish first — the same rule the
+        // reader's own skip follows.
+        ReaderSpeaker.stop()
+        NeuralSpeaker.stop()
+        EdgeVoice.stop()
+        if (speaking) startLoop()
+    }
+
+    // ── THE LOOP ─────────────────────────────────────────────────────────
+
+    private fun stopLoop() {
+        val running = job
+        job = null
+        running?.cancel()
+    }
+
+    private fun startLoop() {
+        stopLoop()
+        val ctx = app ?: return
+        job = scope.launch {
+            while (live && speaking && index in 0 until count) {
+                val provider = textAt
+                val text = provider?.invoke(index)?.trim().orEmpty()
+                if (text.isBlank()) {
+                    // A page of plates has nothing to say: stepped over, never
+                    // stuck on (the reader's own rule for a PDF).
+                    if (index + 1 >= count) {
+                        end()
+                        return@launch
+                    }
+                    index += 1
+                    continue
+                }
+                val done = CompletableDeferred<Unit>()
+                sayAloud(ctx, text, ReaderLook.speakSpeed) { done.complete(Unit) }
+                if (withTimeoutOrNull(ALOUD_STALL_MS) { done.await() } == null) {
+                    end()
+                    return@launch
+                }
+                delay(ALOUD_TAIL_GRACE_MS)
+                if (!live || !speaking) return@launch
+                if (index + 1 >= count) {
+                    end()
+                    return@launch
+                }
+                index += 1
+            }
+        }
+    }
+
+}

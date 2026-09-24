@@ -1,6 +1,7 @@
 package com.curio.app.data
 
 import android.content.Context
+import android.os.SystemClock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.OkHttpClient
@@ -289,6 +290,20 @@ object NeuralVoiceDownloads {
         /** 0f..1f while [Status.Downloading]; 1f once extracting. */
         val progress: Float = 0f,
         val error: String? = null,
+        /**
+         * v465i — HOW MUCH HAS ARRIVED, AND HOW MUCH THERE IS.
+         *
+         * The row used to have one number to show, a percentage, and a
+         * percentage cannot answer the two questions a member actually asks
+         * about a 305 MB pack: how much of my data has gone, and when will this
+         * finish. Bytes answer both — the rate below turns the remainder into a
+         * time (member: *"its not accurate in reader settings how would i know
+         * when its gonna finish"*).
+         */
+        val bytesRead: Long = 0L,
+        val totalBytes: Long = 0L,
+        /** A smoothed arrival rate in bytes/second, 0 until two samples land. */
+        val bytesPerSecond: Long = 0L,
     )
 
     private val _states = MutableStateFlow<Map<String, State>>(emptyMap())
@@ -351,6 +366,18 @@ object NeuralVoiceDownloads {
                 val body = response.body
                 val total = body.contentLength().takeIf { it > 0 } ?: pack.sizeBytes
                 var read = 0L
+                // v465i — THE MEASUREMENT, AND THE THROTTLE.
+                //
+                // Every 64 KB chunk used to publish a new [State], which is a new
+                // immutable Map for a settings page to diff — thousands of them on
+                // a 64 MB pack, for a bar nobody can read that fast. The numbers
+                // below are what the row needs instead: the WINDOW (how many bytes
+                // arrived, and how long they took) feeds a smoothed rate, and a
+                // report is published at most twice a second.
+                var windowAt = SystemClock.elapsedRealtime()
+                var windowBytes = 0L
+                var rate = 0L
+                var reportedAt = windowAt
                 body.byteStream().use { input ->
                     FileOutputStream(archive).use { output ->
                         val buffer = ByteArray(64 * 1024)
@@ -359,20 +386,42 @@ object NeuralVoiceDownloads {
                             if (n <= 0) break
                             output.write(buffer, 0, n)
                             read += n
-                            set(
-                                pack.id,
-                                State(
-                                    Status.Downloading,
-                                    (read.toDouble() / total.toDouble()).toFloat().coerceIn(0f, 0.99f),
-                                ),
-                            )
+                            val now = SystemClock.elapsedRealtime()
+                            windowBytes += n.toLong()
+                            val span = now - windowAt
+                            if (span >= 400L) {
+                                val instant = windowBytes * 1000L / span
+                                // An exponential average, because a raw per-chunk
+                                // rate jumps enough to make a time-left estimate
+                                // unreadable: it is the trend that answers "when".
+                                rate = if (rate <= 0L) instant else (rate * 3L + instant) / 4L
+                                windowAt = now
+                                windowBytes = 0L
+                            }
+                            if (now - reportedAt >= 500L || read >= total) {
+                                reportedAt = now
+                                set(
+                                    pack.id,
+                                    State(
+                                        Status.Downloading,
+                                        (read.toDouble() / total.toDouble()).toFloat()
+                                            .coerceIn(0f, 0.99f),
+                                        null,
+                                        read,
+                                        total,
+                                        rate,
+                                    ),
+                                )
+                            }
                         }
                         output.flush()
                     }
                 }
             }
             calls.remove(pack.id)
-            set(pack.id, State(Status.Extracting, 1f))
+            // v465i — the network half is DONE, and the row says so: everything
+            // from here is unpacking, which needs no data and no connection.
+            set(pack.id, State(Status.Extracting, 1f, null, read, total))
             extract(archive, dir)
             File(dir, NeuralVoicePacks.DONE_MARKER).writeText(pack.id)
         } finally {

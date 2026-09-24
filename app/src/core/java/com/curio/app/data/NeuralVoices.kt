@@ -101,6 +101,14 @@ object NeuralVoiceDownloads {
         val status: Status = Status.Idle,
         val progress: Float = 0f,
         val error: String? = null,
+        /**
+         * v465i — the same three fields the full edition's twin carries (see its
+         * own note): nothing here ever downloads, so they are always zero, and
+         * they exist because `main` is compiled against this signature.
+         */
+        val bytesRead: Long = 0L,
+        val totalBytes: Long = 0L,
+        val bytesPerSecond: Long = 0L,
     )
 
     private val _states = MutableStateFlow<Map<String, State>>(emptyMap())

@@ -1,4 +1,12 @@
 ADD:
+- Read aloud keeps reading when you leave the book page: the notification's pause, skip and stop keep working in the background, and reopening the book picks the voice back up at the sentence it had reached.
+- Reading settings: the voice-pack download row shows how much has arrived of how much there is, a real progress bar, roughly how long is left — and a failed download offers Retry.
+
+FIX:
+- Read aloud: a sentence's last words are never clipped again (the words just before a comma or a full stop were the ones going missing), and a sentence the engine never reports on stops the reading instead of freezing on one mark.
+- Read aloud: the hidden Edge voice falls back to the phone's own voice the moment it is refused, instead of racing the highlight through the page in silence — and the voice picker says when Edge is not answering.
+
+ADD:
 - Moderation: reports now cover posts, replies AND members, each with a reason and an optional note — and reporting the same thing again refreshes your report instead of being refused.
 - Moderation: a control room for the team. The queue removes content, hides an author, or dismisses and reopens a report — always with a reason — and the team half adds moderators by @username with five permissions each. @jugnu is the owner and cannot be removed.
 - Hiding a member hides their content and pauses their posting; their account keeps working, and a moderator can restore them from their profile.

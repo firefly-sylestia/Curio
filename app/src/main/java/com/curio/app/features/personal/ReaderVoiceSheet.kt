@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.NeuralVoicePacks
+import com.curio.app.infrastructure.ReadAloudSession
 
 /**
  * ── v465h — THE VOICE, FROM THE PAGE THE MEMBER IS ON ─────────────────────
@@ -100,6 +101,20 @@ internal fun ReaderVoiceSheet(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                // v465i — IF EDGE HAS REFUSED US THIS SESSION, SAY SO WHERE THE
+                // CHOICE IS MADE. The member asked for that voice and heard the
+                // phone's instead; being told why — and that picking a voice again
+                // is the retry — is the difference between an experiment that
+                // failed and a feature that looks broken.
+                if (ReaderLook.speakEngine == ReaderEngine.EDGE && ReadAloudSession.edgeUnavailable) {
+                    Text(
+                        "Edge is not answering \u2014 this reading is in the phone's own voice. " +
+                            "Stopping the voice and starting it again tries Edge once more.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = palette.ink.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp)
+                    )
+                }
                 ReaderVoiceHeading("Engine", palette)
                 engines.forEach { (name, label) ->
                     VoiceChoice(label = label, live = ReaderLook.speakEngine == name, palette = palette) {

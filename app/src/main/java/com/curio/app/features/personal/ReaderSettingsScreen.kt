@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -785,8 +787,16 @@ internal fun ReaderSettingsScreen(
                             val progress = state?.progress ?: 0f
                             val failure = state?.error
                             val failed = state?.status == NeuralVoiceDownloads.Status.Failed
-                            val busy = state?.status == NeuralVoiceDownloads.Status.Downloading ||
-                                state?.status == NeuralVoiceDownloads.Status.Extracting
+                            val downloading = state?.status == NeuralVoiceDownloads.Status.Downloading
+                            val unpacking = state?.status == NeuralVoiceDownloads.Status.Extracting
+                            val busy = downloading || unpacking
+                            // v465i — WHAT THE TRANSFER IS DOING, in the units a
+                            // member can act on: how much of the pack has arrived of
+                            // how much there is, and how long the rest should take.
+                            // A bare percentage could say neither.
+                            val readBytes = state?.bytesRead ?: 0L
+                            val totalBytes = state?.totalBytes ?: 0L
+                            val rate = state?.bytesPerSecond ?: 0L
                             // ⚠️ MEMOISED ON PURPOSE. `sizeOnDisk` walks the pack's
                             // whole directory tree — and a pack is espeak-ng-data, which
                             // is hundreds of files. Walking that on every recomposition
@@ -797,16 +807,40 @@ internal fun ReaderSettingsScreen(
                                 if (here) NeuralVoicePacks.sizeOnDisk(context, pack.id) else 0L
                             }
                             val action = when {
-                                state?.status == NeuralVoiceDownloads.Status.Extracting -> "Finishing"
-                                state?.status == NeuralVoiceDownloads.Status.Downloading ->
-                                    "${(progress * 100).toInt()}% \u00b7 Stop"
+                                unpacking -> "Unpacking"
+                                downloading -> "Stop"
                                 here -> "Remove"
+                                // v465i — a failure offers the door again by NAME,
+                                // because "Download" on a pack that failed reads as
+                                // though nothing had been tried.
+                                failed -> "Retry"
                                 else -> "Download"
                             }
                             val subtitle = when {
                                 here -> pack.voiceLabel + " \u00b7 " +
                                     NeuralVoicePacks.formatSize(onDisk) + " on this phone"
-                                busy -> pack.voiceLabel
+                                downloading -> {
+                                    val arrived = NeuralVoicePacks.formatSize(readBytes)
+                                    val all = if (totalBytes > 0L) {
+                                        NeuralVoicePacks.formatSize(totalBytes)
+                                    } else {
+                                        pack.sizeLabel
+                                    }
+                                    val left = if (rate > 0L && totalBytes > readBytes) {
+                                        (totalBytes - readBytes) / rate
+                                    } else {
+                                        0L
+                                    }
+                                    "$arrived of $all \u00b7 ${(progress * 100).toInt()}%" +
+                                        readerTimeLeft(left)
+                                }
+                                // The data is IN. Saying so is the whole point of
+                                // this line: unpacking a 305 MB archive is the long
+                                // part on a phone, and a member watching a bar that
+                                // no longer moves deserves to know the network is
+                                // not the reason.
+                                unpacking -> "The pack has arrived \u2014 unpacking it now. " +
+                                    "No data left to fetch."
                                 failed -> failure ?: "The download did not finish."
                                 else -> pack.voiceLabel + " \u00b7 " + pack.sizeLabel
                             }
@@ -869,6 +903,31 @@ internal fun ReaderSettingsScreen(
                                             style = MaterialTheme.typography.bodySmall,
                                             color = palette.ink.copy(alpha = 0.6f)
                                         )
+                                        // A real progress bar, drawn rather than
+                                        // borrowed: the row's own track and fill, so
+                                        // no Material3 version decides how this looks.
+                                        // Only the DOWNLOAD has a measurable fraction
+                                        // to draw — unpacking has none, and a bar that
+                                        // crept along by guesswork would be the
+                                        // inaccuracy this exists to remove.
+                                        if (downloading) {
+                                            Spacer(Modifier.height(7.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(4.dp)
+                                                    .clip(RoundedCornerShape(50))
+                                                    .background(palette.ink.copy(alpha = 0.12f))
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxHeight()
+                                                        .fillMaxWidth(progress.coerceIn(0f, 1f))
+                                                        .clip(RoundedCornerShape(50))
+                                                        .background(palette.accent)
+                                                )
+                                            }
+                                        }
                                     }
                                     Text(
                                         action,
@@ -1157,4 +1216,30 @@ private fun ReaderSettingsSection(label: String, palette: ReaderPalette) {
             color = palette.accent
         )
     )
+}
+
+/**
+ * v465i — "HOW LONG IS THIS GOING TO TAKE", said plainly.
+ *
+ * A member asked for exactly this ("how would i know when its gonna finish"): a
+ * bare percentage names a position but never a time, and on a 305 MB pack the
+ * time is the only number that decides whether to wait or to stop. The estimate
+ * is rounded UP and coarsened on purpose — a download row that promises "18s"
+ * and takes 40 has lied, while "about a minute" has not.
+ *
+ * Empty when there is nothing honest to say (no rate yet, or nothing left): the
+ * caller concatenates it, so a blank means the sentence simply ends there.
+ */
+private fun readerTimeLeft(seconds: Long): String = when {
+    seconds <= 0L -> ""
+    seconds < 20L -> " \u00b7 almost there"
+    seconds < 70L -> " \u00b7 about a minute left"
+    seconds < 3_600L -> {
+        val minutes = (seconds + 30L) / 60L
+        " \u00b7 about $minutes min left"
+    }
+    else -> {
+        val hours = (seconds + 1_800L) / 3_600L
+        " \u00b7 about $hours h left"
+    }
 }

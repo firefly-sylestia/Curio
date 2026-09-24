@@ -110,7 +110,26 @@ internal object EdgeVoice {
      * Never throws: a voice that cannot be reached must leave the reader exactly
      * where it was, which is what the immediate [onDone] guarantees.
      */
-    fun say(context: Context, text: String, speed: Float, voiceName: String, onDone: () -> Unit) {
+    fun say(
+        context: Context,
+        text: String,
+        speed: Float,
+        voiceName: String,
+        onDone: () -> Unit,
+        /**
+         * v465i — THE VOICE COULD NOT BE REACHED, AND SAYING SO IS THE POINT.
+         *
+         * This used to be `onDone()`, and that one line was the reported bug: the
+         * reader treats a finished utterance as "that sentence has been read", so
+         * a refused socket, a 403 from a rotated GEC version or a dead network
+         * advanced the cursor anyway — the read-along wash raced through the page
+         * in silence (member: *"edge tts wasnt working or something it was just
+         * going fast the highlight with no sound"*). A failure now says it is a
+         * failure, and the reader answers it by reading the sentence in the
+         * phone's own voice instead (see `sayAloud`).
+         */
+        onFail: () -> Unit
+    ) {
         if (text.isBlank()) { onDone(); return }
         stop()
         val mine = utterance
@@ -118,9 +137,17 @@ internal object EdgeVoice {
         val voice = voiceName.ifBlank { DEFAULT_VOICE }
         Thread {
             val clip = runCatching { fetch(app, text, speed, voice) }.getOrNull()
-            // A newer sentence, or a pause, arrived while this one was in flight.
-            if (clip == null || utterance != mine) { main.post { onDone() }; return@Thread }
-            main.post { play(clip, mine, onDone) }
+            // A NEWER SENTENCE, OR A PAUSE, ARRIVED WHILE THIS ONE WAS IN FLIGHT:
+            // nobody is waiting on this one any more — the run that superseded it
+            // owns the cursor — so it reports NOTHING. Reporting "done" here was
+            // the other half of the same bug: a stale clip's completion moved the
+            // reading on from a sentence the member had already left.
+            if (utterance != mine) return@Thread
+            if (clip == null) {
+                main.post { if (utterance == mine) onFail() }
+                return@Thread
+            }
+            main.post { play(clip, mine, onDone, onFail) }
         }.start()
     }
 
@@ -303,8 +330,10 @@ internal object EdgeVoice {
      * created on a worker thread, its completion listener would never fire and
      * the reader's driver would stall on that sentence for ever.
      */
-    private fun play(clip: File, mine: Int, onDone: () -> Unit) {
-        if (utterance != mine) { onDone(); return }
+    private fun play(clip: File, mine: Int, onDone: () -> Unit, onFail: () -> Unit) {
+        // Superseded between the fetch and the play: same rule as above — nothing
+        // to report, because nobody is waiting.
+        if (utterance != mine) return
         val built = runCatching {
             MediaPlayer().apply {
                 setAudioAttributes(
@@ -327,9 +356,10 @@ internal object EdgeVoice {
                     if (utterance == mine) onDone()
                 }
                 setOnErrorListener { _, _, _ ->
-                    // A failed clip still reports done: the reader must move on to
-                    // the next sentence rather than sit on a silent one.
-                    if (utterance == mine) onDone()
+                    // A clip that failed to PLAY is a failure like any other: the
+                    // reader falls back to the phone's voice for this sentence
+                    // rather than counting a silent one as read (v465i).
+                    if (utterance == mine) onFail()
                     true
                 }
                 prepareAsync()

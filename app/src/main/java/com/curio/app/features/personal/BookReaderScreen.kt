@@ -192,6 +192,7 @@ import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
 import com.curio.app.ui.theme.isCurioDarkTheme
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1167,11 +1168,67 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         null
     }
     val readingAloud = voiceOn && !voicePaused
+    // ── v465i — AND TAKING THE READING BACK ─────────────────────────────
+    //
+    // The other half of the handover (see the dispose below): a reading of THIS
+    // book that is going on without its page is picked up here — at the sentence
+    // the voice has reached — so reopening a book that is being read aloud
+    // continues it in place, with the wash back on the right line, instead of
+    // starting over or leaving a hidden second driver speaking.
+    LaunchedEffect(bookId, document) {
+        val taken = ReadAloudContinuation.takeOver(bookId)
+        if (taken != null) {
+            speakCursor = taken.index
+            voiceOn = true
+            voicePaused = !taken.playing
+            ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
+        }
+    }
     // The engine is a service binding, so it is brought up when the member ASKS for
     // the voice and released the moment the reader closes — never merely because a
     // book was opened (see [ReaderSpeaker.prepare]).
     DisposableEffect(bookId, document) {
         onDispose {
+            // ── v465i — LEAVING THE PAGE IS NOT STOPPING THE VOICE ─────────
+            //
+            // The driver lives in this composition, so popping the reader used to
+            // end the reading with it — the member's own report was "exiting
+            // cancels it", and the background-listening switch could not help,
+            // because there was nothing left for the service to keep alive. A live
+            // session is HANDED OVER instead: [ReadAloudContinuation] reads the
+            // remaining sentences, owns the notification's four buttons, and gives
+            // the reading back — at the sentence the voice has reached — when this
+            // book's page is opened again.
+            val handingOver = voiceOn && AppPreferences.readAloudBackgroundEnabledState
+            if (handingOver) {
+                val textAt: suspend (Int) -> String? = when (content) {
+                    is ReaderContent.Text -> { index -> sentences.getOrNull(index)?.text }
+                    is ReaderContent.Pages -> { index ->
+                        runCatching { extractPdfPageText(context, document, index) }
+                            .getOrNull()?.text
+                    }
+                    null -> { _ -> null }
+                }
+                val pieces = when (val shape = content) {
+                    is ReaderContent.Text -> sentences.size
+                    is ReaderContent.Pages -> shape.pageCount
+                    null -> 0
+                }
+                ReadAloudContinuation.handOff(
+                    context = context,
+                    bookId = bookId,
+                    title = book?.title.orEmpty(),
+                    count = pieces,
+                    from = speakCursor,
+                    playing = !voicePaused,
+                    textAt = textAt
+                )
+                return@onDispose
+            }
+            // Nothing to carry on with (or background listening is off): the
+            // reading goes with the page, exactly as it always did. A handover of
+            // ANOTHER book ends here too — one page owns the voice.
+            ReadAloudContinuation.end()
             ReaderSpeaker.release()
             // v465c — a downloaded pack's model is the other thing that must not
             // outlive the reader: it holds onnxruntime's memory and, for Kokoro,
@@ -1201,6 +1258,17 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
+        // v465i — a fresh start is a fresh attempt at the Edge experiment: the
+        // refusal remembered during the last session must not outlive it.
+        ReadAloudSession.edgeUnavailable = false
+        // ── ONE VOICE, AND IT IS THIS PAGE'S ────────────────────────────
+        //
+        // A reading handed over from ANOTHER book (see [ReadAloudContinuation])
+        // keeps going while this page is open — that is the point of the handover.
+        // But the moment this page starts a voice of its own, the other one has to
+        // go: two drivers speaking over each other is the one thing the whole
+        // single-cursor design exists to prevent.
+        if (!voiceOn) ReadAloudContinuation.end()
         Unit
     }
 
@@ -1233,6 +1301,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
+        if (!voiceOn) ReadAloudContinuation.end()
         ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
@@ -1270,6 +1339,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
             null -> return
         }
+        if (!voiceOn) ReadAloudContinuation.end()
         ReaderSpeaker.prepare(context, ReaderEngine.packageFor(ReaderLook.speakEngine))
         voiceOn = true
         voicePaused = false
@@ -1364,22 +1434,36 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 // sentence in the block already on screen must not scroll the page
                 // out from under the member's eye.
                 if (sentence.block != liveTextBlock) jumpToBlock(sentence.block)
-                sayAloud(
-                    context = context,
-                    text = sentence.text,
-                    speed = ReaderLook.speakSpeed
-                ) {
-                    // THE END OF THE BOOK IS THE ONLY THING THAT STOPS IT. There is
-                    // no next sentence to move to, and an engine cannot be asked to
-                    // speak nothing — so the session closes and the last mark stays,
-                    // which is where a reader would leave the page anyway.
-                    val next = from + 1
-                    if (next >= list.size) {
-                        voiceOn = false
-                        voicePaused = false
-                    } else {
-                        speakCursor = next
-                    }
+                // ── v465i — THE DRIVER WAITS, AND IT DOES NOT WAIT FOR EVER ──
+                //
+                // This used to be fire-and-forget: the sentence was handed to the
+                // engine and a callback moved the cursor. Two things were wrong with
+                // that. An engine that never reported back left the reading frozen on
+                // one mark with no error anywhere (the member's *"the 2nd one wasnt
+                // playing"*), and a callback that landed while the last words were
+                // still sounding had the NEXT sentence flush exactly the words before
+                // the sentence's own comma or full stop (*"i was skipping comma and
+                // full stop words"*). So the effect body now AWAITS the sentence, and
+                // a sentence nobody reports on within [ALOUD_STALL_MS] ends the
+                // session where it stands instead of hanging on it.
+                val done = CompletableDeferred<Unit>()
+                sayAloud(context, sentence.text, ReaderLook.speakSpeed) { done.complete(Unit) }
+                if (withTimeoutOrNull(ALOUD_STALL_MS) { done.await() } == null) {
+                    stopVoice()
+                    return@LaunchedEffect
+                }
+                // The grace, so the engine's own tail is not cut by the next flush.
+                delay(ALOUD_TAIL_GRACE_MS)
+                // THE END OF THE BOOK IS THE ONLY THING THAT STOPS IT. There is
+                // no next sentence to move to, and an engine cannot be asked to
+                // speak nothing — so the session closes and the last mark stays,
+                // which is where a reader would leave the page anyway.
+                val next = from + 1
+                if (next >= list.size) {
+                    voiceOn = false
+                    voicePaused = false
+                } else {
+                    speakCursor = next
                 }
             }
 
@@ -1405,17 +1489,21 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     }
                 } else {
                     jumpToPage(page)
-                    sayAloud(
-                        context = context,
-                        text = said,
-                        speed = ReaderLook.speakSpeed
-                    ) {
-                        if (after >= loaded.pageCount) {
-                            voiceOn = false
-                            voicePaused = false
-                        } else {
-                            speakCursor = after
-                        }
+                    // v465i — the same wait, the same timeout and the same grace a
+                    // sentence gets: a page's last words are words too, and a page
+                    // that never reports back must not freeze the reading either.
+                    val donePage = CompletableDeferred<Unit>()
+                    sayAloud(context, said, ReaderLook.speakSpeed) { donePage.complete(Unit) }
+                    if (withTimeoutOrNull(ALOUD_STALL_MS) { donePage.await() } == null) {
+                        stopVoice()
+                        return@LaunchedEffect
+                    }
+                    delay(ALOUD_TAIL_GRACE_MS)
+                    if (after >= loaded.pageCount) {
+                        voiceOn = false
+                        voicePaused = false
+                    } else {
+                        speakCursor = after
                     }
                 }
             }
@@ -2173,6 +2261,10 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             palette = palette,
             onDismiss = { voiceSheet = false },
             onChanged = {
+                // v465i — a voice chosen by hand deserves a fresh attempt, the Edge
+                // experiment included: a refusal earlier in the session is forgotten
+                // the moment the member picks a voice themselves.
+                ReadAloudSession.edgeUnavailable = false
                 if (voiceOn && !voicePaused) {
                     // Stop first: the old voice's sentence is already in flight, and
                     // for the system engine that is a queue that would finish before
@@ -7878,7 +7970,7 @@ internal object ReaderEngine {
  * before the button responds would read as a dead control. [NeuralSpeaker.prepare]
  * is idempotent, so only the first sentence of a session pays for it.
  */
-private suspend fun sayAloud(
+internal suspend fun sayAloud(
     context: Context,
     text: String,
     speed: Float,
@@ -7893,8 +7985,25 @@ private suspend fun sayAloud(
     // once: an Edge engine with the flag off simply falls through to the tail below
     // and reads in the phone's own voice, rather than opening a socket to an
     // endpoint the member just turned away from.
-    if (ReaderLook.speakEngine == ReaderEngine.EDGE && AppPreferences.edgeVoiceEnabledState) {
-        EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone)
+    if (ReaderLook.speakEngine == ReaderEngine.EDGE && AppPreferences.edgeVoiceEnabledState &&
+        !ReadAloudSession.edgeUnavailable
+    ) {
+        EdgeVoice.say(context, text, speed, ReaderLook.speakVoice, onDone) {
+            // ── v465i — A REFUSED SOCKET IS NOT A READ SENTENCE ─────────
+            //
+            // The experiment is undocumented (see [EdgeVoice]): a rotated GEC
+            // version, a 403 or a dead network is its normal weather. It used to
+            // report "done" anyway, so the page raced through the book in silence.
+            // Now the first refusal ends Edge for this reading and the SAME
+            // sentence is read in the phone's own voice, so the member hears a
+            // voice rather than a page of moving highlight.
+            ReadAloudSession.edgeUnavailable = true
+            ReaderSpeaker.prepare(context, ReaderEngine.PHONE)
+            // An empty voice name because the fallback is the PHONE's own voice —
+            // a stored name here is an endpoint id (`en-US-AriaNeural`), which no
+            // system engine has ever heard of.
+            ReaderSpeaker.say(text, speed, "", onDone)
+        }
         return
     }
     if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
