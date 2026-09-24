@@ -6,7 +6,29 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §63 — the long stop at a full stop, the words before a full stop, and the pack that says nothing at all (v468; DONE, pushed)
+## 0. THE CURRENT REQUEST — §64 — the landscape pass resumed, a warm first paragraph, pack health, and a page for the voices (v468; PLAN — only the CI red is landed so far)
+
+> continue landspace, and warm first paragraph, and show pack helath, and a test look if its running, and for voivce pack down load and all make its own page
+
+**⚠️ FIVE ASKS, AND ONE OF THEM WAS ANSWERED BY THE RUN ITSELF: CI WAS RED, TWICE, AND IT WAS MY OWN IMPORT.** Both pushes after §63 died in under three minutes — a compile error, not lint. The log named it exactly:
+
+```
+e: CurioGlassToolbar.kt:54:25 Unresolved reference 'floatingPillHeader'.
+e: CurioGlassToolbar.kt:117:9 Unresolved reference 'floatingPillHeader'.
+```
+
+`floatingPillHeader()` is a **member of the `CurioLayout` object**, and the file imported it as if it were a top-level function — so the failure was at the IMPORT, and the four jobs that went red did so for one character of form. The object is imported now and its member called through it (`de2c3b28`, pushed). **The lesson worth keeping: when a new symbol is a member of an object, import the OBJECT and call through it — and grep how the codebase already reads that object rather than inventing a form.** Note what the same log proved: **every §63 edit compiled clean** (NeuralSpeaker, EdgeVoice, the reader, the continuation, the sheet, the session) — the only errors in the tree were that one import.
+
+### The four that are not landed, in the order they should be taken
+
+1. **THE LANDSCAPE PASS, RESUMED — AND IT IS THE BIG ONE.** The foundation is in (§62: `CurioLayout`, the floating pill, the app-wide `CurioGlassToolbar`, the chevron sweep). Still on today's layout in a compact window: **Spin** (the member's own spec — *"the spin category and filter button becomes 3 floating buttons rounded small buttons, the deck becomes one small view"*; Spin already has exactly three actions in its bottom row — `Categories · Filter · Shuffle all`), then **Cabinet, Home and Settings**, whose heroes are the torn banner and `CurioGlassToolbarMorph` — neither of which consults `CurioLayout` yet. **The morph bar is the honest next step**: it is Home's and Profile's, it is a content-height bar by a v452 decision the member made deliberately, so a compact form there must be asked for (`CurioLayout.isCompact()`), never assumed.
+2. **WARM THE FIRST PARAGRAPH — ONE SLOT IS NOT ENOUGH.** §63 gave the online voice a one-clip head start, so sentences 2..n no longer pay a full round trip — but sentence 1 always does, and the member asked for *"the first paragraph"*. That means **a small multi-slot cache** (three clips, each with its own file slot and the same `voice|speed|text` cue) plus a prefetch of `list[0..2]` at the moment play is tapped. The single-slot design, its keying and the copy-into-the-playing-slot rule are all in `EdgeVoice` and are what the multi-slot version must keep.
+3. **PACK HEALTH — AND IT BELONGS ON THE PAGE IN (4).** Today a pack that cannot speak is invisible until a reading silently falls back (the §63 fix tells the member *while reading*, which is late). The honest shape: a **Test** action per pack that runs `NeuralSpeaker.prepare` + `speakerCount()` off the main thread and reports "Loaded · 11 voices" or "Could not be loaded" with the logged reason — i.e. the same probe the reader does, made visible before it matters.
+4. **THE VOICES GET THEIR OWN PAGE.** The member: *"for voice pack download and all make its own page"*. The pack rows (download / stop / remove / progress / size on disk) live inside Reading settings (`ReaderSettingsScreen`, the pack card) and should move to a dedicated screen with a single door row left behind — which is also where (3) belongs, and where the narrator list already belongs. **This is a REPLACEMENT of existing UI, so it ships with the door and nothing is lost**: the settings row becomes "Reading voices →" and every control it had moves intact.
+
+---
+
+## 0 (previous). §63 — the long stop at a full stop, the words before a full stop, and the pack that says nothing at all (v468; DONE, pushed)
 
 > now the edge tts stops way too long at full stops maybe sentence by senetence or is it playing online and that show much time it takes to load, fix the loading and pre load the next paragraph so its not slow like rn. and still piper lessac works in custom voice and also the lessac is skipping the words which are before full stop and not taking a break please fix those. and kokoro doesnt work at all, like totally it doesnt work.
 
