@@ -1419,6 +1419,38 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         if (voiceOn) ReadAloudService.sync(context) else ReadAloudService.stop(context)
     }
 
+    // ── v468 — WARM THE PARAGRAPH THE READING IS ABOUT TO ENTER ─────────
+    // The member: *"and warm first paragraph"*. The per-sentence head start (see
+    // `sayAloud`'s `nextText`) cannot cover the START of a reading — the first
+    // sentence has nothing fetched before it because nothing has played yet, so the
+    // opening words of every reading were the one place it still stopped. Handing
+    // the next few sentences over before the first one speaks is the whole fix.
+    //
+    // ⚠️ KEYED ON THE EPOCH AND THE STATE, NEVER ON [speakCursor]. This runs when a
+    // reading starts or is re-aimed, not once per sentence — a `warm` per sentence
+    // would move `EdgeVoice`'s generation every single line and throw away the very
+    // head start it exists to protect. A jump or a resume re-runs it, which is
+    // right: the reading has entered a different paragraph.
+    LaunchedEffect(voiceOn, voicePaused, speakEpoch) {
+        if (!voiceOn || voicePaused) return@LaunchedEffect
+        if (content !is ReaderContent.Text) return@LaunchedEffect
+        // The same three conditions `sayAloud` checks at the moment of speaking: a
+        // reading that will not reach the online voice must not fetch for it.
+        if (ReaderLook.speakEngine != ReaderEngine.EDGE ||
+            !AppPreferences.edgeVoiceEnabledState ||
+            ReadAloudSession.edgeUnavailable
+        ) return@LaunchedEffect
+        val list = sentences
+        if (list.isEmpty()) return@LaunchedEffect
+        val from = speakCursor.coerceIn(0, list.size - 1)
+        EdgeVoice.warm(
+            context,
+            list.drop(from + 1).take(3).map { it.text },
+            ReaderLook.speakSpeed,
+            ReaderLook.speakVoice
+        )
+    }
+
     LaunchedEffect(voiceOn, voicePaused, speakCursor, speakEpoch) {
         if (!voiceOn || voicePaused) return@LaunchedEffect
         when (val loaded = content) {

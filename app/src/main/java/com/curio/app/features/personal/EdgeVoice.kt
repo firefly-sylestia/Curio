@@ -168,16 +168,37 @@ internal object EdgeVoice {
      * makes them safe: a clip belongs to `voice|speed|text`, so a change of voice, of
      * speed or of sentence simply misses rather than playing the wrong sentence in the
      * right voice — which is the one way a cache like this can lie to a member.
+     *
+     * ── v468 — ONE CLIP BECAME A PARAGRAPH ([PREFETCH_SLOTS]) ─────────────
+     *
+     * A single slot fixes the pause at every full stop but does nothing for the one
+     * place a reading still stutters: the FIRST sentence, which has nothing fetched
+     * before it because nothing has played yet. So the cache is a MAP keyed by the same
+     * cue — [warm] fills it with the opening paragraph when a reading starts, [say]
+     * drains it as the reading walks forward, and a sentence that is not in it is simply
+     * fetched as before. A map is what makes several clips safe at once: each cue names
+     * its own slot file, so two saved sentences can never be confused for each other.
      */
     @Volatile
-    private var readyClip: File? = null
+    private var readyClips: Map<String, File> = emptyMap()
 
+    /** The cues being fetched right now, so one promise is never paid for twice. */
     @Volatile
-    private var readyKey: String? = null
+    private var fetchingKeys: Set<String> = emptySet()
 
-    /** The cue being fetched right now, so one promise is never paid for twice. */
+    /**
+     * Bumped by [warm] — the one place a reading's position is known to move.
+     *
+     * A prefetch outlives the sentence that asked for it, so its result can arrive after
+     * the member has paused, skipped or moved on — and publishing it then would leave a
+     * stale clip keyed to a sentence the reading has left behind. Each prefetch carries
+     * the generation it started in and publishes only if that generation is still the
+     * current one, which is a cheaper and more honest answer than cancelling workers that
+     * are already mid-socket. Written from the main thread only ([say]/[warm]), read from
+     * worker threads.
+     */
     @Volatile
-    private var fetchingKey: String? = null
+    private var prefetchGen = 0
 
     /** The cue a clip belongs to: who is reading, how fast, and which words. */
     private fun cue(text: String, voice: String, speed: Float): String = "$voice|$speed|$text"
@@ -198,17 +219,38 @@ internal object EdgeVoice {
     /** Below this a difference is ordinary network jitter, not a wrong clock. */
     private const val SKEW_FLOOR_MS = 30_000L
 
+    /**
+     * ── v468 — HOW MANY SENTENCES ONE HEAD START COVERS ───────────────────
+     *
+     * Three, because the member asked to *"pre load the next paragraph"* and a
+     * paragraph in this reader is one to three sentences: three slots are always
+     * enough to have the paragraph after the current one in hand, and small enough
+     * that a phone never holds more than a few hundred kilobytes of audio nobody
+     * has asked for yet. [warm] fills them; [say] drains them one at a time.
+     */
+    private const val PREFETCH_SLOTS = 3
+
+    /** The slot the sentence being SPOKEN is written to — never an index in [PREFETCH_SLOTS]. */
+    private const val PLAYING_SLOT = -1
+
     /** Bumped per utterance so a late completion cannot resume a newer one. */
     @Volatile private var utterance = 0
 
     /**
-     * Where a clip is written. TWO SLOTS, because one is not enough any more (v468):
-     * the sentence being PLAYED holds one file and the sentence being FETCHED holds the
-     * other, and they must never be the same file or a prefetch would overwrite the
-     * audio coming out of the speaker.
+     * Where a clip is written. ONE PLAYING SLOT PLUS [PREFETCH_SLOTS] AHEAD (v468).
+     *
+     * The sentence coming out of the speaker owns the playing slot, and each prefetched
+     * sentence owns a numbered slot of its own — so a prefetch can never write the file
+     * `MediaPlayer` is reading, and two saved sentences can never land on each other.
      */
-    private fun clipFile(context: Context, next: Boolean = false): File =
-        File(context.cacheDir, if (next) "edge-voice-next.mp3" else "edge-voice.mp3")
+    private fun clipFile(context: Context, slot: Int = PLAYING_SLOT, gen: Int = 0): File = File(
+        context.cacheDir,
+        // ⚠️ THE GENERATION IS IN THE NAME, and that is what makes a stale prefetch
+        // harmless rather than merely unpublishable: a fetch started in an older
+        // generation writes its OWN files and cannot corrupt the slots a newer
+        // [warm] is filling, even while both are mid-socket.
+        if (slot == PLAYING_SLOT) "edge-voice.mp3" else "edge-voice-next-$gen-$slot.mp3"
+    )
 
     /**
      * Says [text] in [voiceName], calling [onDone] on the MAIN thread — after the
@@ -263,7 +305,7 @@ internal object EdgeVoice {
      *
      * Called by `sayAloud` with the text the reader is about to want next, and does
      * nothing at all unless there IS a next sentence to fetch. Runs on its own thread and
-     * publishes into [readyClip] only if nothing newer was asked for meanwhile, so two
+     * publishes into [readyClips] only if its generation is still current, so two
      * promises can never race each other into the wrong audio.
      *
      * **A failure is remembered as an empty slot, not as an error.** The prefetched clip
@@ -277,24 +319,57 @@ internal object EdgeVoice {
      * prefetch that happens to be in flight. That is a wasted head start on one sentence
      * and nothing more: the reading itself never depends on it.
      */
-    fun prefetch(context: Context, text: String, speed: Float, voiceName: String) {
+    fun prefetch(context: Context, text: String, speed: Float, voiceName: String, slot: Int = 0) {
         if (text.isBlank()) return
+        if (slot < 0 || slot >= PREFETCH_SLOTS) return
         val app = context.applicationContext
         val voice = voiceName.ifBlank { DEFAULT_VOICE }
         val key = cue(text, voice, speed)
-        if (readyKey == key && readyClip?.isFile == true) return
-        if (fetchingKey == key) return
-        fetchingKey = key
+        if (readyClips[key]?.isFile == true) return
+        if (fetchingKeys.contains(key)) return
+        // ⚠️ CLAIMED ON THE CALLING THREAD, BEFORE ITS WORKER EXISTS. A [warm] and
+        // a `sayAloud`'s own `nextText` often want the SAME sentence at the same
+        // moment, and if both passed this gate they would both write it — this is
+        // the line that makes the second one a no-op instead.
+        fetchingKeys = fetchingKeys + key
+        val gen = prefetchGen
         Thread {
-            val clip = runCatching { fetch(app, text, speed, voice, next = true) }.getOrNull()
-            // Only publish when this is still the cue that was wanted: a newer
-            // prefetch supersedes this one, and its own thread owns the slot.
-            if (fetchingKey == key) {
-                readyClip = clip?.takeIf { it.isFile }
-                readyKey = key
-                fetchingKey = null
+            if (prefetchGen != gen) {
+                fetchingKeys = fetchingKeys - key
+                return@Thread
             }
+            val clip = runCatching { fetch(app, text, speed, voice, slot, gen) }.getOrNull()
+            // A GENERATION THAT IS NO LONGER CURRENT IS DROPPED (see [prefetchGen]):
+            // the reading has moved, so this sentence is not the one wanted now.
+            if (prefetchGen == gen && clip != null && clip.isFile) {
+                readyClips = readyClips + (key to clip)
+            }
+            fetchingKeys = fetchingKeys - key
         }.start()
+    }
+
+    /**
+     * ── v468 — WARM THE FIRST PARAGRAPH ──────────────────────────────────
+     *
+     * The member, after the first head start landed: *"and warm first paragraph"*.
+     * [prefetch] alone can never do that, because it always knows only the sentence
+     * after the one playing — so the FIRST sentence of a reading still paid a full
+     * round trip, and the first words of a book were the one place the reading still
+     * stuttered.
+     *
+     * So the driver hands over the next few sentences at once when the reading starts
+     * (and again after a jump), and this fills a slot for each of them. A sentence
+     * already in hand is skipped by [prefetch] itself, so calling this twice over
+     * overlapping text costs nothing.
+     *
+     * ⚠️ The generation moves here, which is what frees the new warm's slots: any
+     * fetch still carrying the old one writes its own files and is dropped on arrival.
+     */
+    fun warm(context: Context, texts: List<String>, speed: Float, voiceName: String) {
+        prefetchGen += 1
+        texts.take(PREFETCH_SLOTS).forEachIndexed { index, next ->
+            prefetch(context, next, speed, voiceName, slot = index)
+        }
     }
 
     /**
@@ -320,15 +395,21 @@ internal object EdgeVoice {
 
     /** Takes the prefetched clip when it belongs to this cue, and only then. */
     private fun takeReady(text: String, voice: String, speed: Float): File? {
-        if (readyKey != cue(text, voice, speed)) return null
-        val file = readyClip
-        readyKey = null
-        readyClip = null
-        return file?.takeIf { it.isFile }
+        val key = cue(text, voice, speed)
+        val file = readyClips[key] ?: return null
+        // Removed on TAKE, so one saved clip is never played twice: the reading
+        // walks forward, and the sentence behind it is not coming back.
+        readyClips = readyClips - key
+        return file.takeIf { it.isFile }
     }
 
     /** Stops whatever is being said. Safe to call when nothing is. */
     fun stop() {
+        // ⚠️ NO [prefetchGen] BUMP HERE, DELIBERATELY. `say` stops the previous
+        // utterance before EVERY sentence, so a bump in this method would
+        // invalidate the prefetch `sayAloud` had just started for the next line —
+        // the head start would be thrown away on every single sentence, which is
+        // precisely the pause this cache exists to remove.
         utterance += 1
         runCatching { socket?.cancel() }
         socket = null
@@ -351,10 +432,15 @@ internal object EdgeVoice {
         text: String,
         speed: Float,
         voice: String,
-        /** True for a PREFETCH: writes the other slot, never the one being played. */
-        next: Boolean = false
+        /**
+         * Which slot to write: [PLAYING_SLOT] for the sentence being spoken, or a
+         * prefetch slot 0..[PREFETCH_SLOTS]-1 — never the one being played.
+         */
+        slot: Int = PLAYING_SLOT,
+        /** The generation that asked for this fetch — see [clipFile] and [prefetchGen]. */
+        gen: Int = 0
     ): File? {
-        val clip = clipFile(context, next)
+        val clip = clipFile(context, slot, gen)
         if (clip.exists()) clip.delete()
         var turn = fetchOnce(text, speed, voice)
         // ── ONE RETRY, AND ONLY EVER BECAUSE OF THE CLOCK (v465j) ─────────
