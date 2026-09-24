@@ -82,6 +82,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.TourController
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.markCompleted
 import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioDialogShape
@@ -1761,39 +1762,65 @@ composable(CurioRoutes.COMMUNITY) {
                         Text("Yes, cancel session", color = MaterialTheme.colorScheme.error)
                     }
                 } else {
-                    TextButton(onClick = {
-                        showDoneDialog = false
-                        confirmSessionCancel = false
-                        // v17/v27 — hand the session's write package (elapsed
-                        // time + shared note + screenshots) to the capture page
-                        // before clearing (the save screen can't read it once
-                        // the session is gone).
-                        ExploreSessionStore.handoffWriteSession(
-                            context,
-                            activeSession.categoryId,
-                            activeSession.topicName,
-                            activeSession.elapsedMillis(),
-                            note = activeSession.note,
-                            screenshots = activeSession.screenshotPaths
-                        )
-                        ExploreSessionStore.clearSession(context)
-                        ExploreReminderScheduler.cancel(context)
-                        ExploreSessionService.stop(context)
-                        // Anchor HOME beneath the entry page so Back returns to
-                        // the app instead of exiting from a deep-opened page.
-                        val routePrefix = currentRoute?.substringBefore("/")
-                        if (routePrefix != null &&
-                            routePrefix != CurioRoutes.HOME &&
-                            routePrefix !in CurioRoutes.bootGatePrefixes
-                        ) {
-                            navController.popBackStack(CurioRoutes.HOME, inclusive = false)
-                        }
-                        navController.navigate(
-                            CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
-                        ) { launchSingleTop = true }
-                    },
-                        colors = curioDialogActionButtonColors()
-                    ) { Text("Express yourself") }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // ── v470 — "COMPLETED" IN THE BACK-TO-APP DIALOG ──
+                        // The member: *"when going back show a completed in the dialog
+                        // box"*. This is the dialog they come back to, so it now
+                        // offers the answer in their own word: the topic is marked
+                        // completed (the record Topic History's Completed list
+                        // reads, plus the done mark) and the session ends quietly —
+                        // no write-it-down page. "Express yourself" is still the door
+                        // for a member who wants to write, and it completes the topic
+                        // too, because finishing an explore IS completing it.
+                        TextButton(
+                            onClick = {
+                                showDoneDialog = false
+                                confirmSessionCancel = false
+                                activeSession.markCompleted(context)
+                                ExploreSessionStore.clearSession(context)
+                                ExploreReminderScheduler.cancel(context)
+                                ExploreSessionService.stop(context)
+                                activeSession.let { dialogDismissedFor = it.startMillis }
+                            },
+                            colors = curioDialogActionButtonColors()
+                        ) { Text("Completed") }
+                        TextButton(onClick = {
+                            showDoneDialog = false
+                            confirmSessionCancel = false
+                            // v17/v27 — hand the session's write package (elapsed
+                            // time + shared note + screenshots) to the capture page
+                            // before clearing (the save screen can't read it once
+                            // the session is gone).
+                            ExploreSessionStore.handoffWriteSession(
+                                context,
+                                activeSession.categoryId,
+                                activeSession.topicName,
+                                activeSession.elapsedMillis(),
+                                note = activeSession.note,
+                                screenshots = activeSession.screenshotPaths
+                            )
+                            // v470 — writing it down means it is finished: the same
+                            // completed mark "Completed" writes.
+                            activeSession.markCompleted(context)
+                            ExploreSessionStore.clearSession(context)
+                            ExploreReminderScheduler.cancel(context)
+                            ExploreSessionService.stop(context)
+                            // Anchor HOME beneath the entry page so Back returns to
+                            // the app instead of exiting from a deep-opened page.
+                            val routePrefix = currentRoute?.substringBefore("/")
+                            if (routePrefix != null &&
+                                routePrefix != CurioRoutes.HOME &&
+                                routePrefix !in CurioRoutes.bootGatePrefixes
+                            ) {
+                                navController.popBackStack(CurioRoutes.HOME, inclusive = false)
+                            }
+                            navController.navigate(
+                                CurioRoutes.captureFor(activeSession.categoryId.routeSlug, activeSession.topicName)
+                            ) { launchSingleTop = true }
+                        },
+                            colors = curioDialogActionButtonColors()
+                        ) { Text("Express yourself") }
+                    }
                 }
             },
             dismissButton = {

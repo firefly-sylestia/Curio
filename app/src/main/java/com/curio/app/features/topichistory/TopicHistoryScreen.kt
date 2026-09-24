@@ -113,9 +113,12 @@ fun TopicHistoryScreen(navController: NavController) {
     // v6.7 — pinned-for-later topics from the Topic Reveal screen, listed
     // above the day-grouped capture history so the user can revisit them.
     val pinnedTopics = AppPreferences.pinnedTopicsState
-    // v21 — favorited topics (Topic Reveal's favorite button),
+    // v21 — COMPLETED topics (Topic Reveal's Completed star; the record is a
+    // sentiment, see AppPreferences.SENTIMENT_LIKE),
     // resolved to catalog topics so the rows show real topic names. Reactive
     // off the sentiments state, so a vote flips the section instantly.
+    // v470 — the section is titled "Completed" and the star writes the done
+    // mark with it, so a topic finished here is finished everywhere.
     // Topic names live in the JSON catalogs, so resolution is suspend:
     // produceState re-runs whenever the sentiments map is replaced.
     // Null until the first resolution completes, so the empty state never
@@ -196,7 +199,7 @@ fun TopicHistoryScreen(navController: NavController) {
         if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
             CurioGlassToolbar(
                 title = "Topic History",
-                subtitle = "Favorites & every spin you've explored",
+                subtitle = "Completed & every spin you've explored",
                 onBack = { navController.popBackStack() }
             )
         } else {
@@ -283,12 +286,12 @@ fun TopicHistoryScreen(navController: NavController) {
                     ),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // ── Favorited topics — the Topic Reveal favorite button ──
+                    // ── Completed topics — the Topic Reveal Completed star ──
                     if (filteredFavorited.isNotEmpty()) {
                         item(key = "favorited_header") {
                             HistorySectionHeader(
                                 glyph = CurioIcons.Star,
-                                label = "Favorite",
+                                label = "Completed",
                                 count = filteredFavorited.size,
                                 tint = curioAccentInk()
                             )
@@ -529,7 +532,7 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                             maxLines = 1
                         )
                         Text(
-                            "Favorites & every spin you've explored",
+                            "Completed & every spin you've explored",
                             style = MaterialTheme.typography.labelMedium,
                             color = ink.copy(alpha = 0.82f),
                             maxLines = 1
@@ -696,7 +699,7 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
 }
 
 
-// ── Section header for the sentiment lists (Favorite) ─────────────
+// ── Section header for the sentiment lists (Completed) ────────────
 
 @Composable
 private fun HistorySectionHeader(

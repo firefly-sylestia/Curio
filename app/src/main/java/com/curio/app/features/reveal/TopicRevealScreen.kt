@@ -789,7 +789,11 @@ fun TopicRevealScreen(
             durationMinutes = action.durationMinutes,
             instruction = action.instruction,
             searchUrl = searchUrl,
-            startMillis = System.currentTimeMillis()
+            startMillis = System.currentTimeMillis(),
+            // v470 — the id the explore's own Completed action needs (see
+            // ExploreSession.topicId): a topic resolved here, so no later
+            // catalog lookup is required to mark it completed.
+            topicId = topic.id
         )
         // Starting a new explore while another session is running would
         // silently discard it — ask first instead (Save for later / Explore
@@ -1266,11 +1270,24 @@ fun TopicRevealScreen(
                             container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
                             onShare = { showShareSheet = true },
                             onFavorite = {
+                                // ── v470 — THE STAR IS SCORED IN BOTH BOOKS ────
+                                // The pill's own word is "Completed", and Topic
+                                // History now files it under Completed — but the
+                                // sentiment alone left the topic unfinished
+                                // everywhere else: the deck still dealt it, and a
+                                // later back-out re-listed it as unexplored (see
+                                // ExploreSessionStore.recordUnexplored). The done
+                                // mark goes with the star and is cleared with it;
+                                // [setCompleted] touches the done set alone, so
+                                // the explored recents entry is never lost.
+                                val completing = sentiment != AppPreferences.SENTIMENT_LIKE
                                 AppPreferences.setTopicSentiment(
                                     context, cat.id, floatingTopic.id,
-                                    if (sentiment == AppPreferences.SENTIMENT_LIKE)
-                                        AppPreferences.SENTIMENT_NONE
-                                    else AppPreferences.SENTIMENT_LIKE
+                                    if (completing) AppPreferences.SENTIMENT_LIKE
+                                    else AppPreferences.SENTIMENT_NONE
+                                )
+                                ExploreSessionStore.setCompleted(
+                                    context, cat.id, floatingTopic.name, completing
                                 )
                             }
                         )

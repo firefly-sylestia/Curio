@@ -44,7 +44,21 @@ data class ExploreSession(
     // finish flow hands them off to the write session, and the save page
     // attaches them to the saved entry.
     val note: String = "",
-    val screenshotPaths: List<String> = emptyList()
+    val screenshotPaths: List<String> = emptyList(),
+    /**
+     * ── v470 — THE TOPIC'S OWN CATALOG ID ─────────────────────────────────
+     *
+     * "Completed" is a SENTIMENT keyed by `CATEGORY:topicId` (see
+     * `AppPreferences.setTopicSentiment`), and a session only ever carried the
+     * topic's NAME — so a reading finished from the shade, the reminder or the
+     * back-to-app dialog had no way to write the record it was promising into
+     * [com.curio.app.features.topichistory.TopicHistoryScreen]'s Completed list.
+     * The reveal resolves the topic before it starts a session, so the id rides
+     * along here and every teardown path can mark it completed with no catalog
+     * lookup. Legacy sessions (and queued ones written before this field) decode
+     * to `""` — see [markCompleted], which treats a blank id as "nothing to do".
+     */
+    val topicId: String = ""
 ) {
     /**
      * Active explore time — frozen while paused. [now] defaults to the
@@ -634,6 +648,21 @@ object ExploreSessionStore {
         recordExplored(context, categoryId, topicName)
     }
 
+    /**
+     * ── v470 — COMPLETED, WITHOUT ROLLING BACK THE RECENTS ENTRY ──────────
+     *
+     * [unmarkDone] is the "not watched after all" door: it drops the done mark
+     * AND the explored recents entry together, which is right when the member is
+     * taking back an explore and wrong when they are only clearing the Reveal's
+     * Completed star — the topic really was explored, and Home's recents should
+     * keep saying so. This touches the done set alone, so the star and the done
+     * mark can be set and cleared independently of the history.
+     */
+    fun setCompleted(context: Context, categoryId: CategoryId, topicName: String, completed: Boolean) {
+        if (topicName.isBlank()) return
+        if (completed) addDone(context, categoryId, topicName) else removeDone(context, categoryId, topicName)
+    }
+
     /** True if the topic is marked done (explored or "already seen"). */
     fun isDone(categoryId: CategoryId, topicName: String): Boolean =
         doneKey(categoryId, topicName) in doneTopicsState
@@ -738,6 +767,16 @@ object ExploreSessionStore {
      */
     fun recordUnexplored(context: Context, categoryId: CategoryId, topicName: String) {
         if (topicName.isBlank()) return
+        // ── v470 — A COMPLETED TOPIC IS NEVER "UNEXPLORED" ────────────────
+        // The member: *"the topic state changes back to unexplored when tapped
+        // explore again"*. Every back-out of the reveal (the close button, the
+        // system back, the explore dialog's dismiss) records the topic as
+        // unexplored so Home can offer to resume it. That is right for a topic
+        // being glanced at and wrong for one already finished: it re-listed a
+        // completed topic as unfinished work. The done mark IS that record —
+        // marked by exploring, and by [setCompleted] from the Reveal's Completed
+        // star — so a done topic is left exactly as it is here.
+        if (isDone(categoryId, topicName)) return
         val updated = listOf(
             UnexploredTopic(categoryId, topicName, System.currentTimeMillis())
         ) + readUnexplored(context).filterNot {
@@ -817,6 +856,7 @@ fun parseExploreSession(raw: String): ExploreSession? {
             accumulatedPausedMillis = obj.optLong("accumulatedPausedMillis"),
             pillHidden = obj.optBoolean("pillHidden"),
             note = obj.optString("note"),
+            topicId = obj.optString("topicId"),
             screenshotPaths = obj.optJSONArray("screenshotPaths")?.let { arr ->
                 List(arr.length()) { i -> arr.optString(i) }.filter { it.isNotBlank() }
             } ?: emptyList()
@@ -839,7 +879,30 @@ private fun ExploreSession.toJson(): JSONObject = JSONObject()
     .put("accumulatedPausedMillis", accumulatedPausedMillis)
     .put("pillHidden", pillHidden)
     .put("note", note)
+    .put("topicId", topicId)
     .put("screenshotPaths", JSONArray().apply { screenshotPaths.forEach { put(it) } })
+
+/**
+ * v470 — marks the topic this session is about COMPLETED.
+ *
+ * Called from every path that ENDS a session the member says they finished (the
+ * shade's Completed action, the reminder's, the write-it-down confirm on Home and
+ * the back-to-app dialog) — the one place the two halves of "completed" are
+ * written together: the SENTIMENT that Topic History's Completed list reads, and
+ * the done mark that keeps the topic out of the shuffle deck and stops a later
+ * back-out from re-listing it as unexplored (see
+ * [ExploreSessionStore.recordUnexplored]).
+ *
+ * A session with no id (a legacy or queued session written before v470) marks
+ * nothing rather than guessing — there is no honest way to resolve a name to an
+ * id off the main thread in a BroadcastReceiver, and marking the wrong topic is
+ * worse than the member tapping the star once more.
+ */
+fun ExploreSession.markCompleted(context: Context) {
+    if (topicId.isBlank()) return
+    AppPreferences.setTopicSentiment(context, categoryId, topicId, AppPreferences.SENTIMENT_LIKE)
+    ExploreSessionStore.setCompleted(context, categoryId, topicName, true)
+}
 
 
 /**

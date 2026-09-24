@@ -85,7 +85,7 @@ internal const val ALOUD_STALL_MS = 120_000L
  * was missing was something for the service to keep alive. That is this object:
  * when the page is left with a session live, the reader hands over the book, the
  * sentence it had reached and a way to ask for the text of any other one, and this
- * simple loop carries the reading on. The notification's four controls are
+ * simple loop carries the reading on. The notification's three shade controls are
  * re-registered to point here (they were the reader's lambdas, and those died with
  * its composition), so pause, skip and stop still work from the shade.
  *

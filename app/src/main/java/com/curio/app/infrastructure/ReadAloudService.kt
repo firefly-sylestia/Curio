@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.curio.app.R
 import com.curio.app.data.AppPreferences
@@ -29,7 +30,7 @@ import com.curio.app.data.AppPreferences
  * **IT OWNS NO READING.** Every decision — which sentence, which voice, which
  * page — belongs to the reader. This service answers three questions and nothing
  * else: *is a session live* ([ReadAloudSession.active]), *is it speaking*, and
- * *what is the book called*. Its four buttons call straight back into the
+ * *what is the book called*. Its three shade buttons call straight back into the
  * reader's own lambdas, so a tap in the shade and a tap on the page are one code
  * path.
  *
@@ -57,18 +58,39 @@ class ReadAloudService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // ── THE FOUR SHADE BUTTONS ────────────────────────────────────────
+        // ── THE THREE SHADE BUTTONS ───────────────────────────────────────
         // Each one is delivered here as an intent (a `PendingIntent` cannot call
         // a lambda) and is delegated straight back to the reader. Nothing is
         // decided here, which is what keeps one cursor in the app (see
         // [ReadAloudSession]'s note).
         when (intent?.action) {
             ACTION_TOGGLE -> ReadAloudSession.toggle()
-            ACTION_PREV -> ReadAloudSession.prev()
             ACTION_NEXT -> ReadAloudSession.next()
             ACTION_STOP -> ReadAloudSession.stop()
         }
         return render()
+    }
+
+    /**
+     * ── v470 — CLOSING THE APP CLOSES THE READING ──────────────────────────
+     *
+     * The member: *"the reader aloud notification stays even after closing the app
+     * and there is no stop option which should stop and clear the notification"*.
+     * A foreground service is not killed when its task is swept out of Recents, so
+     * the notification outlived the app with nothing of the member's left driving
+     * it. Swiping Curio away IS the member saying they are done, so the reading
+     * ends here: the session's own stop runs first — the reader's, or
+     * [com.curio.app.features.personal.ReadAloudContinuation]'s when the book page
+     * is already gone, one teardown for both — and then the foreground state and
+     * the notification go with it.
+     */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        ReadAloudSession.stop()
+        ReadAloudSession.clear()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        stopSelf()
+        super.onTaskRemoved(rootIntent)
     }
 
     /**
@@ -131,10 +153,16 @@ class ReadAloudService : Service() {
             // controls are this notification's own actions, so a member whose lock
             // screen is set to hide notification content still gets them.
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(0, "Previous sentence", controlIntent(ACTION_PREV, 1))
-            .addAction(0, if (playing) "Pause" else "Carry on", controlIntent(ACTION_TOGGLE, 2))
-            .addAction(0, "Next sentence", controlIntent(ACTION_NEXT, 3))
-            .addAction(0, "Stop reading", controlIntent(ACTION_STOP, 4))
+            // ── THREE ACTIONS, NOT FOUR, AND STOP IS ONE OF THEM ───────────
+            // A standard notification renders at most three action buttons and
+            // SILENTLY DROPS the rest. There were four here — "Previous
+            // sentence" first, "Stop reading" last — so the last one was never
+            // drawn anywhere, which is exactly why the member could find no
+            // Stop in the shade. "Previous sentence" keeps its home on the
+            // reader's own bar; the shade carries the three that matter.
+            .addAction(0, if (playing) "Pause" else "Carry on", controlIntent(ACTION_TOGGLE, 1))
+            .addAction(0, "Next sentence", controlIntent(ACTION_NEXT, 2))
+            .addAction(0, "Stop reading", controlIntent(ACTION_STOP, 3))
             .build()
     }
 
@@ -186,7 +214,6 @@ class ReadAloudService : Service() {
         const val CHANNEL_ID = "read_aloud"
         const val NOTIFICATION_ID = 4212
         const val ACTION_TOGGLE = "com.curio.app.action.READ_ALOUD_TOGGLE"
-        const val ACTION_PREV = "com.curio.app.action.READ_ALOUD_PREV"
         const val ACTION_NEXT = "com.curio.app.action.READ_ALOUD_NEXT"
         const val ACTION_STOP = "com.curio.app.action.READ_ALOUD_STOP"
 

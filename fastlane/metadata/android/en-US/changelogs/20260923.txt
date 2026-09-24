@@ -23,7 +23,14 @@ ADD:
 - Reading: read aloud can keep going with Curio off screen, with play, pause, skip and stop in the notification and on the lock screen, so a chapter plays with the phone in your pocket. The read-aloud settings have a **Background** row for it — keep reading, or only while Curio is on screen.
 - Reading: Experiments carries one more voice — a hidden door that reads aloud through the Edge browser's own endpoint, with five neural voices and no account or key. It is undocumented, so it can stop working at any time, and your phone's voice reads instead when it does.
 
+- Reading: the read-aloud notification has a **Stop reading** button now — it was always meant to, but a notification shows three buttons and it was the fourth, so it was never drawn. Play/pause, the next sentence and stop are the three in the shade, and skipping back stays on the page's own bar.
+- Reading: closing the app ends the reading — sweeping Curio away from your recent apps used to leave the notification sitting there with nothing behind it; it stops the voice and clears the notification with the app.
+- Explore: finishing a topic marks it **Completed** — the notification's action says Completed (and so does the reminder that asks whether you're done), the dialog you meet when you come back to Curio has a **Completed** button, and writing it down counts as completing it too.
+- Topic History: the section the Reveal's star writes to is named **Completed** — it was called Favorite, which is not what the star says or means. The same list, the same star, its own honest name.
+
 FIX:
+- Explore: a topic you have completed stays completed — backing out of the topic page used to re-list it as unexplored, as if you had never finished it.
+- Explore: the Reveal's Completed star finishes the topic everywhere now — the deck stops dealing a topic you have completed, instead of the mark living only in Topic History.
 - Reading: a reading's opening paragraph is fetched before it starts — the first sentence had nothing fetched ahead of it, so the opening words were the one place the online voice still stopped.
 - Reading: a voice pack no longer clips the end of a sentence — the last block of unplayed audio was being thrown away when playback stopped, which is why the words before a full stop went missing and no pause was heard after it. Sentences keep their own break now.
 - Reading: the online Edge voice no longer stalls at every full stop — the next sentence is fetched while the current one is being read, instead of only after it finishes.

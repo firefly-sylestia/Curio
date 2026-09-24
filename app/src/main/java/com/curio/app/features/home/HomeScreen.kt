@@ -129,6 +129,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.markCompleted
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
@@ -1022,6 +1023,10 @@ fun HomeScreen(navController: NavController) {
                             note = activeSession.note,
                             screenshots = activeSession.screenshotPaths
                         )
+                        // v470 — writing it down means the topic is finished:
+                        // the same completed mark the shade's "Completed" action
+                        // and the back-to-app dialog write.
+                        activeSession.markCompleted(context)
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)

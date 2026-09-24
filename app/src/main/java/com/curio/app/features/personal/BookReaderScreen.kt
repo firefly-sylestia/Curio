@@ -1208,7 +1208,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             // cancels it", and the background-listening switch could not help,
             // because there was nothing left for the service to keep alive. A live
             // session is HANDED OVER instead: [ReadAloudContinuation] reads the
-            // remaining sentences, owns the notification's four buttons, and gives
+            // remaining sentences, owns the notification's three shade buttons, and gives
             // the reading back — at the sentence the voice has reached — when this
             // book's page is opened again.
             val handingOver = voiceOn && AppPreferences.readAloudBackgroundEnabledState
@@ -1359,7 +1359,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
 
     // ── v465h — ONE VOICE, TWO DOORS ────────────────────────────────────
     //
-    // The bar on the page and the four buttons in the notification are the SAME
+    // The bar on the page and the three shade buttons in the notification are the SAME
     // control, so both call these two functions rather than the notification
     // growing its own copy of the `when` below. That is the whole reason the
     // session carries lambdas instead of intents (see [ReadAloudSession]): a

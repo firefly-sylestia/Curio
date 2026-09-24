@@ -66,7 +66,7 @@ import com.curio.app.ui.theme.pastelAccent
  * 1. **Live explore notification** (when "Live explore notification" is ON):
  *    a persistent, audible notification with a live elapsed-time chronometer,
  *    a progress bar against the recommended duration, the topic name, and
- *    Pause/Resume + "Done exploring" actions, tinted with the topic's
+ *    Pause/Resume + "Completed" actions (v470), tinted with the topic's
  *    category accent. Kept SHORT by design — just the topic and the elapsed
  *    time, no description lines. An elapsed clock, NOT a countdown.
  *
@@ -280,7 +280,7 @@ class ExploreSessionService : Service() {
 
     /**
      * v27 — the bubble's Finish button. Ends the session the same way as the
-     * notification's "Done exploring" (shared teardown in
+     * notification's "Completed" action (shared teardown in
      * [com.curio.app.infrastructure.ExploreReminderReceiver]): hands the
      * session's elapsed time + shared note + screenshots off to the write
      * package, clears the session, cancels the reminder, stops this service,
@@ -413,9 +413,15 @@ class ExploreSessionService : Service() {
                 .addAction(0, "Pause", togglePauseIntent())
         }
         builder
-            .addAction(0, "Done exploring", stopSessionIntent())
+            // ── v470 — "COMPLETED" RATHER THAN "DONE EXPLORING" ──────────
+            // The same teardown (harmless: hand the write package over, then
+            // hand the member to the write-it-down page), but the action now
+            // says what it MEANS — the member's own word — and the teardown
+            // marks the topic completed (see
+            // [com.curio.app.data.markCompleted], called from the receiver).
+            .addAction(0, "Completed", stopSessionIntent())
             // Plain cancel — end the session without jumping to the
-            // write-it-down page (Done exploring opens it).
+            // write-it-down page (Completed opens it).
             .addAction(0, "Cancel", cancelSessionIntent())
 
         if (!paused && android.os.Build.VERSION.SDK_INT >= 36) {
@@ -475,7 +481,7 @@ class ExploreSessionService : Service() {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .addAction(0, "Done exploring", stopSessionIntent())
+            .addAction(0, "Completed", stopSessionIntent())
             .addAction(0, "Cancel", cancelSessionIntent())
             .build()
     }
