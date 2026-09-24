@@ -6,7 +6,54 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §61 — the Cabinet's level animation, a 3-up for the tile levels, and the journals back to rows (v467; PLAN)
+## 0. THE CURRENT REQUEST — §62 — the red build, the Edge voice's refused handshake, and the Kokoro pack that was never loaded (v468; DONE, pushed)
+
+> ci failed, and also fix edge tts find out why it wasnt working, and also fix kokoro not working.
+
+**THREE DEFECTS, ALL THREE FOUND BY READING THE CODE AND THE UPSTREAM PROTOCOL RATHER THAN GUESSING — and two of them were not what the previous fix had assumed.**
+
+### (1) The CL — one declaration consumed outside its own lambda
+
+The red run (`35961963329`) failed BOTH the core and full jobs, and every annotation came from one file:
+
+```
+e: app/src/full/java/com/curio/app/data/NeuralVoices.kt:424:61 Unresolved reference 'read'.
+e: app/src/full/java/com/curio/app/data/NeuralVoices.kt:424:67 Unresolved reference 'total'.
+```
+
+`val total` and `var read` were declared **inside `call.execute().use { response -> … }`** while the extracting report — `set(pack.id, State(Status.Extracting, 1f, null, read, total))` — is published **after the response is closed**. Both are declared above the `try` now. Rule 12's shape applied to values: the compiler names the *use*, two hundred lines from the mistake.
+
+### (2) Edge TTS — the 403 is on the UPGRADE, so nothing at the message layer could have fixed it
+
+The member: *"edge tts wasnt working or something it was just going fast the highlight with no sound"*. **v465i had already fixed the second half of that sentence** (a failed utterance was being reported as a *finished* one, so the page raced). It never fixed the first half, because the failure is not a message: the WebSocket **upgrade** is refused, OkHttp delivers it through `onFailure(response)`, `fetch` returns null, and the reader falls back. Nothing inside the socket is ever reached.
+
+**Why it is refused — read off `rany2/edge-tts` (the reference implementation), `constants.py` + `drm.py` + `communicate.py`:**
+
+| What the endpoint is given | This file, before | The reference client |
+| --- | --- | --- |
+| `User-Agent` | `okhttp/4.x` | `… Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0` |
+| `Origin` | none | `chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold` |
+| `Cookie` | none | `muid=<32 upper-hex>;` |
+| `Pragma` / `Cache-Control` | none | `no-cache` |
+| `Sec-MS-GEC-Version` | `1-131.0.2903.86` (Edge **131**) | `1-143.0.3650.75` (from `CHROMIUM_FULL_VERSION`) |
+
+The `Sec-MS-GEC` *signature* was already right (FILETIME ticks × 10⁷, floored to the 5-minute window, one SHA-256 over `"$windowed$token"`, uppercase hex) and stays in the query string, as the reference client sends it. **Added:** every header above, the UA and the version built from one build number so they cannot drift, and `muid`. **Two deliberate omissions:** `Accept-Encoding` (the reference offers br/zstd; OkHttp decodes neither, so claiming them breaks the *frames*) and `Sec-WebSocket-Version` (OkHttp's own layer sets it). **The `_=` cache-buster is gone** — a parameter nothing reads is one more thing to be wrong about.
+
+**And the one failure a header cannot fix, handled the way the reference handles it:** the signature is signed from the DEVICE's clock, so a phone minutes out signs every handshake with something that looks forged. A 403 whose `Date` header disagrees with this phone by more than 30 s now sets `clockSkewMs`, and **exactly one** retry is made with the signature recomputed from the corrected time. A second refusal is the service saying no; asking a third time is how an experiment gets rate-limited out of existence.
+
+### (3) Kokoro — it was never LOADED, and that is a code bug, not a model that refuses to run
+
+`sayAloud` asked `NeuralSpeaker.isReady || prepare(pack)`. **`isReady` only ever meant *an* engine is loaded.** Piper is the pack offered FIRST, so the real sequence is Piper downloaded and heard, then Kokoro downloaded and chosen — and the next sentence found `isReady == true` (Piper), short-circuited, and read on in Piper's voice for ever. The 305 MB pack the member had just chosen was opened by nothing. **`isReadyFor(id) = tts != null && loaded == id`** now answers the question that matters (no-op twin added to the core edition in the same change), and `sayAloud` asks it per pack. *An `isReady` that does not name what it is ready for is a bug waiting for a second thing to be ready.*
+
+**A second, quieter fault in the same config:** `lang = "en"` for Kokoro. It is not a comment field — `offline-tts-kokoro-impl.h` resolves it into **the espeak-ng voice the frontend phonemizes with** (`lang = config_.model.kokoro.lang.empty() ? meta_data.voice : config_.model.kokoro.lang`, then `ConvertTextToTokenIds(text, lang)`), so it has to be an **ISO 639-3** code espeak-ng can resolve. sherpa-onnx's own Android engine is the authority: its generated `TtsEngine.kt` entry for `kokoro-en-v0_19` reads **`lang = "eng"`** (the generator converts the 639-1 code it is written with through `Lang.pt3`) — now `"eng"`. **Checked and deliberately left alone:** `kokoro-en-v0_19` ships **no lexicon** (its conversion script produces only `model.onnx`, `model.int8.onnx`, `tokens.txt`, `voices.bin`), so the `lexicon*.txt` glob already answers `""`; and `findModel`'s "largest `.onnx`" picks the **fp32** `model.onnx` over `model.int8.onnx`, which is also the variant sherpa-onnx's own tracker says is the one that does not produce rail-pinned garbage on ARM (`k2-fsa/sherpa-onnx#3754`).
+
+### Checks, in this environment's terms
+
+**No Gradle may run here (root AGENTS), so nothing was compiled.** Verification was: a full read of every edited file's seams (rule 12), a grep for every new symbol across both editions, and the upstream protocol/API sources quoted above rather than recalled. The compile-risk surface is small and named: one hoisted pair of locals in the full `NeuralVoices.kt`, one new member on each `NeuralSpeaker` twin (both editions touched), one call-site swap, and header/helper additions inside `EdgeVoice` whose only new imports are `kotlin.math.abs`.
+
+---
+
+## 0 (previous). §61 — the Cabinet's level animation, a 3-up for the tile levels, and the journals back to rows (v467; SHIPPED)
 
 > the collection ui opening closing upboard nd collections is very visual glitchy, also sho the 3 grid in collections ersonals etc not in journals resture the row view of jurnal
 
@@ -968,6 +1015,7 @@ only it ever resolves a face, and a pill handed no path draws its own glyph.
 status is updated and it is moved into the request log above. One empty slot for the next
 prompt stays below it.)*
 
+- **§62 — "ci failed, and also fix edge tts find out why it wasnt working, and also fix kokoro not working" (DONE, v468 — committed and pushed).** The CL was one declaration used outside its own lambda (`read`/`total` in the full `NeuralVoices.kt`'s download loop); Edge was being **refused on the WebSocket upgrade** — every connection, every time — for want of the identity headers the endpoint now judges a client by (Edge UA, the read-aloud extension's `Origin`, `muid`, no-cache) and a current `Sec-MS-GEC-Version` (131 → 143), with one clock-skew retry because the signature is signed from the device's own clock; and Kokoro was **never loaded at all**, because `sayAloud` asked `isReady` ("is *an* engine loaded") instead of `isReadyFor(pack.id)` — so choosing Kokoro after Piper kept reading in Piper. Fixing that exposed the second Kokoro fault: `lang = "en"` is neither the 639-1 form the models are documented with nor the 639-3 code sherpa-onnx resolves the espeak-ng voice from — `"eng"` is, per sherpa-onnx's own Android engine config. Changelog + `app/AGENTS.md` (v465j) updated with it. **CI not yet observed.**
 - **§60 — "also make the post set up and set up be one if it possible and build release apk difernt so more faster and yk much better branching and also more faster build with cache or something analayse the full log of revious sucess build" (DONE in code, v466 — pushed; CI not yet observed).** The log was read before anything was changed, and it says the job wall was 1056s of which **1007s was one Gradle invocation**, and `lintReportCoreRelease` was **~400s (40%) that ran LAST, after the APK was already signed** — 40% of the work and none of the critical path. **Built:** `verify` split into **`build` + `lint`, each a two-job matrix**, four runners starting together, critical path `max(build, lint)` ≈ **10 min instead of 17.6 (~43% off)**; the report job now rolls up **four** (edition · phase) rows from four named artifacts; and **`.github/scripts/annotate-lint.py`** is new so the lint job's own findings reach the Checks tab instead of a job that fails naming no file and no rule. **Two of the four asks were answered "no, and here is why" rather than built:** *"post set up and set up be one"* — `Post Set up Gradle` is the **teardown echo of the same action**, and its 24.6s is the **cache upload** that makes the next run fast, so merging the steps would mean not saving the cache (the achievable half WAS taken: `cache-read-only: true` on the lint job, so it restores and pays no upload); *"build the release APK differently so it's faster"* — the APK's packaging, signing and verification together are **~10 seconds**, while the 362s is R8 in full mode, and the only lever (`enableR8.fullMode=false`) would make CI validate a **differently-built APK than `release.yml` ships**. *"Faster with cache or something"* was already true and is recorded rather than "improved": Gradle build cache + configuration cache + parallel are on and **17 tasks were restored** on the green run; R8, lint and the Kotlin compile take the source as input and every push changes the source. **Three real bugs fell out of the work** (all found by RUNNING the scripts, not reading them): **`echo "```"` in `build-summary.sh` had been breaking the red-run postmortem** — inside double quotes bash reads backticks as command substitution, so the lines between the fences were **executed** and the "First compiler errors" block has never rendered on any red run (`bash -n` parses it cleanly); the lint runner would have reported **`0 file(s) · 0 topics`**, the exact v412 failure signature, because `assets/topics` holds only `SCHEMA.md` in git and the JSONs are copied in by the build job; and a red lint run would have shown an **empty "Failed tasks" section** because the postmortem greps a log filename that runner does not write. **NOT VERIFIED: none of it has run.** The scripts were exercised against fixtures (four report states, both summary phases, a red lint log), never by CI, so "~10 minutes" is arithmetic from one measured run.
 - **§59 — "for instance option remove the dictionary settings option. we can ship with it dw about the ap size, lets do a double build, one with advance feature focusing on online and all one smaller with the core curio features" + "also can it work with the same key" (IN PROGRESS — the two reader items are DONE and pushed; the two EDITIONS are the open work).**
 

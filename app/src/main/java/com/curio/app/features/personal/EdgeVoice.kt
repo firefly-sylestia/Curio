@@ -12,6 +12,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
+import kotlin.math.abs
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -48,6 +49,34 @@ import okio.ByteString
  * it, and without it every connection is refused), the **binary frame layout**
  * (two length bytes, then a text header, then the audio), and **turn.end** as
  * the only reliable completion signal.
+ *
+ * ── v465j — WHY IT WAS NOT WORKING AT ALL, AND WHAT THE UPGRADE NOW NEEDS ──
+ *
+ * The member: *"edge tts wasnt working or something it was just going fast the
+ * highlight with no sound"*. That was the **upgrade** being refused, every time,
+ * and the shape of the refusal is worth recording because the read-aloud path
+ * around it was (correctly) blamed first:
+ *
+ *  - **The 403 arrives on the WebSocket upgrade, not on a message.** OkHttp
+ *    answers it with `onFailure(response)`, `fetch` returns null, and the reader
+ *    falls back (see `sayAloud`). There is no audio frame to be missing, and
+ *    nothing to retry inside the socket — so a fix at the message layer could
+ *    never have touched it.
+ *  - **THE IDENTITY HEADERS ARE NOT DECORATION.** The endpoint now judges the
+ *    client by them: the reference implementation (`rany2/edge-tts`, whose
+ *    `constants.py` is the source of every constant here) sends an **Edge
+ *    `User-Agent`**, the browser extension's **`Origin`**, no-cache headers and a
+ *    **`muid` cookie**. OkHttp's own `okhttp/4.x` user agent and empty Origin
+ *    identify an Android app, which is exactly what the service refuses.
+ *  - **AND THE VERSION ROTS ON A SCHEDULE.** `Sec-MS-GEC-Version` has to name a
+ *    build the endpoint still recognises; the value this file carried was
+ *    **Edge 131** (`1-131.0.2903.86`) — twelve majors behind the 143 that the
+ *    reference client sends now.
+ *
+ * ⚠️ **WHAT TO DO WHEN IT STOPS AGAIN.** It will: this is undocumented and
+ * unsanctioned by construction (see above). Bump [GEC_VERSION] and
+ * [EDGE_USER_AGENT] to `CHROMIUM_FULL_VERSION` and `BASE_HEADERS['User-Agent']`
+ * in edge-tts's `constants.py`. Nothing else in this file should need to change.
  */
 internal object EdgeVoice {
 
@@ -70,7 +99,35 @@ internal object EdgeVoice {
      * fix, and it is in the experiment's row description so a member who turns it
      * on knows what they are relying on.
      */
-    private const val GEC_VERSION = "1-131.0.2903.86"
+    private const val GEC_VERSION = "1-143.0.3650.75"
+
+    /**
+     * The Edge build [GEC_VERSION] belongs to, sent as the `User-Agent`.
+     *
+     * Verbatim from edge-tts's `constants.py` (`BASE_HEADERS`), built from the
+     * same `CHROMIUM_FULL_VERSION` as [GEC_VERSION] so the two can never drift
+     * apart — a UA claiming 143 beside a signature claiming 131 is a mismatch on
+     * its own.
+     */
+    private const val EDGE_USER_AGENT =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+            "(KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+
+    /**
+     * The read-aloud extension's own origin, which is what the service expects a
+     * browser to announce itself with. Public by construction — it ships inside
+     * Edge's own package.
+     */
+    private const val EXTENSION_ORIGIN = "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold"
+
+    /**
+     * The smallest reply that counts as a sentence, in bytes.
+     *
+     * 48 kbit/s mono MP3 spends the head of the file on headers, so anything
+     * under this is a truncated stream rather than speech — and the phone's own
+     * voice reads that sentence far better than a click does.
+     */
+    private const val MIN_CLIP_BYTES = 512L
 
     /** Mono MP3 at 24 kHz — the format the endpoint sends by default. */
     private const val OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3"
@@ -96,6 +153,22 @@ internal object EdgeVoice {
 
     private var socket: WebSocket? = null
     private var player: MediaPlayer? = null
+
+    /**
+     * How far this phone's clock is from the endpoint's, in milliseconds.
+     *
+     * **THE ONE PART OF THE TOKEN THAT IS NOT OURS TO GET RIGHT.** [gec] signs
+     * the device's own time, and the endpoint validates it against ITS five-minute
+     * window — so a phone a few minutes out signs every handshake with a value
+     * that looks forged, and no header can fix that. edge-tts corrects in exactly
+     * this way: read the server's `Date` out of the refused upgrade, keep the
+     * difference, and ask again. Zero until a refusal has taught us otherwise.
+     */
+    @Volatile
+    private var clockSkewMs: Long = 0L
+
+    /** Below this a difference is ordinary network jitter, not a wrong clock. */
+    private const val SKEW_FLOOR_MS = 30_000L
 
     /** Bumped per utterance so a late completion cannot resume a newer one. */
     @Volatile private var utterance = 0
@@ -173,9 +246,42 @@ internal object EdgeVoice {
     private fun fetch(context: Context, text: String, speed: Float, voice: String): File? {
         val clip = clipFile(context)
         if (clip.exists()) clip.delete()
+        var turn = fetchOnce(text, speed, voice)
+        // ── ONE RETRY, AND ONLY EVER BECAUSE OF THE CLOCK (v465j) ─────────
+        // A refusal that came with the server's own date is the one failure here
+        // that is this phone's fault and ours to repair; see [clockSkewMs]. The
+        // retry is bounded at one, and only when the difference is real — a
+        // second refusal is the service saying no, and asking a third time is how
+        // an experiment gets rate-limited into never working again.
+        val refusedAt = turn.refusedAt
+        if (turn.audio == null && refusedAt != null) {
+            val skew = refusedAt - System.currentTimeMillis()
+            if (abs(skew) > SKEW_FLOOR_MS) {
+                clockSkewMs = skew
+                turn = fetchOnce(text, speed, voice)
+            }
+        }
+        val audio = turn.audio ?: return null
+        clip.writeBytes(audio)
+        // A clip has to be more than a few hundred bytes of MP3 header to be
+        // worth a MediaPlayer: anything smaller is a truncated turn, and playing
+        // it is a click rather than a sentence.
+        return clip.takeIf { it.length() > MIN_CLIP_BYTES }
+    }
+
+    /** One turn's audio, and — when the handshake was refused — the server's clock. */
+    private class Turn(val audio: ByteArray?, val refusedAt: Long?)
+
+    /**
+     * One handshake and one whole turn. Runs on a background thread; never throws.
+     */
+    private fun fetchOnce(text: String, speed: Float, voice: String): Turn {
         val audio = java.io.ByteArrayOutputStream()
         val finished = java.util.concurrent.CountDownLatch(1)
         var ok = false
+        var refusedAt: Long? = null
+        // A random per-connection id, exactly as the reference client sends one.
+        val muid = UUID.randomUUID().toString().replace("-", "").uppercase()
 
         val client = OkHttpClient.Builder()
             .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
@@ -217,6 +323,11 @@ internal object EdgeVoice {
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                // ⚠️ A 403 IS THE HANDSHAKE'S OWN VERDICT, and its `Date` header is
+                // how the caller learns WHICH verdict: a signed time it disagrees
+                // with (see [clockSkewMs]) or a client it will not talk to. Only
+                // the first is worth a second attempt, so only the first is kept.
+                refusedAt = if (response?.code == 403) httpDate(response.header("Date")) else null
                 finished.countDown()
             }
 
@@ -225,28 +336,62 @@ internal object EdgeVoice {
             }
         }
 
-        val request = Request.Builder().url(url()).build()
+        // ── ⚠️ THE HEADERS THE UPGRADE IS JUDGED BY (v465j) ───────────────
+        // Without these the endpoint answers the upgrade with a 403 and the voice
+        // never gets as far as a message — which is precisely how "it was just
+        // going fast with no sound" looked from the page.
+        //
+        // Two deliberate omissions: `Accept-Encoding` (the reference client offers
+        // br/zstd, and OkHttp cannot decode either, so advertising them would be a
+        // lie that breaks the frames rather than the handshake) and
+        // `Sec-WebSocket-Version` (OkHttp's own WebSocket layer sets it, and a
+        // second copy in the header list is not an upgrade request OkHttp will
+        // send). Per-message deflate is negotiated by OkHttp itself.
+        val request = Request.Builder()
+            .url(url())
+            .header("User-Agent", EDGE_USER_AGENT)
+            .header("Origin", EXTENSION_ORIGIN)
+            .header("Pragma", "no-cache")
+            .header("Cache-Control", "no-cache")
+            .header("Accept-Language", "en-US,en;q=0.9")
+            .header("Cookie", "muid=$muid;")
+            .build()
         socket = client.newWebSocket(request, listener)
         // The whole turn, bounded: a socket that opens and then says nothing must
         // not hold a reading session hostage.
         finished.await(30, java.util.concurrent.TimeUnit.SECONDS)
         socket = null
         client.dispatcher.executorService.shutdown()
-        if (!ok) return null
-        clip.writeBytes(audio.toByteArray())
-        return clip.takeIf { it.length() > 512L }
+        return Turn(if (ok) audio.toByteArray() else null, refusedAt)
     }
 
-    /** The endpoint URL, with the two tokens the handshake is checked against. */
-    private fun url(): String {
-        val stamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            .apply { timeZone = TimeZone.getTimeZone("UTC") }
-            .format(Date())
-        return "$ENDPOINT?TrustedClientToken=$TRUSTED_CLIENT_TOKEN" +
-            "&Sec-MS-GEC=${gec()}&Sec-MS-GEC-Version=$GEC_VERSION" +
+    /**
+     * An RFC 1123 `Date` header — the one shape the endpoint sends one in — as
+     * epoch milliseconds, or null when it is missing or unparseable.
+     *
+     * Deliberately tolerant: a header this cannot read must leave the retry
+     * unmade rather than throw inside a socket callback.
+     */
+    private fun httpDate(raw: String?): Long? = runCatching {
+        if (raw.isNullOrBlank()) return@runCatching null
+        SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+            .apply { timeZone = TimeZone.getTimeZone("GMT") }
+            .parse(raw)
+            ?.time
+    }.getOrNull()
+
+    /**
+     * The endpoint URL, with the two tokens the handshake is checked against.
+     *
+     * The four parameters and their order are the reference client's own
+     * (`{WSS_URL}&ConnectionId=…&Sec-MS-GEC=…&Sec-MS-GEC-Version=…`) — the `_=`
+     * cache-buster an older client carried is gone, because a parameter nothing
+     * reads is one more thing to be wrong about.
+     */
+    private fun url(): String =
+        "$ENDPOINT?TrustedClientToken=$TRUSTED_CLIENT_TOKEN" +
             "&ConnectionId=${UUID.randomUUID().toString().replace("-", "")}" +
-            "&_=$stamp"
-    }
+            "&Sec-MS-GEC=${gec()}&Sec-MS-GEC-Version=$GEC_VERSION"
 
     /**
      * The `Sec-MS-GEC` signature.
@@ -266,7 +411,11 @@ internal object EdgeVoice {
      * from being refused.
      */
     private fun gec(): String {
-        val secondsSince1601 = System.currentTimeMillis() / 1000L + 11_644_473_600L
+        // The device's own clock, corrected by whatever a refused upgrade taught
+        // us about it (see [clockSkewMs]) — the signature has to sit inside the
+        // endpoint's window, not merely inside this phone's idea of the time.
+        val secondsSince1601 =
+            (System.currentTimeMillis() + clockSkewMs) / 1000L + 11_644_473_600L
         val ticks = secondsSince1601 * 10_000_000L
         val windowed = ticks - (ticks % 3_000_000_000L)
         val digest = MessageDigest.getInstance("SHA-256")

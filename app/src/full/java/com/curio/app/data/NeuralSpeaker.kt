@@ -58,6 +58,25 @@ internal object NeuralSpeaker {
 
     val isReady: Boolean get() = tts != null
 
+    /**
+     * ── v465j — READY FOR *THIS* PACK, WHICH IS NOT THE SAME QUESTION ─────
+     *
+     * [isReady] answers "is an engine loaded", and the reader asked exactly that
+     * before speaking: `isReady || prepare(pack)`. That reads correctly and is
+     * wrong, because the engine already loaded may belong to a DIFFERENT pack.
+     *
+     * **It is why Kokoro "did not work".** Piper is the pack offered first, so a
+     * member downloads Piper, listens, then downloads Kokoro and chooses it. The
+     * very next sentence finds `isReady == true` — Piper's engine, still in
+     * memory — skips `prepare` entirely, and reads on in Piper's voice for ever.
+     * Nothing fails, nothing logs, and the 305 MB pack they chose is never
+     * loaded. The same trap catches a pack switched back again.
+     *
+     * So readiness is asked per pack, which is the only form of it that means
+     * anything here.
+     */
+    fun isReadyFor(id: String?): Boolean = tts != null && loaded == id
+
     /** How many voices the loaded pack offers (Piper 1, Kokoro eleven). */
     fun speakerCount(): Int = runCatching { tts?.numSpeakers() ?: 1 }.getOrDefault(1)
 
@@ -96,7 +115,17 @@ internal object NeuralSpeaker {
                             tokens = tokens.absolutePath,
                             dataDir = dataDir.absolutePath,
                             lexicon = lexicon,
-                            lang = "en",
+                            // ⚠️ ISO 639-3, NOT THE "en" IT READS LIKE. This value
+                            // is the espeak-ng voice the Kokoro frontend phonemizes
+                            // with, and sherpa-onnx's own Android engine is explicit
+                            // about it: its `kokoro-en-v0_19` entry passes `eng`
+                            // (`scripts/apk/generate-tts-apk-script.py` converts the
+                            // ISO 639-1 code it is written with through `Lang.pt3`,
+                            // and the generated `TtsEngine.kt` carries the 639-3
+                            // form). Left empty the model's own `voice` metadata is
+                            // used instead — also "en-us" — but a value that is
+                            // neither is a language espeak-ng cannot resolve.
+                            lang = "eng",
                         ),
                         // Kokoro is the heavier model and the one whose RTF is
                         // closest to the line, so it is the one that wants the

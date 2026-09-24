@@ -358,14 +358,19 @@ object NeuralVoiceDownloads {
             context.cacheDir,
             "${pack.id}${NeuralVoicePacks.PARTIAL_SUFFIX}",
         )
+        // ⚠️ THESE TWO OUTLIVE THE `use` BLOCK BELOW, AND THEY HAVE TO: the
+        // extracting report published once the response is closed carries both
+        // of them. Declared inside the lambda they are out of scope by the time
+        // that line runs — which is a red build, not a warning (v465j).
+        var total = 0L
+        var read = 0L
         try {
             val call = http.newCall(Request.Builder().url(pack.url).build())
             calls[pack.id] = call
             call.execute().use { response ->
                 if (!response.isSuccessful) error("The download server answered ${response.code}.")
                 val body = response.body
-                val total = body.contentLength().takeIf { it > 0 } ?: pack.sizeBytes
-                var read = 0L
+                total = body.contentLength().takeIf { it > 0 } ?: pack.sizeBytes
                 // v465i — THE MEASUREMENT, AND THE THROTTLE.
                 //
                 // Every 64 KB chunk used to publish a new [State], which is a new

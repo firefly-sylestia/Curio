@@ -27,6 +27,13 @@ internal object NeuralSpeaker {
 
     val isReady: Boolean get() = false
 
+    /**
+     * v465j — the full edition's per-pack form of [isReady] (see its own note on
+     * why "an engine is loaded" and "THIS pack's engine is loaded" are different
+     * questions). There is never an engine here, so it is false for every id.
+     */
+    fun isReadyFor(id: String?): Boolean = false
+
     fun speakerCount(): Int = 1
 
     fun prepare(context: Context, pack: NeuralVoicePacks.Pack): Boolean = false

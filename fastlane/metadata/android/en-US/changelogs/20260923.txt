@@ -19,6 +19,8 @@ ADD:
 - Reading: Experiments carries one more voice — a hidden door that reads aloud through the Edge browser's own endpoint, with five neural voices and no account or key. It is undocumented, so it can stop working at any time, and your phone's voice reads instead when it does.
 
 FIX:
+- Reading: the Kokoro voice pack actually speaks — choosing it after another pack had downloaded kept the previous pack's voice reading instead, because an already-loaded engine was taken as the engine you had asked for.
+- Reading: the hidden Edge voice answers again — the connection identifies itself the way the endpoint expects now (the browser's own user agent and origin, and a current Edge build), instead of being refused every time.
 - Reading: a voice you install reads your books again — with a speech engine chosen in Reading settings, read aloud had been dropping back to the phone's own voice on the very first sentence, so the engine you picked never spoke. The same fault silenced a downloaded pack's voice and the Edge voice on every skip.
 - Books: Look it up really looks the book up — tapping it on a book Curio already knew opened no lookup at all and answered "nothing more found" over a search that never ran; it now asks Open Library once and says what it found, and with book lookups switched off it says so instead.
 - Reading: the Dictionary source row left the appearance sheet — which dictionary answers is a choice you make once, so it lives in Reading settings with the rest of the complete set instead of in the sheet you open while reading.

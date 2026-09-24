@@ -8009,7 +8009,13 @@ internal suspend fun sayAloud(
     if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
         val pack = NeuralVoicePacks.byId(ReaderLook.speakVoice)
         if (pack != null) {
-            val ready = NeuralSpeaker.isReady || withContext(Dispatchers.IO) {
+            // ⚠️ READY FOR **THIS** PACK — `NeuralSpeaker.isReady` alone is the
+            // bug it looks like the fix for (v465j). It is true whenever ANY pack
+            // is loaded, so a member who listened to Piper and then chose the
+            // Kokoro pack they had just downloaded kept being read to by Piper:
+            // the engine was already up, `prepare` was skipped, and the pack they
+            // picked was never opened. See [NeuralSpeaker.isReadyFor].
+            val ready = NeuralSpeaker.isReadyFor(pack.id) || withContext(Dispatchers.IO) {
                 NeuralSpeaker.prepare(context, pack)
             }
             if (ready) {
