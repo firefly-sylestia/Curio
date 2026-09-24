@@ -136,6 +136,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
@@ -1216,7 +1217,84 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         //    Categories + Filter move to a right-edge rail as tall
         //    vertical pills, and the deck + Spin button stay centered.
         val wide = windowWidthSizeClass().isWide
-        if (wide) {
+        // ── v468 — THE COMPACT-LANDSCAPE STAGE ──────────────────────
+        // The member: *"the spin category and filter button becomes 3 floating
+        // buttons rounded small buttons, the deck becomes one small view"*.
+        //
+        // **WHY THIS IS A NEW BRANCH AND NOT A TWEAK TO [wide].** The wide
+        // branch below is the TABLET stage: it centres the deck and lets
+        // `wideFit` scale the fan UP to 1.6x, because a tablet has the room
+        // and empty gutters looked starved. A PHONE in landscape is wide too,
+        // so it was taking that branch and getting a 1.6x deck in a 360dp-tall
+        // body — the "stretched" the member is describing. Height is what
+        // makes these two stages different: this one is gated on the SHORT
+        // body `CurioLayout.isCompact()` reports (landscape, or under 520dp),
+        // further bounded at 560dp so a tall tablet in landscape keeps the
+        // full stage and the room it has.
+        //
+        // **THE TRIO OWNS THE SHUFFLE HERE.** `showSpinButton = false` drops
+        // the 126dp dice (taller than this whole body) and the row's Shuffle
+        // button becomes the only CTA — which is exactly the three buttons
+        // asked for, with nothing duplicated.
+        //
+        // **[landscapeFit] SCALES DOWN, NEVER UP.** The fan is compressed to
+        // the short body so it reads as one small view; the floor of 0.58 is
+        // the same floor the fit scale has always used, and the trio's own
+        // band is reserved before the deck measures.
+        val landscapeStage = CurioLayout.isCompact() && maxHeight < 560.dp
+        val landscapeFit = ((maxHeight - 76.dp) / 520.dp).coerceIn(0.58f, 0.92f)
+        if (landscapeStage) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 62.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    SpinDeckSection(
+                        compact = true,
+                        // The dice steps aside for the trio's Shuffle button.
+                        showSpinButton = false,
+                        cat = deckCat,
+                        deckAccent = deckAccent,
+                        deckGradient = deckGradient,
+                        isMixed = isMixedDeck,
+                        mixSeed = mixSeed,
+                        displayPool = hand,
+                        cycleIndex = cycleIndex,
+                        shuffling = shuffling,
+                        shuffleProgress = shuffleProgress,
+                        landedTopic = landedTopic,
+                        opening = isOpening,
+                        enabled = filteredPool.isNotEmpty() && !shuffling,
+                        buttonPulse = buttonPulse,
+                        fitScale = landscapeFit,
+                        poolLoading = poolLoading,
+                        poolLoadFailed = poolLoadFailed,
+                        onRetryPool = { poolRetryKey++ },
+                        onCardTap = onDeckCardTap,
+                        onCycle = onDeckCycle,
+                        onSpinClick = onSpinClick
+                    )
+                }
+                // ── The floating trio — small, rounded, and detached ──
+                // It floats OVER the page's tint wash at the bottom centre,
+                // where both thumbs reach in landscape, rather than sitting
+                // in a tray that would cost the short body more height.
+                SpinFloatTrio(
+                    cat = deckCat,
+                    filterActiveCount = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
+                        filteredPool.size else null,
+                    onCategories = { showCategoryPicker = true },
+                    onFilter = { showFilters = true },
+                    onShuffle = onSpinClick,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 10.dp)
+                )
+            }
+        } else if (wide) {
             // Wide / landscape: deck centered vertically, controls below.
             // No side rail — Categories/Filter sit as horizontal pills
             // below the deck, same as phone but with more breathing room.
@@ -1569,7 +1647,15 @@ private fun ColumnScope.SpinDeckSection(
     onRetryPool: () -> Unit = {},
     onCardTap: () -> Unit,
     onCycle: (Int) -> Unit,
-    onSpinClick: () -> Unit
+    onSpinClick: () -> Unit,
+    // ── v468 — COMPACT LANDSCAPE HIDES THE BIG DICE ────────────────────
+    // The member: *"the spin category and filter button becomes 3 floating
+    // buttons rounded small buttons, the deck becomes one small view"*. The
+    // trio's Shuffle button IS the shuffle CTA in that stage, so the 126dp
+    // dice — which alone is taller than a phone's whole landscape body —
+    // must not be drawn beside it. Default true: every other stage keeps the
+    // big centre button exactly as it was.
+    showSpinButton: Boolean = true
 ) {
     // ── Breathing room before the deck (tighter when the screen is short;
     //    roomier on high-density screens so the bigger deck has space) ────
@@ -1621,6 +1707,10 @@ private fun ColumnScope.SpinDeckSection(
     // v8.16 — the spin button is a FUN pet landmark: the pet sometimes
     // dashes over and boops it while the deck waits (it just pulses — no
     // layout change, and the shared-element morph is untouched).
+    // v468 — the compact-landscape stage ends the deck section here: the
+    // trio below the stage owns the shuffle. An early return is safe in a
+    // @Composable (nothing after it holds state or emits).
+    if (!showSpinButton) return
     PetLandmark(
         id = "spin",
         kind = PetLandmarks.Kind.FUN,
@@ -4155,6 +4245,89 @@ private fun deckPillLabel(mixName: String?, mixedCount: Int, cat: CurioCategory)
     mixedCount > 1 && mixName != null -> mixName
     mixedCount > 1 -> "Mixed · $mixedCount"
     else -> cat.displayName
+}
+
+@Composable
+private fun SpinFloatTrio(
+    cat: CurioCategory,
+    // null = no filters selected, so the middle button stays a quiet category
+    // surface instead of wearing the accent (same rule as [BottomCta]).
+    filterActiveCount: Int?,
+    onCategories: () -> Unit,
+    onFilter: () -> Unit,
+    onShuffle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val hasFilters = filterActiveCount != null
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SpinFloatButton(
+            container = deckControlSurface(cat),
+            tint = deckControlInk(cat, selected = false),
+            onClick = onCategories
+        ) {
+            CurioIcon(
+                name = cat.iconGlyph,
+                tint = deckControlInk(cat, selected = false),
+                size = 20.dp
+            )
+        }
+        SpinFloatButton(
+            container = if (hasFilters) cat.themedAccent() else deckControlSurface(cat),
+            tint = deckControlInk(cat, selected = hasFilters),
+            onClick = onFilter
+        ) {
+            CurioIcon(
+                name = CurioIcons.Search,
+                tint = deckControlInk(cat, selected = hasFilters),
+                size = 20.dp
+            )
+        }
+        SpinFloatButton(
+            container = cat.themedAccent(),
+            tint = cat.onAccent(),
+            onClick = onShuffle
+        ) {
+            ShuffleGlyph(tint = cat.onAccent(), modifier = Modifier.size(24.dp))
+        }
+    }
+}
+
+/**
+ * One small rounded button of the compact-landscape trio.
+ *
+ * **OPAQUE FILLS ONLY, AND THE SHADOW COMES FROM THE SURFACE.** The fills
+ * handed in here are the deck's own opaque category surfaces (or the category
+ * accent), which is what lets `shadowElevation` render a clean edge instead of
+ * bleeding through a translucent fill — the same rule the deck controls follow.
+ */
+@Composable
+private fun SpinFloatButton(
+    container: Color,
+    tint: Color,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = container,
+        // The ink travels with the fill, so a child glyph that doesn't name a
+        // tint still lands on the readable one for this surface.
+        contentColor = tint,
+        shadowElevation = 6.dp,
+        modifier = Modifier.size(46.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
