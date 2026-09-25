@@ -1384,14 +1384,39 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             }
             else -> startSpeaking()
         }
+        // ── v473 — AND THE SESSION IS TOLD IN THE SAME BREATH ────────────────
+        //
+        // `ReadAloudSession.playing` used to be written only by the effect below —
+        // i.e. by a RECOMPOSITION — so a pause tapped while Curio was off screen
+        // left the service believing the voice was still speaking: it kept the
+        // foreground state (and rebuilt its notification as "Reading <book>") for a
+        // paused reading, which is the state the member found the app listed as
+        // active for with nothing playing. The same write the effect makes, made here
+        // where the state actually changes, means the very next render of the
+        // notification — this tap's own `render()`, on the shade's Stop/Pause path —
+        // already has the truth.
+        ReadAloudSession.playing = voiceOn && !voicePaused
     }
 
     /**
      * Ends the session, from the page or from the shade's Stop.
      *
-     * Every engine is silenced for the same reason pause silences all three, and
-     * `voiceOn = false` is what stands the keep-alive service down (see the
-     * session effect below) — so a stop is a stop wherever it came from.
+     * Every engine is silenced for the same reason pause silences all three.
+     *
+     * ── v473 — AND THE KEEP-ALIVE GOES WITH IT, FROM HERE, NOT FROM A RECOMPOSITION ──
+     *
+     * `voiceOn = false` used to be the whole of the stand-down, because the session
+     * effect below is what told the service — but that effect runs from a
+     * `LaunchedEffect`, i.e. from a RECOMPOSITION, and a backgrounded app may not be
+     * recomposing at all. So every stop that happened while Curio was off screen (the
+     * shade's Stop, a sentence that hit the stall timeout) set this state and left the
+     * foreground service running for a reading that had ended: the app stayed in the
+     * phone's "active apps" list with nothing playing, and once its notification was
+     * swiped away there was nothing in the shade to explain it — the member's
+     * *"staying in active apps in background even though nothing is being played or
+     * active notifications"*. Clearing the session and stopping the service HERE makes
+     * a stop a stop wherever it came from and whatever the app is doing; the effect
+     * below still runs on the next recomposition and finds the state it expects.
      */
     fun stopVoice() {
         voiceOn = false
@@ -1399,6 +1424,8 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         ReaderSpeaker.stop()
         NeuralSpeaker.stop()
         EdgeVoice.stop()
+        ReadAloudSession.clear()
+        ReadAloudService.stop(context)
     }
 
     // ── v465h — THE SESSION THAT OUTLIVES THE SCREEN ────────────────────

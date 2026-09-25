@@ -30,6 +30,7 @@ ADD:
 - Topic History: the section the Reveal's star writes to is named **Completed** — it was called Favorite, which is not what the star says or means. The same list, the same star, its own honest name.
 
 FIX:
+- Reading: read aloud keeps Curio awake only while it is actually reading — a reading stopped from the notification, or one that ended while Curio was off screen, left the app running in the background with nothing playing and nothing in the shade. A paused reading now keeps its notification and its **Carry on** button without the app being listed as active.
 - Explore: completing a topic from its page marks it explored — it joins Recents as an explored row instead of keeping the **Unexplored** tag it picked up when you backed out of it earlier.
 - Explore: Recents lists the topics you have already finished — a topic marked done in an earlier version, or an explore that had dropped off the recent list, appears again as an explored row.
 - Reading: a full stop is a breath now on every voice — the online voice's clip had its own trailing silence played in full, because nothing ever cut it, and a downloaded pack that ended in a low hiss was never recognised as ending in silence at all, so Kokoro held the longest gap of the three. Both are cut to the same short breath the Full stop break slider sets, and Piper · Lessac — the one that was a little too quick — is a little longer.

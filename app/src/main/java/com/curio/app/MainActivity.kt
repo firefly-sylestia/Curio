@@ -172,6 +172,21 @@ class MainActivity : ComponentActivity() {
         // Load the persisted explore-session flow state (active session +
         // recently explored/unexplored lists) before any screen reads it.
         ExploreSessionStore.seed(this)
+        // ── v473 — A READING THAT IS NOT RUNNING HOLDS NOTHING ───────────────
+        //
+        // The member: *"the curio is now staying in active apps in background even
+        // though nothing is being played or active notifications"*. The read-aloud
+        // keep-alive is a foreground service, and this is the reconciliation that
+        // makes opening the app the last word on it: the LIVE session is process
+        // state, so if this process has none there is no reading to keep alive —
+        // whatever pinned those threads is finished, and any notification a paused
+        // reading had detached (which the system never removes on its own) goes with
+        // it, because the service cancels it in `onDestroy`. A reading that IS live
+        // is left exactly as it is: this only ever takes down what has nothing behind
+        // it.
+        if (!com.curio.app.infrastructure.ReadAloudSession.active) {
+            com.curio.app.infrastructure.ReadAloudService.stop(this)
+        }
         // v29 — load per-topic reading/watching progress before any screen
         // (reveal / Cabinet / detail) reads it.
         TopicProgressStore.seed(this)

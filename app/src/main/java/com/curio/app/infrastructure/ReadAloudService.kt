@@ -66,9 +66,51 @@ class ReadAloudService : Service() {
         when (intent?.action) {
             ACTION_TOGGLE -> ReadAloudSession.toggle()
             ACTION_NEXT -> ReadAloudSession.next()
-            ACTION_STOP -> ReadAloudSession.stop()
+            ACTION_STOP -> {
+                // ── v473 — A STOP TAKES THE KEEP-ALIVE DOWN HERE, NOT IN THE READER ──
+                //
+                // The member: *"the curio is now staying in active apps in
+                // background even though nothing is being played or active
+                // notifications"*. The reading is driven by the READER, and the
+                // reader's own teardown (which used to be the only thing that stood
+                // this service down) runs from a `LaunchedEffect` — i.e. from a
+                // RECOMPOSITION, which a backgrounded app may not be doing at all.
+                // So a Stop tapped in the shade while Curio was off screen could set
+                // the page's state and leave the foreground service — and the
+                // process it pins — running for a reading that had ended: swiping the
+                // notification away then left the app listed as active with nothing
+                // playing and nothing in the shade.
+                //
+                // The member's own stop still runs first ([ReadAloudSession.stop]),
+                // so the page and this service agree about the state either way; and
+                // then the notification and the foreground state go with it, from
+                // here, where the work is already done.
+                ReadAloudSession.stop()
+                ReadAloudSession.clear()
+                return standDown()
+            }
         }
         return render()
+    }
+
+    /**
+     * ── v473 — A NOTIFICATION MUST NOT OUTLIVE ITS SERVICE ────────────────
+     *
+     * A notification detached with `STOP_FOREGROUND_DETACH` — which is how a
+     * paused reading keeps its controls without holding the foreground state
+     * ([hold]) — is *by design* left posted when the service it belongs to is
+     * destroyed, because the whole point of detaching is that the notification is
+     * the member's, not the service's. That is right for a read-aloud service that
+     * is still alive behind it and wrong for one that is gone: a *Paused · <book>*
+     * notification whose Carry on button belongs to a dead process is exactly the
+     * notification that outlived the app the member reported in v470. Every way out
+     * of this service — the reader's own `stopService`, a stop from the shade, the
+     * OS reclaiming it — passes through here, so this is the one place that has to
+     * say it.
+     */
+    override fun onDestroy() {
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        super.onDestroy()
     }
 
     /**
@@ -87,9 +129,9 @@ class ReadAloudService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         ReadAloudSession.stop()
         ReadAloudSession.clear()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
-        stopSelf()
+        // The same three calls a stop from the shade makes (v473): foreground state,
+        // notification, self. One teardown, whichever door the member used.
+        standDown()
         super.onTaskRemoved(rootIntent)
     }
 
@@ -104,13 +146,43 @@ class ReadAloudService : Service() {
      * that left it up would be a switch that changed nothing visible.
      */
     private fun render(): Int {
-        if (!ReadAloudSession.active) return stopQuietly()
-        if (!AppPreferences.isReadAloudBackgroundEnabled(this)) return stopQuietly()
-        return promote()
+        if (!ReadAloudSession.active) return standDown()
+        if (!AppPreferences.isReadAloudBackgroundEnabled(this)) return standDown()
+        return hold()
     }
 
-    private fun promote(): Int {
+    /**
+     * ── v473 — THE FOREGROUND STATE IS OWED TO WHAT IS PLAYING ────────────
+     *
+     * A foreground service is a claim that *this process is doing something the
+     * member asked for*, and only one of the two live states here is that. WHILE
+     * THE VOICE IS SPEAKING the claim is true and the service is what stops the
+     * phone freezing the reader mid-sentence (the whole reason this service
+     * exists). WHILE IT IS PAUSED nothing is being read, nothing can be lost by
+     * freezing the process, and the claim is false — but the app went on making it,
+     * so a paused reading sat in the phone's own "active apps" list for as long as
+     * the member left it there (their *"nothing is being played or active
+     * notifications"*).
+     *
+     * So the paused state keeps the NOTIFICATION and gives back the FOREGROUND
+     * STATE:
+     *
+     *  · **Detach, never remove.** `STOP_FOREGROUND_DETACH` is what keeps Carry on,
+     *    Next sentence and Stop on the lock screen for a paused reading — the
+     *    controls the member asked for in v465h — while the app stops being listed
+     *    as active. [onDestroy] is what stops such a notification outliving the
+     *    service (it is never removed by the system once detached).
+     *  · **Promote first, unconditionally.** A service started through
+     *    `startForegroundService` owes the system this call within five seconds of
+     *    every start, and the promotion is also what POSTS the notification — so it
+     *    is made first and the detach follows. Resuming re-promotes through the same
+     *    path, which is allowed exactly where a resume can come from: a visible app
+     *    or a tap on this notification (the system allowlists an app the member has
+     *    just interacted with).
+     */
+    private fun hold(): Int {
         val notification = buildNotification()
+        val speaking = ReadAloudSession.playing
         // A start failure (a denied notification permission, a revoking system)
         // must not take the reading down with it.
         return try {
@@ -123,15 +195,24 @@ class ReadAloudService : Service() {
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
+            if (!speaking) stopForeground(STOP_FOREGROUND_DETACH)
             START_NOT_STICKY
         } catch (e: Exception) {
             Log.e(TAG, "Could not keep the read-aloud session alive", e)
-            stopSelf()
-            START_NOT_STICKY
+            standDown()
         }
     }
 
-    private fun stopQuietly(): Int {
+    /**
+     * Nothing here has a reason to exist — take the notification and the foreground
+     * state down together and stop. The explicit `cancel` matters: a notification
+     * that was DETACHED (a paused reading) is not removed by the system when the
+     * service goes, so `stopSelf()` alone would leave it in the shade (see
+     * [onDestroy], which makes the same call for every other way out).
+     */
+    private fun standDown(): Int {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
         stopSelf()
         return START_NOT_STICKY
     }
@@ -144,7 +225,17 @@ class ReadAloudService : Service() {
             .setContentTitle(if (playing) "Reading $title" else "Paused · $title")
             .setContentText("Curio is reading this aloud")
             .setContentIntent(openAppIntent())
-            .setOngoing(true)
+            // ── v473 — ONGOING WHILE IT SPEAKS, SWIPEABLE WHILE IT DOES NOT ───
+            //
+            // Ongoing is right for a reading that is playing: the notification is
+            // the member's control surface AND the promise that the process behind it
+            // is alive, so a stray swipe must not be able to leave an invisible
+            // foreground service. It is wrong for a PAUSED reading, which holds no
+            // foreground state at all ([hold]) — a non-dismissible notification with
+            // nothing playing is the one kind the member cannot clear, and if the
+            // process is reclaimed while it sits there, a tap on it is what cleans it
+            // up ("Carry on" arrives at a service with no session and stands down).
+            .setOngoing(playing)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
@@ -170,12 +261,14 @@ class ReadAloudService : Service() {
      * A control button's intent, aimed at THIS service.
      *
      * `getService` rather than a broadcast receiver: the service is already
-     * running in the foreground, so the intent is delivered to its own
-     * `onStartCommand` with no new start — which is the only shape Android 12+
-     * allows from a notification anyway (starting a service from the background
-     * is refused). The request code is per action because a `PendingIntent` is
-     * cached by its identity: four actions sharing one code would all resolve to
-     * whichever was built first.
+     * running, so the intent is delivered to its own `onStartCommand` — which is
+     * the only shape Android 12+ allows from a notification anyway (starting a
+     * service from the background is refused). And where the service has given up
+     * the foreground state (a paused reading, see [hold]) the tap IS the member
+     * interacting with this notification, which is what allowlists the start it
+     * asks the service to make in return. The request code is per action because a
+     * `PendingIntent` is cached by its identity: four actions sharing one code
+     * would all resolve to whichever was built first.
      */
     private fun controlIntent(action: String, requestCode: Int): PendingIntent =
         PendingIntent.getService(
