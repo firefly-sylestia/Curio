@@ -31,6 +31,7 @@ ADD:
 
 FIX:
 - The words have had a pass: the list of doors in Settings says what each page holds in a few words instead of a sentence, the picker that opens a row is titled with that row's own name, the phone's built-in voice is called **Phone voice** everywhere instead of "the phone's own", and the voice packs' own row states what it is doing in one line.
+- Home: the **+** sheet is a grid of tiles now — Journal page, Book, Note on a topic and To-do list in two columns, with the dictionary across the foot — so the five doors are one glance instead of a list to read.
 - Home and Recents: a row says what it is — Explored, Not explored, Paused at 4:12 — instead of telling you to tap it, and the reminder suggestion appears on the first-run page rather than under every list (the setting itself is unchanged in Preferences).
 - Social: the rows that send you to Online mode no longer repeat the same path line under each of them.
 - Reading: read aloud keeps Curio awake only while it is actually reading — a reading stopped from the notification, or one that ended while Curio was off screen, left the app running in the background with nothing playing and nothing in the shade. A paused reading now keeps its notification and its **Carry on** button without the app being listed as active.

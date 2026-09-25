@@ -157,9 +157,15 @@ fun PersonalCreateLauncher(
 /**
  * What the "+" opens: the four things a member can start writing here — a
  * journal page for a day, a book they are reading with somewhere to put the
- * chapters, a note about one topic, and a to-do list. Each door opens the
- * page's OWN screen (see [personalRouteFor]); none of them is a journal day
- * wearing route params.
+ * chapters, a note about one topic, and a to-do list — plus v449's dictionary
+ * door, which is not writing but is one of the things a member opens this sheet
+ * to do. Each door opens the page's OWN screen (see [personalRouteFor]); none of
+ * them is a journal day wearing route params.
+ *
+ * v474 — the doors are a 2-column GRID of tiles ([CreateEntryTile]), with the
+ * dictionary taking the sheet's whole width beneath them, and no tile carries a
+ * second line of explanation (see the note inside for why a lazy grid must never
+ * be used here).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,6 +179,9 @@ fun CreateEntrySheet(
     onDictionary: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // v474 — read ONCE for the whole sheet (it was called again inside every
+    // door's arguments, on every recomposition of the sheet).
+    val accent = personalAccent()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -194,109 +203,172 @@ fun CreateEntrySheet(
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
-            CreateEntryOption(
-                glyph = CurioIcons.Note,
-                title = "A journal page",
-                body = "Today, how it felt, what you want to keep",
-                accent = personalAccent(),
-                onClick = onJournal
-            )
-            CreateEntryOption(
-                glyph = CurioIcons.MenuBook,
-                title = "A book",
-                body = "Pick a book, review it chapter by chapter",
-                accent = personalAccent(),
-                onClick = onBook
-            )
-            CreateEntryOption(
-                glyph = CurioIcons.TravelExplore,
-                title = "A note on a topic",
-                body = "Write about something you are exploring",
-                accent = personalAccent(),
-                onClick = onTopicNote
-            )
-            // v389 — the door wears the CHECKBOX the to-do page itself draws
-            // (the same mark the journal's to-do tool wears), instead of the
-            // `task_alt` icon, which reads as "task added", not "a list".
-            CreateEntryOption(
-                glyph = null,
-                title = "A to-do list",
-                body = "Check off tasks as you go",
-                accent = personalAccent(),
-                onClick = onTodoList,
-                drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
-            )
+            // ── v474 — THE DOORS ARE A GRID ────────────────────────────────
+            //
+            // The member: *"we can make the buttom sheet option of books etc like
+            // in a grid maybe"*. Five full-width rows made the sheet something to
+            // READ before it was something to choose, and every row carried a
+            // second line explaining a title that needed no explaining ("A
+            // book" / "Pick a book, review it chapter by chapter"). Two columns
+            // of tiles put the whole sheet in one glance; the labels are
+            // unchanged, and the one line of guidance the sheet still needs is
+            // its own title.
+            //
+            // ⚠️ PLAIN `Row`s WITH `weight(1f)`, NEVER A `LazyVerticalGrid`: a
+            // bottom sheet measures its content against an INFINITE height, and a
+            // lazy grid needs a bounded one — it would either crash or force a
+            // fixed height onto the sheet. Five fixed doors do not need laziness.
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CreateEntryTile(
+                    glyph = CurioIcons.Note,
+                    title = "A journal page",
+                    accent = accent,
+                    onClick = onJournal,
+                    modifier = Modifier.weight(1f)
+                )
+                CreateEntryTile(
+                    glyph = CurioIcons.MenuBook,
+                    title = "A book",
+                    accent = accent,
+                    onClick = onBook,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CreateEntryTile(
+                    glyph = CurioIcons.TravelExplore,
+                    title = "A note on a topic",
+                    accent = accent,
+                    onClick = onTopicNote,
+                    modifier = Modifier.weight(1f)
+                )
+                // v389 — the door wears the CHECKBOX the to-do page itself draws
+                // (the same mark the journal's to-do tool wears), instead of the
+                // `task_alt` icon, which reads as "task added", not "a list".
+                CreateEntryTile(
+                    glyph = null,
+                    title = "A to-do list",
+                    accent = accent,
+                    onClick = onTodoList,
+                    modifier = Modifier.weight(1f),
+                    drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
+                )
+            }
             // ── v449 — AND THE DICTIONARY, WHICH IS NOT WRITING ────────
             //
             // The member asked for this page to be reachable from Home's "+" as well
             // as the reader's ⋯ menu, and it belongs here even though nothing is
             // written on it: the sheet is the member's own "what shall I do now" door,
             // and looking a word up is one of the things they do.
-            CreateEntryOption(
+            //
+            // v474 — and it takes the sheet's WHOLE WIDTH rather than a cell, which
+            // says the same thing the comment above does: this one is not a writing
+            // page, and a wide last tile is also what keeps an odd fifth door from
+            // leaving a hole in a two-column grid.
+            CreateEntryTile(
                 glyph = CurioIcons.Search,
                 title = "The dictionary",
-                body = "Any word — online, or offline once you download a volume",
-                accent = personalAccent(),
-                onClick = onDictionary
+                accent = accent,
+                onClick = onDictionary,
+                wide = true
             )
         }
     }
 }
 
+/**
+ * ONE DOOR IN THE "Start writing" GRID (v474).
+ *
+ * The glyph on its accent plate and the label — a tile says two things, which is
+ * all a choice in a sheet needs to say. [wide] is the horizontal form: the
+ * dictionary is not a writing page, so it takes the sheet's whole width instead
+ * of a cell (and that is also what keeps the odd fifth door from leaving a hole
+ * in the grid).
+ *
+ * The tile is built to sit in a `Row` with `weight(1f)`; it never sets its own
+ * width, so both shapes fill whatever the caller gives them.
+ */
 @Composable
-private fun CreateEntryOption(
+private fun CreateEntryTile(
     glyph: String?,
     title: String,
-    body: String,
-    accent: androidx.compose.ui.graphics.Color,
+    accent: Color,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     /** A drawn door mark, for the doors whose icon the bundled font subset
      *  cannot say — the to-do list wears the page's OWN checklist box. */
-    drawn: (@Composable () -> Unit)? = null
+    drawn: (@Composable () -> Unit)? = null,
+    wide: Boolean = false
 ) {
     val ink = MaterialTheme.colorScheme.onSurface
-    // The glyph tone is NOT the raw accent: in light mode the accent is too
-    // pale to read on its own wash, so the icon takes the deeper hero ink.
-    val glyphTint = personalIconTint(accent)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(13.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                // v412 — opaque: the accent is mixed into the card fill instead
-                // of tinting it translucently.
-                color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.24f),
-                modifier = Modifier.size(42.dp)
+        if (wide) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(13.dp)
             ) {
-                Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                    if (drawn != null) {
-                        CompositionLocalProvider(LocalContentColor provides glyphTint) { drawn() }
-                    } else {
-                        CurioIcon(glyph.orEmpty(), null, tint = glyphTint, size = 20.dp)
-                    }
-                }
-            }
-            Column(Modifier.weight(1f)) {
+                CreateEntryTileGlyph(glyph, accent, drawn)
                 Text(
                     title,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = ink
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
+                CurioIcon(CurioIcons.ChevronRight, null, tint = ink.copy(alpha = 0.4f), size = 18.dp)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                CreateEntryTileGlyph(glyph, accent, drawn)
                 Text(
-                    body,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ink.copy(alpha = 0.6f)
+                    title,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = ink,
+                    // Two lines, so "A note on a topic" wraps rather than
+                    // ellipsising into "A note on a…" in a half-width cell.
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            CurioIcon(CurioIcons.ChevronRight, null, tint = ink.copy(alpha = 0.4f), size = 18.dp)
+        }
+    }
+}
+
+/** The 42dp accent plate a door's mark sits on — shared by both tile shapes. */
+@Composable
+private fun CreateEntryTileGlyph(
+    glyph: String?,
+    accent: Color,
+    drawn: (@Composable () -> Unit)?
+) {
+    // The glyph tone is NOT the raw accent: in light mode the accent is too
+    // pale to read on its own wash, so the icon takes the deeper hero ink.
+    val glyphTint = personalIconTint(accent)
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        // v412 — opaque: the accent is mixed into the card fill instead
+        // of tinting it translucently.
+        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.24f),
+        modifier = Modifier.size(42.dp)
+    ) {
+        Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+            if (drawn != null) {
+                CompositionLocalProvider(LocalContentColor provides glyphTint) { drawn() }
+            } else {
+                CurioIcon(glyph.orEmpty(), null, tint = glyphTint, size = 20.dp)
+            }
         }
     }
 }
