@@ -437,8 +437,15 @@ fun HomeScreen(navController: NavController) {
     }
     val exploredTopics = ExploreSessionStore.recentlyExploredState
     val unexploredTopics = ExploreSessionStore.recentlyUnexploredState
-    val recentFeed = remember(recentEntries, exploredTopics, unexploredTopics) {
-        buildRecentFeed(recentEntries, exploredTopics, unexploredTopics)
+    // v472 — the finished topics ride with the explored ones (see
+    // `ExploreSessionStore.doneRecents`): they carry no timestamp, so the feed's
+    // dedupe prefers any row with a real time and they sort behind every genuine
+    // recent discovery rather than in front of one.
+    val finishedTopics = remember(ExploreSessionStore.doneTopicsState) {
+        ExploreSessionStore.doneRecents()
+    }
+    val recentFeed = remember(recentEntries, exploredTopics, unexploredTopics, finishedTopics) {
+        buildRecentFeed(recentEntries, exploredTopics, unexploredTopics, finishedTopics)
     }
     var totalSaved by remember { mutableIntStateOf(0) }
     // v27h — the Topics stat always shows the TRUE catalog total: the

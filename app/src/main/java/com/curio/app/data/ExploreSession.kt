@@ -201,8 +201,25 @@ object ExploreSessionStore {
         queuedSessionsState = readQueued(context)
         cancelledSessionState = getCancelledSession(context)
         recentlyExploredState = readExplored(context)
-        recentlyUnexploredState = readUnexplored(context)
+        // The done set is read BEFORE the unexplored list — that list is
+        // filtered against it, one line down (v472).
         doneTopicsState = readDone(context)
+        // ── v472 — A DONE TOPIC IS NEVER "UNEXPLORED" ─────────────────────
+        // v470 stopped a NEW "left without exploring" row from being written
+        // for a done topic ([recordUnexplored]), but a row written BEFORE the
+        // topic was completed stayed exactly where it was — the member's
+        // *"it still show the unexplored badge for it"*. The done mark is the
+        // durable record of "finished", so the stale rows are dropped here, on
+        // the read that opens the app, and the pruned list is persisted: a bad
+        // row inherited from an older install cannot come back, and nothing is
+        // rewritten unless something actually needed dropping.
+        val unexplored = readUnexplored(context)
+        val prunedUnexplored = unexplored.filterNot { isDone(it.categoryId, it.topicName) }
+        if (prunedUnexplored.size != unexplored.size) {
+            saveUnexplored(context, prunedUnexplored)
+        } else {
+            recentlyUnexploredState = unexplored
+        }
         readPendingWrite(context)
     }
 
@@ -655,17 +672,81 @@ object ExploreSessionStore {
      * AND the explored recents entry together, which is right when the member is
      * taking back an explore and wrong when they are only clearing the Reveal's
      * Completed star — the topic really was explored, and Home's recents should
-     * keep saying so. This touches the done set alone, so the star and the done
-     * mark can be set and cleared independently of the history.
+     * keep saying so.
+     *
+     * ── v472 — AND COMPLETING IS EXPLORING ────────────────────────────────
+     *
+     * The member: *"the completed from topic reveal still doesnt mark the topic
+     * explored and it still show the unexplored badge for it"*. It did neither,
+     * because the completing half only wrote the done mark. So it now goes
+     * through **[recordExplored]** — the same door the Reveal's Explore button
+     * uses — which is what "mark the topic explored" means to the member:
+     *
+     *  - a real recents row with a real timestamp (it leads Home's Recents),
+     *    tagged "Resumed" only when the topic had been left without exploring;
+     *  - the done mark that keeps the topic out of the shuffle deck;
+     *  - the quests feed, exactly as exploring does;
+     *  - and the stale "left without exploring" row dropped, which is the badge
+     *    the member was still seeing. [removeUnexplored] after it is the belt for
+     *    a topic that sat in BOTH lists (a shape older versions could write):
+     *    [recordExplored] only clears the unexplored row it can see while it is
+     *    recording.
+     *
+     * **Clearing is untouched.** Un-starring (
+     * `setCompleted(…, completed = false)`) still touches the done set alone, so
+     * the history the topic already earned stays exactly as v470 left it — see
+     * [unmarkDone] for the door that rolls it back wholesale.
      */
     fun setCompleted(context: Context, categoryId: CategoryId, topicName: String, completed: Boolean) {
         if (topicName.isBlank()) return
-        if (completed) addDone(context, categoryId, topicName) else removeDone(context, categoryId, topicName)
+        if (!completed) {
+            removeDone(context, categoryId, topicName)
+            return
+        }
+        recordExplored(context, categoryId, topicName)
+        removeUnexplored(context, categoryId, topicName)
     }
 
     /** True if the topic is marked done (explored or "already seen"). */
     fun isDone(categoryId: CategoryId, topicName: String): Boolean =
         doneKey(categoryId, topicName) in doneTopicsState
+
+    /**
+     * ── v472 — THE FINISHED TOPICS, AS RECENTS ROWS ───────────────────────
+     *
+     * The member: *"also in recently show the explored topics too"*. The done
+     * set is the app's own durable record of finished topics (unbounded, unlike
+     * the 12-entry recents lists) and every entry in it got there through
+     * [recordExplored] or [setCompleted] — i.e. the member explored it, completed
+     * it, or marked it already seen. So it is also the record that shows them:
+     * Recents now renders it beside the explored rows.
+     *
+     * Two rules make that safe rather than a second source of truth:
+     *
+     *  - **Nothing is copied.** These rows are derived from the mark itself, so
+     *    an older install's completions (and the explores the 12-entry recents
+     *    cap had already dropped) appear with no migration, no renamed pref and
+     *    nothing that can go stale against the record it came from.
+     *  - **[exploredAtMillis] is 0** — the one honest timestamp for "finished at
+     *    some point before today". Recents sorts by time, so a row carrying a
+     *    real time (a fresh explore or completion, a saved entry) always wins
+     *    the feed's one-row-per-topic dedupe and these sit at the feed's end,
+     *    where they cannot push a recent discovery off Home's five-row preview.
+     */
+    fun doneRecents(): List<ExploredTopic> = doneTopicsState.mapNotNull { key ->
+        val sep = key.indexOf("::")
+        if (sep <= 0) return@mapNotNull null
+        val categoryId = CategoryId.values().firstOrNull { it.name == key.substring(0, sep) }
+            ?: return@mapNotNull null
+        val topicName = key.substring(sep + 2)
+        if (topicName.isBlank()) null
+        else ExploredTopic(
+            categoryId = categoryId,
+            topicName = topicName,
+            exploredAtMillis = 0L,
+            wasUnexplored = false
+        )
+    }
 
     /**
      * Un-marks a done topic ("not watched after all") — the exact inverse of
@@ -887,11 +968,13 @@ private fun ExploreSession.toJson(): JSONObject = JSONObject()
  *
  * Called from every path that ENDS a session the member says they finished (the
  * shade's Completed action, the reminder's, the write-it-down confirm on Home and
- * the back-to-app dialog) — the one place the two halves of "completed" are
- * written together: the SENTIMENT that Topic History's Completed list reads, and
- * the done mark that keeps the topic out of the shuffle deck and stops a later
- * back-out from re-listing it as unexplored (see
- * [ExploreSessionStore.recordUnexplored]).
+ * the back-to-app dialog) — the one place the halves of "completed" are written
+ * together: the SENTIMENT that Topic History's Completed list reads, and the done
+ * mark that keeps the topic out of the shuffle deck and stops a later back-out
+ * from re-listing it as unexplored (see [ExploreSessionStore.recordUnexplored]).
+ * Since v472 that done mark is written through [ExploreSessionStore.setCompleted]'s
+ * record-the-explore path, so completing a topic from the shade records it in
+ * Recents exactly as completing it from the Reveal's star does.
  *
  * A session with no id (a legacy or queued session written before v470) marks
  * nothing rather than guessing — there is no honest way to resolve a name to an

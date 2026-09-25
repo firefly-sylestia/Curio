@@ -98,13 +98,22 @@ internal sealed interface RecentFeedItem {
  * to the newest one, and a topic's explored/unexplored row is superseded
  * by its newest saved entry (or vice-versa, by timestamp) — so the same
  * topic never appears twice on Home or in Recents.
+ *
+ * v472 — [finished] is the store's done record, handed in already shaped as
+ * explored rows (see `ExploreSessionStore.doneRecents`), so a topic the member
+ * completed before completing recorded anything, or one the 12-entry recents cap
+ * had pushed out, is still listed as explored. They carry no timestamp, so the
+ * dedupe above lets a row with a real time supersede them and they sort to the
+ * end of the feed rather than over a recent discovery.
  */
 internal fun buildRecentFeed(
     entries: List<CurioEntry>,
     explored: List<ExploredTopic>,
-    unexplored: List<UnexploredTopic>
+    unexplored: List<UnexploredTopic>,
+    finished: List<ExploredTopic> = emptyList()
 ): List<RecentFeedItem> = buildList {
     addAll(explored.map { RecentFeedItem.Explored(it) })
+    addAll(finished.map { RecentFeedItem.Explored(it) })
     addAll(unexplored.map { RecentFeedItem.Unexplored(it) })
     addAll(entries.map { RecentFeedItem.SavedEntry(it) })
 }
@@ -142,8 +151,14 @@ fun RecentScreen(navController: NavController) {
     }
     val explored = ExploreSessionStore.recentlyExploredState
     val unexplored = ExploreSessionStore.recentlyUnexploredState
-    val feed = remember(entries, explored, unexplored) {
-        buildRecentFeed(entries, explored, unexplored)
+    // v472 — every topic the member has finished (the store's done record), so
+    // the page shows the topics completed before completing wrote a recents row
+    // too. Read as a state key, so marking one done updates the page live.
+    val finished = remember(ExploreSessionStore.doneTopicsState) {
+        ExploreSessionStore.doneRecents()
+    }
+    val feed = remember(entries, explored, unexplored, finished) {
+        buildRecentFeed(entries, explored, unexplored, finished)
     }
     // v3xx — LONG-PRESS a row for more (default tap opens the TOPIC now):
     // the option pill offers the alternative actions (write about it, open
@@ -255,6 +270,14 @@ val glassBackdrop = rememberLayerBackdrop()
                                 CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
                             ) { launchSingleTop = true }
                         }, false))
+                        // v472 — this reaches the v472 finished rows too (a
+                        // `doneRecents` topic carries `exploredAtMillis == 0`),
+                        // and it means what it means on every explored row:
+                        // `removeExplored` rolls back the recents entry AND the
+                        // done mark together, because that is the app's own door
+                        // for "not finished after all" — the row is only ever
+                        // listed because of that mark. The Reveal's star is the
+                        // other way back, and it leaves the history alone.
                         add(Triple("Remove from Recents", {
                             ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
                         }, true))

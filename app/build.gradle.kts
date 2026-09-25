@@ -202,11 +202,18 @@ android {
         // file (`changelogs/20260924.txt`): `20260923.txt` is what v1.4.0 shipped
         // with, so it is left exactly as it was rather than renamed out from under
         // the release that owns it.
-        versionCode = 20260924
+        //
+        // v472 — 20260925 / 1.4.2: the +1 / +0.0.1 bump for this push, and
+        // `changelogs/20260925.txt` is its notes file (copied forward from
+        // 20260924.txt, which stays exactly as it was — it is the record of the
+        // build that code shipped as). What it carries: completing a topic from
+        // its page marks it explored (a recents row, and no more stale
+        // **Unexplored** tag), and Recents lists the topics already finished.
+        versionCode = 20260925
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.1"
+        versionName = envReleaseVersion ?: "1.4.2"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
