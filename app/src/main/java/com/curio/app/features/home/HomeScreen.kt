@@ -236,9 +236,13 @@ import kotlinx.coroutines.launch
  *      "Unexplored"), and the latest saved entries as solid category-
  *      tinted cards (View all → Cabinet), or a beautiful empty-state card
  *      prompting the first spin.
- *   6. **Reminder CTA** (only when reminder is OFF) — a subtle ghost-style
- *      card suggesting the user try a daily shuffle reminder, navigating to
- *      Settings.
+ *   6. **Reminder CTA** (only when the reminder is OFF *and* Recents is
+ *      still empty) — a subtle ghost-style card suggesting the user try a
+ *      daily shuffle reminder, navigating to Settings. v474 — the second
+ *      half of that condition is new: standing under a full Recents list it
+ *      was a sixth block on a five-block page, so it now belongs to the
+ *      first-run page it was written for. The setting itself is untouched
+ *      (Settings → Preferences → "Daily shuffle reminder").
  *
  *  v147 — the drawer itself now lives at the NavHost root (drawn ABOVE the
  *  floating pill bar, which stays composed underneath): Home's hamburger
@@ -1160,6 +1164,19 @@ fun HomeScreen(navController: NavController) {
             Spacer(Modifier.height(12.dp))
 
             // ── 5. Recents — explored + unexplored topics and recent entries ──
+            //
+            // v387 — the saved-capture rows left Home's recents: the member's own
+            // writing is the Home shelf now, so this list is explored /
+            // unexplored topics only (the saved archive keeps its Cabinet, its
+            // Recents page and its detail view).
+            //
+            // v474 — HOISTED out of the section's own Column: the reminder nudge
+            // below (section 6) hides itself while there is nothing here yet, so
+            // the emptiness has to be readable one block further down than it
+            // was declared. Same value, same `remember` key — nothing recomputes.
+            val recentPreview = remember(recentFeed) {
+                recentFeed.filterNot { it is RecentFeedItem.SavedEntry }.take(5)
+            }
             Column(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -1169,13 +1186,6 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                // v387 — the saved-capture rows left Home's recents: the
-                // member's own writing is the Home shelf now, so this list is
-                // explored / unexplored topics only (the saved archive keeps
-                // its Cabinet, its Recents page and its detail view).
-                val recentPreview = remember(recentFeed) {
-                    recentFeed.filterNot { it is RecentFeedItem.SavedEntry }.take(5)
-                }
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1264,7 +1274,10 @@ fun HomeScreen(navController: NavController) {
                                         category = CurioCategories.byId(explored.categoryId),
                                         topicName = explored.topicName,
                                         tag = if (explored.wasUnexplored) "Resumed" else null,
-                                        subtitle = "Explored · tap to open",
+                                        // v474 — the state, and nothing else. "· tap to
+                                        // open" was an instruction the chevron already
+                                        // gives.
+                                        subtitle = "Explored",
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(explored.categoryId.routeSlug, explored.topicName)
@@ -1278,7 +1291,7 @@ fun HomeScreen(navController: NavController) {
                                         category = CurioCategories.byId(unexplored.categoryId),
                                         topicName = unexplored.topicName,
                                         tag = "Unexplored",
-                                        subtitle = "Left without exploring · tap to resume",
+                                        subtitle = "Not explored",
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
@@ -1306,7 +1319,15 @@ fun HomeScreen(navController: NavController) {
             }
 
             // ── 6. Reminder nudge (when reminders off) ─────────────────
-            if (!reminderEnabled) {
+            //
+            // v474 — AND ONLY WHILE HOME HAS NOTHING TO SHOW YET. Standing alone
+            // under a full Recents list it was a sixth block on a page that
+            // already had five, asking for a setting nobody came to Home for;
+            // folded into the first-run page it is the last thing a new member
+            // reads, which is the member who wants a daily nudge. The setting
+            // itself never moves — Settings → Preferences → "Daily shuffle
+            // reminder" — so nothing is lost for anyone who explored already.
+            if (!reminderEnabled && recentPreview.isEmpty()) {
                 Spacer(Modifier.height(16.dp))
                 ReminderNudgeCard(
                     surface = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -2267,7 +2288,11 @@ private fun FirstTimeEmpty(
                 textAlign = TextAlign.Center
             )
             Text(
-                "Shuffle the deck to discover your first topic. Capture what you find and it'll land here.",
+                // v474 — no instruction: the two buttons under this line ARE
+                // the instruction ("Pick a lane" / "Surprise me"), and the quest
+                // card above already says "Shuffle the deck". This says what the
+                // area is for.
+                "Captures from your first topic land here.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -4172,7 +4197,9 @@ private fun QueuedExploreRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                "Paused at ${formatElapsed(session.elapsedMillis())} · tap to resume",
+                // v474 — the row is tappable and says so by being a row; the
+                // state is the information.
+                "Paused at ${formatElapsed(session.elapsedMillis())}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -4226,7 +4253,7 @@ private fun CancelledExploreRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                "Cancelled at ${formatElapsed(session.elapsedMillis())} · tap to resume",
+                "Cancelled at ${formatElapsed(session.elapsedMillis())}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

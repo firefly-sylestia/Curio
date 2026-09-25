@@ -536,8 +536,12 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                 LaunchedEffect(enginePicker, picker) {
                     engines = readerEngines(context)
                 }
+                // v474 — ONE NAME FOR THE PHONE'S BUILT-IN READING ("Phone
+                // voice") everywhere on this page. It used to be "The phone's
+                // own" on the two VALUES and on the picker's first choice, a
+                // sentence-shaped name printed four times on one screen.
                 val engineLabel = engines.firstOrNull { it.first == ReaderLook.speakEngine }?.second
-                    ?: if (ReaderLook.speakEngine.isBlank()) "The phone's own"
+                    ?: if (ReaderLook.speakEngine.isBlank()) "Phone voice"
                     else ReaderLook.speakEngine
                 Surface(
                     onClick = { enginePicker = true },
@@ -574,7 +578,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                         containerColor = palette.paper,
                         title = {
                             Text(
-                                "Which engine reads",
+                                "Engine",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontFamily = readerTypeFamily(ReaderLook.typeFace)
                                 ),
@@ -607,8 +611,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                     }
                                 }
                                 Text(
-                                    "A better voice means a better engine — a neural " +
-                                        "text-to-speech engine you install shows up here.",
+                                    "Neural text-to-speech engines you install show up here.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = palette.ink.copy(alpha = 0.6f),
                                     modifier = Modifier.padding(vertical = 8.dp)
@@ -694,7 +697,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                 // describes the wrong state is worse than a terse one.
                                 voices.firstOrNull { it.first == ReaderLook.speakVoice }?.second
                                     ?: ReaderLook.speakVoice.substringAfterLast('#', "").ifBlank {
-                                        if (ReaderLook.speakVoice.isBlank()) "The phone's own"
+                                        if (ReaderLook.speakVoice.isBlank()) "Phone voice"
                                         else ReaderLook.speakVoice
                                     }
                             },
@@ -711,7 +714,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                         containerColor = palette.paper,
                         title = {
                             Text(
-                                "Which voice reads",
+                                "Voice",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontFamily = readerTypeFamily(ReaderLook.typeFace)
                                 ),
@@ -734,7 +737,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                     ReaderLook.speakEngine != ReaderEngine.EDGE
                                 ) {
                                     VoiceChoice(
-                                        label = "The phone's own",
+                                        label = "Phone voice",
                                         live = ReaderLook.speakVoice.isBlank(),
                                         palette = palette
                                     ) { ReaderLook.speakVoice = "" }
@@ -828,7 +831,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                             containerColor = palette.paper,
                             title = {
                                 Text(
-                                    "Who reads it",
+                                    "Narrator",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontFamily = readerTypeFamily(ReaderLook.typeFace)
                                     ),
@@ -974,8 +977,11 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                 // part on a phone, and a member watching a bar that
                                 // no longer moves deserves to know the network is
                                 // not the reason.
-                                unpacking -> "The pack has arrived \u2014 unpacking it now. " +
-                                    "No data left to fetch."
+                                // v474 — one clause, in the row's own dot style:
+                                // the download is DONE and the phone is unpacking.
+                                // (The old line was two sentences of prose, and it
+                                // was the only status on this page written as such.)
+                                unpacking -> "Download complete \u00b7 unpacking"
                                 failed -> failure ?: "The download did not finish."
                                 else -> pack.voiceLabel + " \u00b7 " + pack.sizeLabel
                             }
@@ -1076,7 +1082,10 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                                 text = when {
                                                     testing == pack.id -> "Testing\u2026"
                                                     health[pack.id] != null -> health[pack.id].orEmpty()
-                                                    else -> "Test it"
+                                                    // v474 — "Test" matches the row's
+                                                    // other one-word actions (Download /
+                                                    // Remove / Retry / Stop).
+                                                    else -> "Test"
                                                 },
                                                 style = MaterialTheme.typography.labelMedium,
                                                 color = palette.accent,
@@ -1097,7 +1106,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                                                     NeuralSpeaker.prepare(context, pack)
                                                                 }.getOrDefault(false)
                                                                 if (!ok) {
-                                                                    "Could not be loaded \u2014 the phone's voice reads instead."
+                                                                    "Could not load \u00b7 using the phone's voice"
                                                                 } else {
                                                                     val speakers = NeuralSpeaker.speakerCount()
                                                                     val loaded = if (speakers > 1) {
@@ -1142,8 +1151,8 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                                                             heard.await()
                                                                         } == true
                                                                         if (!spoke) {
-                                                                            "$loaded, but it made no sound \u2014 " +
-                                                                                "the phone's voice reads instead."
+                                                                            "$loaded \u00b7 no sound \u00b7 " +
+                                                                                "using the phone's voice"
                                                                         } else {
                                                                             val seconds =
                                                                                 (System.currentTimeMillis() - startedAt) / 1000f

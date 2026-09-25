@@ -216,7 +216,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                             "Sign in to open cards",
                             "Social cards need an account with Online mode on."
                         )
-                        SettingsOptionRowLink("Settings → Online mode") {
+                        SettingsOptionRowLink("Open Online mode") {
                             navController.navigate(CurioRoutes.SETTINGS_ONLINE)
                         }
                     }

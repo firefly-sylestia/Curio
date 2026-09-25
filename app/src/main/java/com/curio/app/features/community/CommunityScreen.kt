@@ -551,7 +551,7 @@ fun CommunityScreen(navController: NavController) {
                                 SettingsOptionRow(
                                     icon = CurioIcons.Person,
                                     title = "Sign in or create an account",
-                                    subtitle = "Settings → Online mode",
+                                    subtitle = "",
                                     onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
                                 )
                             }
@@ -564,7 +564,7 @@ fun CommunityScreen(navController: NavController) {
                                 SettingsOptionRow(
                                     icon = CurioIcons.Refresh,
                                     title = "Turn Online mode on",
-                                    subtitle = "Settings → Online mode",
+                                    subtitle = "",
                                     onClick = { navController.navigate(CurioRoutes.SETTINGS_ONLINE) }
                                 )
                             }

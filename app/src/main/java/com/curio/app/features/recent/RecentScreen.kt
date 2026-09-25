@@ -347,7 +347,9 @@ private fun RecentFeedRow(
                 topicName = topic.topicName,
                 // v3xx — the default tap now opens the TOPIC (keeps the
                 // discovery open); the write/save flow moved to long-press.
-                label = if (topic.wasUnexplored) "Resumed · tap to open" else "Explored · tap to open",
+                // v474 — "Resumed" is already the tag pill on the title line, and
+                // the chevron already says tap; this line is the state.
+                label = "Explored",
                 tag = if (topic.wasUnexplored) "Resumed" else null,
                 onClick = {
                     navController.navigate(
@@ -362,7 +364,7 @@ private fun RecentFeedRow(
             RecentTopicRow(
                 categoryId = topic.categoryId,
                 topicName = topic.topicName,
-                label = "Left without exploring · tap to resume",
+                label = "Not explored",
                 tag = "Unexplored",
                 onClick = {
                     navController.navigate(

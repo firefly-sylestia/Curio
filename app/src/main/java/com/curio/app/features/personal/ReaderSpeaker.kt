@@ -199,7 +199,10 @@ internal object ReaderSpeaker {
                 name to label
             }
             .sortedBy { it.second }
-        return listOf("" to "The phone's own") + installed
+        // v474 — "Phone voice", the one name for the built-in engine (see
+        // ReaderSettingsScreen: the row value, the picker's first choice and
+        // this label are one string now).
+        return listOf("" to "Phone voice") + installed
     }
 
     /** The engine's voices, for the picker — name to a label a member can read. */

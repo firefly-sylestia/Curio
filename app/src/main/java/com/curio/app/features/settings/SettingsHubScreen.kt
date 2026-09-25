@@ -1528,14 +1528,14 @@ private val SettingsSections = listOf(
                 headerTitle = null,
                 headerSubtitle = null,
                 rows = listOf(
-                    SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint, and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
+                    SettingsRowEntry(CurioIcons.DarkMode, "Appearance", "Theme, tint and pastel color", CurioRoutes.SETTINGS_APPEARANCE),
                     // v26 — Preferences: search engine, explore behavior, and
                     // the pet's personality — "how Curio behaves" choices
                     // pulled out of Notifications and Appearance.
                     // v27 — Notifications is gone: every notification control
                     // (daily reminder, live notification, explore bubble)
                     // lives in Preferences now.
-                    SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore, and notification", CurioRoutes.SETTINGS_PREFERENCES),
+                    SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore and notifications", CurioRoutes.SETTINGS_PREFERENCES),
                     // ── v461 — RECORDING, EXPERIMENTS AND THE PET DESIGNER MOVED ──
                     //
                     // The member: *"maybe simplifying settings, like yk some are
@@ -1553,8 +1553,8 @@ private val SettingsSections = listOf(
                     // the five-tap version trick in Support); these two moved
                     // in here from the old Explore section so they stay one
                     // tap away next to Appearance.
-                    SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
-                    SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
+                    SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Hide or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
+                    SettingsRowEntry(CurioIcons.History, "Topic history", "Completed, pinned and every capture", CurioRoutes.TOPIC_HISTORY),
                     // v456 — THE SHARE HUB IS A DEV DOOR NOW. The member:
                     // *"make the share hub hide from settings and its only
                     // accessible from the dev settings"*. It is a gallery for
@@ -1586,16 +1586,16 @@ private val SettingsSections = listOf(
                     // row, and its copy is the full sentence the designed
                     // secondary card carried: the row is the place for it
                     // now, with room to wrap.
-                    SettingsRowEntry(CurioIcons.Refresh, "Online mode", "Sign in, keep your account in sync, and set your privacy rules", CurioRoutes.SETTINGS_ONLINE, plain = true),
+                    SettingsRowEntry(CurioIcons.Refresh, "Online mode", "Account, sync and privacy", CurioRoutes.SETTINGS_ONLINE, plain = true),
                     // v26 — recycle bin for soft-deleted captures.
                     SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN, plain = true),
                     // v112 — the dedicated Updates sub-page (its own UI,
                     // replaces the old update card inside Support).
-                    SettingsRowEntry(CurioIcons.Download, "Updates", "Your build, release notes & update checker", CurioRoutes.UPDATES, plain = true),
+                    SettingsRowEntry(CurioIcons.Download, "Updates", "Your build and the update checker", CurioRoutes.UPDATES, plain = true),
                     // v403 — What's New: this version's highlights, each with a
                     // door straight to the thing it describes. It also opens
                     // itself once per version; this row is the way back.
-                    SettingsRowEntry(CurioIcons.AutoAwesome, "What's New", "The highlights of this version, and where to find them", CurioRoutes.WHATS_NEW),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "What's New", "The highlights of this version and where to find them", CurioRoutes.WHATS_NEW),
                     // v24 — merged into the shared Support & diagnostics page
                     // (same screen Profile's "Support & diagnostics" opens).
                     // v408 — a PLAIN row (it was the "Help & feedback" card).

@@ -259,13 +259,21 @@ private fun SettingsOptionCopy(
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = subtitleMaxLines,
-            overflow = TextOverflow.Ellipsis
-        )
+        // v474 — a BLANK subtitle renders NOTHING (no empty line held open).
+        // Rows whose title already names the action ("Turn Online mode on")
+        // and whose tap already goes there don't need a second line repeating
+        // the destination — the nine empty-state rows across the social
+        // screens all used to print "Settings → Online mode" under exactly
+        // such a title.
+        if (subtitle.isNotBlank()) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = subtitleMaxLines,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

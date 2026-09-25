@@ -261,7 +261,7 @@ val glassBackdrop = rememberLayerBackdrop()
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
                         title = "Manage categories",
-                        subtitle = "Show, hide, or reorder lanes",
+                        subtitle = "Hide or reorder lanes",
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -499,7 +499,7 @@ val glassBackdrop = rememberLayerBackdrop()
         // v-tablet — pinned overlay is phone-only; wide windows scroll the
         // hero as the list's first item instead.
         if (!wide) {
-            SettingsHeroHeader(title = "Manage categories", subtitle = "Show, hide, or reorder lanes", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+            SettingsHeroHeader(title = "Manage categories", subtitle = "Hide or reorder lanes", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
         }
 
     }
