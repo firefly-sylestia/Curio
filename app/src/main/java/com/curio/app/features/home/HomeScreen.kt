@@ -187,6 +187,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioFillInk
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioTintOn
@@ -229,7 +230,9 @@ import kotlinx.coroutines.launch
  *      button picks a random category (or a random mix) and opens that
  *      deck on the Shuffle tab.
  *   3. **Currently exploring / Queued** — the live session card and any
- *      paused sessions set aside for later.
+ *      paused sessions set aside for later (v474 — the section shows the
+ *      NEWEST one and puts the rest behind a "N more" note that opens them in
+ *      place, instead of a row per session).
  *   4. **Saved** — bookmarked quotes + pinned topics (hidden when empty),
  *      each row tappable through to its entry / topic.
  *   5. **Recents** — explored topics, unexplored topics (tagged
@@ -1070,7 +1073,20 @@ fun HomeScreen(navController: NavController) {
             // When a new explore replaced the running one, the old session is
             // paused (time banked) and queued here. Tap a row to swap it back
             // into the active slot; the ✕ discards it.
+            // v474 — one row by default (the newest) with the rest behind the
+            // "N more" note — see the block below for why, and for the rule that
+            // keeps an odd fifth session reachable.
             val queuedSessions = ExploreSessionStore.queuedSessionsState
+            // ── v474 — ONE ROW, AND THE REST BEHIND IT ────────────────────
+            //
+            // The member's own pick (from "a row each" and this): a member who
+            // has set three explores aside was reading three rows on Home for
+            // work they had already decided to put off. The **newest** is the one
+            // shown — the queue is newest-first (see `ExploreSessionStore`'s own
+            // `listOf(paused) + readQueued(...)`) — and the ones behind it are
+            // never lost: the note under the row opens the rest IN PLACE, so
+            // nothing needed a new page, and no session became unreachable.
+            var queuedExpanded by remember { mutableStateOf(false) }
             if (queuedSessions.isNotEmpty()) {
                 Column(
                     modifier = Modifier
@@ -1082,13 +1098,22 @@ fun HomeScreen(navController: NavController) {
                         .align(Alignment.CenterHorizontally)
                 ) {
                     Text(
-                        "Queued explores",
+                        // v474 — the count belongs in the heading once the list
+                        // is collapsed: it is the one thing the hidden rows were
+                        // saying, in three words instead of three cards.
+                        if (queuedSessions.size > 1) {
+                            "Queued explores \u00b7 ${queuedSessions.size}"
+                        } else {
+                            "Queued explores"
+                        },
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(Modifier.height(10.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        queuedSessions.forEachIndexed { index, queued ->
+                        val shown =
+                            if (queuedExpanded) queuedSessions else queuedSessions.take(1)
+                        shown.forEachIndexed { index, queued ->
                             QueuedExploreRow(
                                 session = queued,
                                 onResume = {
@@ -1113,6 +1138,18 @@ fun HomeScreen(navController: NavController) {
                                 onDiscard = { ExploreSessionStore.removeQueued(context, index) }
                             )
                         }
+                    }
+                    if (queuedSessions.size > 1) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            if (queuedExpanded) "Show less" else "${queuedSessions.size - 1} more",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = curioDialogActionColor(),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable { queuedExpanded = !queuedExpanded }
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
                     }
                 }
                 Spacer(Modifier.height(12.dp))

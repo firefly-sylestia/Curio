@@ -20,11 +20,15 @@ from the state rather than from memory.
 - **HOME'S "+" SHEET IS A GRID (`CreateEntrySheet` → `CreateEntryTile`).** The member's own suggestion when answering the structural question: *"we can make the buttom sheet option of books etc like in a grid maybe"*. Five full-width rows with a second line each became **two columns of tiles** (glyph on its accent plate + the label, nothing else) with the **dictionary taking the sheet's whole width** beneath them — the one door that isn't a writing page, and the shape that keeps an odd fifth door from leaving a hole in a 2-column grid. `personalAccent()` is now read once for the sheet instead of once per door. **⚠️ The grid is plain `Row`s with `weight(1f)` and must never become a `LazyVerticalGrid`:** a sheet measures its content against an infinite height and a lazy grid needs a bounded one.
 - **⚠️ NEW STANDING INSTRUCTION, FROM THIS REQUEST: ASK BEFORE REMOVING A CONTROL.** *"when u do clutter remove buttons … etc ask me"*. Copy shortening is inside the mandate; **removing, merging or hiding a button, row or control is not** — the specific control goes to the member first. Asked which surfaces to take next, they chose **Home's stacked blocks ("the most clutter i feel"), the topic reveal, the reader's chrome — and Home's "+" sheet** — and confirmed the reminder-nudge gate stays as built.
 
+### HOME'S BLOCKS — WHAT THE MEMBER PICKED, AND WHAT THEY TURNED DOWN
+
+- **Collapse the queued explores into one row — DONE (v474).** Asked as "a row each" vs "one row with a 2 more note", they took the collapse. Section 3 shows the **newest** session (the queue is newest-first), the heading carries the count ("Queued explores · 3"), and a **"2 more"** note opens the rest **in place** — which is what keeps every session reachable, since there is no page listing them; a note that went nowhere would have hidden every row but the newest, resume and discard included.
+- **TURNED DOWN, and must not be revisited without being asked again:** dropping the hero's whole stat bar (Streak · Cabinet · Topics); dropping just the Topics stat; dropping the "TODAY'S QUEST" eyebrow; merging Pages + My shelf into one row with a switch. The member chose none of them — **the hero and the writing rows stay exactly as they are.**
+
 ### NEXT, AND NOT YET STARTED
 
-- **Home's stacked blocks** — the member's own first pick ("the most clutter i feel"). Six blocks in one scroll (hero + stats, quest card, live/queued sessions, saved shelf, writing rows, Recents). **Every removal or merge goes to the member before it is made** — the standing instruction above.
-- **The topic reveal's header controls + floating pill**, then **the reader's chrome**. Both need a rendered screen to judge, not a code read.
-- The "+" sheet is done (above).
+- **The topic reveal's header controls + floating pill**, then **the reader's chrome**. Both need a rendered screen to judge, not a code read; **and both are control removals, so they get put to the member first.**
+- The "+" sheet (grid) and Home's queued rows are both done (above).
 
 **A REAL SAVE DURING THE WORK:** the nudge gate was first written against a `recentPreview` that lives *inside* the Recents `Column` — a compile error the scope read caught before the commit, and the reason the declaration moved.
 
