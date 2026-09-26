@@ -364,7 +364,9 @@ private fun RecentFeedRow(
             RecentTopicRow(
                 categoryId = topic.categoryId,
                 topicName = topic.topicName,
-                label = "Not explored",
+                // v476 — one fact, once: the chip says "Unexplored", so the label
+                // is blank (the member's choice on Home's identical row).
+                label = "",
                 tag = "Unexplored",
                 onClick = {
                     navController.navigate(
@@ -525,15 +527,24 @@ private fun RecentTopicRow(
                         }
                     }
                 }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // v476 — a blank label draws NOTHING (see the unexplored call site);
+                // the row's state is then carried by the chip alone.
+                if (label.isNotEmpty()) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
-            CurioForwardArrow(contentDescription = label, tint = category.categoryInk())
+            CurioForwardArrow(
+                // A blank label leaves the arrow with nothing to read, so it falls
+                // back to the topic's own name.
+                contentDescription = label.ifEmpty { topicName },
+                tint = category.categoryInk()
+            )
         }
     }
 }

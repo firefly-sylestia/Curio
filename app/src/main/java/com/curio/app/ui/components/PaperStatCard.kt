@@ -1,6 +1,7 @@
 package com.curio.app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -127,6 +128,35 @@ fun paperStatCardColor(base: Color): Color {
     }
     return lerp(base, Color(0xFFFFF6EB), 0.62f)
 }
+
+/**
+ * v476 — THE HERO STAT PANE'S BASE SHADE, SHARED BY HOME AND PROFILE.
+ *
+ * The member: *"in glass header the stats of profile and home gets a beautiful
+ * shade of what the hero is, its not the same for normal tear header"*. The glass
+ * header's stat card is built on the bar's own tinted frost
+ * (`lerp(surfaceContainerHigh, rose, …)`), so it reads as a raised card floating on
+ * the header; the torn hero's pane was painted from the hero's OWN fill, so it read
+ * as part of the banner rather than as a card on it.
+ *
+ * The member's answer to the fork was **"keep the hero tint, add the lift"**, so the
+ * base is the hero's own colour LIFTED toward the page's raised surface — the tint
+ * stays the hero's (a lantern of wherever the hero is), and the lift is what buys
+ * the same soft separation the glass card has.
+ *
+ * The lift is larger in LIGHT mode (0.32 vs 0.22): a near-white page needs more of
+ * the neutral mixed in before a saturated hero hue reads as raised, and the hero's
+ * readable ink only gains contrast as the pane lightens, whereas on the dark page a
+ * heavy lift would wash the hero's own colour away. The callers keep the white
+ * top-light they already wore (`lerp(base, White, 0.06f → 0.26f)`) on top of this,
+ * so nothing else on the pane changes.
+ */
+@Composable
+fun heroStatPaneBase(heroFill: Color): Color = lerp(
+    heroFill,
+    MaterialTheme.colorScheme.surfaceContainerHigh,
+    if (isCurioDarkTheme()) 0.22f else 0.32f
+)
 
 /** The pressed two-tone rim around a punch hole (light top-left, shadow bottom-right). */
 private fun DrawScope.drawPressedRim(center: Offset, holeR: Float, ink: Color) {

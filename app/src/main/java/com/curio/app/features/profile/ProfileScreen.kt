@@ -112,6 +112,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.heroStatPaneBase
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
@@ -1058,6 +1059,11 @@ private fun ProfileHero(
                     // card Home's Streak · Cabinet · Topics wears, following the
                     // same toggles (holes + rings + torn edges).
                     val paperStatsOn = AppPreferences.paperStatCardsState
+                    // v476 — the non-paper pane's base is the hero tint LIFTED, so it
+                    // reads as a raised card rather than as part of the banner (the
+                    // glass header's own shade — the member asked the torn header to
+                    // match it; Home wears the same base).
+                    val statPaneBase = heroStatPaneBase(fill)
                     val paperStatBg = paperStatCardColor(fill)
                     val statTearOn = paperStatsOn && AppPreferences.paperStatTearState
                     val statShape: Shape = remember(statTearOn) {
@@ -1096,11 +1102,13 @@ private fun ProfileHero(
                                     // bleed through (blurry broken pane). The
                                     // opaque blends resolve to the same perceived
                                     // tints over the banner while keeping the
-                                    // shadow clean behind them.
+                                    // shadow clean behind them. v476 — the base is
+                                    // the hero tint LIFTED (see heroStatPaneBase),
+                                    // so this pane and Home's are one shade.
                                     Brush.verticalGradient(
                                         listOf(
-                                            lerp(fill, Color.White, 0.06f),
-                                            lerp(fill, Color.White, 0.26f)
+                                            lerp(statPaneBase, Color.White, 0.06f),
+                                            lerp(statPaneBase, Color.White, 0.26f)
                                         )
                                     ),
                                     RoundedCornerShape(20.dp)

@@ -136,6 +136,7 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
+import com.curio.app.ui.components.heroStatPaneBase
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
@@ -812,7 +813,11 @@ fun HomeScreen(navController: NavController) {
                             val paperStatsOn = AppPreferences.paperStatCardsState
                             // v27u — shared paper color (same cream/rose-brown
                             // blend Profile's stat pane uses).
-                            val statGlass = heroFill
+                            // v476 — and the non-paper pane's base is the hero tint
+                            // LIFTED, so it reads as a raised card rather than as part
+                            // of the banner (the glass header's own shade — the member
+                            // asked for the torn header to match it).
+                            val statPaneBase = heroStatPaneBase(heroFill)
                             val paperStatBg = paperStatCardColor(heroFill)
                             // v27h — torn paper edges (separate experiment):
                             // when on, the paper card wears a real torn-paper
@@ -873,8 +878,8 @@ fun HomeScreen(navController: NavController) {
                                             // clean (theme-aware like Profile).
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    lerp(statGlass, Color.White, 0.06f),
-                                                    lerp(statGlass, Color.White, 0.26f)
+                                                    lerp(statPaneBase, Color.White, 0.06f),
+                                                    lerp(statPaneBase, Color.White, 0.26f)
                                                 )
                                             ),
                                             RoundedCornerShape(20.dp)
@@ -1327,8 +1332,15 @@ fun HomeScreen(navController: NavController) {
                                     ExploreTopicRow(
                                         category = CurioCategories.byId(unexplored.categoryId),
                                         topicName = unexplored.topicName,
+                                        // v476 — the row says it ONCE. It wore the
+                                        // "Unexplored" chip AND a "Not explored"
+                                        // subtitle, which is the same fact twice
+                                        // (the member: *"in home there are 2 info
+                                        // duplicate"*); asked which to keep, they
+                                        // chose the CHIP, so the subtitle is blank
+                                        // and ExploreTopicRow skips it.
                                         tag = "Unexplored",
-                                        subtitle = "Not explored",
+                                        subtitle = "",
                                         onClick = {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
@@ -3183,6 +3195,20 @@ private fun DrawerLaneStarMap(
     // BRANCH rather than star by star (the member's own words).
     val familyOrder = remember(familyOf) { familyOf.distinct() }
     val slotFamily = remember(familyOf, familyOrder) { familyOf.map { familyOrder.indexOf(it) } }
+    // v476 — where a lane sits INSIDE its own branch (0 = the family's first
+    // lane, 1 = its last), so a branch can draw star-to-star instead of all at
+    // once (see [bornOf]).
+    val slotBranchRank: List<Float> = remember(slotFamily) {
+        val totals = HashMap<Int, Int>()
+        slotFamily.forEach { f -> totals[f] = (totals[f] ?: 0) + 1 }
+        val seen = HashMap<Int, Int>()
+        slotFamily.map { f ->
+            val total = totals[f] ?: 1
+            val i = seen[f] ?: 0
+            seen[f] = i + 1
+            if (total <= 1) 0f else i.toFloat() / (total - 1).toFloat()
+        }
+    }
     // A faint dust field behind the stars, so the panel has depth without the
     // regular grid the member rejected (v419).
     val dust = remember { starDust(STAR_DUST_COUNT) }
@@ -3247,7 +3273,10 @@ private fun DrawerLaneStarMap(
     // stops cost nothing at draw time — the brush is cached), and it still rides
     // the same `reveal` layer as every star.
     val glowTint = lerp(page, MaterialTheme.colorScheme.primary, GlowTintMix)
-    val glowStrength = if (isCurioDarkTheme()) DarkGlowStrength else LightGlowStrength
+    // v476 — the old single wash is FADED, because the light now comes from the
+    // branches themselves (see [familyGlows]); this is only the page's base glow.
+    val glowStrength =
+        (if (isCurioDarkTheme()) DarkGlowStrength else LightGlowStrength) * CentreGlowFade
     val centreGlow = remember(sizePx, page, glowTint, glowStrength) {
         if (sizePx.width <= 0 || sizePx.height <= 0) {
             null
@@ -3280,6 +3309,56 @@ private fun DrawerLaneStarMap(
     // `null` means "not a lit star": an unexplored, unpicked lane stays the plain
     // solid point v422 settled on.
     val lanesKey = lanes.joinToString(",") { "${it.id.name}:${it.knowledge}:${it.explored}" }
+    // ── v476 — EVERY BRANCH LIGHTS ITS OWN PATCH OF THE SKY ────────────────
+    //
+    // The member: *"the background color glow more gradient abstract gradient but
+    // faint and also more like glow according to that constellation, and smoother
+    // blending and no hard edges"*. One radial wash from the middle became a glow
+    // per FAMILY, centred on the branch's own anchor and tinted with the branch's
+    // own colour, each sampled off the same eased falloff the wash uses (so its
+    // edge is not an edge). The colours are only slightly deeper than the page —
+    // the member asked for FAINT — and the blooms overlap deliberately, which is
+    // what turns a dozen separate spots into one abstract field.
+    val familyAnchors = remember(familyOf) {
+        val firstIndex = LinkedHashMap<CategoryFamily, Int>()
+        familyOf.forEachIndexed { index, family ->
+            if (!firstIndex.containsKey(family)) firstIndex[family] = index
+        }
+        familyOrder.map { family -> firstIndex[family] ?: 0 }
+    }
+    val familyTints = remember(lanesKey, familyOrder) {
+        familyOrder.map { family ->
+            val accents = lanes
+                .filter { CategoryFamily.of(it.id) == family }
+                .map { it.accent }
+            accents.drop(1).fold(accents.firstOrNull() ?: Color.Transparent) { acc, c ->
+                lerp(acc, c, 0.5f)
+            }
+        }
+    }
+    val familyGlows: List<Pair<Brush, Offset>> = remember(
+        sizePx, page, ink, dark, slots, familyAnchors, familyTints
+    ) {
+        if (sizePx.width <= 0 || sizePx.height <= 0) {
+            emptyList()
+        } else {
+            val middle = Offset(sizePx.width / 2f, sizePx.height / 2f)
+            val strength = if (dark) FamilyGlowStrengthDark else FamilyGlowStrengthLight
+            val reach = maxOf(sizePx.width, sizePx.height) * FamilyGlowReach
+            familyAnchors.mapIndexedNotNull { f, index ->
+                val slot = slots.getOrNull(index) ?: return@mapIndexedNotNull null
+                val centre = starPoint(slot, middle, sizePx.width.toFloat(), sizePx.height.toFloat())
+                // Light mode gets the same deepening the dots and lines do, so a
+                // bloom is a real tint on the near-white page instead of a pastel.
+                val tint = if (dark) familyTints[f] else lerp(familyTints[f], ink, LightDotDarken)
+                Brush.radialGradient(
+                    colors = glowStops(page, lerp(page, tint, FamilyGlowTintMix), strength),
+                    center = centre,
+                    radius = reach
+                ) to centre
+            }
+        }
+    }
     val starHalos: List<Pair<Float, Brush>?> = remember(
         lanesKey, starPoints, selected, page, ink, dark, strongest, density
     ) {
@@ -3324,9 +3403,10 @@ private fun DrawerLaneStarMap(
     LaunchedEffect(lanes.size) {
         lit.snapTo(0f)
         // v476 — a longer sweep, because it now carries one BRANCH per turn
-        // instead of one star per turn: at 900ms a family was on and off the
+        // instead of one star per turn, and because each branch is DRAWN inside
+        // its turn rather than switched on: at 900ms a family was on and off the
         // page before the eye could follow it (see [bornOf]).
-        lit.animateTo(1f, tween(1150, easing = FastOutSlowInEasing))
+        lit.animateTo(1f, tween(1320, easing = FastOutSlowInEasing))
     }
     // ── v444 — THE SKY ARRIVES AND LEAVES WITH THE DRAWER ─────────────
     //
@@ -3413,21 +3493,30 @@ private fun DrawerLaneStarMap(
             //    hairline stop exactly at the edge of the halo it runs into
             //    instead of disappearing under it. ──
             fun bornOf(index: Int): Float {
-                // ── v476 — ONE BRANCH AT A TIME ─────────────────────────────
+                // ── v476 — ONE BRANCH AT A TIME, DRAWN STAR TO STAR ────────
                 // Every star of a family shares its family's own window, so a
                 // branch comes on AS A BRANCH — its stars and its own lines
                 // together — and the next family starts a beat later (the
                 // member: *"the animation make it light by branch by branch"*).
-                // The windows are laid across the sweep with a little overlap,
-                // so the sky reads as growing branches, not as a metronome.
+                // Within its window the branch is DRAWN, not switched on: the
+                // family's first lane opens it and its last closes it
+                // ([BranchStarSpread]), and each branch's own progress is eased
+                // ([BranchEasePower]) so it blooms rather than ramping (the
+                // member: *"tune the branch animations branch by branch"*). The
+                // windows still overlap a little, so the sky reads as growing
+                // branches rather than as a metronome.
                 val f = slotFamily.getOrElse(index) { 0 }
                 val step = 1f / familyOrder.size.coerceAtLeast(1)
                 val start = f * step * BranchStagger
                 val span = (step * BranchSpan).coerceAtLeast(0.0001f)
-                val branch = ((lit.value - start) / span).coerceIn(0f, 1f)
+                val rank = slotBranchRank.getOrElse(index) { 0f }
+                val lead = start + span * BranchStarSpread * rank
+                val drawSpan = (span * (1f - BranchStarSpread)).coerceAtLeast(0.0001f)
+                val branch = ((lit.value - lead) / drawSpan).coerceIn(0f, 1f)
+                val eased = 1f - (1f - branch).pow(BranchEasePower)
                 // v444 — and the whole sky is dressed by the drawer's own
                 // progress, so a close takes every star with it.
-                return (branch * reveal.value).coerceIn(0f, 1f)
+                return (eased * reveal.value).coerceIn(0f, 1f)
             }
             fun corePxOf(index: Int): Float {
                 val born = bornOf(index)
@@ -3475,6 +3564,15 @@ private fun DrawerLaneStarMap(
             //    own colour: no rim, no box, nothing to see but light.
             centreGlow?.let { glow ->
                 drawRect(brush = glow, size = size)
+            }
+            // ── v476 — THE BRANCHES' OWN BLOOMS ─────────────────────────────
+            //    Each family's faint glow, drawn over the faded centre wash and
+            //    under the dust, so a speck reads ON the light rather than under
+            //    it. Same eased falloff as the wash (see [glowStops]), so a
+            //    bloom blends into the page with no edge of its own.
+            val branchGlowRadius = maxOf(size.width, size.height) * FamilyGlowReach
+            familyGlows.forEach { (glow, centre) ->
+                drawCircle(brush = glow, radius = branchGlowRadius, center = centre)
             }
             // ── THE SKY, NOT A DIAL (v419) — the astrolabe grid is GONE.
             //    The rings and the twelve spokes were perfectly regular, and
@@ -3692,13 +3790,13 @@ private const val HALO_REACH = 2.7f
  * entirely finished (the member asked for branches, not a metronome) while still
  * leaving the last branch room to complete before the sweep ends.
  */
-private const val BranchStagger = 0.86f
+private const val BranchStagger = 0.90f
 
 /**
  * How long one family's own window runs, as a multiple of its step. Over 1 so the
  * windows OVERLAP a little — the sky grows as branches, not as blinking groups.
  */
-private const val BranchSpan = 1.40f
+private const val BranchSpan = 1.28f
 
 /**
  * How far a lane's own accent is pulled toward the ink when it becomes a halo in
@@ -3725,6 +3823,40 @@ private const val LightLineBoost = 1.30f
  * is only just being drawn out is never a grey ghost ahead of its branch.
  */
 private const val LightLineDarken = 0.30f
+
+/**
+ * v476 — HOW EACH BRANCH'S OWN GLOW IS MADE.
+ *
+ * The member: *"the background color glow more gradient abstract gradient but faint
+ * and also more like glow according to that constellation, and smoother blending and
+ * no hard edges"*. So the single centre wash is kept but FADED ([CentreGlowFade]) and
+ * every family gets its own faint bloom, so the light on the page comes from the
+ * constellations rather than from the middle of the box. Each is a radial gradient
+ * sampled off the same eased curve the wash uses (see [glowStops]), which is what
+ * makes it blend smoothly with no edge at its own radius.
+ */
+private const val FamilyGlowTintMix = 0.34f
+private const val FamilyGlowStrengthDark = 0.26f
+private const val FamilyGlowStrengthLight = 0.34f
+
+/** How far a family's bloom reaches, as a share of the map's longer side. */
+private const val FamilyGlowReach = 0.60f
+
+/** How much of the old single centre wash survives under the per-branch glows. */
+private const val CentreGlowFade = 0.55f
+
+/**
+ * v476 — HOW A BRANCH DRAWS ITSELF.
+ *
+ * The member: *"the animation make it light by branch by branch"* and *"tune the
+ * branch animations branch by branch"*. A family's stars were all lit at once, which
+ * made a branch pop as a block; a share of the branch's window now spreads them
+ * ([BranchStarSpread]) so the constellation is DRAWN star to star inside its own
+ * turn, and each branch's own progress is eased ([BranchEasePower]) so it blooms
+ * rather than ramping linearly.
+ */
+private const val BranchStarSpread = 0.55f
+private const val BranchEasePower = 1.8f
 
 /**
  * v419 — LANES ON A GOLDEN-ANGLE SCATTER (this replaced the v414 lattice).
@@ -4200,16 +4332,23 @@ private fun ExploreTopicRow(
                         }
                     }
                 }
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // v476 — a blank subtitle draws NOTHING (it used to render an
+                // empty Text, which reserved its line). The row's state is then
+                // carried by the chip alone (see the unexplored call site).
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             CurioForwardArrow(
-                contentDescription = subtitle,
+                // A blank subtitle leaves the arrow with no label to read, so it
+                // falls back to the topic's own name.
+                contentDescription = subtitle.ifEmpty { topicName },
                 tint = category.categoryInk(),
                 modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp)
             )

@@ -9657,6 +9657,43 @@ scheme role means something different there than in the app's own schemes.
     (`LightLineBoost` 1.30 / `DarkLineBoost` 1.15) and the light page then pulls
     the mixed line a further `LightLineDarken` (0.30) toward the ink, because a
     coloured mix on a near-white page is a pastel the member could not see.
+- **v476 (pass two) — A GLOW PER BRANCH, AND THE BRANCH DRAWS ITSELF.** The
+  member: *"make the animation more beautifully, and also the background color glow
+  more gradient abstract gradient but faint and also more like glow according to
+  that constellation, and smoother blending and no hard edges"*, plus *"tune the
+  branch animations branch by branch"*.
+  * **The light on the page comes from the constellations now.** The single centre
+    wash is FADED (`CentreGlowFade` 0.55) and every family gets its own faint
+    bloom (`familyGlows` in the composable): centred on the branch's own anchor,
+    tinted with the branch's averaged accent (`familyTints`), drawn over the wash
+    and under the dust, and sampled off the same `glowStops` eased falloff as the
+    wash — which is what makes its own edge not an edge. `FamilyGlowStrengthDark`
+    0.26 / `FamilyGlowStrengthLight` 0.34 and `FamilyGlowTintMix` 0.34 keep it
+    faint; `FamilyGlowReach` 0.60 of the longer side lets the blooms overlap into
+    one abstract field rather than a dozen spots. Light mode deepens each bloom
+    with the same `LightDotDarken` the dots use.
+  * **A branch is DRAWN, not switched on.** `bornOf` no longer lights a whole
+    family at once: `slotBranchRank` gives every lane its place inside its own
+    branch (0 = the family's first lane), `BranchStarSpread` 0.55 spends that
+    share of the window spreading the stars (`lead`/`drawSpan`), and
+    `BranchEasePower` 1.8 eases each branch so it blooms rather than ramping.
+    `BranchStagger` 0.90 / `BranchSpan` 1.28 keep a little overlap between
+    branches, and the sweep is 1320ms (was 1150).
+
+### The hero stat pane is one shade (v476)
+
+- **THE TORN HERO'S STAT PANE MATCHES THE GLASS HEADER'S.** The member: *"in glass
+  header the stats of profile and home gets a beautiful shade of what the hero is,
+  its not the same for normal tear header"*. The glass header's stat card sits on
+  the bar's tinted frost; the torn hero's pane was painted from the hero's OWN fill,
+  so it read as part of the banner. `heroStatPaneBase(heroFill)`
+  (`PaperStatCard.kt`) is the shared base now: the hero's colour LIFTED toward
+  `surfaceContainerHigh` (0.32 light / 0.22 dark — the member's answer, *"keep the
+  hero tint, add the lift"*), with the pane's existing white top-light
+  (`lerp(base, White, 0.06f → 0.26f)`) unchanged on top. Home's torn hero and
+  Profile's torn hero both call it, so the two panes are one shade; the paper-card
+  experiment branch is untouched. `EntryDetailScreen`'s meta pane was NOT changed
+  (the member named Home and Profile).
 
 ### The reader owns the page it is showing
 
@@ -10187,6 +10224,7 @@ Asked for in the same breath as the API fixes — *"also fetching artworks, pain
 - **THE DESTINATION IS NOT THE COPY (`SettingsHubScreen`).** Hub rows re-cut: **Updates** no longer promises "release notes" that the What's New row right below it owns ("Your build and the update checker"); **Online mode** is "Account, sync and privacy" (it was the only full sentence in the list); **Manage categories** is "Hide or reorder lanes" (its page hero and rail row too — `ManageCategoriesScreen`); **Topic history** stops saying "Revisit what you explored", which was Home's Recents card's own line word for word, and says "Completed, pinned and every capture"; and the list's serial commas are gone ("Theme, tint and pastel color").
 - **A PICKER IS TITLED WITH THE ROW THAT OPENED IT (`ReaderSettingsScreen`, `ReaderSpeaker`).** "Which engine reads" / "Which voice reads" / "Who reads it", sitting over rows already labelled **Engine / Voice / Narrator**, are now those three words. **"The phone's own" — a sentence-shaped name printed four times on one page — is "Phone voice"** at all four (the two values, the picker's first choice, and `ReaderSpeaker.engines()`'s own label, so a caller can never print the old one). The engine footnote is one clause; the pack's unpacking status lost its two-sentence prose ("Download complete · unpacking"); "Test it" is **"Test"** (the row's other actions are single verbs: Download / Stop / Remove / Retry) and the two test verdicts wear the page's dot style ("Could not load · using the phone's voice").
 - **HOME AND RECENTS: THE STATE, NOT THE INSTRUCTION (`HomeScreen`, `RecentScreen`).** "Explored · tap to open" → **"Explored"**; "Left without exploring · tap to resume" → **"Not explored"**; the queued-session rows drop "· tap to resume" ("Paused at 4:12"). The chevron and the row itself already say tap, and a resumed topic already wears its **Resumed** pill — the old row said the same word twice. The first-run empty state stops repeating the quest card's "Shuffle the deck" (the two buttons under it are the instruction) and says what the area is for: "Captures from your first topic land here."
+- **v476 — ONE FACT, ONCE: THE "UNEXPLORED" CHIP OR THE "NOT EXPLORED" LINE, NOT BOTH.** The member: *"in home there are 2 info duplicate, as in unexplored it shows the badge and also in text not explored"*. Asked which to keep, they chose the **chip**, so the unexplored row's subtitle/label is blank now — and **`ExploreTopicRow` (`HomeScreen`) and `RecentTopicRow` (`RecentScreen`) both SKIP a blank subtitle/label and fall the arrow's `contentDescription` back to the topic name**, because an empty `Text` still reserved its line and a blank description is what a screen reader would read. The rule for these rows: the chip carries the state, the line under the name is optional, and a blank one must draw nothing.
 - **⚠️ THE REMINDER NUDGE BELONGS TO THE FIRST-RUN PAGE (`HomeScreen`) — THE ONE BEHAVIOR CHANGE IN THIS PASS.** The daily-reminder card now needs **`recentPreview.isEmpty()`** as well as the reminder being off. Standing under a full Recents list it was a sixth block on a five-block page asking for a setting nobody opens Home for; folded into the first-run page it is the last thing a new member reads, which is the member who wants a nudge. **The setting itself never moves** (Settings → Preferences → "Daily shuffle reminder"), so nothing is lost for anyone who has already explored. `recentPreview` was **hoisted out of the Recents `Column`** to make the emptiness readable from section 6 — same value, same `remember` key, nothing recomputes.
 - **HOME'S "+" SHEET IS A GRID OF TILES (`CreateEntrySheet` → `CreateEntryTile`, `PersonalHome.kt`).** The member: *"we can make the buttom sheet option of books etc like in a grid maybe"*, given after the copy pass. Five full-width rows with a second line of explanation each ("A book" / "Pick a book, review it chapter by chapter") made the sheet something to read before it was something to choose; it is now **two columns of tiles** — glyph on its 42dp accent plate + the label, nothing else — with the **dictionary taking the sheet's whole width beneath them** (the one door that is not a writing page, and the shape that stops an odd fifth door leaving a hole in a 2-column grid). `personalAccent()` is read once for the sheet instead of once per door. **⚠️ A BOTTOM SHEET MEASURES ITS CONTENT AGAINST AN INFINITE HEIGHT, so the grid is plain `Row`s with `weight(1f)` and must never become a `LazyVerticalGrid`** — a lazy grid needs a bounded height and would either crash or force a fixed height onto the sheet.
 - **HOME'S QUEUED EXPLORES ARE ONE ROW, AND THE REST OPEN IN PLACE (`HomeScreen` section 3).** Asked directly ("a row each" vs this), the member picked the collapse: a member who had set three explores aside was reading **three rows on Home for work they had already decided to put off**. The section shows the **newest** session — the queue is newest-first (`ExploreSessionStore.queueActiveSession` writes `listOf(paused) + readQueued(…)`) — with the count in the heading ("Queued explores · 3") and a **"N more"** note under the row that opens the rest **in place** (it becomes "Show less"). **The in-place rule is the load-bearing part: there is no page listing queued sessions, so hiding the rows behind a note that went nowhere would have made every session but the newest unreachable** — including its resume AND its discard. The visible row's index is always the queue's own index 0, so `resumeQueuedSession`/`removeQueued` are called exactly as before.
