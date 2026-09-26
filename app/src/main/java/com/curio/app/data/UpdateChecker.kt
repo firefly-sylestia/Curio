@@ -298,7 +298,26 @@ object UpdateChecker {
      * Any failure (offline, API error) is silently ignored — the manual
      * check in Support & diagnostics remains the authoritative path.
      */
+    /**
+     * v485 — TRUE on an F-Droid build (versionName carries the `-fdroid`
+     * suffix the `fdroid` build type adds; see app/build.gradle.kts).
+     *
+     * F-Droid's policy forbids an app from advertising or self-installing
+     * its own APK updates — on the store, the CLIENT is the updater. The
+     * whole in-app update flow (the background check in MainActivity, the
+     * dialog, the notification and the Updates page's Download & install)
+     * therefore goes quiet on such a build: no GitHub check is fetched, no
+     * dialog is offered, and nothing is downloaded. The version check and
+     * the release notes on the Updates page stay readable (a manual check
+     * is harmless), but there is no install button to press.
+     */
+    val isFdroidBuild: Boolean
+        get() = BuildConfig.VERSION_NAME.contains("-fdroid", ignoreCase = true)
+
     suspend fun notifyIfUpdateAvailable(context: Context) = withContext(Dispatchers.IO) {
+        // v485 — an F-Droid build never announces updates at all: the store
+        // client is the updater there, and the policy is explicit.
+        if (isFdroidBuild) return@withContext
         val appContext = context.applicationContext
         val release = fetchLatestRelease() ?: return@withContext
         if (!isNewer(release.tagName, BuildConfig.VERSION_NAME)) return@withContext

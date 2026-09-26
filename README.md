@@ -105,6 +105,10 @@ Curio ships as two editions built from the same source, published from the same 
 
 Every release APK is named `Curio-<version>-<code>-<edition>-<abi>…`, and the in-app updater matches the edition token so an update never hands you the other app.
 
+### F-Droid
+
+Curio ships a **fully free-software build** for F-Droid: the same **core** edition — all of the table above minus the three Full-only rows — with nothing proprietary anywhere in it. The tag release publishes a `core-fdroid` universal APK beside the others, and F-Droid's own builder compiles the identical app from the tagged source. On an F-Droid install the in-app updater stays quiet and updates arrive through the F-Droid client, per the store's rules.
+
 ---
 
 ## 🚀 Quick Start
@@ -116,7 +120,7 @@ Every release APK is named `Curio-<version>-<code>-<edition>-<abi>…`, and the 
 3. Android will ask you to allow "install from unknown sources" for your browser — that's normal for sideloaded apps
 4. Updates arrive through the app's own updater, or by downloading the new APK the same way
 
-> **Google Play support is not planned.** v1.0 ships via GitHub Releases; the store metadata under `fastlane/` keeps the changelogs release-ready for F-Droid-style distribution.
+> **Google Play support is not planned.** v1.0 ships via GitHub Releases; the fastlane metadata under `fastlane/` keeps the changelogs release-ready for F-Droid-style distribution (see [F-Droid](#f-droid) above).
 
 ### Build from Source
 
@@ -354,7 +358,7 @@ Copyright (C) 2026 the Curio contributors.
 - **Cloud sync of your library** — your captures stay on the device; use Backup & Restore (Settings) to export and keep them safe
 - **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, 24-hour expiry) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
 - **Localization** — English only in v1.0
-- **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready
+- **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready, and a fully-FOSS core-fdroid APK publishes beside every release for F-Droid
 - **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing
 - **Images need network** — topic and entry images load from the web (your data is always offline)
 

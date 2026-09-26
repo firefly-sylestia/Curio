@@ -216,11 +216,17 @@ android {
         // territories now (no branch runs through another's stars, no two dots or
         // halos overlap), and its connections wear one of three styles — threads,
         // bones or swept arcs — cycled by a HOLD on the sky and remembered.
-        versionCode = 20260928
+        // v485 — 20260929 / 1.4.6: the +1 / +0.0.1 bump for this push, and
+        // `changelogs/20260929.txt` is its notes file (copied forward from
+        // 20260928.txt, which stays exactly as it was — it is the record of the
+        // build that code shipped as). What it carries: the F-Droid build — a
+        // `fdroid` build type built CORE-only from every tag, named
+        // core-fdroid in the release, with the in-app updater silent on it.
+        versionCode = 20260929
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.5"
+        versionName = envReleaseVersion ?: "1.4.6"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
@@ -376,6 +382,48 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+        }
+        // ── v485 — THE F-DROID BUILD TYPE (release's FOSS clone, core only) ──
+        //
+        // F-Droid builds Curio itself from the tagged source, but the store
+        // metadata and the release artifacts still want an APK the repo can
+        // publish and the F-Droid reviewer can compare against, so this build
+        // type produces it. It is EVERYTHING the `release` buildType is —
+        // minify + shrink + the two-arm ABI filter + the same proguard files
+        // and signing fallback — with two differences:
+        //
+        //   1. `versionNameSuffix = "-fdroid"` so the build identifies itself
+        //      (e.g. 1.4.6-fdroid) in Settings → About and in any bug report.
+        //   2. It is built ONLY for the `core` flavor. `assembleFdroidRelease`
+        //      is ambiguous across the edition dimension, so the workflow
+        //      spells out `assembleCoreFdroidRelease`. The FULL edition's
+        //      non-free pieces (ML Kit's barcode model and the vendored
+        //      sherpa-onnx AAR) must never enter an F-Droid APK — which is
+        //      exactly the member's line: "fdroid will only build from core
+        //      not full".
+        //
+        // The in-app updater reads `BuildConfig.VERSION_NAME` and stays
+        // silent on this suffix (see UpdateChecker.isFdroidBuild), because
+        // F-Droid's policy forbids an app from self-installing APKs — the
+        // store is the updater there.
+        create("fdroid") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            ndk {
+                abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            versionNameSuffix = "-fdroid"
+            signingConfig = if (hasReleaseSigningMaterial) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 

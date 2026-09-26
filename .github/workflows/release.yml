@@ -130,12 +130,14 @@ jobs:
             exit 1
           fi
           echo "Bundled $topic_files topic catalog files into the release APK."
-          # v465b — per-EDITION task names, not `assembleRelease`: with the
-          # `edition` flavor dimension that name is ambiguous and Gradle fails
-          # at task selection ("Task 'assembleRelease' is ambiguous …"). Both
-          # editions must be built here — the release publishes both, and the
-          # rename step below reads the edition from the APK's own path.
-          ./gradlew validateTopics assembleCoreRelease assembleFullRelease --stacktrace
+          # v465b — per-EDITION+BUILDTYPE task names, not `assembleRelease`:
+          # with the `edition` flavor dimension that name is ambiguous and
+          # Gradle fails at task selection ("Task 'assembleRelease' is
+          # ambiguous …"). Both editions must be built here — the release
+          # publishes both — and v485 adds the F-Droid build type (CORE only:
+          # F-Droid ships the FOSS build, which is the core edition's exactly).
+          # The rename step below reads the edition from the APK's own path.
+          ./gradlew validateTopics assembleCoreRelease assembleFullRelease assembleCoreFdroidRelease --stacktrace
 
       - name: Verify release APKs and signatures
         run: |
@@ -147,6 +149,11 @@ jobs:
           # matches nothing — and would fail this step with "No signed release
           # APK was produced", which reads as a signing fault rather than a path
           # fault.
+          #
+          # v485 — the fdroid build type ALSO lands in `apk/core/release/`
+          # (AGP puts all release-family build types of a flavor in that
+          # directory), so the glob below picks it up and verifies it with
+          # the rest.
           shopt -s nullglob
           apks=(app/build/outputs/apk/*/release/*.apk)
           if [ "${#apks[@]}" -eq 0 ]; then
@@ -225,6 +232,7 @@ jobs:
             echo ""
             echo "- \`core\` — **Curio**, the smaller app: everything except the on-device offline voice-to-text stack and the neural read-aloud voice packs."
             echo "- \`full\` — **Curio Full**: those two as well, plus the ISBN barcode scanner."
+            echo "- \`core-fdroid\` — the same FOSS **core** app, prepared for the F-Droid store build; anyone may sideload it too."
             echo ""
             echo "They install **side by side** and are two separate apps with separate data (\`com.curio.app\` and \`com.curio.app.full\`) — installing one never replaces the other."
             echo ""
@@ -243,8 +251,15 @@ jobs:
             base="$(basename "${apk%.apk}")"
             abi="${base#app-}"
             abi="${abi#${flavor}-}"
+            # v485 — the fdroid build type sits between the flavor and the ABI
+            # (`app-core-universal-fdroid-release.apk`), so it is stripped out
+            # of the middle the same way, then re-added as its own name token.
+            buildtype=""
+            case "$abi" in
+              *-fdroid) buildtype="-fdroid"; abi="${abi%-fdroid}" ;;
+            esac
             abi="${abi%-release}"
-            new_name="Curio-${vname}-${vcode}-${flavor}-${abi}-Android${min_android}+.apk"
+            new_name="Curio-${vname}-${vcode}-${flavor}${buildtype}-${abi}-Android${min_android}+.apk"
             size=$(du -h "$apk" | cut -f1)
             case "$abi" in
               universal)   desc="Every Android $min_android+ device — the safe default (largest download)" ;;
@@ -254,6 +269,9 @@ jobs:
               x86)         desc="32-bit emulators" ;;
               *)           desc="See project README" ;;
             esac
+            if [ -n "$buildtype" ]; then
+              desc="The FOSS core app prepared for the F-Droid store build (universal)"
+            fi
             echo "| \`$new_name\` | $desc | ~$size |" >> "$body"
             # Renamed IN PLACE, so the files stay beside their edition's directory
             # and the publish step's glob below still finds them.
@@ -273,6 +291,11 @@ jobs:
           # so it must fail when one of them silently stops being built rather
           # than read whichever names happen to be present. Adding a third
           # edition means adding it here too.
+          #
+          # v485 — AND THE F-DROID APK. The core edition's fdroid build type
+          # ships beside them (the F-Droid store's FOSS build: core only, no
+          # full, by the member's own rule), so its universal APK is checked
+          # for the same reason the other three are.
           for flavor in core full; do
             for expected in universal armeabi-v7a arm64-v8a; do
               if [ ! -f "${flavor}/release/Curio-${vname}-${vcode}-${flavor}-${expected}-Android${min_android}+.apk" ]; then
@@ -281,6 +304,10 @@ jobs:
               fi
             done
           done
+          if [ ! -f "core/release/Curio-${vname}-${vcode}-core-fdroid-universal-Android${min_android}+.apk" ]; then
+            echo "::error::Expected F-Droid APK missing after rename: core-fdroid / universal"
+            exit 1
+          fi
 
           echo "" >> "$body"
           echo "**How do I know which one to install?**" >> "$body"

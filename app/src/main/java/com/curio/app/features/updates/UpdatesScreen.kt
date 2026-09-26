@@ -382,7 +382,18 @@ fun UpdatesScreen(navController: NavController) {
                                         )
                                         when (downloadState) {
                                             UpdateDownloadUi.Idle -> {
-                                                if (info?.apkUrl != null) {
+                                                // v485 — ON AN F-DROID BUILD the
+                                                // store client is the updater (F-Droid
+                                                // policy forbids in-app APK installs), so
+                                                // the CTA is a note instead of a button.
+                                                if (UpdateChecker.isFdroidBuild) {
+                                                    Text(
+                                                        "Installed from F-Droid — updates arrive through the F-Droid client.",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                                if (!UpdateChecker.isFdroidBuild && info?.apkUrl != null) {
                                                     Surface(
                                                         onClick = { info?.let { downloadAndInstall(it) } },
                                                         shape = RoundedCornerShape(50),

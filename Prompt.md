@@ -6,7 +6,32 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §84 — the failed CL (the v484 nav-bar frost forgot its import; FIXED, pushed as v1.4.5 / code 20260928)
+## 0. THE CURRENT REQUEST — §86 — the F-Droid build (a `fdroid` build type, core only, shipped from every tag; the updater goes quiet on it)
+
+> "add frdoid build with full foss version too only in release and fdroid will only build from core not full"
+
+**WHAT WAS RESEARCHED BEFORE ANYTHING WAS WRITTEN:** the core flavor is already fully FOSS by construction — every non-free/heavy dependency (ML Kit's barcode model, the vendored sherpa-onnx AAR, Vosk, CameraX) is `fullImplementation`, and there is no Firebase/GMS anywhere in the app. So "F-Droid builds core" needs NO source twin, NO flag and NO exclusion list; it needs a build type, a workflow line, and an updater that respects the store's rules. F-Droid itself always compiles from the tagged source, so no fastlane metadata change is required — the repo publishes the comparable APK for members and reviewers.
+
+### WHAT WAS BUILT (v485)
+
+1. **The `fdroid` BUILD TYPE** (app/build.gradle.kts): `initWith(release)` + the same minify/shrink/two-arm-ABI/proguard/signing block, with `versionNameSuffix = "-fdroid"` (reads 1.4.6-fdroid in About and bug reports). Built via **`assembleCoreFdroidRelease`** — the bare `assembleFdroidRelease` is ambiguous across the `edition` dimension exactly like v465b's `assembleRelease` was.
+2. **THE RELEASE WORKFLOW** (`.github/workflows/release.yml`): the Gradle line gained `assembleCoreFdroidRelease`; the verify step picks the APK up unchanged (AGP drops it in `apk/core/release/` beside core's other APKs); the rename step strips `-fdroid` from AGP's ABI segment and re-adds it as its own name segment (`Curio-<v>-<code>-core-fdroid-universal-Android8.0+.apk`); only the UNIVERSAL APK is published (F-Droid convention), and the expected-splits guard checks it by exact name. The release body gained the `core-fdroid` row.
+3. **THE UPDATER GOES QUIET** (`UpdateChecker.isFdroidBuild`): F-Droid policy forbids an app from self-installing APK updates — the store client IS the updater there. `notifyIfUpdateAvailable` returns before any network call on a `-fdroid` build, and the Updates page's **Download & install** CTA becomes a note ("Installed from F-Droid — updates arrive through the F-Droid client") while the manual check and release notes stay readable. The gate reads `BuildConfig.VERSION_NAME.contains("-fdroid")` — the suffix IS the flag, no new BuildConfig field.
+4. **DOX:** app/AGENTS.md identity section gained the flavor-dimension bullet it was missing (it still said "No product flavors") + the fdroid-buildType bullet; a `### v485` section records the whole decision. README: an F-Droid subsection under Two Builds + distribution notes.
+5. **ALL 7 `run:` blocks of release.yml were bash -n checked** after editing (extract-and-parse harness), because this environment cannot run Gradle or `actionlint` — CI remains the only full validation.
+
+### ⚠️ OPEN / NOTES
+
+- The fdroid build is NOT in android.yml's per-push matrix (core/full build+lint continue as before) — it ships from tags only, per the member's "only in release".
+- F-Droid's actual onboarding (metadata YAML on their side, package id `com.curio.app`) is a separate future step — this change makes the repo's artifact story ready for it.
+
+### THE PREVIOUS REQUEST — §84 — the failed CL (FIXED in v1.4.5 / code 20260928)
+
+`1b61f76b` (v484 glass) failed all four app jobs on ONE error: `CurioLiquidGlassTabBar.kt` — Unresolved `isCurioDarkTheme`; the import was missing. Fixed and pushed (`e92058f8`). See §84 below for the detail. Also committed (not pushed alone): the README rewrite (`ec934855`).
+
+---
+
+## §84 — the failed CL (the v484 nav-bar frost forgot its import; FIXED, pushed as v1.4.5 / code 20260928)
 
 > "cl failed"
 
@@ -19,7 +44,15 @@ This is the third failed CL in recent history that is a missing import or a comp
 
 ---
 
-## §83 (SUPERSEDED BY §84 as the current request — the glass pass itself, v484) — the glass is a wash again, dark gets its smudge, and sheets/dialogs are glass over a really blurred page (BUILT, pushed with the version bump — and §82 pushed with it on the member's word)
+## §85 — the README rewrite (COMMITTED, not pushed alone — docs-only)
+
+> "lets update readme"
+
+The member chose **rewrite/restructure** and **document both builds**. The README was restructured with: a 📚 Books & Reading feature section + complete-list block (the reader, read-aloud, voice packs, dictionary — none of it was in the README at all); a 📦 Two Builds section with the core/Full comparison table (packages, size, features, camera permission); a 🎨 Design section covering liquid glass (frosted/clear, window blur, dark frost); facts corrected from source (38 lanes, target API 37, permissions); a Reader screenshot slot added to docs/screenshots/README.md; Vosk + Piper/Kokoro/sherpa-onnx added to the open-source credits. Committed as `ec934855` — docs-only, so it rode with §86's push.
+
+---
+
+## §83 (SUPERSEDED — the glass pass itself, v484) — the glass is a wash again, dark gets its smudge, and sheets/dialogs are glass over a really blurred page (BUILT, pushed with the version bump — and §82 pushed with it on the member's word)
 
 > "for liquid glass make the buttom sheet and dialog box etc liquid glass too with the clear glass too, also the frosted blur doesnt refract and its too opaque make it 40 mybe and also for dark mode too its just for light mode rn, the smudged."
 
