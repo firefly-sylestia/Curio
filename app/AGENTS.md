@@ -9408,14 +9408,15 @@ scheme role means something different there than in the app's own schemes.
   stats and the lane readout; that part still holds. **v422: 254 → 320dp** (see
   the star-map section — the height is the only dial that sizes the pattern).
 - **POSITION: a golden-angle scatter with a hashed wobble.** `starScatter(count)`
-  (v476: `starScatterByFamily(familyOf)` — the same shape, grouped by family; see
-  the star-map section) replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
+  (v476/477: `starScatterByFamily(familyOf)` — the ORIGINAL spiral, with each lane
+  pulled only a little toward its family's centre; see the star-map section)
+  replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
   the previous version was at least better … its too symmetric". The i-th star
   sits at the GOLDEN ANGLE (2.3999632 rad) times i, its radius grows with
   `sqrt((i + 0.55) / count)` so the disc fills evenly, and a deterministic 0..7
   hash (`i * 2654435761L and 7`) wobbles the angle and radius so no two
   neighbours align. Still deterministic — the same lanes always land in the same
-  places — and knowledge still never MOVES a star (size and brightness only), so
+  places — and knowledge still never MOVES a star (colour and light only), so
   the map stays the landmark the member learns.
 - **NO GRID.** The v414 astrolabe (one circle per orbit, `STAR_CHART_SPOKES` =
   12 spokes, a hub) was the symmetry the member rejected, so it is GONE — and so
@@ -9578,10 +9579,12 @@ scheme role means something different there than in the app's own schemes.
 ### The drawer's lanes are a star map (the grid is gone)
 
 - `DrawerLaneStarMap` replaces the lane grid in the drawer: one star per lane,
-  phyllotaxis-scattered by lane COUNT (`starScatter`; v476 `starScatterByFamily`)
-  so a star never moves when knowledge changes, sized and brightened by knowledge,
-  coloured by the lane's own accent, and joined to its nearest neighbour
-  (`starLinks`; v476 `starLinksGrouped`). Stars are
+  phyllotaxis-scattered by lane COUNT (`starScatter`; v476/477
+  `starScatterByFamily` = that same spiral with a gentle pull toward each family's
+  centre) so a star never moves when knowledge changes, lit — not sized — by
+  knowledge (v477: one fixed core, `StarCoreDp`), coloured by the lane's own
+  accent, and joined to its nearest neighbour (`starLinks`; v476
+  `starLinksGrouped`). Stars are
   TAPPABLE (a 30dp halo, nearest star wins) and the readout under the map is
   `CurioLaneDetailStrip`. `CurioLaneGrid` still serves the Stats page — only the
   drawer changed.
@@ -9638,11 +9641,12 @@ scheme role means something different there than in the app's own schemes.
   in that branch and the animation make it light by branch by branch, the lines
   and the dots make it more noticable, in light mode darker shade and similar"*.
   Four pieces:
-  * `starScatter` is `starScatterByFamily(familyOf)` now: the SAME golden-angle
-    spiral with the same hashed wobble, asked once per FAMILY for the branch
-    ANCHORS, with each lane then nudged off its own anchor by a tiny local
-    golden-angle step — so Artists · Albums · Songs read as ONE small
-    constellation while the sky keeps the shape the member knows.
+  * `starScatter` is `starScatterByFamily(familyOf)` now. v476 asked the spiral
+    once per FAMILY and hugged each lane to its anchor, which the member rejected
+    as a different pattern (see the v477 bullet below); **v477 draws the ORIGINAL
+    per-lane spiral unchanged and pulls each lane only `FamilyPull` (0.35) of the
+    way toward its family's centre of mass** — so Artists · Albums · Songs read as
+    a soft neighbourhood while the sky stays the shape the member knows.
   * `starLinks` is `starLinksGrouped(slots, familyOf)` and answers
     `StarLink(first, second, cross)`: each star joins its NEAREST FAMILY-MATE
     (the old local rule, scoped to the branch) and each family keeps exactly ONE
@@ -9662,16 +9666,14 @@ scheme role means something different there than in the app's own schemes.
   more gradient abstract gradient but faint and also more like glow according to
   that constellation, and smoother blending and no hard edges"*, plus *"tune the
   branch animations branch by branch"*.
-  * **The light on the page comes from the constellations now.** The single centre
-    wash is FADED (`CentreGlowFade` 0.55) and every family gets its own faint
-    bloom (`familyGlows` in the composable): centred on the branch's own anchor,
-    tinted with the branch's averaged accent (`familyTints`), drawn over the wash
-    and under the dust, and sampled off the same `glowStops` eased falloff as the
-    wash — which is what makes its own edge not an edge. `FamilyGlowStrengthDark`
-    0.26 / `FamilyGlowStrengthLight` 0.34 and `FamilyGlowTintMix` 0.34 keep it
-    faint; `FamilyGlowReach` 0.60 of the longer side lets the blooms overlap into
-    one abstract field rather than a dozen spots. Light mode deepens each bloom
-    with the same `LightDotDarken` the dots use.
+  * **~~The light on the page comes from the constellations now.~~** v476 added a
+    bloom per family (`familyGlows`, `CentreGlowFade`, `FamilyGlow*`). **v477
+    REMOVED them** (the member: *"fix the werid glow patternt"*; the blooms were
+    a dozen full-canvas gradient circles drawn every frame — the lag — and, with
+    nothing clipping the map's box, they painted up over the brain panel and left
+    the top of the drawer blank). The sky's light is the single centre wash again
+    at full strength, and `DrawerLaneStarMap`'s box carries `clipToBounds()` so
+    nothing can bleed over the panel above it.
   * **A branch is DRAWN, not switched on.** `bornOf` no longer lights a whole
     family at once: `slotBranchRank` gives every lane its place inside its own
     branch (0 = the family's first lane), `BranchStarSpread` 0.55 spends that
@@ -9679,6 +9681,24 @@ scheme role means something different there than in the app's own schemes.
     `BranchEasePower` 1.8 eases each branch so it blooms rather than ramping.
     `BranchStagger` 0.90 / `BranchSpan` 1.28 keep a little overlap between
     branches, and the sweep is 1320ms (was 1150).
+- **v477 — THE DOTS ARE ONE SIZE, THE GLOW IS ONE WASH, THE PATTERN IS BACK.**
+  The member's report on v476: *"the drawer is lagging, the top your brain
+  disapears, and the scattering is bad i asked not to chnage the attern too much,
+  and also very small scatters and dont make the dots glow too much or grow bigger
+  when too much knowledge dont let them grow at all, and fix the werid glow
+  patternt, and fix the scarttering"*. **Three questions were asked before any
+  edit** and the answers shaped it: the scatter — **keep the branches, but
+  gentle**; the glow — **remove the blooms, restore the centre wash**; the
+  symptom — **the whole top area goes blank**. So:
+  * the scatter is the ORIGINAL per-lane Vogel spiral plus a gentle `FamilyPull`
+    (0.35) toward each family's centre of mass (see the v476 bullet above);
+  * the per-family blooms are gone and the centre wash is back at full strength;
+  * every dot is one size (`StarCoreDp` 3.0f) — knowledge shows as colour and
+    light, never as a fatter disc (the member: *"dont let them grow at all"*) —
+    and the lit halo's radius follows that fixed core, so the glow no longer grows
+    with knowledge either;
+  * the map's box takes `clipToBounds()`, so its gradients can never wash the
+    brain panel above it (the blank-top symptom).
 
 ### The hero stat pane is one shade (v476)
 
