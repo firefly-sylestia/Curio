@@ -79,6 +79,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.glyphWatermarkDepthScale
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.curioAccentInk
@@ -383,6 +384,7 @@ fun TopicHistoryScreen(navController: NavController) {
             title = { Text("Unpin ${pinned.topicName}?") },
             text = { Text("This removes ${pinned.topicName} from Pinned for later. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)

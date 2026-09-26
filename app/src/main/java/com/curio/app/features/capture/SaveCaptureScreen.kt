@@ -111,6 +111,7 @@ import com.curio.app.ui.components.TextHistoryPill
 import com.curio.app.ui.components.TextHistoryRestoreMode
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -1284,6 +1285,7 @@ fun SaveCaptureScreen(
                 title = { Text("Remove this take?") },
                 text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     TextButton(onClick = {
                         removeSection(removeIdx)
                         pendingRemoveIndex = null
@@ -1322,6 +1324,7 @@ fun SaveCaptureScreen(
                     }
                 },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         TextButton(onClick = {
                             val section = sections.getOrNull(activeIndex)
@@ -1388,6 +1391,7 @@ fun SaveCaptureScreen(
                     }
                 },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         TextButton(onClick = { showDiscardDialog = false }) {
                             Text("Keep editing")
@@ -1439,6 +1443,7 @@ fun SaveCaptureScreen(
                     }
                 },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     TextButton(
                         onClick = { showDiscardDialog = false },
                         colors = curioDialogActionButtonColors()
@@ -1475,6 +1480,7 @@ fun SaveCaptureScreen(
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         resumedDraftData = pendingDraft

@@ -56,7 +56,7 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
-import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
 import androidx.compose.ui.unit.DpOffset
@@ -361,6 +361,12 @@ fun CurioLiquidGlassTabBar(
                             vibrancy()
                             if (frosted) {
                                 blur(21f.dp.toPx() * blurScale)
+                                // v484 — the smudge refracts again, at half the
+                                // clear recipe's radius (see [CurioGlassPills.Frost.
+                                // LensDp]): the nav bar is the most-seen glass
+                                // surface and it was the flattest of them all.
+                                val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() * refrScale
+                                lens(smudgeR, smudgeR)
                             } else {
                                 blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                 lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
@@ -384,13 +390,21 @@ fun CurioLiquidGlassTabBar(
                     },
                     onDrawSurface = {
                         if (frosted) {
-                            // v482 — the nav bar's near-opaque white frost.
+                            // v484 — the nav bar wears the SAME frost as every
+                            // other glass surface ([CurioGlassPills.Frost]): a
+                            // 0.40 wash, breathed toward white in light and only
+                            // LIFTED in dark, so the bar reads as glass rather
+                            // than as the near-opaque white plate v482 made of it.
                             val frost = androidx.compose.ui.graphics.lerp(
                                 containerColor,
                                 Color.White,
-                                if (frostedDark) 0.62f else 0.90f
+                                if (frostedDark) {
+                                    CurioGlassPills.Frost.DarkLift
+                                } else {
+                                    CurioGlassPills.Frost.LightLift
+                                }
                             )
-                            drawRect(frost.copy(alpha = 0.92f))
+                            drawRect(frost.copy(alpha = CurioGlassPills.Frost.Wash))
                         } else {
                             // v233 — clear-glass cuts the frost wash to ~a third.
                             drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.20f else 1f))

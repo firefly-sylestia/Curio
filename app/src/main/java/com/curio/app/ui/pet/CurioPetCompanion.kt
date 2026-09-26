@@ -45,6 +45,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.ui.components.CurioPatientHold
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -376,6 +377,7 @@ fun CurioPetHeroCard(
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         showDialog = false

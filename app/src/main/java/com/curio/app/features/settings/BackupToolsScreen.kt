@@ -49,6 +49,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -235,6 +236,7 @@ fun BackupToolsScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     val uri = legacyPendingUri
                     legacyPreview = null
@@ -286,6 +288,7 @@ fun BackupToolsScreen(navController: NavController) {
             title = { Text("Restore backup?", fontWeight = FontWeight.ExtraBold) },
             text = { Text("This replaces all of your current captures and settings with the contents of the backup file. This can't be undone.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         showRestoreConfirm = false
@@ -308,6 +311,7 @@ fun BackupToolsScreen(navController: NavController) {
             title = { Text(if (success) "Done" else "Couldn't do that", fontWeight = FontWeight.ExtraBold) },
             text = { Text(message) },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { legacyStatus = null }, colors = curioDialogActionButtonColors()) { Text("OK", fontWeight = FontWeight.Bold) }
             }
         )
@@ -321,6 +325,7 @@ fun BackupToolsScreen(navController: NavController) {
             title = { Text(if (success) "Done" else "Couldn't do that", fontWeight = FontWeight.ExtraBold) },
             text = { Text(message) },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { backupStatus = null }, colors = curioDialogActionButtonColors()) { Text("OK", fontWeight = FontWeight.Bold) }
             }
         )

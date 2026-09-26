@@ -74,6 +74,7 @@ import com.curio.app.ui.components.MoodBoardFloatingCards
 import com.curio.app.ui.components.MoodBoardZoomOverlay
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.NotePaperCard
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.moodBoardPainter
 import com.curio.app.ui.components.rememberMoodBoardZoomState
 import com.curio.app.ui.theme.CurioDialogShape
@@ -1255,6 +1256,7 @@ private fun MoodBoardCanvas(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     tiles.clear()
                     // v145 — Clear board also wipes every quote card (the
@@ -1288,6 +1290,7 @@ private fun MoodBoardCanvas(
             title = { Text("Remove this image?") },
             text = { Text("This will delete the image from your mood board. This can't be undone.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     val id = pendingRemoveTileId
                     val idx = tiles.indexOfFirst { it.id == id }

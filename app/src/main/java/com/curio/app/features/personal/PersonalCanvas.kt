@@ -106,6 +106,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.curio.app.ui.components.CurioMenuToggle
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryRestoreMode
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberTextHistoryCapture
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.TextToolbar
@@ -6816,6 +6817,7 @@ internal fun PersonalToolDock(
             title = { Text("Could not export") },
             text = { Text(exportFailure) },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = exporter.dismissFailure) { Text("OK") }
             }
         )

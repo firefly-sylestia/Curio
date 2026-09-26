@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -438,6 +439,7 @@ fun IncursionScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     IncursionStore.setGroupStatus(context, victim.keys, IncursionStore.Status.UNWATCHED)
                     pendingClear = null
@@ -1898,6 +1900,7 @@ private fun IncursionDetailSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -20,6 +20,7 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -142,6 +143,7 @@ internal fun JournalAccentSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

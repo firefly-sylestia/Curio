@@ -45,6 +45,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -8889,6 +8890,7 @@ fun TopicShareSheet(
     // until Done/back drops edit mode (then normal swipe-dismiss returns);
     // content scrolling and the card carousel keep working throughout.
     ModalBottomSheet(onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, sheetGesturesEnabled = !editMode, containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface), dragHandle = { BottomSheetDefaults.DragHandle() }) {
+        CurioGlassWindowBlur()
         // v325 — BACK cancels the Customise editor first, then (on a second
         // press) exits the sheet — it was previously swallowed while editing.
         BackHandler(enabled = editMode) {

@@ -30,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -409,6 +410,7 @@ fun TextHistoryBrowser(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         TextHistoryStore.delete(ctx, deleteTarget.id)
@@ -459,6 +461,7 @@ fun TextHistoryBrowser(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.88f)) {
             // ── Header ──────────────────────────────
             Row(

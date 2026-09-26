@@ -6,7 +6,44 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §82 — a skills catalogue, our own design skill, and Android command-line tools (COMMITTED, NOT pushed — the member says when)
+## 0. THE CURRENT REQUEST — §83 — the glass is a wash again, dark gets its smudge, and sheets/dialogs are glass over a really blurred page (v484; BUILT, pushed with the version bump — and §82 pushed with it on the member's word)
+
+> "for liquid glass make the buttom sheet and dialog box etc liquid glass too with the clear glass too, also the frosted blur doesnt refract and its too opaque make it 40 mybe and also for dark mode too its just for light mode rn, the smudged."
+
+**THREE QUESTIONS WERE ASKED BEFORE ANY EDIT** (this is a look the member has now revised twice) and every answer shaped the work: thin the frost to ~40% **and bring the lens back everywhere except the reader**; **attempt real window blur behind sheets and dialogs**; and give dark **its own smudge — a lifted dark container, never white**.
+
+### WHAT WAS READ BEFORE ANYTHING WAS WRITTEN
+
+- `LiquidGlassPills.kt` — the frost (v482: white at 92%, dark breathed 0.62 toward white, lens dropped), `fauxGlassCapsule` (the pre-12 twin), and the `CurioGlassScreen` / `ProvideCurioGlass` hand-off the reader already uses.
+- **The RESOLVED libraries, not memory:** the BOM `2026.05.01` pins `ui` **1.11.2** and `material3` **1.4.0**. The `ui-android-1.11.2-sources.jar` says `DialogProperties` has **no** blur parameters (blurBehind/BG exist only on `androidx-main`, unreleased), so the platform route was the only one available; the same jar says Compose's `DialogLayout` **is** a `DialogWindowProvider`, and `material3-android-1.4.0-sources.jar` says `ModalBottomSheetDialogLayout` is one too, with `window.setBackgroundDrawableResource(transparent)` — which is what makes `LocalView.current` inside either window the way to reach it.
+- **AndroidX's own implementation for the exact two lines:** `DialogApi31Impl.setBlurBehindRadius` does `addFlags(FLAG_BLUR_BEHIND)` + `attributes.blurBehindRadius = px` + reassign (and clears the flag at 0). `setBackgroundBlurRadius` was rejected: it blurs only WITHIN the window's bounds, not the page behind.
+
+### WHAT WAS BUILT
+
+1. **The frost is four numbers in one place** (`CurioGlassPills.Frost`): `Wash` 0.40, `LightLift` 0.62, `DarkLift` 0.14, `LensDp` 12, plus `OpaquePanel` 0.94 and `ClearWash` 0.22. Both the real and the simulated recipe spend them, and so does the nav bar (`CurioLiquidGlassTabBar`), which also gets its lens back.
+2. **The smudge refracts again, the reader excepted** — `LocalCurioGlassFrostRefraction` + `Provide(refractFrosted = false)`, passed at the reader's three `readerGlass.Provide` sites. The exception travels with the composition, so the shared components inside the reader skip the lens without being told one by one.
+3. **`CurioWindowGlass.kt`** — `windowBlurAvailable(context)` (glass on, Android 12+, cross-window blur enabled) and `CurioGlassWindowBlur()`, which must be composed INSIDE a sheet's/dialog's content. The file header records why: a `containerColor` is evaluated at the caller, in the app's window, before the dialog's window exists.
+4. **The panels** (`curioFrostedPanel`) ask `windowBlurAvailable` and pick their alpha: thin when a real blur is behind them, `OpaquePanel` when there is none — **a translucent sheet over a sharp page reads as a mistake, not as glass.** Clear glass reaches the panels for the first time, and dark's panel takes `DarkLift`.
+5. **109 call sites wired** — 39 `ModalBottomSheet`s (each trailing content lambda) and 70 dialogs (the first composable lambda the dialog offers: `confirmButton`/`text`/`title`/`dismissButton`/`icon`, **never `onDismissRequest`**, which is a plain `() -> Unit`). One import per file, placed with the other `com.curio.*` imports in sorted order.
+6. The Experiments copy for the smudge was corrected (it claimed "near-opaque" and only "frosts" panels); `app/AGENTS.md` gained a `### v484` section and a supersession pointer on v482.
+
+### CHECKS, IN THIS ENVIRONMENT'S TERMS
+
+- **No Gradle command was run** (root `AGENTS.md` forbids it here); CI is the validation. This is the biggest hand-edited Kotlin change of the session, so the scripted part was made to REPORT rather than to guess: the dry run had to match the grep count exactly (39 + 70) with **zero sites skipped** before it was allowed to write, and it refuses any anchor that is not a composable lambda.
+- **Six hunks were read back before applying** (the previews), and the diffs of the two largest files (`TopicRevealScreen`, `SettingsSharedComponents`) were read after — every insertion sits inside a content/`confirmButton` lambda at the right indent.
+- **Every file with a call has the import** (57 = 57, checked both ways).
+- **`gh` is not installed in this workspace (see §81), so no CI run could be read.** The `NewApi` risk was handled by construction: the SDK guard for the API-31 window symbols lives INSIDE `Window.blurBehind`, in the same scope as the symbols, because lint does not see an early return from the enclosing composable across a `DisposableEffect` lambda.
+
+### ⚠️ OPEN / JUDGEMENTS
+
+- **The frost numbers are judgements, not measured** — 0.40 was the member's own "make it 40 mybe"; `OpaquePanel` 0.94 and the panel's thin-vs-opaque switch are mine.
+- **Window blur is device-dependent:** Android 12 with cross-window blur disabled, or a low-end GPU, gets the opaque panel and no blur (by design, and it is logged once per window by `CurioWindowGlass.kt`). Android 13+ enables it by default.
+- **The scrim** over a blurred sheet was left exactly as M3 draws it — a judgement, not a measurement.
+- **The reader's paper dialogs** (`ReaderClockDialog`, `ReaderVoiceSheet`) keep `palette.paper` (the v482 note still stands) — they get the blur, but they are not frosted panels.
+
+---
+
+## §82 — a skills catalogue, our own design skill, and Android command-line tools (COMMITTED, then pushed with §83 on the member's word)
 
 > "can u add /skill with all the important skills by research and also add in instruction to read that skill based on the work, and also for design etc use or modify our own skill by modifying one by your researh add the best skills for dynamic motion, consitency, etc also add cmdline tools"
 

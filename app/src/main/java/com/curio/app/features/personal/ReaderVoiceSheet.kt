@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.infrastructure.ReadAloudSession
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 
 /**
  * ── v465h — THE VOICE, FROM THE PAGE THE MEMBER IS ON ─────────────────────
@@ -206,6 +207,7 @@ internal fun ReaderVoiceSheet(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss) {
                 Text("Done", color = palette.accent)
             }

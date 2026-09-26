@@ -57,6 +57,7 @@ import com.curio.app.data.supabase.KIND_CARD
 import com.curio.app.data.supabase.SOCIAL_CACHE_PREFS
 import com.curio.app.data.supabase.SocialCache
 import com.curio.app.features.personal.personalQuoteDeepColor
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.FrauncesFontFamily
@@ -773,6 +774,7 @@ internal fun SocialConfirmDialog(
             )
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(
                 onClick = { if (!busy) onConfirm() },
                 colors = if (destructive) {

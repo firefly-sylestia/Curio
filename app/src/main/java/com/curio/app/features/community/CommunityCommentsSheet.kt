@@ -30,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -239,6 +240,7 @@ internal fun CommunityCommentsSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

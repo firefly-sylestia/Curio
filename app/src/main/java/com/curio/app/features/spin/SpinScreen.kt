@@ -67,6 +67,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -1552,6 +1553,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             },
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
+            CurioGlassWindowBlur()
             // v3xx — the NEW picker is the only picker (the classic
             // glass-pill picker experiment was fully removed).
             val pickCategory: (CurioCategory) -> Unit = { c ->
@@ -1968,6 +1970,7 @@ private fun FilterSheet(
         shape = RectangleShape,
         dragHandle = null
     ) {
+        CurioGlassWindowBlur()
         Box(modifier = Modifier.fillMaxSize()) {
             // ── Watermark backdrop (v70) — the sheet body wears the same
             //    muted category-glyph collage as every other page, kept in

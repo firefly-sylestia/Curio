@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -379,6 +380,7 @@ fun FeedbackFormSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

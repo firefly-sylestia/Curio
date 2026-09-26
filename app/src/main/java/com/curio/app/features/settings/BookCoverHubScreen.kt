@@ -52,6 +52,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberCurioControlTick
 import androidx.compose.ui.draw.alpha
 import com.curio.app.ui.theme.CurioIcon
@@ -480,6 +481,7 @@ fun BookCoverHubScreen(navController: NavController) {
                     )
                 },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     TextButton(onClick = {
                         showClearConfirm = false
                         BookCoverFetch.clearAllCovers(context)

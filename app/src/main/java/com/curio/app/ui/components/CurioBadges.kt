@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.CurioQuests
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
@@ -327,6 +328,7 @@ fun CurioBadgeDetailDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss) { Text("Close") }
         }
     )

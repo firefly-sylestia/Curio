@@ -53,6 +53,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -557,6 +558,7 @@ internal fun CurioTermsDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onAccept) { Text("Accept") }
         },
         dismissButton = {

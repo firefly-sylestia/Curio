@@ -85,6 +85,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.markCompleted
 import com.curio.app.data.formatElapsed
 import com.curio.app.infrastructure.ExploreSessionService
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -1640,6 +1641,7 @@ composable(CurioRoutes.COMMUNITY) {
             title = { Text("Take a tiny tour?") },
             text = { Text("Curie can walk you through the main controls. Nothing will start, open, or be saved while you tour.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { TourController.start() }, colors = curioDialogActionButtonColors()) { Text("Take the tour") }
             },
             dismissButton = {
@@ -1751,6 +1753,7 @@ composable(CurioRoutes.COMMUNITY) {
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 if (confirmSessionCancel) {
                     // Second tap — the actual end. Quiet teardown, same as
                     // the notification's Cancel action (no write-it-down
@@ -1870,6 +1873,7 @@ composable(CurioRoutes.COMMUNITY) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         CurioUpdatePrompt.dismiss()

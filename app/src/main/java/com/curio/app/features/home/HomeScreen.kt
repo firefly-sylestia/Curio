@@ -138,6 +138,7 @@ import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.heroStatPaneBase
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
@@ -1738,6 +1739,7 @@ fun HomeScreen(navController: NavController) {
             title = { Text("Remove saved quote?") },
             text = { Text("This removes \u201C${quote.quoteText}\u201D from your Saved shelf. The entry itself stays in the Cabinet.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         AppPreferences.removeSavedQuote(context, quote.entryId, quote.quoteText)
@@ -1761,6 +1763,7 @@ fun HomeScreen(navController: NavController) {
             title = { Text("Unpin ${pinned.topicName}?") },
             text = { Text("This removes ${pinned.topicName} from your Saved shelf. The topic stays in the deck. You can pin it again anytime.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         AppPreferences.unpinTopic(context, pinned.categoryId, pinned.topicName)

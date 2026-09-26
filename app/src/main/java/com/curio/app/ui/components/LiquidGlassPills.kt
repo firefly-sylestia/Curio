@@ -87,6 +87,56 @@ object CurioGlassPills {
     @Volatile
     var appContext: android.content.Context? = null
 
+    /**
+     * v484 — THE FROST, AS FOUR NUMBERS.
+     *
+     * The member, after living with v482's near-opaque white: *"the frosted blur
+     * doesnt refract and its too opaque make it 40 mybe … also for dark mode too,
+     * its just for light mode rn"*. These four numbers are the whole answer, and
+     * they live here so **no surface invents its own** — the floating pills and
+     * the sheets'/dialogs' panels are frosted out of this one recipe.
+     */
+    object Frost {
+        /**
+         * How much of the pane the frost covers at all. 0.40: the heavy BLUR is
+         * what makes it a smudge, not the opacity — 92% was paint.
+         */
+        const val Wash = 0.40f
+
+        /** How far a LIGHT pane breathes toward white. */
+        const val LightLift = 0.62f
+
+        /**
+         * How far a DARK pane lifts its OWN colour. Deliberately small: the frost
+         * must not turn a dark pane grey, which is exactly what the old
+         * `lerp(…, White, 0.62f)` in dark did — and why the smudge only ever read
+         * in light mode.
+         */
+        const val DarkLift = 0.14f
+
+        /**
+         * How much more opaque a panel stays when there is NO window blur behind
+         * it (pre-Android-12, blur switched off, Lite mode — see
+         * [com.curio.app.ui.components.liquidglass.windowBlurAvailable]). A
+         * translucent sheet with a sharp page behind it reads as a mistake, so
+         * without a blur to hide behind, a panel stays readable instead.
+         */
+        const val OpaquePanel = 0.94f
+
+        /**
+         * The same wash for a CLEAR-glass panel (the Clear-glass option): the
+         * blurred page does most of the work, so barely any colour sits on top.
+         */
+        const val ClearWash = 0.22f
+
+        /**
+         * The refraction radius a smudge bends with — half the clear recipe's
+         * 24dp, because a thicker pane bends less. Skipped entirely on the
+         * reader's chrome (see [LocalCurioGlassFrostRefraction]).
+         */
+        const val LensDp = 12f
+    }
+
 }
 
 /**
@@ -196,6 +246,25 @@ fun isInScreenGlassActive(): Boolean =
 val LocalCurioGlassBackdrop = compositionLocalOf<LayerBackdrop?> { null }
 
 /**
+ * v484 — WHETHER A FROSTED SURFACE MAY ALSO REFRACT (the reader's one exception).
+ *
+ * v482 dropped the `lens()` pass from the frosted recipe because the per-frame
+ * distortion of a live capture was what made the reader's seven floating pills
+ * shimmer and glitch over a page that is itself re-recording every frame. The
+ * member's answer to that (v484): *"the frosted blur doesnt refract"* — the
+ * smudge should bend what is behind it everywhere ELSE, and the reader's chrome
+ * is the single place that must stay flat.
+ *
+ * So the exception travels with the composition instead of with 100 call sites:
+ * a screen that hands its backdrop down with [CurioGlassScreen.Provide] passes
+ * `refractFrosted = false` once, and every glass surface inside it — including
+ * the shared components, which cannot be told per-site — skips the lens.
+ *
+ * Default `true`: every screen that says nothing refracts.
+ */
+val LocalCurioGlassFrostRefraction = compositionLocalOf { true }
+
+/**
  * A screen's glass state: whether it refracts at all, and the layer its pills
  * sample. Null [backdrop] (glass off, or Android below 12) makes every consumer
  * fall back to its own solid fill, so a screen can adopt this unconditionally.
@@ -211,10 +280,22 @@ class CurioGlassScreen internal constructor(
     val capture: Modifier
         get() = if (on && backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier
 
-    /** Hands the backdrop to every pill drawn inside [content]. */
+    /**
+     * Hands the backdrop to every pill drawn inside [content].
+     *
+     * v484 — [refractFrosted] is the reader's door (see
+     * [LocalCurioGlassFrostRefraction]): pass `false` on the one page whose chrome
+     * must not bend what is behind it. Every other screen leaves it alone.
+     */
     @Composable
-    fun Provide(content: @Composable () -> Unit) {
-        CompositionLocalProvider(LocalCurioGlassBackdrop provides backdrop) { content() }
+    fun Provide(
+        refractFrosted: Boolean = true,
+        content: @Composable () -> Unit
+    ) {
+        CompositionLocalProvider(
+            LocalCurioGlassBackdrop provides backdrop,
+            LocalCurioGlassFrostRefraction provides refractFrosted
+        ) { content() }
     }
 }
 
@@ -258,10 +339,13 @@ fun ambientGlassOn(): Boolean = LocalCurioGlassBackdrop.current != null
 fun ProvideCurioGlass(
     backdrop: LayerBackdrop?,
     active: Boolean = isInScreenGlassActive(),
+    // v484 — the same reader exception as [CurioGlassScreen.Provide].
+    refractFrosted: Boolean = true,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalCurioGlassBackdrop provides if (active) backdrop else null
+        LocalCurioGlassBackdrop provides if (active) backdrop else null,
+        LocalCurioGlassFrostRefraction provides refractFrosted
     ) { content() }
 }
 
@@ -329,6 +413,20 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
  * has published its capture layer — callers must keep their classic path.
  */
 /**
+ * The frost fill for a pane: white in light, a lifted dark in dark.
+ *
+ * The numbers are [CurioGlassPills.Frost]'s — shared with the sheets' and
+ * dialogs' panels (see `curioFrostedPanel`) so a floating pill and a sheet are
+ * frosted out of the same recipe rather than out of two that merely look alike.
+ */
+internal fun frostColor(container: Color, dark: Boolean): Color =
+    androidx.compose.ui.graphics.lerp(
+        container,
+        Color.White,
+        if (dark) CurioGlassPills.Frost.DarkLift else CurioGlassPills.Frost.LightLift
+    )
+
+/**
  * v243 — SIMULATED glass for pre-Android-12 devices (no RenderEffect, so
  * no real backdrop blur/refraction). Draws a theme-aware frosted veil, a
  * top-down sheen and a bright rim over the capsule so the look still reads
@@ -354,7 +452,11 @@ fun Modifier.fauxGlassCapsule(
     val frosted = AppPreferences.glassFrostedState
     val veilScale = 0.30f + 0.70f * AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
     val veil = if (frosted) {
-        Color.White.copy(alpha = if (dark) 0.62f else 0.88f)
+        // v484 — the same thin, theme-own frost the real recipe draws (see
+        // [CurioGlassPills.Frost.Wash]): the simulated pane cannot refract, so
+        // being a WASH rather
+        // than paint is the only thing it can honestly share with it.
+        frostColor(container, dark).copy(alpha = CurioGlassPills.Frost.Wash)
     } else {
         Color.White.copy(alpha = (if (dark) 0.05f else 0.34f) * veilScale)
     }
@@ -484,6 +586,10 @@ fun Modifier.liquidGlassCapsule(
     // wash instead of the translucent container tint. The toggle lives in
     // Experiments → Liquid glass (see `AppPreferences.glassFrostedState`).
     val frosted = AppPreferences.glassFrostedState
+    // v484 — the reader's chrome is the one place a frosted pane must not refract
+    // (see [LocalCurioGlassFrostRefraction]); hoisted here because the draw
+    // lambdas below are plain scopes, not composable ones.
+    val frostRefracts = LocalCurioGlassFrostRefraction.current
     // v242 — user tuning (Appearance → Liquid glass): multipliers around
     // the tuned defaults. Hoisted here; the draw lambdas are plain scopes.
     val blurScale = AppPreferences.glassBlurScaleState
@@ -550,12 +656,26 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    // v482 — FROSTED: one heavy blur, no lens. The smudge IS
-                    // the blur (nothing reads through the near-opaque wash),
-                    // and dropping the lens is what removes the glitch on the
-                    // reader's chrome. ~21dp at the default scale.
+                    // v482/v484 — FROSTED: one heavy blur (~21dp at the default
+                    // scale) and, since v484, the lens as well — the smudge is the
+                    // blur PLUS the bend, and the reader's chrome is the one place
+                    // the bend is skipped (see `frostRefracts` below).
                     if (frosted) {
                         blur(21f.dp.toPx() * blurScale * blurMultiplier)
+                        // v484 — THE SMUDGE REFRACTS AGAIN. The lens is what makes
+                        // the pane bend what is behind it at its edges; v482 dropped
+                        // it for the reader (whose chrome re-records every frame and
+                        // shimmered). It is back everywhere else, at
+                        // [CurioGlassPills.Frost.LensDp] —
+                        // half the clear recipe's radius, because a thicker pane bends
+                        // less — and climbs with the press like the clear one does.
+                        // The reader passes `refractFrosted = false` (see
+                        // [LocalCurioGlassFrostRefraction]).
+                        if (frostRefracts) {
+                            val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() *
+                                refrScale * (1f + 0.45f * press.value)
+                            lens(smudgeR, smudgeR)
+                        }
                     } else if (compact) {
                         // v291 — compact mode: no lens (invisible on <50dp
                         // capsules but each call adds a per-pixel distortion
@@ -592,26 +712,27 @@ fun Modifier.liquidGlassCapsule(
                 // properly frosty instead of clear-plastic.
                 onDrawSurface = {
                     if (frosted) {
-                        // v482 — NEAR-OPAQUE WHITE FROST: the container
-                        // breathed most of the way to white (a little less in
-                        // dark so ink stays readable), laid at 92% so the
-                        // heavy blur behind only whispers through — the
-                        // "not transparent at all, more smudged" the member
-                        // asked for. A soft top-down sheen sits on top so the
-                        // pane still reads as glass, not paint.
-                        val frost = androidx.compose.ui.graphics.lerp(
-                            container,
-                            Color.White,
-                            if (dark) 0.62f else 0.90f
-                        )
-                        drawRect(frost.copy(alpha = 0.92f))
+                        // v484 — THE FROST IS A WASH AGAIN, NOT PAINT.
+                        //
+                        // v482 laid a near-opaque white at 92% and the member's
+                        // answer was immediate: *"the frosted blur doesnt refract and
+                        // its too opaque make it 40 mybe … also for dark mode too, its
+                        // just for light mode rn"*. So the wash is THIN
+                        // ([CurioGlassPills.Frost.Wash] 0.40), so the blur behind it
+                        // still reads as a blurred page and the refraction at the rim is
+                        // visible at all — LIGHT breathes toward white while DARK lifts
+                        // its own container a little, so a dark pane is dark glass
+                        // instead of the grey slab a white frost made of it. The sheen
+                        // stays as the light lying along the top rim.
+                        val frost = frostColor(container, dark)
+                        drawRect(frost.copy(alpha = CurioGlassPills.Frost.Wash))
                         drawRect(
                             brush = Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.30f),
+                                    Color.White.copy(alpha = if (dark) 0.18f else 0.30f),
                                     Color.Transparent,
                                     Color.Transparent,
-                                    Color.White.copy(alpha = 0.10f)
+                                    Color.White.copy(alpha = if (dark) 0.06f else 0.10f)
                                 )
                             )
                         )

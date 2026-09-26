@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicProgressStore
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -497,6 +498,7 @@ fun CurioProgressEditorDialog(
         },
         // ── Finish + Save only (no Reset, no Cancel) ──
         confirmButton = {
+            CurioGlassWindowBlur()
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)

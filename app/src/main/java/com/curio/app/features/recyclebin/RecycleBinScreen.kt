@@ -67,6 +67,7 @@ import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.navigateToSettingsSection
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -401,6 +402,7 @@ fun RecycleBinScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 Surface(
                     onClick = {
                         purgeTarget = null
@@ -475,6 +477,7 @@ fun RecycleBinScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 Surface(
                     onClick = {
                         showEmptyBinConfirm = false
@@ -579,6 +582,7 @@ fun RecycleBinScreen(navController: NavController) {
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { showExpiryDialog = false }) {
                     Text("Close", fontWeight = FontWeight.Bold)
                 }

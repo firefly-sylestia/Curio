@@ -50,6 +50,7 @@ import com.curio.app.data.VoskModelDownloads
 import com.curio.app.data.VoskModels
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
@@ -137,6 +138,7 @@ fun AudioQualityDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close", fontWeight = FontWeight.Bold) }
         }
     )
@@ -246,6 +248,7 @@ private fun SettingsChoiceSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -367,6 +370,7 @@ fun OfflineModelDialog(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -656,6 +660,7 @@ fun OfflineModelDialog(
                         }
                     },
                     confirmButton = {
+                        CurioGlassWindowBlur()
                         TextButton(
                             onClick = {
                                 pendingBigDownload = null

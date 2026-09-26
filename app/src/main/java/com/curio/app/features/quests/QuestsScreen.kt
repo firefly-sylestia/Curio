@@ -88,6 +88,7 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
@@ -1052,6 +1053,7 @@ private fun PathDetailDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close") }
         }
     )
@@ -1121,6 +1123,7 @@ private fun MergedBadgeShelfDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close") }
         }
     )

@@ -39,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -349,7 +350,7 @@ fun BookShelfScreen(navController: NavController) {
                     }
                 }
             },
-            confirmButton = {},
+            confirmButton = { CurioGlassWindowBlur();},
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("Close") } }
         )
     }
@@ -909,6 +910,7 @@ private fun AddBookSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

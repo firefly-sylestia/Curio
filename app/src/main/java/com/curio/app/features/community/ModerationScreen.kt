@@ -62,6 +62,7 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -1500,6 +1501,7 @@ private fun ModerationPermissionsDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             androidx.compose.material3.TextButton(
                 onClick = { onSave(posts, replies, reports_, admins, bans, forms) },
                 enabled = !busy,

@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.SocialPostArchive
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -682,6 +683,7 @@ private fun DeletedPostsDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
                 Text("Done", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
             }

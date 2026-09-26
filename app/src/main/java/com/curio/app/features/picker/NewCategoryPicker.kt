@@ -44,6 +44,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -542,6 +543,7 @@ fun NewCategoryPickerSheet(
             title = { Text("Delete \"${deleteMix?.name}\"?") },
             text = { Text("The mix is removed from your saved list.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         deleteMix?.let { AppPreferences.deleteMix(context, it.createdAtMillis) }
@@ -1997,6 +1999,7 @@ private fun AddSuggestionSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Text(
             "Add to Continue exploring",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
@@ -2173,6 +2176,7 @@ fun MixEditorSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
         shape = shape
     ) {
+        CurioGlassWindowBlur()
         var name by remember { mutableStateOf(editMix?.name ?: "") }
         // IMMUTABLE Set — every toggle writes a NEW set so the grid and the
         // Save label recompose instantly. The old MutableSet-toggle mutated

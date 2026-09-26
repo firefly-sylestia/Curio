@@ -68,6 +68,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -1279,6 +1280,7 @@ fun CabinetV2Content(navController: NavController) {
                 title = { Text("Delete \"${c.name}\"?") },
                 text = { Text("The collection and its ${c.members.size} member${if (c.members.size == 1) "" else "s"} are removed. Your saved entries and topics stay untouched.") },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     TextButton(onClick = {
                         AppPreferences.deleteCollection(context, c.id)
                         if (openLevel == c.id) openLevel = ""
@@ -2903,6 +2905,7 @@ private fun V2CollectionNameSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             verticalArrangement = Arrangement.spacedBy(14.dp),
             modifier = Modifier
@@ -3262,6 +3265,7 @@ private fun V2CoverSourceSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier
@@ -3509,6 +3513,7 @@ private fun V2AddToShelfSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
@@ -3896,6 +3901,7 @@ private fun V2CupboardAddSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier

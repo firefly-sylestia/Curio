@@ -54,6 +54,7 @@ import com.curio.app.infrastructure.ReadAloudService
 import com.curio.app.infrastructure.ReadAloudSession
 import com.curio.app.data.NeuralVoiceDownloads
 import com.curio.app.data.NeuralVoicePacks
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -619,6 +620,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                             }
                         },
                         confirmButton = {
+                            CurioGlassWindowBlur()
                             TextButton(onClick = { enginePicker = false }) {
                                 Text("Done", color = palette.accent)
                             }
@@ -764,6 +766,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                             }
                         },
                         confirmButton = {
+                            CurioGlassWindowBlur()
                             TextButton(onClick = { picker = false }) {
                                 Text("Done", color = palette.accent)
                             }
@@ -869,6 +872,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                 }
                             },
                             confirmButton = {
+                                CurioGlassWindowBlur()
                                 TextButton(onClick = { narratorPicker = false }) {
                                     Text("Done", color = palette.accent)
                                 }

@@ -78,6 +78,7 @@ import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsHeroPillFill
 import com.curio.app.features.settings.settingsHeroTotalHeight
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioPressClickable
@@ -896,6 +897,7 @@ fun CommunityScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     val active = token ?: return@TextButton
                     deleteTarget = null

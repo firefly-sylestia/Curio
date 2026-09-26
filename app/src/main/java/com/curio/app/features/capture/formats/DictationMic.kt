@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.components.LocalDictationHost
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberPulseScale
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -447,6 +448,7 @@ private fun DictationDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             if (listening) {
                 TextButton(onClick = onStop) {
                     Text("Stop", fontWeight = FontWeight.Bold, color = accent)

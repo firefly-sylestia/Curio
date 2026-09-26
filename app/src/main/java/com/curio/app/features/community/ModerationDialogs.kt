@@ -38,6 +38,7 @@ import com.curio.app.data.supabase.BAN_TIERS
 import com.curio.app.data.supabase.ModerationReasons
 import com.curio.app.data.supabase.banTierBlurb
 import com.curio.app.data.supabase.banTierLabel
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -205,6 +206,7 @@ internal fun ReportTargetDialog(
             )
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(
                 onClick = {
                     val reason = chosen ?: return@TextButton
@@ -434,6 +436,7 @@ internal fun ModerationBanDialog(
             }
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // A dimmed button that does not say what it is waiting for reads
                 // as a broken button, so it says it.
@@ -653,6 +656,7 @@ internal fun ModerationReasonDialog(
             )
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(
                 onClick = {
                     if (reasonRequired && chosen == null) return@TextButton

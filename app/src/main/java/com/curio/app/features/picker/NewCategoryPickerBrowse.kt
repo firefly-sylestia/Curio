@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
@@ -272,6 +273,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
             title = { Text("Delete \"${deleteMix?.name}\"?") },
             text = { Text("The mix is removed from your saved list.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         deleteMix?.let { AppPreferences.deleteMix(context, it.createdAtMillis) }

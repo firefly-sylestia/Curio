@@ -18,6 +18,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -417,6 +418,7 @@ internal fun ModerationFormsTab(accessToken: String) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = { publish(form, force = true) },
                     enabled = !busy,
@@ -713,6 +715,7 @@ private fun FormBuilderSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

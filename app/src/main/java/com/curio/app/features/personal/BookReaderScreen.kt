@@ -182,6 +182,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.ambientGlassOn
 import com.curio.app.ui.components.curioAmbientGlass
 import com.curio.app.ui.components.curioPressClickable
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberCurioGlassScreen
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -1862,7 +1863,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         }
 
         // The pills' own door to the capture above — see [CurioGlassScreen.Provide].
-        readerGlass.Provide {
+        readerGlass.Provide(refractFrosted = false) {
         ReaderChrome(
             visible = chrome && !ReaderLook.zonesEditing,
             title = book?.title.orEmpty().ifBlank { "Reader" },
@@ -1923,7 +1924,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
                 // Sits outside [ReaderChrome], so it gets the screen's glass of its
                 // own (see [rememberCurioGlassScreen]).
-                readerGlass.Provide {
+                readerGlass.Provide(refractFrosted = false) {
                 ReaderPinnedPage(
                     pageLabel = pinned.short,
                     palette = palette,
@@ -2219,7 +2220,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         ) {
             if (run != null) {
                 // The scrubber is outside [ReaderChrome] too — its own glass door.
-                readerGlass.Provide {
+                readerGlass.Provide(refractFrosted = false) {
                 ReaderScrubPill(
                     scrubber = run,
                     palette = palette,
@@ -12682,6 +12683,7 @@ internal fun ReaderClockDialog(
         },
         text = { TimePicker(state = picker) },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(
                 onClick = {
                     onPick(picker.hour * 60 + picker.minute)

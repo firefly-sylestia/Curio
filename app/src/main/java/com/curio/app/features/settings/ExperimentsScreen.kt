@@ -37,6 +37,7 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -173,7 +174,7 @@ fun ExperimentsScreen(navController: NavController) {
                         // v482 — the whitish SMUDGED frost (default ON): heavy
                         // blur, near-opaque white wash, no refraction. Turning
                         // it off returns the clear refracting glass.
-                        ExperimentSwitchRow("Frosted glass (smudged)", "Heavily blurred, near-opaque whitish glass instead of a clear pane — glass reads as smudged white frost, not transparent. Also frosts bottom sheets and dialogs", AppPreferences.glassFrostedState) {
+                        ExperimentSwitchRow("Frosted glass (smudged)", "Blurred, smudged glass instead of a clear refracting pane. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
                             AppPreferences.setGlassFrostedEnabled(context, it)
                         }
                         CurioSettingsDivider()
@@ -542,6 +543,7 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = { showRingStylePicker = false },
                     colors = curioDialogActionButtonColors()

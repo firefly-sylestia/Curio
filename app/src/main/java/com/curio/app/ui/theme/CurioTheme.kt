@@ -25,9 +25,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.curio.app.data.AppPreferences
+import com.curio.app.ui.components.CurioGlassPills
+import com.curio.app.ui.components.frostColor
+import com.curio.app.ui.components.liquidglass.windowBlurAvailable
 
 /**
  * Curio's M3 theme wrapper.
@@ -614,35 +618,64 @@ fun CurioTheme(
 val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 
 /**
- * v482 — THE FROSTED (SMUDGED) PANEL. Bottom sheets and dialogs are OPAQUE
- * surfaces — they cannot refract, so the member's *"expand the smudge look to
- * buttom sheets dialog box etc"* is a colour move: when the frosted look is
- * on (and glass is on at all), [base] is breathed most of the way to white in
- * light and over half in dark, so a sheet or dialog reads as the same smudged
- * white frost as the floating glass instead of a separate cream/grey slab.
+ * v482/v484 — THE GLASS PANEL. A bottom sheet or a dialog is its own Android
+ * window, so its surface cannot sample the page behind it the way a floating
+ * pill samples a capture — but it CAN have that page really blurred behind it
+ * ([CurioGlassWindowBlur] on the window), and it can be thin enough to let that
+ * blur read. That is what makes a sheet or a dialog glass:
  *
- * Gated on BOTH switches: the smudge is part of the glass feature, so turning
- * Liquid glass off (its parent) returns every panel to exactly today's colour
- * rather than leaving stray frost behind.
+ *  - **frosted** (the default): the smudge — a 40% wash of [base] breathed
+ *    toward white in light and lifted a little in dark, so a dark pane is dark
+ *    glass and not the grey slab a white frost made of it;
+ *  - **Clear glass**: a genuinely clearer pane — less wash, more of the blurred
+ *    page showing through;
+ *  - **no blur behind it** (Android below 12, cross-window blur off, Lite mode):
+ *    the wash stays nearly opaque, because a translucent sheet over a sharp page
+ *    reads as a mistake rather than as glass;
+ *  - **glass off**: [base] untouched, exactly as it was before glass existed.
+ *
+ * Gated on glass being on at all, so switching Liquid glass off returns every
+ * panel to its old colour and no stray frost is left behind.
  */
 @Composable
-fun curioFrostedPanel(base: Color): Color =
-    if (AppPreferences.glassFrostedState && AppPreferences.liquidGlassPillsState) {
-        lerp(base, Color.White, if (isCurioDarkTheme()) 0.58f else 0.86f)
+fun curioFrostedPanel(base: Color): Color {
+    if (!AppPreferences.liquidGlassPillsState) return base
+    val dark = isCurioDarkTheme()
+    // The pane a blurred window sits behind is thin; the same pane without a
+    // blur must stay readable. One question decides which one we are drawing.
+    val blurred = windowBlurAvailable(LocalContext.current)
+    val frosted = AppPreferences.glassFrostedState
+    // Clear glass keeps the container's own colour as a hint and takes no white
+    // lift: the blurred page behind it is what the pane is made of. (Lerping
+    // toward Transparent instead would premultiply the colour toward black —
+    // the pane would go muddy, not clear.)
+    val pane = if (frosted) {
+        frostColor(base, dark)
+    } else if (dark) {
+        lerp(base, Color.White, 0.06f)
     } else {
-        base
+        lerp(base, Color.White, 0.16f)
     }
+    val alpha = when {
+        !blurred -> CurioGlassPills.Frost.OpaquePanel
+        frosted -> CurioGlassPills.Frost.Wash
+        else -> CurioGlassPills.Frost.ClearWash
+    }
+    return pane.copy(alpha = alpha)
+}
 
 /**
- * v482 — a BOTTOM SHEET's container under the frosted (smudged) look.
+ * v482/v484 — a BOTTOM SHEET's container under glass.
  *
- * The member: *"expand the smudge look to buttom sheets dialog box etc"*.
- * A sheet cannot refract, so its container is simply frosted: [base] (the
- * colour the sheet already used, including a category wash or a cover
- * palette) is breathed toward white through [curioFrostedPanel]. With the
- * frosted look off — or glass off entirely — the base is returned untouched,
- * so every sheet keeps exactly today's colour. Pass no [base] for a sheet
- * that used Material's own default (surfaceContainerLow).
+ * The member: *"expand the smudge look to buttom sheets dialog box etc"*, then
+ * (v484) *"make the buttom sheet and dialog box etc liquid glass too with the
+ * clear glass too"*. A sheet cannot refract the page the way a pill does — it is
+ * another window — so its container is the glass [base] is made into through
+ * [curioFrostedPanel]: frosted or clear, thin when `CurioGlassWindowBlur()` has
+ * put a real blur behind the window, near-opaque when it has not. With glass off
+ * entirely, [base] is returned untouched, so every sheet keeps its old colour.
+ * Pass no [base] for a sheet that used Material's own default
+ * (surfaceContainerLow).
  */
 @Composable
 fun curioSheetContainerColor(base: Color = Color.Unspecified): Color =

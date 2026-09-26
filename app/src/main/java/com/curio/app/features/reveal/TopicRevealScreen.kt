@@ -72,6 +72,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -1652,6 +1653,7 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     showOverlayPermissionDialog = false
                     val s = pendingOverlaySession
@@ -1725,6 +1727,7 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     showNotificationsBlockedDialog = false
                     val s = pendingNotificationSession
@@ -1867,6 +1870,7 @@ fun TopicRevealScreen(
                 }
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 // v27r — the two explore actions are PILL-shaped buttons, each
                 // a leading icon + short label so nothing wraps or truncates
                 // in the width-constrained dialog: the globe (travel_explore)
@@ -2029,6 +2033,7 @@ fun TopicRevealScreen(
                     }
                 },
                 confirmButton = {
+                    CurioGlassWindowBlur()
                     TextButton(
                         onClick = {
                             val s = pendingConflictSession
@@ -4209,6 +4214,7 @@ private fun AlbumNotesSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -5088,6 +5094,7 @@ private fun EpisodeNotesSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -5681,6 +5688,7 @@ private fun PosterNotesSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -7015,6 +7023,7 @@ private fun FileToCollectionSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
@@ -7199,6 +7208,7 @@ private fun RevealShareChoiceSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

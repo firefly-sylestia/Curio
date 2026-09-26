@@ -1665,15 +1665,18 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
-    // v482 — FROSTED (SMUDGED) GLASS (default ON): the member: *"make it
+    // v482/v484 — FROSTED (SMUDGED) GLASS (default ON): the member: *"make it
     // whitish frosty glass not transparent at all more smudged, add a toggle
-    // for the whole smudged look too"*. When ON, every glass surface — the
-    // floating pills, the toolbars, the reader's chrome, the nav bar — drops
-    // the lens refraction for a heavy blur and wears a near-opaque WHITE
-    // frost wash, so the capsule reads as smudged white glass rather than a
-    // clear refracting pane. Turning it off restores the clear recipe (and
-    // the separate Clear glass option still applies in that mode). The same
-    // switch drives the smudge on bottom sheets and dialogs (see
+    // for the whole smudged look too"*, then, living with it: *"the frosted blur
+    // doesnt refract and its too opaque make it 40 mybe … also for dark mode too,
+    // its just for light mode rn"*. When ON, every glass surface — the floating
+    // pills, the toolbars, the nav bar, and (since v484) the bottom sheets' and
+    // dialogs' own panels — wears a THIN frost wash (`CurioGlassPills.Frost.Wash`
+    // 0.40, breathed toward white in light and lifted in dark) over a heavy blur.
+    // The lens refraction is back everywhere it was dropped except the reader's
+    // chrome (see `LocalCurioGlassFrostRefraction`). Turning it off restores the
+    // clear recipe (and the separate Clear glass option still applies in that
+    // mode). The same switch drives the smudge on sheets and dialogs (see
     // [com.curio.app.ui.theme.curioSheetContainerColor] and
     // [com.curio.app.ui.theme.curioDialogContainerColor]).
     var glassFrostedState by mutableStateOf(true)

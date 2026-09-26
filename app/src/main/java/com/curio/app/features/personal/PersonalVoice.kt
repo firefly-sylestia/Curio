@@ -36,6 +36,7 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -972,6 +973,7 @@ internal fun PersonalVoiceBar(
                 Text("The recording goes with it, and a recording cannot be made again.")
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(
                     onClick = {
                         confirmRemove = false
@@ -1662,6 +1664,7 @@ private fun PersonalVoiceStyleSheet(
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1898,7 +1901,7 @@ internal fun PersonalVoiceMic(
             onDismissRequest = { recordFailed = false },
             title = { Text("Could not start recording") },
             text = { Text("The microphone is busy or unavailable. Try again in a moment.") },
-            confirmButton = { TextButton(onClick = { recordFailed = false }) { Text("OK") } }
+            confirmButton = { CurioGlassWindowBlur(); TextButton(onClick = { recordFailed = false }) { Text("OK") } }
         )
     }
 
@@ -1916,6 +1919,7 @@ internal fun PersonalVoiceMic(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 if (micSettings != null) {
                     TextButton(onClick = {
                         micDenied = false
@@ -2022,6 +2026,7 @@ internal fun PersonalVoiceLeaveDialog(
         },
         text = { Text("This voice note is $elapsed long.") },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onKeepNote) {
                 Text("Keep the note", color = personalAccentInk(), fontWeight = FontWeight.SemiBold)
             }

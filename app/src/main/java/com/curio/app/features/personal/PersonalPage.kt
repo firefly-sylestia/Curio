@@ -96,6 +96,7 @@ import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.newNoteId
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -1080,6 +1081,7 @@ internal fun PersonalWritingPage(
                 Text("The microphone is busy or unavailable. Try again in a moment.")
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { recordFailed = false }) { Text("OK") }
             }
         )
@@ -1099,6 +1101,7 @@ internal fun PersonalWritingPage(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 if (micSettings != null) {
                     TextButton(onClick = {
                         micDenied = false

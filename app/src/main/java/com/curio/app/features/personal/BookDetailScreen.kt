@@ -51,6 +51,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -935,6 +936,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                 Text("Curio could not copy the file into its own storage. Try picking it again.")
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { attachFailed = false }) { Text("OK") }
             }
         )
@@ -956,6 +958,7 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
             title = { Text("Remove chapter ${review.chapterIndex}?") },
             text = { Text("The review you wrote for this chapter leaves your book.") },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     val id = review.id
                     pendingReviewDelete = null
@@ -2261,6 +2264,7 @@ private fun DownloadHelpSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = shape,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

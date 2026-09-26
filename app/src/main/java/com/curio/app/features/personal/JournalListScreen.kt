@@ -70,6 +70,7 @@ import com.curio.app.data.PersonalNoteEntity
 import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.wordCount
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -497,6 +498,7 @@ fun JournalListScreen(navController: NavController) {
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = {
                     val id = journal.id
                     pendingDelete = null

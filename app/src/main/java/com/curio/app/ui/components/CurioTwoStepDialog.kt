@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -54,6 +55,7 @@ fun CurioTwoStepDeleteDialog(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { step = 2 }) {
                     Text("Continue", fontWeight = FontWeight.Bold)
                 }
@@ -77,6 +79,7 @@ fun CurioTwoStepDeleteDialog(
                 )
             },
             confirmButton = {
+                CurioGlassWindowBlur()
                 TextButton(onClick = { step = 1; onConfirmed() }) {
                     Text(
                         confirmLabel,

@@ -71,6 +71,7 @@ import com.curio.app.features.personal.personalOnAccent
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -931,6 +932,7 @@ private fun NewTakePickerSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1059,6 +1061,7 @@ private fun CaptureToolsSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        CurioGlassWindowBlur()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

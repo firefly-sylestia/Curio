@@ -55,6 +55,7 @@ import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -110,6 +111,7 @@ private fun BlobatarLicenseDialog(onDismiss: () -> Unit) {
             )
         },
         confirmButton = {
+            CurioGlassWindowBlur()
             TextButton(onClick = onDismiss) { Text("Close") }
         }
     )
