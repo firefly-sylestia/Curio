@@ -39,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -905,7 +906,7 @@ private fun AddBookSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(

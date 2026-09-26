@@ -72,6 +72,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -4204,7 +4205,7 @@ private fun AlbumNotesSheet(
         // Same category-tinted wash + top hairline as the book-notes sheet.
         // v339 — when the cover's palette is available it replaces the
         // category accent (fallback stays when it isn't).
-        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
+        containerColor = curioSheetContainerColor(coverPal?.container ?: cat.notesSheetContainerColor()),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -5083,7 +5084,7 @@ private fun EpisodeNotesSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
+        containerColor = curioSheetContainerColor(coverPal?.container ?: cat.notesSheetContainerColor()),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -5676,7 +5677,7 @@ private fun PosterNotesSheet(
         sheetState = sheetState,
         // The same category-tinted wash + top hairline as the book / album /
         // series sheets.
-        containerColor = cat.notesSheetContainerColor(),
+        containerColor = curioSheetContainerColor(cat.notesSheetContainerColor()),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -7011,7 +7012,7 @@ private fun FileToCollectionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -7195,7 +7196,7 @@ private fun RevealShareChoiceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(

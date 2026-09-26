@@ -136,12 +136,21 @@ fun UserExperimentsScreen(navController: NavController) {
                     }
                     if (AppPreferences.liquidGlassPillsState) {
                         CurioSettingsDivider()
+                        // v482 — the whitish SMUDGED frost (default ON): heavy
+                        // blur, near-opaque white wash, no refraction. Turning
+                        // it off returns the clear refracting glass.
+                        ExperimentSwitchRow("Frosted glass (smudged)", "Heavily blurred, near-opaque whitish glass instead of a clear pane — glass reads as smudged white frost, not transparent. Also frosts bottom sheets and dialogs", AppPreferences.glassFrostedState) {
+                            AppPreferences.setGlassFrostedEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
                         ExperimentSwitchRow("Force glass", "Bypass device capability checks and always enable glass", AppPreferences.forceGlassEnabled) {
                             AppPreferences.setForceGlassEnabled(context, it)
                         }
+                        if (!AppPreferences.glassFrostedState) {
                         CurioSettingsDivider()
                         ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction. Glass reads clear, like the glow under your finger", AppPreferences.glassClarityState) {
                             AppPreferences.setGlassClarityEnabled(context, it)
+                        }
                         }
                         CurioSettingsDivider()
                         var showGlassTuning by remember { mutableStateOf(false) }

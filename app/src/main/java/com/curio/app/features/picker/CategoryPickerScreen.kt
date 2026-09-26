@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -194,7 +195,7 @@ fun CategoryPickerScreen(navController: NavController) {
     ModalBottomSheet(
         onDismissRequest = { navController.popBackStack() },
         sheetState = sheetState,
-        containerColor = washCat.categoryBackgroundWash(),
+        containerColor = curioSheetContainerColor(washCat.categoryBackgroundWash()),
         dragHandle = {
             // Glass grabber pill
             Box(

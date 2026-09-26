@@ -56,6 +56,7 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
 import androidx.compose.ui.unit.DpOffset
@@ -156,6 +157,11 @@ fun CurioLiquidGlassTabBar(
     val density = LocalDensity.current
     // v233 — CLEAR GLASS (experiment): less frost, more refraction.
     val clear = AppPreferences.glassClarityState
+    // v482 — the FROSTED (smudged) look: the nav bar is the most-seen glass
+    // surface, so it wears the same near-opaque whitish frost as every other
+    // glass site (see `LiquidGlassPills`), and drops the lens pass.
+    val frosted = AppPreferences.glassFrostedState
+    val frostedDark = isCurioDarkTheme()
     // v242 — user tuning (Appearance → Liquid glass): multipliers around
     // the tuned defaults, applied to blur / lens / highlight below.
     val blurScale = AppPreferences.glassBlurScaleState
@@ -353,8 +359,12 @@ fun CurioLiquidGlassTabBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                            lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                            if (frosted) {
+                                blur(21f.dp.toPx() * blurScale)
+                            } else {
+                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
+                                lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                            }
                         }
                     },
                     highlight = {
@@ -373,8 +383,18 @@ fun CurioLiquidGlassTabBar(
                         )
                     },
                     onDrawSurface = {
-                        // v233 — clear-glass cuts the frost wash to ~a third.
-                        drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.20f else 1f))
+                        if (frosted) {
+                            // v482 — the nav bar's near-opaque white frost.
+                            val frost = androidx.compose.ui.graphics.lerp(
+                                containerColor,
+                                Color.White,
+                                if (frostedDark) 0.62f else 0.90f
+                            )
+                            drawRect(frost.copy(alpha = 0.92f))
+                        } else {
+                            // v233 — clear-glass cuts the frost wash to ~a third.
+                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.20f else 1f))
+                        }
                     },
                     layerBlock = {
                         if (isBlurEnabled) {

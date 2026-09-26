@@ -67,6 +67,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -1532,7 +1533,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         androidx.compose.material3.ModalBottomSheet(
             onDismissRequest = { showCategoryPicker = false },
             sheetState = pickerSheetState,
-            containerColor = deckCat.categoryBackgroundWash(),
+            containerColor = curioSheetContainerColor(deckCat.categoryBackgroundWash()),
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -1957,7 +1958,7 @@ private fun FilterSheet(
         // as the Spin page behind it), not the stronger card-level
         // categorySurface that read as the raw hero color and glared
         // against the washed page.
-        containerColor = cat.categoryBackgroundWash(),
+        containerColor = curioSheetContainerColor(cat.categoryBackgroundWash()),
         // v70 — the tear hero runs up BEHIND the status bar like every other
         // page hero: flush top corners (no rounded cap), no floating drag
         // handle, and only the bottom + IME insets consumed so the banner

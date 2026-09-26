@@ -347,9 +347,17 @@ fun Modifier.fauxGlassCapsule(
     // Android 12, so the recipe leans clear-pane (light veil, strong sheen +
     // rim) instead of milk. The Appearance Blur slider drives the veil too —
     // at the default 25% the capsule reads near-clear.
+    // v482 — the FROSTED (smudged) look: a near-opaque white veil instead of
+    // the clear pane, so pre-12 devices read the same smudged white the real
+    // glass recipe draws (see `liquidGlassCapsule`). The Blur slider no longer
+    // thins it — that slider belongs to the clear recipe.
+    val frosted = AppPreferences.glassFrostedState
     val veilScale = 0.30f + 0.70f * AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
-    val veilBase = if (dark) 0.05f else 0.34f
-    val veil = Color.White.copy(alpha = veilBase * veilScale)
+    val veil = if (frosted) {
+        Color.White.copy(alpha = if (dark) 0.62f else 0.88f)
+    } else {
+        Color.White.copy(alpha = (if (dark) 0.05f else 0.34f) * veilScale)
+    }
     val sheen = if (dark) Color.White.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.75f)
     val rim = if (dark) Color.White.copy(alpha = 0.32f) else Color.White.copy(alpha = 0.90f)
     return this.drawWithContent {
@@ -464,6 +472,18 @@ fun Modifier.liquidGlassCapsule(
     // than milky frosted glass.
     // v292g — forceFrost overrides glassClarity so chips always frost.
     val clear = (AppPreferences.glassClarityState || alwaysClear) && !forceFrost
+    // ── v482 — THE FROSTED (SMUDGED) LOOK ───────────────────────────
+    //
+    // The member: *"make it whitish frosty glass not transparent at all more
+    // smudged … the reader it has really glitchy"*. When this is ON (the
+    // default) the glass stops being a clear refracting pane and becomes a
+    // heavy SMUDGE: the lens refraction pass is dropped entirely — it is the
+    // per-frame distortion of the live capture, and it was what made the
+    // reader's seven floating pills shimmer and glitch over a page that is
+    // itself re-recording — and the surface wears a near-opaque WHITE frost
+    // wash instead of the translucent container tint. The toggle lives in
+    // Experiments → Liquid glass (see `AppPreferences.glassFrostedState`).
+    val frosted = AppPreferences.glassFrostedState
     // v242 — user tuning (Appearance → Liquid glass): multipliers around
     // the tuned defaults. Hoisted here; the draw lambdas are plain scopes.
     val blurScale = AppPreferences.glassBlurScaleState
@@ -530,12 +550,18 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    // v291 — compact mode: no lens (invisible on <50dp
-                    // capsules but each call adds a per-pixel distortion
-                    // pass). v292 — user call: chips read too flat — the
-                    // frost blur went back UP to 3dp so small capsules get
-                    // the same milky-frosted depth as the big panes.
-                    if (compact) {
+                    // v482 — FROSTED: one heavy blur, no lens. The smudge IS
+                    // the blur (nothing reads through the near-opaque wash),
+                    // and dropping the lens is what removes the glitch on the
+                    // reader's chrome. ~21dp at the default scale.
+                    if (frosted) {
+                        blur(21f.dp.toPx() * blurScale * blurMultiplier)
+                    } else if (compact) {
+                        // v291 — compact mode: no lens (invisible on <50dp
+                        // capsules but each call adds a per-pixel distortion
+                        // pass). v292 — user call: chips read too flat — the
+                        // frost blur went back UP to 3dp so small capsules get
+                        // the same milky-frosted depth as the big panes.
                         // v292c — REVERTED the frost boost (user call: chips
                         // must read as LIQUID GLASS again, not milky plastic).
                         // Back to the light clear-refraction recipe: minimal
@@ -565,10 +591,36 @@ fun Modifier.liquidGlassCapsule(
                 // surfaces take a ~35% STRONGER wash so the small chips read
                 // properly frosty instead of clear-plastic.
                 onDrawSurface = {
-                    // v292c — wash back to the standard recipe (the v292/
-                    // v292b compact multipliers made chips read milky-frosted
-                    // instead of clear liquid glass).
-                    drawRect(container.copy(alpha = washAlpha * if (clear) 0.20f else 1f))
+                    if (frosted) {
+                        // v482 — NEAR-OPAQUE WHITE FROST: the container
+                        // breathed most of the way to white (a little less in
+                        // dark so ink stays readable), laid at 92% so the
+                        // heavy blur behind only whispers through — the
+                        // "not transparent at all, more smudged" the member
+                        // asked for. A soft top-down sheen sits on top so the
+                        // pane still reads as glass, not paint.
+                        val frost = androidx.compose.ui.graphics.lerp(
+                            container,
+                            Color.White,
+                            if (dark) 0.62f else 0.90f
+                        )
+                        drawRect(frost.copy(alpha = 0.92f))
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.30f),
+                                    Color.Transparent,
+                                    Color.Transparent,
+                                    Color.White.copy(alpha = 0.10f)
+                                )
+                            )
+                        )
+                    } else {
+                        // v292c — wash back to the standard recipe (the v292/
+                        // v292b compact multipliers made chips read milky-frosted
+                        // instead of clear liquid glass).
+                        drawRect(container.copy(alpha = washAlpha * if (clear) 0.20f else 1f))
+                    }
                 }
             )
         )

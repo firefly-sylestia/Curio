@@ -51,6 +51,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -2259,8 +2260,7 @@ private fun DownloadHelpSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = shape,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

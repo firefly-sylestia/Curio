@@ -614,6 +614,43 @@ fun CurioTheme(
 val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 
 /**
+ * v482 — THE FROSTED (SMUDGED) PANEL. Bottom sheets and dialogs are OPAQUE
+ * surfaces — they cannot refract, so the member's *"expand the smudge look to
+ * buttom sheets dialog box etc"* is a colour move: when the frosted look is
+ * on (and glass is on at all), [base] is breathed most of the way to white in
+ * light and over half in dark, so a sheet or dialog reads as the same smudged
+ * white frost as the floating glass instead of a separate cream/grey slab.
+ *
+ * Gated on BOTH switches: the smudge is part of the glass feature, so turning
+ * Liquid glass off (its parent) returns every panel to exactly today's colour
+ * rather than leaving stray frost behind.
+ */
+@Composable
+fun curioFrostedPanel(base: Color): Color =
+    if (AppPreferences.glassFrostedState && AppPreferences.liquidGlassPillsState) {
+        lerp(base, Color.White, if (isCurioDarkTheme()) 0.58f else 0.86f)
+    } else {
+        base
+    }
+
+/**
+ * v482 — a BOTTOM SHEET's container under the frosted (smudged) look.
+ *
+ * The member: *"expand the smudge look to buttom sheets dialog box etc"*.
+ * A sheet cannot refract, so its container is simply frosted: [base] (the
+ * colour the sheet already used, including a category wash or a cover
+ * palette) is breathed toward white through [curioFrostedPanel]. With the
+ * frosted look off — or glass off entirely — the base is returned untouched,
+ * so every sheet keeps exactly today's colour. Pass no [base] for a sheet
+ * that used Material's own default (surfaceContainerLow).
+ */
+@Composable
+fun curioSheetContainerColor(base: Color = Color.Unspecified): Color =
+    curioFrostedPanel(
+        if (base == Color.Unspecified) MaterialTheme.colorScheme.surfaceContainerLow else base
+    )
+
+/**
  * Theme-aware AlertDialog container. LIGHT (v170): the theme's own
  * elevated container (surfaceContainerHigh — the warm tan the floating
  * pills/chips wear) instead of the old 72% blend toward the cream
@@ -629,13 +666,15 @@ val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 @Composable
 fun curioDialogContainerColor(): Color {
     if (isCurioDarkTheme()) {
-        return lerp(
-            MaterialTheme.colorScheme.surfaceContainerLow,
-            // The dark tint lift mirrors settingsCardTintLift: a whisper of
-            // the brand rose into black (the dialog floats over any page, so
-            // it uses the neutral rose rather than a lane accent).
-            lerp(Color.Black, curioRoseInk(), 0.20f),
-            0.30f
+        return curioFrostedPanel(
+            lerp(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                // The dark tint lift mirrors settingsCardTintLift: a whisper of
+                // the brand rose into black (the dialog floats over any page, so
+                // it uses the neutral rose rather than a lane accent).
+                lerp(Color.Black, curioRoseInk(), 0.20f),
+                0.30f
+            )
         )
     }
     // v408 — light: a WHITE panel (the same card the page's surfaces are
@@ -644,10 +683,13 @@ fun curioDialogContainerColor(): Color {
     // which was a cream step BELOW the page — a dialog therefore looked
     // like a slightly dirtier patch of the page behind it. A dialog is the
     // most elevated card in the app; it now reads as one.
-    return lerp(
-        MaterialTheme.colorScheme.surfaceContainerLowest,
-        curioRoseInk(),
-        0.05f
+    // v482 — the frosted (smudged) panel wins over the clear recipe.
+    return curioFrostedPanel(
+        lerp(
+            MaterialTheme.colorScheme.surfaceContainerLowest,
+            curioRoseInk(),
+            0.05f
+        )
     )
 }
 
@@ -665,16 +707,20 @@ fun curioDialogContainerColor(): Color {
 @Composable
 fun curioProfileDialogColor(): Color {
     if (isCurioDarkTheme()) {
-        return lerp(
-            MaterialTheme.colorScheme.surfaceContainerLow,
-            lerp(Color.Black, curioRoseInk(), 0.20f),
-            0.30f
+        return curioFrostedPanel(
+            lerp(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                lerp(Color.Black, curioRoseInk(), 0.20f),
+                0.30f
+            )
         )
     }
-    return lerp(
-        MaterialTheme.colorScheme.surfaceContainerLowest,
-        curioRoseInk(),
-        0.06f
+    return curioFrostedPanel(
+        lerp(
+            MaterialTheme.colorScheme.surfaceContainerLowest,
+            curioRoseInk(),
+            0.06f
+        )
     )
 }
 

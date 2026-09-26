@@ -1665,6 +1665,20 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
+    // v482 — FROSTED (SMUDGED) GLASS (default ON): the member: *"make it
+    // whitish frosty glass not transparent at all more smudged, add a toggle
+    // for the whole smudged look too"*. When ON, every glass surface — the
+    // floating pills, the toolbars, the reader's chrome, the nav bar — drops
+    // the lens refraction for a heavy blur and wears a near-opaque WHITE
+    // frost wash, so the capsule reads as smudged white glass rather than a
+    // clear refracting pane. Turning it off restores the clear recipe (and
+    // the separate Clear glass option still applies in that mode). The same
+    // switch drives the smudge on bottom sheets and dialogs (see
+    // [com.curio.app.ui.theme.curioSheetContainerColor] and
+    // [com.curio.app.ui.theme.curioDialogContainerColor]).
+    var glassFrostedState by mutableStateOf(true)
+        private set
+
     // v454 — LITE MODE (default OFF): one switch that makes the app cheaper
     // on weaker hardware — refraction/blur everywhere is skipped, the
     // always-running decorative clocks (shimmer, twinkle, breathe, pulse)
@@ -2079,6 +2093,7 @@ object AppPreferences {
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
+        glassFrostedState = isGlassFrostedEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
         pinnedTitleViewState = isPinnedTitleViewEnabled(context)
@@ -2572,6 +2587,10 @@ object AppPreferences {
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
     private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
+    // v482 — the FROSTED (smudged) look: near-opaque whitish frost instead of
+    // clear refraction. Default ON (the member's ask); the toggle turns it off
+    // and returns the old clear glass.
+    private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
@@ -2889,6 +2908,15 @@ object AppPreferences {
     fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()
         glassClarityState = enabled
+    }
+
+    // ── Frosted (smudged) glass (v482, default ON) ───────────────────
+    fun isGlassFrostedEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_FROSTED, true)
+
+    fun setGlassFrostedEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_FROSTED, enabled).apply()
+        glassFrostedState = enabled
     }
 
     // ── Liquid glass tuning (Appearance; stored as percent ints) ──────

@@ -68,6 +68,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -2899,7 +2900,7 @@ private fun V2CollectionNameSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -3258,7 +3259,7 @@ private fun V2CoverSourceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -3505,7 +3506,7 @@ private fun V2AddToShelfSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         LazyColumn(
@@ -3892,7 +3893,7 @@ private fun V2CupboardAddSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         LazyColumn(

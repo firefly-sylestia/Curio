@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.curio.app.ui.theme.curioSheetContainerColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -190,8 +191,7 @@ fun LiquidGlassPageNav(
     if (showPagePicker) {
         ModalBottomSheet(
             onDismissRequest = { showPagePicker = false },
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ) {
+            containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)) {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
