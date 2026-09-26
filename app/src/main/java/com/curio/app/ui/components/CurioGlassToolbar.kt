@@ -769,9 +769,19 @@ private val PILL_HEADER_HEIGHT = CurioLayout.PILL_HEADER_HEIGHT_DP.dp
  * below it starts immediately.
  *
  * **A TRANSPARENT BACKDROP IS A VALID CALL.** A screen with no glass host passes no
- * `glassBackdrop`, and the simulated frost or the plain tint takes over — the pill is
+ * `glassBackdrop`, and the simulated frost or the plain tint takes over — the bar is
  * never invisible, and never a second refraction pass over a capsule that already has
- * one (the same rule [CurioBackButton]'s `ambientGlass = false` follows here).
+ * one.
+ *
+ * ── v481 — TWO OBJECTS, NOT ONE: THE BACK DISC STANDS APART FROM THE TITLE ─
+ *
+ * The member: *"the back button and the header isnt separated and i dont like it so
+ * fix it"*. The chevron was a [CurioBackButton] INSIDE the bar's capsule, so the two
+ * shared one slab and the control read as part of the title. It is a **separate 48dp
+ * circle beside the bar** now, with an 8dp gap, wearing the bar's own tint and lift
+ * (and its own ambient glass — see the body note on why `ambientGlass = false` no
+ * longer applies: that rule was for a pill INSIDE the refracting capsule). Only the
+ * title and the action pills live in the slab; the back control floats on its own.
  */
 @Composable
 fun CurioPillHeader(
@@ -832,39 +842,60 @@ fun CurioPillHeader(
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(PILL_HEADER_HEIGHT)
-                .then(glassMod)
-                .padding(start = 6.dp, end = 10.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // ── v481 — THE BACK CONTROL IS ITS OWN FLOATING DISC ──────────
+            //
+            // The member, of the v479 bar: *"the back button and the header isnt
+            // separated and i dont like it so fix it"*. The chevron was a
+            // `CurioBackButton` INSIDE the bar's own capsule, so it and the title
+            // shared one slab and the control read as part of the title instead of
+            // as something to press. It is its own 48dp circle now, sitting BESIDE
+            // the bar with a real 8dp gap — the app's floating-control language —
+            // on the bar's own tint, with the bar's lift.
+            //
+            // It takes the AMBIENT glass now (the default) where the old in-slab
+            // pill passed `false`: that flag existed because the pill was INSIDE
+            // the capsule that already refracted, so a second pass would be the
+            // same refraction paid twice. It is a SEPARATE surface now, so it
+            // refracts on its own and the bar keeps its own — two objects, two
+            // passes, no double-draw on either.
             if (onBack != null) {
                 CurioBackButton(
                     onClick = onBack,
-                    // This bar IS the ambient glass for the pill inside it.
-                    ambientGlass = false,
+                    containerColor = container,
                     contentColor = MaterialTheme.colorScheme.primary,
-                    shadowElevation = 3.dp,
+                    shadowElevation = 6.dp,
                     disableRipple = true
                 )
-                Spacer(Modifier.width(10.dp))
-            }
-            Text(
-                title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = ink,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            if (trailing != null) {
                 Spacer(Modifier.width(8.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    trailing(ink)
+            }
+            // ── THE TITLE BAR — the slab the back disc now stands apart from.
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(PILL_HEADER_HEIGHT)
+                    .then(glassMod)
+                    .padding(start = 16.dp, end = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (trailing != null) {
+                    Spacer(Modifier.width(8.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        trailing(ink)
+                    }
                 }
             }
         }
