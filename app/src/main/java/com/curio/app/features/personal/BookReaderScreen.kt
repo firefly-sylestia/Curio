@@ -130,6 +130,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -5935,9 +5936,16 @@ private fun ReaderPinnedPage(
  * away. A tap anywhere on the page closes it as well (see [tapPage]) — the member's
  * own rule, and the same tap that already means "get out of the way".
  *
- * The two arrows are the hold-to-turn ones from the old sheet, one on each side of
- * the slider, so the pill is the whole of the page bar: drag for a long jump, hold
- * to walk a page at a time. Nothing was dropped in the move.
+ * ── v478 — TWO LINES: THE BAR, THEN THE CONTROLS ────────────────────────
+ *
+ * The member: *"maybe make the progress bar all the way and place the number
+ * similiar to the chapter view"*. The pill was ONE row — two arrows, the track, a
+ * fixed count slot and the cross — so the track was only the leftover middle of
+ * its own control, and a whole book lived in a few thumb-widths of travel. The
+ * track is the pill's top line now, edge to edge; the two hold-to-turn arrows (the
+ * old sheet's own [ReaderHoldButton]), the chapter's own name and the count sit on
+ * the line BELOW it. Nothing was dropped in the move: drag for a long jump, hold
+ * the arrows to walk a page at a time.
  */
 @Composable
 private fun ReaderScrubPill(
@@ -5990,11 +5998,65 @@ private fun ReaderScrubPill(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 7.dp)
+                .padding(start = 4.dp, end = 4.dp, top = 10.dp, bottom = 8.dp)
         ) {
+        // ── v478 — THE BAR COMES FIRST, AND IT RUNS THE WHOLE PILL ──────
+        //
+        // The member: *"maybe make the progress bar all the way"*. The track
+        // used to be the leftover middle of ONE crowded row — two arrows, a
+        // fixed count slot and the close all beside it — so a whole book lived
+        // in a few thumb-widths of travel. The bar is the pill's own top line
+        // now, inset only enough to clear the capsule's rounded corner, and
+        // every control sits on the line BELOW it, beside the chapter name.
+        //
+        // A book with one page has nothing to scrub THROUGH, and a slider whose
+        // range is a single value is a divide by zero wearing a thumb (a
+        // one-page PDF is the honest case). The arrows still work.
+        if (last > 1) {
+            val trackInactive = lerp(body, palette.ink, 0.18f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp)
+            ) {
+                Slider(
+                    value = dragged.coerceIn(1, last).toFloat(),
+                    onValueChange = { next -> dragged = next.roundToInt() },
+                    onValueChangeFinished = { scrubber.onScrub(dragged.coerceIn(1, last)) },
+                    valueRange = 1f..last.toFloat(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        // ── v478 — THE HANDLE IS NOT THE TRACK ───────────────
+                        // The member: *"and also the indicator"*. The handle wore
+                        // the SAME accent as the active track, so the one thing
+                        // that says where you are disappeared into the fill it
+                        // stood in. It is the reader's ink now — dark on the
+                        // accent fill and on the empty track, in both themes —
+                        // so the indicator is the most legible thing on the bar.
+                        thumbColor = palette.ink,
+                        activeTrackColor = palette.accent,
+                        inactiveTrackColor = trackInactive
+                    )
+                )
+                ReaderChapterNotches(
+                    total = last,
+                    chapters = scrubber.chapters,
+                    at = dragged,
+                    ink = palette.ink,
+                    paper = palette.paper,
+                    accent = palette.accent,
+                    inactive = trackInactive,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+            }
+        }
+        // ── v478 — AND THE CONTROLS UNDER THE BAR ───────────────────────
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 2.dp)
         ) {
             ReaderHoldButton(
                 glyph = CurioIcons.ChevronLeft,
@@ -6002,61 +6064,45 @@ private fun ReaderScrubPill(
                 palette = palette,
                 step = scrubber.onPrev
             )
-            // A book with one page has nothing to scrub THROUGH, and a slider
-            // whose range is a single value is a divide by zero wearing a thumb
-            // (a one-page PDF is the honest case). The arrows still work.
-            if (last > 1) {
-                // ── v475 — THE CHAPTER MARKS RIDE ON THE TRACK ───────────────
-                // The scrubber is one drag across the whole book, and a book's
-                // chapters are the landmarks along it. The notches are drawn on
-                // the slider's own track, so a tick sits where its page does.
-                Box(modifier = Modifier.weight(1f)) {
-                    Slider(
-                        value = dragged.coerceIn(1, last).toFloat(),
-                        onValueChange = { next -> dragged = next.roundToInt() },
-                        onValueChangeFinished = { scrubber.onScrub(dragged.coerceIn(1, last)) },
-                        valueRange = 1f..last.toFloat(),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = SliderDefaults.colors(
-                            thumbColor = palette.accent,
-                            activeTrackColor = palette.accent,
-                            inactiveTrackColor = lerp(body, palette.ink, 0.18f)
-                        )
-                    )
-                    ReaderChapterNotches(
-                        total = last,
-                        chapters = scrubber.chapters,
-                        ink = palette.ink,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-            } else {
-                Spacer(Modifier.weight(1f))
-            }
             ReaderHoldButton(
                 glyph = CurioIcons.ChevronRight,
                 label = "The next page",
                 palette = palette,
                 step = scrubber.onNext
             )
-            // The count follows the THUMB, not the settled page: a scrubber that
-            // named the old page while the finger was elsewhere would be the one
-            // thing on it that is not the answer to the question asked.
-            //
-            // And it is a FIXED slot, right-aligned (v441). It used to be
-            // whatever width its own digits needed, in a row beside a slider that
-            // had the weight — so every time the number gained a digit the track
-            // next to it got narrower, the thumb moved with it, and the page
-            // under the member's own finger changed for no reason they could see.
+            // ── v478 — THE CHAPTER'S OWN NAME, ON THIS LINE ──────────────
+            // v475 put a small hint line UNDER the bar; the member's chosen
+            // layout folds it in here, between the arrows and the count, where
+            // it has the weight and a long name ellipsizes instead of wrapping.
+            val hint = scrubber.chapters.lastOrNull { it.at <= dragged }?.title.orEmpty()
+            Text(
+                hint,
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.ink.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 4.dp)
+            )
+            // ── v478 — THE COUNT, IN THE CONTENTS' OWN VOICE ─────────────
+            // The member: *"place the number similiar to the chapter view"*.
+            // The Contents list names a chapter's place with a small, quiet
+            // `p 12`; the scrubber's readout wears that same small muted label
+            // now, at the end of the bar's line. It follows the THUMB, not the
+            // settled page, so it is always the answer to the question asked —
+            // and, because it is weighed against the flexible name instead of
+            // fixed at 72dp (v441's slot), a longer count can never take room
+            // from the bar again.
             Text(
                 "$dragged / $last",
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = palette.ink.copy(alpha = 0.75f),
+                color = palette.ink.copy(alpha = 0.6f),
                 maxLines = 1,
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(72.dp)
+                modifier = Modifier.padding(start = 4.dp)
             )
             Surface(
                 onClick = onDismiss,
@@ -6074,58 +6120,79 @@ private fun ReaderScrubPill(
                 }
             }
         }
-        // ── v475 — A SMALL HINT, NAMING THE CHAPTER THE THUMB IS IN ───────
-        // The member asked for the chapters to show on the bar with *"a small
-        // text hint below"* — the notches say WHERE a book's chapters are, and
-        // this line says WHICH one the thumb is in, so a drag across a long
-        // book always has a name under the finger.
-        val hint = scrubber.chapters.lastOrNull { it.at <= dragged }?.title.orEmpty()
-        if (hint.isNotBlank()) {
-            Text(
-                hint,
-                style = MaterialTheme.typography.labelSmall,
-                color = palette.ink.copy(alpha = 0.6f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 42.dp, end = 80.dp, top = 3.dp)
-            )
-        }
         }
     }
 }
 
 /**
- * v475 — THE CHAPTER NOTCHES, drawn on the scrubber's own track.
+ * v478 — THE SCRUBBER'S OWN GEOMETRY, in the same terms Material 3 draws it.
  *
- * A short tick per chapter, laid on the span the Slider's track really occupies:
- * the thumb radius (10dp) insets the track at both ends, and the ticks ride the
- * same inset so a chapter's mark lines up with the page it opens. A tick the
- * thumb is standing over is simply drawn under it, which is the same answer the
- * count beside the bar gives.
+ * The reader's slider is the M3 expressive one: a **16dp** track with a **4dp
+ * wide** handle, and the handle's CENTRE travels half a handle in from each end.
+ * Every number the chapter marks need comes from here, so a mark can only ever
+ * sit where the handle for its own page would (see [ReaderChapterNotches]).
+ */
+private val SliderTrackHeight = 16.dp
+private val HandleHalfWidth = 2.dp
+
+/** Half a chapter mark's height: a short tick that lives INSIDE the 16dp bar. */
+private val ChapterMarkHalf = 2.5.dp
+
+/** A chapter mark closer than this to the handle is not drawn at all. */
+private val HandleClearance = 12.dp
+
+/**
+ * v478 — THE CHAPTER MARKS, INSIDE THE BAR.
+ *
+ * The member, of v475's notches: *"the breaing of it is bad and also the
+ * indicator"* — and both halves were geometry. A mark was a 20dp-tall line drawn
+ * across a **16dp** track, so every chapter speared clean through the bar; and it
+ * was inset by 10dp (the OLD round 20dp thumb's radius) instead of the M3
+ * expressive 4dp handle's own half-width, so the marks did not even line up with
+ * the place the handle goes. Now:
+ *
+ *  * a mark is a short rounded tick that lives INSIDE the bar ([ChapterMarkHalf]),
+ *    never crossing it;
+ *  * it is laid on the span the HANDLE really travels ([HandleHalfWidth]), so a
+ *    chapter's mark lines up with the page it opens — and with the bar's own
+ *    ends at the first and the last chapter;
+ *  * it is drawn LIGHT on the filled side of the handle and DEEP on the empty
+ *    side, so it reads as a seam in the track rather than as a cut through it;
+ *  * and a mark the handle is standing on is skipped ([HandleClearance]), so the
+ *    indicator is never fouled.
  */
 @Composable
 private fun ReaderChapterNotches(
     total: Int,
     chapters: List<ReaderScrubberChapter>,
+    at: Int,
     ink: Color,
+    paper: Color,
+    accent: Color,
+    inactive: Color,
     modifier: Modifier = Modifier
 ) {
     if (chapters.isEmpty() || total <= 1) return
-    Canvas(modifier = modifier.fillMaxWidth().height(20.dp)) {
-        val inset = 10.dp.toPx()
+    Canvas(modifier = modifier.fillMaxWidth().height(SliderTrackHeight)) {
+        // The span the handle's CENTRE covers: half a handle in from each end.
+        val inset = HandleHalfWidth.toPx()
         val span = (size.width - inset * 2f).coerceAtLeast(1f)
-        val half = 5.dp.toPx()
+        val middle = size.height / 2f
+        fun markX(value: Int): Float =
+            inset + ((value - 1).toFloat() / (total - 1).toFloat()).coerceIn(0f, 1f) * span
+        val thumbX = markX(at)
         chapters.forEach { chapter ->
-            val fraction = ((chapter.at - 1).toFloat() / (total - 1).toFloat())
-                .coerceIn(0f, 1f)
-            val x = inset + fraction * span
+            val x = markX(chapter.at)
+            // Never over the handle (nor in its own gap): the tap's answer must
+            // stay the most legible thing on the bar.
+            if (abs(x - thumbX) < HandleClearance.toPx()) return@forEach
             drawLine(
-                color = ink.copy(alpha = 0.35f),
-                start = Offset(x, size.height / 2f - half),
-                end = Offset(x, size.height / 2f + half),
-                strokeWidth = 1.5.dp.toPx()
+                color = if (chapter.at <= at) lerp(accent, paper, 0.38f)
+                        else lerp(inactive, ink, 0.22f),
+                start = Offset(x, middle - ChapterMarkHalf.toPx()),
+                end = Offset(x, middle + ChapterMarkHalf.toPx()),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
             )
         }
     }

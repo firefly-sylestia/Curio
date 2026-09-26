@@ -28,7 +28,7 @@ ADD:
 - Reading: closing the app ends the reading — sweeping Curio away from your recent apps used to leave the notification sitting there with nothing behind it; it stops the voice and clears the notification with the app.
 - Explore: finishing a topic marks it **Completed** — the notification's action says Completed (and so does the reminder that asks whether you're done), the dialog you meet when you come back to Curio has a **Completed** button, and writing it down counts as completing it too.
 - Topic History: the section the Reveal's star writes to is named **Completed** — it was called Favorite, which is not what the star says or means. The same list, the same star, its own honest name.
-- Reading: the page slider marks the book's chapters — a small tick on the bar at each chapter opening, and the chapter your thumb is standing in is named in a small line under it.
+- Reading: the page slider is the book's whole bar now — the track runs the full width of the pill with a small mark at every chapter opening, the chapter your thumb is in is named beside the arrows, and the page count sits at the bar's end in the Contents list's own quiet style. The handle is the reader's ink, so it no longer disappears into the track it stands in.
 
 FIX:
 - The words have had a pass: the list of doors in Settings says what each page holds in a few words instead of a sentence, the picker that opens a row is titled with that row's own name, the phone's built-in voice is called **Phone voice** everywhere instead of "the phone's own", and the voice packs' own row states what it is doing in one line.
