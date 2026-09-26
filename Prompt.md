@@ -6,7 +6,15 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §86 — the F-Droid build (a `fdroid` build type, core only, shipped from every tag; the updater goes quiet on it)
+## 0. THE CURRENT REQUEST — §87 — how to list on F-Droid, and the F-Droid builds switched OFF for now (v486)
+
+> "how do we list in fdroid ? and turn off frdoid builds for now. just off"
+
+**THE OFF SWITCH (v486):** the release workflow's `assembleCoreFdroidRelease` Gradle line, the release-body `core-fdroid` row and the expected-splits fdroid check are COMMENTED OUT with `v486` markers; the rename step additionally SKIPS any `*-fdroid-*` APK on disk (a stale cache or re-run cannot publish one by accident). The `fdroid` build type stays in app/build.gradle.kts and a hand-built `assembleCoreFdroidRelease` keeps working. **Re-enabling = uncommenting the three marked spots.** The updater gate (`UpdateChecker.isFdroidBuild`) stays active regardless — an F-Droid store build must never self-update. All 7 workflow shell blocks re-verified with bash -n. README + app/AGENTS.md updated to say the build is ready but off.
+
+---
+
+## §86 — the F-Droid build (a `fdroid` build type, core only, shipped from every tag; the updater goes quiet on it) — DONE, pushed as d17acfdc
 
 > "add frdoid build with full foss version too only in release and fdroid will only build from core not full"
 

@@ -137,7 +137,17 @@ jobs:
           # publishes both — and v485 adds the F-Droid build type (CORE only:
           # F-Droid ships the FOSS build, which is the core edition's exactly).
           # The rename step below reads the edition from the APK's own path.
-          ./gradlew validateTopics assembleCoreRelease assembleFullRelease assembleCoreFdroidRelease --stacktrace
+          #
+          # v486 — THE F-DROID BUILD IS SWITCHED OFF for now (the member's
+          # call — "turn off frdoid builds for now. just off"): the
+          # assembleCoreFdroidRelease task is commented out below and the
+          # rename/guard/publish steps skip any *-fdroid APK on disk. Re-enable
+          # by uncommenting the task (nothing else needs to change — the
+          # rename, verify, body-row and guard code already handle the file
+          # whenever it exists). The `fdroid` build type itself stays in
+          # app/build.gradle.kts: building it by hand keeps working.
+          ./gradlew validateTopics assembleCoreRelease assembleFullRelease --stacktrace
+          # ./gradlew validateTopics assembleCoreRelease assembleFullRelease assembleCoreFdroidRelease --stacktrace
 
       - name: Verify release APKs and signatures
         run: |
@@ -232,7 +242,9 @@ jobs:
             echo ""
             echo "- \`core\` — **Curio**, the smaller app: everything except the on-device offline voice-to-text stack and the neural read-aloud voice packs."
             echo "- \`full\` — **Curio Full**: those two as well, plus the ISBN barcode scanner."
-            echo "- \`core-fdroid\` — the same FOSS **core** app, prepared for the F-Droid store build; anyone may sideload it too."
+            # v486 — the core-fdroid body row is commented out with the build:
+            # uncomment when assembleCoreFdroidRelease comes back.
+            # echo "- \`core-fdroid\` — the same FOSS **core** app, prepared for the F-Droid store build; anyone may sideload it too."
             echo ""
             echo "They install **side by side** and are two separate apps with separate data (\`com.curio.app\` and \`com.curio.app.full\`) — installing one never replaces the other."
             echo ""
@@ -249,6 +261,12 @@ jobs:
             # mistaking one for the other.
             flavor="${apk%%/*}"
             base="$(basename "${apk%.apk}")"
+            # v486 — the F-Droid build is switched OFF for now (see the build
+            # step): any fdroid APK already on disk (a stale cache, a re-run)
+            # is skipped rather than renamed or published.
+            case "$base" in
+              *-fdroid-*) echo "Skipping fdroid APK (fdroid builds are off): $base"; continue ;;
+            esac
             abi="${base#app-}"
             abi="${abi#${flavor}-}"
             # v485 — the fdroid build type sits between the flavor and the ABI
@@ -296,6 +314,8 @@ jobs:
           # ships beside them (the F-Droid store's FOSS build: core only, no
           # full, by the member's own rule), so its universal APK is checked
           # for the same reason the other three are.
+          # v486 — THE F-DROID CHECK IS SWITCHED OFF with the build (see the
+          # build step): uncomment both when the build comes back.
           for flavor in core full; do
             for expected in universal armeabi-v7a arm64-v8a; do
               if [ ! -f "${flavor}/release/Curio-${vname}-${vcode}-${flavor}-${expected}-Android${min_android}+.apk" ]; then
@@ -304,10 +324,10 @@ jobs:
               fi
             done
           done
-          if [ ! -f "core/release/Curio-${vname}-${vcode}-core-fdroid-universal-Android${min_android}+.apk" ]; then
-            echo "::error::Expected F-Droid APK missing after rename: core-fdroid / universal"
-            exit 1
-          fi
+          # if [ ! -f "core/release/Curio-${vname}-${vcode}-core-fdroid-universal-Android${min_android}+.apk" ]; then
+          #   echo "::error::Expected F-Droid APK missing after rename: core-fdroid / universal"
+          #   exit 1
+          # fi
 
           echo "" >> "$body"
           echo "**How do I know which one to install?**" >> "$body"

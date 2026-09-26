@@ -107,7 +107,7 @@ Every release APK is named `Curio-<version>-<code>-<edition>-<abi>…`, and the 
 
 ### F-Droid
 
-Curio ships a **fully free-software build** for F-Droid: the same **core** edition — all of the table above minus the three Full-only rows — with nothing proprietary anywhere in it. The tag release publishes a `core-fdroid` universal APK beside the others, and F-Droid's own builder compiles the identical app from the tagged source. On an F-Droid install the in-app updater stays quiet and updates arrive through the F-Droid client, per the store's rules.
+Curio is ready for F-Droid: the **core** edition is fully free software — all of the table above minus the three Full-only rows — with nothing proprietary anywhere in it, and a `fdroid` build type exists to produce a store-comparable APK. **The release workflow's F-Droid build is switched off for now** (it can be re-enabled with one line), so releases currently ship the core and Full APKs only. On an F-Droid install the in-app updater stays quiet and updates arrive through the F-Droid client, per the store's rules.
 
 ---
 
@@ -358,7 +358,7 @@ Copyright (C) 2026 the Curio contributors.
 - **Cloud sync of your library** — your captures stay on the device; use Backup & Restore (Settings) to export and keep them safe
 - **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, 24-hour expiry) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
 - **Localization** — English only in v1.0
-- **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready, and a fully-FOSS core-fdroid APK publishes beside every release for F-Droid
+- **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready, and the fully-FOSS F-Droid build is ready to switch back on when the store listing lands
 - **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing
 - **Images need network** — topic and entry images load from the web (your data is always offline)
 
