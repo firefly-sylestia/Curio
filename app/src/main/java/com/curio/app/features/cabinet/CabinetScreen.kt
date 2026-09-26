@@ -96,6 +96,7 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CabinetEntrySkeletonGrid
@@ -241,10 +242,21 @@ fun CabinetScreen(navController: NavController) {
     // v-tablet — wide (landscape tablet): the torn hero + filter UI lead
     // the grid as leading items and scroll away with it, so no fixed top
     // reservation (0); phones keep the pinned-hero reservation.
-    val contentTop = if (wide) 0.dp else heroTotal +
-        (if (categoryPanelOpen) CabinetFilterPanelHeight
-         else if (filterUiVisible) CabinetChipBarHeight
-         else 0.dp) + 12.dp
+    // v479 — and on a window where the header is the FLOATING PILL (the member's
+    // switch in portrait, or any compact window) under the GLASS style, the
+    // reservation is the pill's footprint rather than a hero's. Only the glass
+    // header can become the pill — the torn hero's branch never consults it — so
+    // the torn style keeps the full reserve. The wide branch keeps its 0: there the
+    // hero and its filters lead the grid and scroll with it [CurioLayout.reserveForPill].
+    val contentTop = if (wide) 0.dp else {
+        val full = heroTotal +
+            (if (categoryPanelOpen) CabinetFilterPanelHeight
+             else if (filterUiVisible) CabinetChipBarHeight
+             else 0.dp) + 12.dp
+        if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS)
+            CurioLayout.reserveForPill(full)
+        else full
+    }
     // v105 — the sort control is removed; the Cabinet keeps its default
     // ordering (newest captures first, see [visibleEntries]).
     var selectionMode by rememberSaveable { mutableStateOf(false) }

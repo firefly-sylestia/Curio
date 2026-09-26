@@ -154,6 +154,7 @@ import com.curio.app.features.home.HomeDrawerContent
 import com.curio.app.features.home.HomeScreen
 import com.curio.app.features.splash.SplashScreen
 import com.curio.app.features.fieldmind.FieldMindObservationScreen
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
@@ -414,6 +415,12 @@ fun CurioNavHost(
     // filling the gutters. Compact phones keep the bottom bar and full-width
     // content exactly as before. Always-on — no Settings toggle.
     val wide = windowWidthSizeClass().isWide
+    // v479 — remember the window for the NON-COMPOSABLE header-reserve readers
+    // (screens reserve their scroll headroom from a plain function, which cannot
+    // read LocalConfiguration; see [CurioLayout.noteWindow]). The NavHost is an
+    // ancestor of every screen and re-reads on every configuration change, so this
+    // one call keeps every reserve honest.
+    CurioLayout.noteWindow()
 
     // Topic Reveal hides the bottom navigation bar — both from the Spin
     // main card and from the topic browser, the reveal never shows the bar

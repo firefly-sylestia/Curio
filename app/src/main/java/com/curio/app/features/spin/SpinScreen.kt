@@ -1279,9 +1279,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     )
                 }
                 // ── The floating trio — small, rounded, and detached ──
-                // It floats OVER the page's tint wash at the bottom centre,
-                // where both thumbs reach in landscape, rather than sitting
-                // in a tray that would cost the short body more height.
+                // v479 — it sits on the page's SIDES now: Category + Filter
+                // stacked on the left edge, Shuffle alone on the right. That
+                // keeps both thumbs in reach without the deck paying a band
+                // of the short body for a bottom tray.
                 SpinFloatTrio(
                     cat = deckCat,
                     filterActiveCount = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
@@ -1289,9 +1290,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     onCategories = { showCategoryPicker = true },
                     onFilter = { showFilters = true },
                     onShuffle = onSpinClick,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp)
+                    vertical = true,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         } else if (wide) {
@@ -4247,6 +4247,23 @@ private fun deckPillLabel(mixName: String?, mixedCount: Int, cat: CurioCategory)
     else -> cat.displayName
 }
 
+/** The distance a floating trio button keeps from the page edge (v479). */
+private val SpinFloatEdgeInset = 14.dp
+
+/** The gap between the two stacked left-edge buttons (v479). */
+private val SpinFloatStackGap = 12.dp
+
+/**
+ * ── v479 — THE TRIO MOVE TO THE PAGE'S SIDES IN COMPACT-LANDSCAPE ────────
+ *
+ * The member: *"in spin screen put those floating buttons of category spin dice and
+ * filters to the sides"*. At the bottom centre the row cost the short landscape body
+ * a band of its height and crowded the fanned deck; on the sides both thumbs reach
+ * without the deck paying, so [vertical] splits the trio — **Category + Filter
+ * stacked on the LEFT edge, Shuffle alone on the RIGHT** — which is the member's
+ * chosen split (Category + Filter left, Shuffle right). The non-vertical fallback
+ * keeps the old centred row for any host that has the room.
+ */
 @Composable
 private fun SpinFloatTrio(
     cat: CurioCategory,
@@ -4256,43 +4273,91 @@ private fun SpinFloatTrio(
     onCategories: () -> Unit,
     onFilter: () -> Unit,
     onShuffle: () -> Unit,
+    vertical: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val hasFilters = filterActiveCount != null
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+    if (vertical) {
+        // A full-stage Box here, so each group can sit on the page's own edge
+        // rather than the row's — the modifier is the stage, not a button slab.
+        Box(modifier = modifier) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = SpinFloatEdgeInset),
+                verticalArrangement = Arrangement.spacedBy(SpinFloatStackGap)
+            ) {
+                SpinCategoryFloatButton(cat = cat, onCategories = onCategories)
+                SpinFilterFloatButton(cat = cat, hasFilters = hasFilters, onFilter = onFilter)
+            }
+            SpinShuffleFloatButton(
+                cat = cat,
+                onShuffle = onShuffle,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = SpinFloatEdgeInset)
+            )
+        }
+    } else {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SpinCategoryFloatButton(cat = cat, onCategories = onCategories)
+            SpinFilterFloatButton(cat = cat, hasFilters = hasFilters, onFilter = onFilter)
+            SpinShuffleFloatButton(cat = cat, onShuffle = onShuffle)
+        }
+    }
+}
+
+@Composable
+private fun SpinCategoryFloatButton(cat: CurioCategory, onCategories: () -> Unit) {
+    SpinFloatButton(
+        container = deckControlSurface(cat),
+        tint = deckControlInk(cat, selected = false),
+        onClick = onCategories
     ) {
-        SpinFloatButton(
-            container = deckControlSurface(cat),
+        CurioIcon(
+            name = cat.iconGlyph,
             tint = deckControlInk(cat, selected = false),
-            onClick = onCategories
-        ) {
-            CurioIcon(
-                name = cat.iconGlyph,
-                tint = deckControlInk(cat, selected = false),
-                size = 20.dp
-            )
-        }
-        SpinFloatButton(
-            container = if (hasFilters) cat.themedAccent() else deckControlSurface(cat),
+            size = 20.dp
+        )
+    }
+}
+
+@Composable
+private fun SpinFilterFloatButton(
+    cat: CurioCategory,
+    hasFilters: Boolean,
+    onFilter: () -> Unit
+) {
+    SpinFloatButton(
+        container = if (hasFilters) cat.themedAccent() else deckControlSurface(cat),
+        tint = deckControlInk(cat, selected = hasFilters),
+        onClick = onFilter
+    ) {
+        CurioIcon(
+            name = CurioIcons.Search,
             tint = deckControlInk(cat, selected = hasFilters),
-            onClick = onFilter
-        ) {
-            CurioIcon(
-                name = CurioIcons.Search,
-                tint = deckControlInk(cat, selected = hasFilters),
-                size = 20.dp
-            )
-        }
-        SpinFloatButton(
-            container = cat.themedAccent(),
-            tint = cat.onAccent(),
-            onClick = onShuffle
-        ) {
-            ShuffleGlyph(tint = cat.onAccent(), modifier = Modifier.size(24.dp))
-        }
+            size = 20.dp
+        )
+    }
+}
+
+@Composable
+private fun SpinShuffleFloatButton(
+    cat: CurioCategory,
+    onShuffle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SpinFloatButton(
+        container = cat.themedAccent(),
+        tint = cat.onAccent(),
+        onClick = onShuffle,
+        modifier = modifier
+    ) {
+        ShuffleGlyph(tint = cat.onAccent(), modifier = Modifier.size(24.dp))
     }
 }
 
@@ -4309,6 +4374,7 @@ private fun SpinFloatButton(
     container: Color,
     tint: Color,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -4319,7 +4385,7 @@ private fun SpinFloatButton(
         // tint still lands on the readable one for this surface.
         contentColor = tint,
         shadowElevation = 6.dp,
-        modifier = Modifier.size(46.dp)
+        modifier = modifier.size(46.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

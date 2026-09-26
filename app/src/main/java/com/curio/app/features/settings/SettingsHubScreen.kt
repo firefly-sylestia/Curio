@@ -95,6 +95,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
@@ -180,15 +181,30 @@ val SettingsHeroTotalHeight: Dp
  * banner instead of under it. Defaults to the plain header, i.e. exactly
  * [SettingsHeroTotalHeight].
  */
-fun settingsHeroTotalHeight(footerHeight: Dp = 0.dp): Dp =
-    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+fun settingsHeroTotalHeight(footerHeight: Dp = 0.dp): Dp {
+    // v479 — the style is PART of the question, not a detail beside it. The pill
+    // is reachable ONLY through the glass toolbar path ([SettingsHeroHeader]'s
+    // `== GLASS` branch is the only thing that draws it), while a TORN header
+    // keeps its torn banner on a compact window too — its branch never consults
+    // `floatingPillHeader`. Reserving the pill for a header that will actually be
+    // the 204dp torn banner is what slides the page's first rows under the hero.
+    val glass = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
+    return when {
+        glass && CurioLayout.floatingPillHeaderNow() ->
+            // ── v479 — THE PILL IS 48dp, NOT A HERO ────────────────────
+            // When the floating pill is the header this screen will get (a compact
+            // window, or the member's own switch), the reservation is the PILL's
+            // footprint: reserving the hero's left the page's first ~150dp empty
+            // under it (the member: *"it leaves a huge blank sace below it"*).
+            // A FOOTER still rides under the pill, so it still extends the reserve.
+            CurioLayout.PillHeaderReserve + footerHeight
         // v3xx22 — 176dp: the bar's real footprint (status bar + pills row
         // + title block ≈ 172dp on a modern phone). The old 160dp left the
         // settings nav rail peeking from under the header (user fix).
-        176.dp + footerHeight
-    } else {
-        SettingsHeroBannerHeight + SettingsHeroSheetExtent + footerHeight
+        glass -> 176.dp + footerHeight
+        else -> SettingsHeroBannerHeight + SettingsHeroSheetExtent + footerHeight
     }
+}
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
 private data class SettingsHeroPair(

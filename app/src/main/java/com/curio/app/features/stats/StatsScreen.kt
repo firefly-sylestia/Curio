@@ -64,6 +64,7 @@ import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioLaneDetailStrip
@@ -155,7 +156,13 @@ fun StatsScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = if (statsGlass) 150.dp else StatsHeaderHeight + 14.dp,
+                // v479 — the reservation follows the header the screen will
+                // actually get: the glass style on a compact window is the 48dp
+                // floating pill, so reserving the glass bar's 150dp left the first
+                // card's worth of page empty under it ([CurioLayout.reserveForPill]).
+                // The sky header (non-glass) keeps its own reserve untouched.
+                top = if (statsGlass) CurioLayout.reserveForPill(150.dp)
+                      else StatsHeaderHeight + 14.dp,
                 bottom = 24.dp
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp)

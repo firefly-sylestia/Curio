@@ -738,7 +738,9 @@ fun CurioGlassToolbarMorph(
  * does not. It is also the whole saving: the glass bar it replaces is a content-height
  * title + subtitle + action row + reserve, and this is one line.
  */
-private val PILL_HEADER_HEIGHT = 48.dp
+// v479 — the height lives in [CurioLayout] now, because the header's RESERVE is
+// computed from it (a screen must reserve exactly the pill it will get).
+private val PILL_HEADER_HEIGHT = CurioLayout.PILL_HEADER_HEIGHT_DP.dp
 
 /**
  * ── v468 — THE FLOATING PILL HEADER, AND THE THIRD HEADER SHAPE ───────────
@@ -789,7 +791,20 @@ fun CurioPillHeader(
         if (dark) 0.18f else 0.26f
     )
     val ink = MaterialTheme.colorScheme.onSurface
-    val shape = CircleShape
+    // ── v479 — A FLOATING BAR, NOT A GIANT PILL ────────────────────────────
+    //
+    // The member, of the v468 pill: *"the floating header styles are so bad, i dont
+    // want any of that its not good … and keep it floating when scrolling"*. It was a
+    // `CircleShape` capsule spanning the page — a 24dp radius on a 48dp bar is a fat
+    // lozenge, not a header — and it sat FLAT (no lift) on the page, so it read as a
+    // stripe rather than as something floating. It is a proper floating BAR now: a
+    // rounded rectangle with real side margins and a soft shadow, which is the app's
+    // own floating-surface language (the floating nav pills, the reader's dock).
+    //
+    // It stays the one thing at the top of a compact page, and it is drawn OUTSIDE
+    // the scroll content (see the screens' pinned-header host), so it keeps floating
+    // while the page scrolls under it.
+    val shape = RoundedCornerShape(18.dp)
     val glassMod = when {
         isLiquidGlassPillsActive() && glassBackdrop != null ->
             Modifier.liquidGlassCapsule(
@@ -800,45 +815,57 @@ fun CurioPillHeader(
                 blurMultiplier = 1.6f
             )
         isLiquidGlassRequested() ->
-            Modifier.clip(shape).fauxGlassCapsule(container, corner = 26.dp)
-        else -> Modifier.clip(shape).background(container.copy(alpha = 0.97f))
+            Modifier.clip(shape).fauxGlassCapsule(container, corner = 18.dp)
+        // The lift belongs to the NON-glass bar only: the glass carries its own
+        // shadow, and two shadows under one capsule read as a smudge (the reader's
+        // own rule), while an OPAQUE fill is what lets the shadow paint cleanly
+        // instead of bleeding through the bar (see the shadow rules in app/AGENTS.md).
+        else -> Modifier
+            .shadow(6.dp, shape)
+            .clip(shape)
+            .background(container)
     }
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .height(PILL_HEADER_HEIGHT)
-            .then(glassMod),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        if (onBack != null) {
-            CurioBackButton(
-                onClick = onBack,
-                // This capsule IS the ambient glass for the pill inside it.
-                ambientGlass = false,
-                contentColor = MaterialTheme.colorScheme.primary,
-                shadowElevation = 3.dp,
-                disableRipple = true
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(PILL_HEADER_HEIGHT)
+                .then(glassMod)
+                .padding(start = 6.dp, end = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (onBack != null) {
+                CurioBackButton(
+                    onClick = onBack,
+                    // This bar IS the ambient glass for the pill inside it.
+                    ambientGlass = false,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    shadowElevation = 3.dp,
+                    disableRipple = true
+                )
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(
+                title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(Modifier.width(8.dp))
-        }
-        Text(
-            title,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = ink,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        if (trailing != null) {
-            Spacer(Modifier.width(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                trailing(ink)
+            if (trailing != null) {
+                Spacer(Modifier.width(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    trailing(ink)
+                }
             }
         }
     }
