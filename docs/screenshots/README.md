@@ -15,6 +15,7 @@ this folder. The README links resolve as soon as the files exist.
 | `capture.png` | Capture — a paper-textured editor (ruled lines, torn edge) |
 | `cabinet.png` | Cabinet — library grid with category chips |
 | `entry-detail.png` | Entry detail — a saved entry with hero card and metadata |
+| `reader.png` | Reader — a book page with the read-aloud sentence wash and settling control bar |
 | `quests.png` | Quests — daily quest trio with XP bar and pet |
 | `share-card.png` | A finished share card (any Signature style, 3:4) |
 

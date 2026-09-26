@@ -2,7 +2,7 @@
 
 > **Explore something. Notice more. Keep the discovery.**
 
-A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No feed. No ads. Just you, a topic, and the world — plus an **optional** community layer (friends, messages, a 24-hour wall) that stays completely off until you switch it on.
+A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 lanes, then capture what you notice in a beautiful, personal offline library — or open the book you're reading and let Curio read it aloud to you. No feed. No ads. Just you, a topic, and the world — plus an **optional** community layer (friends, messages, a 24-hour wall) that stays completely off until you switch it on.
 
 ![Release](https://img.shields.io/github/v/release/firefly-sylestia/Curio?label=Release&logo=github)
 ![Downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Downloads&logo=github)
@@ -23,9 +23,13 @@ A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand
 |---|---|---|---|
 | ![Home screen](docs/screenshots/home.png) | ![Spin deck](docs/screenshots/spin.png) | ![Topic reveal](docs/screenshots/topic-reveal.png) | ![Capture editor](docs/screenshots/capture.png) |
 
-| Cabinet | Entry Detail | Quests | Share Card |
+| Cabinet | Entry Detail | Reader | Quests |
 |---|---|---|---|
-| ![Cabinet library](docs/screenshots/cabinet.png) | ![Entry detail](docs/screenshots/entry-detail.png) | ![Quests](docs/screenshots/quests.png) | ![Share card](docs/screenshots/share-card.png) |
+| ![Cabinet library](docs/screenshots/cabinet.png) | ![Entry detail](docs/screenshots/entry-detail.png) | ![Reader](docs/screenshots/reader.png) | ![Quests](docs/screenshots/quests.png) |
+
+| Share Card |
+|---|
+| ![Share card](docs/screenshots/share-card.png) |
 
 *Capture names and framing: see [`docs/screenshots/README.md`](docs/screenshots/README.md).*
 
@@ -33,19 +37,30 @@ A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand
 
 ## About
 
-We scroll past interesting things every day and forget them. Curio turns passive scrolling into active, real-world exploration — and gives you a warm, tactile place to keep what you found. Six rich capture formats (voice notes, reviews, journals, mood boards, field notes, and more) live on a paper-textured editor with ruled lines, torn edges, and coffee stains. Everything stays on your device. Your journal is yours.
+We scroll past interesting things every day and forget them. Curio turns passive scrolling into active, real-world exploration — and gives you a warm, tactile place to keep what you found. Six rich capture formats (voice notes, reviews, journals, mood boards, field notes, and more) live on a paper-textured editor with ruled lines, torn edges, and coffee stains. Your books live in a reader that reads aloud with downloaded neural voices. Everything stays on your device. Your journal is yours.
 
 Built with **Kotlin + Jetpack Compose** on Android 8.0+.
+
+Curio ships in **two editions** that install side by side — see [Two builds](#-two-builds) below.
 
 ---
 
 ## ✨ Features
 
 ### 🎡 The Spin — Your Discovery Deck
-Pick from 38 curated categories (Music, Films, Books, Art, Science, Games, Anime, Food, History, Sports, Internet, Mythology, and more) — or blend into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, shadows, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back.
+Pick from 38 curated lanes (Music, Films, Books, Art, Science, Games, Anime, Food, History, Sports, Internet, Mythology, and more) — or blend into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back. Finishing a topic marks it **Completed** everywhere — the deck stops dealing it, and Topic History keeps the record.
 
 ### 📝 Six Capture Formats on Paper-Textured Notes
-Whatever you discover, there's a format waiting: **SoundBite** (voice notes) · **ReelNotes** (reviews) · **Marginalia** (journals) · **Gallery Wall** (mood boards) · **Field Notes** (observations) · **Open Notebook** (wildcard). Every note lives on a rich, paper-styled editor with ruled lines, torn edges, coffee stains, and watermark paper. Full rich text, quotes, images, audio, and tags — all autosaving.
+Whatever you discover, there's a format waiting: **SoundBite** (voice notes) · **ReelNotes** (reviews) · **Marginalia** (journals) · **Gallery Wall** (mood boards) · **Field Notes** (observations) · **Open Notebook** (wildcard). Every note lives on a rich, paper-styled editor with ruled lines, torn edges, coffee stains, and watermark paper. Full rich text, quotes, images, audio, and tags — all autosaving. Dictation types into the note while you speak, and Android's own Select all reaches the whole page.
+
+### 📚 Books & Reading
+Your shelf, your reader, your voice:
+
+- **The shelf** — every book you keep, with covers and progress. Hold a book for its own actions (Open in reader, Pin to Home, Remove); a book with a document opens straight into the reader.
+- **EPUB & PDF reader** — follows the book's own reading order, chapter-aware page slider, highlights, bookmarks, selection notes, text size and zoom, and a motion-lock that never fights the page.
+- **Read aloud** — a sentence at a time, the current sentence marked on the page. Background reading with play/pause/skip/stop in the notification and on the lock screen. A **Full stop break** slider tunes the pause between sentences.
+- **Voice packs** *(Curio Full)* — download **Piper · Lessac** (64 MB) or **Kokoro · 82M** (305 MB, eleven narrators) and read with no engine, no network and no account. Audition a narrator before you commit. Or use any text-to-speech engine installed on your phone.
+- **Dictionary** — look up a word you selected: Webster's 1913 (complete) and WordNet, with a browsable word list and a floating alphabet pill.
 
 ### ⏱️ Explore Sessions with Floating Timer Bubble
 Start a timed session and a persistent floating bubble follows you over other apps (like Messenger) — so you can open the browser, dig in, and always see how much time you planned. Sessions survive reboots and queue for later.
@@ -53,13 +68,15 @@ Start a timed session and a persistent floating bubble follows you over other ap
 ### 🗄️ The Cabinet — Your Personal Museum
 Browse by category, search your collection, zoom images in a lightbox, and explore rich entry pages. Your keepsakes pack into **shelves** — Favorites, Curiying now, Want to Read, Completed, Notes, Personal, your own collections — with the **Cupboard** holding every book, album and series you keep. Streaks, levels, and lane stats make the habit rewarding.
 
+### 🎨 Design — Paper & Liquid Glass
+A **Material-inspired custom design language**: Material 3's open system as the foundation, wrapped in a warm-cream paper world drawn from the editorial, tactile aesthetic of today's best apps — torn-paper heroes, category colors, custom typography, and motion throughout. Three theme styles (Curio, AMOLED, Material You), light and dark.
+
+And on top of the paper, **liquid glass**: the nav bar, headers, pills, sheets and dialogs are real refracting glass over the page behind them (Android 12+). Choose the **frosted** smudge — a soft, near-opaque frost that breathes toward white in light mode and toward its own lifted colour in dark — or the **clear** pane with the lens back. Tuning lives in Appearance → Liquid glass; the switches are in Experiments.
+
 ### 👥 Social, Friends & Messages — optional, off by default
 Switch on **Online mode** and Curio grows a social half: a 24-hour wall of posts, replies that branch, a friends list, and private conversations. Every member picks one of **28 hand-drawn portraits**; a display name and a `@username` are separate things; profiles carry a bio. Friends can see your shelf of liked topics; strangers can't message you. This layer is the *only* part of Curio that ever talks to a server, it is **off unless you turn it on**, and turning it off again (or signing out) takes the tab and the cached conversations with it.
 
 Three kinds of post share the wall: a **topic card** (the topic's own art, words and style), a **note** (a tweet-style line of your own) and a **quote** (the topic's own words, credited to whoever said them). **Direct messages are exempt from the content filter** — two friends writing privately write what they like; the filter guards the public surfaces (the wall, its replies, usernames, display names and bios), where anyone can read what is written. Curio is a small place and its conduct rules are short: slurs, sexual content and harassment get an account banned.
-
-### 🎨 Design Identity
-A **Material-inspired custom design language** — not a hand-invented look, but one assembled from the established design language of the modern web. Material 3's open design system is the foundation; on top sits a warm-cream paper world drawn from the editorial, tactile aesthetic of today's best apps: torn-paper heroes, category colors, custom typography, and motion throughout. Three theme styles (Curio, AMOLED, Material You).
 
 ### 🔒 Privacy First
 Everything lives on your device. No analytics. No tracking. No ads. Open source. Your captures, recordings, photos and screenshots never leave the phone — the online layer carries text only (a card's topic, its words, a reply, your name, your portrait number). Turn Online mode off and nothing about you is sent anywhere. Signing out forgets the device's cached conversations, and the stored session token is sealed with the Android Keystore rather than kept in readable preferences.
@@ -72,22 +89,43 @@ Everything lives on your device. No analytics. No tracking. No ads. Open source.
 
 ---
 
+## 📦 Two Builds
+
+Curio ships as two editions built from the same source, published from the same release. They install side by side, have separate package names and separate data, and are both called **Curio** — the only difference in the launcher list is the package. An existing install stays the app it was: a member who never chooses keeps exactly what they have.
+
+| | **Curio** (core) | **Curio Full** |
+|---|---|---|
+| Package | `com.curio.app` | `com.curio.app.full` |
+| Size | The lighter download | Larger (carries the vendor libraries) |
+| Everything in the table above | ✅ | ✅ |
+| Offline voice-to-text models (Vosk) | — | ✅ |
+| Downloadable reading voices (Piper, Kokoro) | — | ✅ |
+| ISBN barcode scanner (add-a-book by lens) | — | ✅ |
+| Camera permission | Not asked | Asked, for the scanner |
+
+Every release APK is named `Curio-<version>-<code>-<edition>-<abi>…`, and the in-app updater matches the edition token so an update never hands you the other app.
+
+---
+
 ## 🚀 Quick Start
 
 ### Install from Release APK
 
-1. Download the latest `release` APK from the [Releases page](https://github.com/firefly-sylestia/Curio/releases)
+1. Download the latest `core` or `full` APK from the [Releases page](https://github.com/firefly-sylestia/Curio/releases) — see [Two builds](#-two-builds) for which one is yours
 2. Install it on any Android 8.0+ device
 3. Android will ask you to allow "install from unknown sources" for your browser — that's normal for sideloaded apps
+4. Updates arrive through the app's own updater, or by downloading the new APK the same way
 
-> **Google Play support is not planned.** v1.0 ships via GitHub Releases.
+> **Google Play support is not planned.** v1.0 ships via GitHub Releases; the store metadata under `fastlane/` keeps the changelogs release-ready for F-Droid-style distribution.
 
 ### Build from Source
 
 ```bash
 git clone https://github.com/firefly-sylestia/Curio.git
 cd Curio
-./gradlew build
+./gradlew build          # both editions
+./gradlew assembleCoreRelease   # just Curio (core)
+./gradlew assembleFullRelease   # just Curio Full
 ```
 
 **Requirements:**
@@ -121,7 +159,7 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 | **Platform** | Android (v1.0) |
 | **Minimum OS** | Android 8.0 (API 26) and up |
 | **Target OS** | Android 17 (API 37) |
-| **Permissions** | Microphone (voice notes + dictation) · Notifications (reminders) · "Display over other apps" (optional floating explore bubble) · Background service (explore timer) |
+| **Permissions** | Microphone (voice notes + dictation) · Notifications (reminders + read-aloud controls) · "Display over other apps" (optional floating explore bubble) · Background service (explore timer, read-aloud) · Camera *(Curio Full only, for ISBN scanning)* |
 | **Language** | English |
 | **Accounts** | None for the app itself — an optional Curio account is needed only for the online layer |
 | **Network** | Optional. Your library is fully local; images load from the web when available and the online layer needs a connection |
@@ -131,12 +169,13 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 ## 📚 Complete Feature List
 
 ### Discovery — The Spin
-- **38 curated categories**: Music · Films · Books · Art · Science · Games · Anime · Food · History · Sports · Internet · Mythology · and more
-- **16,000+ topics** across 38 categories (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
-- Roulette deck with stacked cards, category-tinted edges, shadows, and satisfying shuffle
+- **38 curated lanes**: Music · Films · Books · Art · Science · Games · Anime · Food · History · Sports · Internet · Mythology · the sciences · and more
+- **16,000+ topics** across 38 lanes (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
+- Roulette deck with stacked cards, category-tinted edges, and satisfying shuffle
 - Single-lane or mixed decks (2–4 categories blended into one)
 - Anti-repeat history — never see the same topic twice in a row
 - Topic reveal pages with full explore action
+- **Completed** — finishing a topic marks it everywhere: the deck stops dealing it, the notification and the return dialog say it, and Topic History keeps the list
 - **Browse Topics** — the whole catalog in one place: search, filter by lane, and sort A–Z or newest/oldest by year
 - "Today's Quest" — one-tap random shuffle on Home
 - Manage Categories — show, hide, or reorder lanes
@@ -145,10 +184,19 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - **Six rich formats** — SoundBite, ReelNotes, Marginalia, Gallery Wall, Field Notes, Open Notebook
 - **Multi-section entries** — mix formats within one entry
 - **Paper-styled editor** — ruled lines, torn edges, coffee stains, folded corners, red margins, watermark paper, six colors
-- **Rich text** — formatting, quotes, images, audio, tags (custom, searchable)
-- **Voice recording** — trim with waveform, playback, voice-to-text transcription
+- **Rich text** — formatting, quotes, images, audio, tags (custom, searchable); bullets keep their marker on Enter
+- **Voice recording** — trim with waveform, playback, voice-to-text transcription *(offline models in Curio Full)*
 - **Mood boards** — draggable quote boxes on category-tinted backgrounds; export as PNG
 - Autosaving drafts
+
+### Reading
+- **Bookshelf** — covers, progress, hold-for-actions (Open, Pin to Home, Remove), pin-to-Home shelf row
+- **EPUB & PDF reader** — spine-true chapter order, chapter-aware full-width page slider, highlights on the exact words, bookmarks, selection notes
+- **Read aloud** — sentence-by-sentence with the current sentence washed on the page; a settling control bar (play/pause + both skips); **Full stop break** slider with per-voice tuned defaults
+- **Background reading** — notification and lock-screen controls; the reading stops when the app is swept away
+- **Voice packs** *(Curio Full)* — Piper · Lessac and Kokoro · 82M, eleven narrators, audition before you commit, Test-it row that speaks a sentence
+- **Any TTS engine** — a better engine installed on the phone reads instead of the built-in one
+- **Dictionary** — Webster's 1913 (complete) + WordNet; selection toolbar door; browsable word list with floating alphabet
 
 ### Exploring
 - **Timed explore sessions** with floating timer bubble over other apps
@@ -192,22 +240,26 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - Your most-explored categories at a glance
 
 ### Settings & Customization
-- **Appearance** — Curio, AMOLED, or Material You theme; Light/Dark/System; pastel color mode
+- **Appearance** — Curio, AMOLED, or Material You theme; Light/Dark/System; pastel color mode; liquid glass tuning (frosted/clear, blur, refraction, reflection)
 - **Online mode** — sign in, claim a username, pick your portrait, and switch the community tab on or off
 - **Privacy** — profile visibility, hidden activity, and who you have blocked
 - **Notifications** — daily shuffle reminders, reminder time, explore controls
 - **Recording** — voice quality, dictation settings
-- **Experiments** — toggle 30+ optional UI tweaks (deck styling, layouts, smart density, voice-to-text)
+- **Advanced** — the doors you rarely need gathered in one page: Recording, Experiments, Pet designer
+- **Experiments** — toggle 30+ optional UI tweaks (deck styling, layouts, smart density, floating pill headers)
 - Manage Categories — show, hide, reorder
 - Topic History — revisit everything explored
 - **Backup & Restore** — export and import full backups; legacy FieldMind archive import
 - Replay onboarding anytime
+- **Home writing rows** — turn the pages row, the shelf row, or both off without touching your journals or books
 
 ### Reliability & Support
-- Onboarding flow (replayable)
+- Onboarding flow (replayable, ends with an optional online step)
 - Crash reporter with saved history
 - In-app bug report screen
 - Daily reminders and explore sessions rebuild after reboot
+- Landscape layout — a short, wide window gets its own arrangement, not a stretched tablet
+- In-app updater that matches your edition
 - CI-validated release builds
 
 ### The Online Layer (optional, off by default)
@@ -224,6 +276,7 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 ### Design & Privacy
 - Material-inspired custom design language — Material 3 foundation extended with a web-drawn editorial aesthetic
 - Torn-paper heroes, watermark backdrops, custom typography
+- **Liquid glass** — real blur + lens refraction on the nav bar, headers, pills, sheets and dialogs (Android 12+), frosted or clear, with its own dark-mode frost
 - Custom Material Symbols and motion
 - **Local by default** — Room database, offline-first; the online layer is the only thing that ever talks to a server and it is off unless you switch it on
 - **Session tokens sealed with the Android Keystore** (AES-GCM), not stored as readable preferences; signing out clears them and the cached social data
@@ -242,12 +295,18 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - **Light / Dark / System** mode selection
 - **Pastel color mode** for softer aesthetics
 
+### Liquid Glass
+- **Frosted** (default) — the smudged, near-opaque frost; **Clear** returns the see-through refracting pane
+- Tuning — blur, refraction, reflection and indicator-shadow multipliers
+- Dark mode gets its own frost — lifted dark glass, never washed toward white
+
 ### Settings
 - **Notifications** — daily shuffle reminders, reminder time, explore controls
 - **Recording** — voice quality, dictation (voice-to-text)
+- **Reading** — engine, voice, narrator, voice packs, background reading, dictionary source, full stop break
 - **Manage Categories** — show, hide, or reorder lanes
 - **Backup & Restore** — export and import full backups; legacy FieldMind archive import
-- **Experiments** — 30+ optional UI tweaks (deck styling, smart density, etc.)
+- **Advanced** — Recording, Experiments and the Pet designer in one page
 
 See Settings in-app for the full list.
 
@@ -295,7 +354,7 @@ Copyright (C) 2026 the Curio contributors.
 - **Cloud sync of your library** — your captures stay on the device; use Backup & Restore (Settings) to export and keep them safe
 - **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, 24-hour expiry) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
 - **Localization** — English only in v1.0
-- **Google Play** — distributed via GitHub Releases; Play Store support coming next
+- **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready
 - **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing
 - **Images need network** — topic and entry images load from the web (your data is always offline)
 
@@ -351,6 +410,9 @@ Curio stands on other people's work. These are the ones it actually ships:
 - **[blobatar](https://github.com/Alain00/blobatar)** — member faces are a Kotlin port of
   blobatar's generation-2 core (MIT licence, © 2026 Alain); the full notice is shown
   verbatim in-app.
+- **[Vosk](https://github.com/alphacep/vosk-api)** — offline voice-to-text in Curio Full.
+- **[Piper](https://github.com/rhasspy/piper) & [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M)** —
+  the downloadable reading voices, run on-device through **[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)**.
 - **[TMDB](https://www.themoviedb.org)** — film and show artwork and facts, when a build
   carries a credential. *This product uses the TMDB API but is not endorsed or certified
   by TMDB.* OMDb, Wikipedia, Wikidata, TVMaze, iTunes, Jikan and Comic Vine fill the
