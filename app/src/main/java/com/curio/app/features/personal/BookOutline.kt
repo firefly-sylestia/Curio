@@ -87,7 +87,38 @@ internal fun epubOutline(zip: ZipFile): List<ReaderOutlineEntry> {
  * read. Empty when the OPF cannot be read, so the caller keeps the archive
  * order as its fallback — a malformed file must never hide a document.
  */
-internal fun epubReadingOrder(zip: ZipFile): List<String> {
+internal fun epubReadingOrder(zip: ZipFile): List<String> = epubPackage(zip).spine
+
+/**
+ * v475 — THE OPF, READ ONCE: the BOOK's order and the two documents it declares.
+ *
+ * `epubReadingOrder`, `epubOutline` and `epubPageList` all need something out
+ * of the same package document, and the two navigation lists have to be FOUND
+ * the way the format says rather than by scanning — the archive order is a
+ * packer's business (see [epubReadingOrder]). So the OPF is resolved here
+ * (`META-INF/container.xml` → the rootfile), its manifest becomes an id→path
+ * map, and the two declared documents are picked out of the SAME pass:
+ *
+ *  · the **nav document** — the manifest item whose `properties` list holds
+ *    `nav` (that is what makes it the EPUB 3 navigation document, whatever it
+ *    is called and wherever in the archive it sits);
+ *  · the **NCX** — the item the manifest types `application/x-dtbncx+xml`
+ *    (the EPUB 2 contents).
+ *
+ * Both are `""` when the package does not declare one, so every caller keeps
+ * its own archive scan as the fallback — a book that breaks the rules must
+ * still open.
+ */
+private class EpubPackage(
+    /** Content documents in the order the BOOK reads them. */
+    val spine: List<String>,
+    /** The nav document the manifest declares, or `""`. */
+    val nav: String,
+    /** The NCX the manifest declares, or `""`. */
+    val ncx: String
+)
+
+private fun epubPackage(zip: ZipFile): EpubPackage {
     // The OPF the container names, else the first one in the archive.
     val container = runCatching {
         zip.getEntry("META-INF/container.xml")?.let { entry ->
@@ -104,28 +135,42 @@ internal fun epubReadingOrder(zip: ZipFile): List<String> {
         ?: zip.entries().asSequence()
             .firstOrNull { !it.isDirectory && it.name.endsWith(".opf", true) }
             ?.name
-        ?: return emptyList()
-    val opf = zip.getEntry(rootPath) ?: return emptyList()
+        ?: return EpubPackage(emptyList(), "", "")
+    val opf = zip.getEntry(rootPath) ?: return EpubPackage(emptyList(), "", "")
     val raw = runCatching {
         zip.getInputStream(opf).bufferedReader().use { it.readText() }
-    }.getOrNull() ?: return emptyList()
+    }.getOrNull() ?: return EpubPackage(emptyList(), "", "")
     val base = rootPath.substringBeforeLast('/', "")
-    // id -> archive path, from the manifest.
+    // id -> archive path, from the manifest — and the two declared navigation
+    // documents picked out of the same walk.
     val manifest = HashMap<String, String>()
+    var nav = ""
+    var ncx = ""
     Regex("<item\\b[^>]*>", RegexOption.IGNORE_CASE).findAll(raw).forEach { match ->
-        val id = epubAttr(match.value, "id") ?: return@forEach
-        val href = epubAttr(match.value, "href") ?: return@forEach
-        manifest[id] = resolveTarget(base, href)
+        val tag = match.value
+        val id = epubAttr(tag, "id") ?: return@forEach
+        val href = epubAttr(tag, "href") ?: return@forEach
+        val path = resolveTarget(base, href)
+        manifest[id] = path
+        val properties = epubAttr(tag, "properties").orEmpty().lowercase()
+        if (nav.isBlank() && properties.split(' ', ',').any { it == "nav" }) nav = path
+        val mediaType = epubAttr(tag, "media-type").orEmpty().lowercase()
+        if (ncx.isBlank() && mediaType.contains("dtbncx")) ncx = path
     }
     // The spine, in order: each `<itemref idref>` resolves through the manifest
     // to the document it names.
-    return Regex("<itemref\\b[^>]*>", RegexOption.IGNORE_CASE).findAll(raw)
+    val spine = Regex("<itemref\\b[^>]*>", RegexOption.IGNORE_CASE).findAll(raw)
         .mapNotNull { match -> epubAttr(match.value, "idref") }
         .mapNotNull { idref -> manifest[idref] }
-        .filter { it.endsWith(".xhtml", true) || it.endsWith(".html", true) || it.endsWith(".htm", true) }
+        .filter { it.isContentDocument() }
         .distinct()
         .toList()
+    return EpubPackage(spine, nav, ncx)
 }
+
+/** True for the document types a reflowable book's text lives in. */
+private fun String.isContentDocument(): Boolean =
+    endsWith(".xhtml", true) || endsWith(".html", true) || endsWith(".htm", true)
 
 /** Reads one XML attribute out of a single tag's text. */
 private fun epubAttr(tag: String, name: String): String? =
@@ -148,10 +193,17 @@ private fun epubAttr(tag: String, name: String): String? =
  * book, with the book's own name for them.
  */
 internal fun epubPageList(zip: ZipFile): List<ReaderOutlineEntry> {
+    // ── v475 — THE DECLARED NAV FIRST, NOT THE ARCHIVE'S FIRST ───────────
+    // A page-list lives in the EPUB 3 navigation document, and WHICH document
+    // that is comes from the package's manifest (`properties="nav"`) — not from
+    // whichever xhtml the packer happened to write first (see [epubPackage]).
+    // The declared document is tried first and the archive scan stays as the
+    // fallback, so a book that breaks the rules still opens.
+    val declared = epubPackage(zip).nav
     val candidates = zip.entries().asSequence().filter { candidate ->
         !candidate.isDirectory && (candidate.name.endsWith(".xhtml", true) ||
             candidate.name.endsWith(".html", true) || candidate.name.endsWith(".htm", true))
-    }
+    }.sortedByDescending { candidate -> candidate.name == declared }
     candidates.forEach { document ->
         val raw = runCatching {
             zip.getInputStream(document).bufferedReader().use { it.readText() }
@@ -178,10 +230,13 @@ internal fun epubPageList(zip: ZipFile): List<ReaderOutlineEntry> {
 }
 
 private fun navDocumentOutline(zip: ZipFile): List<ReaderOutlineEntry> {
+    // v475 — the DECLARED nav document first (see [epubPackage]); the archive
+    // scan is the fallback for a package that does not declare one.
+    val declared = epubPackage(zip).nav
     val candidates = zip.entries().asSequence().filter { candidate ->
         !candidate.isDirectory && (candidate.name.endsWith(".xhtml", true) ||
             candidate.name.endsWith(".html", true) || candidate.name.endsWith(".htm", true))
-    }
+    }.sortedByDescending { candidate -> candidate.name == declared }
     candidates.forEach { document ->
         val raw = runCatching {
             zip.getInputStream(document).bufferedReader().use { it.readText() }
@@ -237,9 +292,14 @@ private fun navDocumentOutline(zip: ZipFile): List<ReaderOutlineEntry> {
 }
 
 private fun ncxOutline(zip: ZipFile): List<ReaderOutlineEntry> {
-    val ncx = zip.entries().asSequence().firstOrNull {
-        !it.isDirectory && it.name.endsWith(".ncx", true)
-    } ?: return emptyList()
+    // v475 — the NCX the package DECLARES first (see [epubPackage]); the archive
+    // scan is the fallback for a package that does not declare one.
+    val declared = epubPackage(zip).ncx
+    val ncx = (declared.takeIf { it.isNotBlank() }?.let { zip.getEntry(it) })
+        ?: zip.entries().asSequence().firstOrNull {
+            !it.isDirectory && it.name.endsWith(".ncx", true)
+        }
+        ?: return emptyList()
     val raw = runCatching {
         zip.getInputStream(ncx).bufferedReader().use { it.readText() }
     }.getOrNull() ?: return emptyList()

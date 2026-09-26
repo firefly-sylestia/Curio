@@ -69,6 +69,7 @@ FIX:
 - Reading: the Voice list is filled the first time you open it — starting a speech engine takes a moment, so the picker used to say no voices were installed until it was opened a second time.
 - Reading: some EPUBs opened with their chapters out of order — the reader followed the archive's own file order instead of the book's own reading order (its spine), so a chapter could land in the wrong place, the contents list disagreed with the reading, and "pages left in this chapter" counted across whatever happened to sit between a chapter's parts. The reader follows the book's own order now.
 - Writing: a bullet keeps its marker on Enter — the marker was stored on the line while the bullet flag crossed the break on its own, so finishing a star (or ring, dash, heart…) line started the next one as a plain dot. The new line wears the same marker now.
+- Reading: an EPUB's contents list is the book's OWN nav document — the reader used to take the first archive file that merely looked like one (and the first `.ncx`), instead of the document the book's package declares, so a book carrying an extra contents file could quote the wrong table of contents.
 
 REMOVE:
 - Privacy: the app no longer asks for all-files access; its only user was the wallpaper experiment retired earlier.
