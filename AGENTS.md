@@ -369,7 +369,10 @@ If the user refines this workflow, update this section AND the Prompt.md
    pushed while you were away). Never start editing on a stale checkout.
 1. **Read DOX chain** — `master.md` → `AGENTS.md` → child AGENTS.md along every path you touch
 2. **Read Prompt.md** — check for existing context or half-finished work
-3. **Gather context** — read relevant files, search codebase, research APIs before making changes
+3. **Gather context** — load the skill that matches the work (read the index in [`
+   .agents/skills/AGENTS.md`](.agents/skills/AGENTS.md) and load every match
+   BEFORE editing), then read relevant files, search the codebase and research
+   APIs before making changes
 4. **Plan** — write analysis and plan to Prompt.md, then update todos
 5. **Implement** — make targeted, minimal changes
 6. **Review** — spawn code-reviewer-deepseek-flash for non-trivial changes
@@ -555,6 +558,7 @@ real destination the project's Site URL answers instead, whose default is
 - [auth-web/AGENTS.md](auth-web/AGENTS.md) — Curio account web (Supabase email links, password reset, account desk)
 - [app/APP_AUDIT.md](app/APP_AUDIT.md) — App audit: fixed defects, Lite-mode gating rules, and the deliberately separate UNVERIFIED leads
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
+- [.agents/skills/AGENTS.md](.agents/skills/AGENTS.md) — Skills catalog + the rule to load the matching skill before editing
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
 - [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)
 - [fastlane/AGENTS.md](fastlane/AGENTS.md) — Android store metadata and release notes

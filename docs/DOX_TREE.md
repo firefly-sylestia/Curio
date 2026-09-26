@@ -10,6 +10,7 @@ graph TB
     ROOT --> GRADLE["gradle/AGENTS.md\nBuild configuration"]
     ROOT --> FASTLANE["fastlane/AGENTS.md\nStore metadata"]
     ROOT --> GITHUB[".github/AGENTS.md\nCI/CD and issues"]
+    ROOT --> SKILLS[".agents/skills/AGENTS.md\nSkills catalogue + load rule"]
 
     APP --> DATA["app/CURIO_DATA_PLAN.md\nTopic data contract"]
     APP --> SCHEMA["app/src/main/assets/topics/SCHEMA.md\nTopic schema quick reference"]
@@ -34,6 +35,12 @@ auth-web/
   index.html, */index.html      Supabase email landings, account desk, legal
   assets/                       theme.css + curio.js (no build step)
   api/                          Vercel functions: public config, delete account
+
+.agents/skills/
+  AGENTS.md                     Skills catalogue + the load-the-match rule
+  curio-design/                 OUR motion + consistency contract
+  <community skill>/            Third-party (unvetted) reference skills
+skills-lock.json                Skill sources + content hashes
 
 gradle/                         Version catalog and wrapper configuration
 .github/                        Android CI, release workflow, issue templates

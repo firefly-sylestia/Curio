@@ -6,7 +6,40 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §81 — the drawer's sky is TERRITORIES with three connection styles (v483; BUILT, pushed with the version bump)
+## 0. THE CURRENT REQUEST — §82 — a skills catalogue, our own design skill, and Android command-line tools (COMMITTED, NOT pushed — the member says when)
+
+> "can u add /skill with all the important skills by research and also add in instruction to read that skill based on the work, and also for design etc use or modify our own skill by modifying one by your researh add the best skills for dynamic motion, consitency, etc also add cmdline tools"
+
+**THREE QUESTIONS WERE ASKED BEFORE ANY INSTALL** (community skills are unvetted and this is a new durable surface), and each answer shaped the work: the set — the six skills below; the rule's home — **a `.agents/skills/AGENTS.md` catalogue**, not the root rail; the design half — **both**, our own Curio skill *and* the community motion skills.
+
+### WHAT WAS RESEARCHED
+
+Skills were found (not recalled) with `npx skills find` across five queries — jetpack compose, design-system motion, code review, design tokens/consistency, kotlin/android, mobile UI/UX — and each candidate's repo previewed with `npx skills add <owner/repo> --list` before installing. Install counts at research time: `code-review-and-quality` 49.6K, `mobile-android-design` 23.1K, `android-clean-architecture` 10.7K, `kotlin-coroutines-flows` 9.5K, `animation-principles` 1.9K, `motion-system` 1.5K.
+
+### WHAT WAS BUILT
+
+1. **Six community skills installed into `.agents/skills/`** (`npx skills add … --skill <name> --yes`), plus `skills-lock.json` pinning each source repo and content hash. All six are markdown only — no scripts — 168K total.
+2. **`curio-design/SKILL.md` — OUR OWN SKILL, the point of the exercise.** Written from the app's real tokens, not from a template: the pill clock (`ENTER_MS` 190 / `EXIT_MS` 130 / `EMPHASIS_MS` 320 / `TICK_MS` 90 / `SETTLE_DEBOUNCE_MS` 80 / `SETTLE_FRACTION` 1/6 / `POP_SCALE` 0.80 and the `pillArrive`/`pillLeave`/`popArrive`/`popLeave`/`arriveFade`/`leaveFade`/`settle` factories), the eight springs with the *meaning* each one carries, the full duration table, `CurioShapes` 8/16/24/32/48, the category-ink twins and the light-surface `CoralInk`/`GoldInk`, the pressed-look indication (no ripple), the shadow-before-fill + opaque-fill elevation rules and the never-elevate-animating-deck-cards rule, and Lite mode's "gate ambience, never meaning" line. Its five rules are the consistency contract: **one clock** (a literal millisecond is a bug), **enter slower than exit and travel ∝ the mover**, **springs are a vocabulary**, **spend a token or add one**, **depth/glass**.
+3. **`.agents/skills/AGENTS.md` — the catalogue and the rule.** A DOX child doc in the default shape, carrying the load-the-match table (skill → load when), the six load rules (load BEFORE editing, matches are cumulative, more than two is a smell, repo docs outrank skills, record it in this file), the install/update/remove procedure (**ask the user first**, and a new skill must get its row in the same change), and the authoring rules for our own skills.
+4. **Root `AGENTS.md` hooks.** Workflow step 3 now says to load the matching skill before editing, and the Child DOX Index gained the `.agents/skills/AGENTS.md` row.
+5. **`.idx/dev.nix` — Python, Node, the JDK, and the Android command-line tools.** Python (`pkgs.python3` — its derivation symlinks `bin/python` → `python3`, so **both** names work; read out of nixpkgs' `cpython/default.nix`, not assumed; plus `pip`, `requests`, `pyyaml`), Node 20 + `nodePackages.pnpm` (web/ is npm, auth-web/ has a pnpm lockfile), `jdk17` + `JAVA_HOME`, the CLI set (`git` `gh` `jq` `curl` `wget` `unzip` `zip` `openssl` `sqlite` `ripgrep` `fd`), and Android tooling (`android-tools` = adb/fastboot, `sdkmanager`, `aapt`, `apksigner`, `apktool`, `jadx`, `kotlin`, `ktlint`, `imagemagick`) — 28 packages.
+
+### CHECKS, IN THIS ENVIRONMENT'S TERMS
+
+- **No Gradle command was run** (root `AGENTS.md` forbids it here); Compose is validated by CI.
+- **`dev.nix` was evaluated, not assumed:** `nix-instantiate --eval --strict` against the store's nixpkgs resolves all 28 attrs and `JAVA_HOME` = `…-openjdk-17.0.7+7/lib/openjdk`. Two first guesses were rejected by that check — `pkgs.pnpm` does not exist on this nixpkgs (it is `nodePackages.pnpm`) and an alias wrapper for `python` was dropped once the symlink was found in the source.
+- **The catalogue was checked against the tree:** every folder under `.agents/skills/` has an index row and every row points at a folder that exists (`ls -1 .agents/skills` — the check the catalogue itself prescribes).
+- **No annotation check needed** — no Kotlin file was touched.
+
+### ⚠️ OPEN
+
+- **NOT pushed.** The member's standing instruction is that they say when (see §66/§67), and this change is instructions + environment, not a user-visible build.
+- **`.idx/dev.nix` is untracked** — `.idx/` is in `.gitignore` (line 49), so the package set lives only in this workspace and would not survive a fresh clone. Asked; awaiting the member's word.
+- **The installer also wrote `.claude/`, `agent/` and `data/skills/`** (symlink farms for other agent tools; `.claude/skills/` holds one link, not six) beside `.agents/skills/`. Left in place rather than removed — the member is asked before a removal.
+
+---
+
+## §81 — the drawer's sky is TERRITORIES with three connection styles (v483; BUILT, pushed with the version bump)
 
 > the drawer pattern and connections are still very much messy and overlaping etc, and not beautiful to look at. please please make it beautiful
 
