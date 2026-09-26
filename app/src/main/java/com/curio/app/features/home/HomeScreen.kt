@@ -3811,6 +3811,24 @@ private const val StarCoreDp = 3.0f
 private const val FamilyPull = 0.35f
 
 /**
+ * ── v480 — HOW CLOSE TWO STARS MAY SIT, AND HOW HARD THEY PUSH APART ──────
+ *
+ * The member, of the sky: *"the drawer patterns are overlapping each other some
+ * lines etc"* — and, asked what overlapped, **both** the lines and the clusters.
+ *
+ * [FamilyPull] gathers a branch by moving every lane toward its family's centre,
+ * and the spiral underneath is dense, so two lanes could land almost on the same
+ * spot and their dots (and halos) drew over one another. [MinStarGap] is the
+ * smallest distance two stars may keep, in the SAME unit space [starPoint] scales
+ * (~a 16dp gap on the drawer's own map: 0.09 × 186dp), which is comfortably past
+ * the two dots plus a lit star's 2.7× halo; [SeparationPasses] deterministic
+ * relaxation passes push any closer pair apart, half each, so the sky settles into
+ * separated stars without leaving the shape the member knows.
+ */
+private const val MinStarGap = 0.090f
+private const val SeparationPasses = 24
+
+/**
  * v476 — HOW A BRANCH DRAWS ITSELF.
  *
  * The member: *"the animation make it light by branch by branch"* and *"tune the
@@ -3883,15 +3901,45 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
     // A fraction of the way in and no further ([FamilyPull]): the member asked for
     // the same pattern with similar lanes reading together, not for the tight
     // clusters v476 drew.
-    return start.mapIndexed { i, point ->
+    val gathered = start.mapIndexed { i, point ->
         val centre = centres[familyOf[i]] ?: point
-        val pulled = point + (centre - point) * FamilyPull
-        val clamped = Offset(
-            pulled.x.coerceIn(-0.95f, 0.95f),
-            pulled.y.coerceIn(-0.95f, 0.95f)
-        )
-        val radius = clamped.getDistance().coerceIn(0.16f, 0.95f)
-        val angle = if (radius <= 0.0001f) 0f else kotlin.math.atan2(clamped.y, clamped.x)
+        point + (centre - point) * FamilyPull
+    }.toMutableList()
+    // ── 4) AND NO TWO STARS SIT ON EACH OTHER ─────────────────────────────
+    // The pull can gather two lanes onto the same spot, which is what drew their
+    // dots (and halos) over one another — the member's "overlapping". A short,
+    // deterministic relaxation pushes any pair closer than [MinStarGap] apart,
+    // half each pass; it is seeded from the same gathered positions every time, so
+    // the map is still the landmark the member learns. The clamp runs each pass so
+    // a star pushed off the rim is pulled back INSIDE the field before the next
+    // pair is measured — clamping only at the end would let two rim-clamped stars
+    // land on each other again.
+    fun clampUnit(p: Offset): Offset {
+        val boxed = Offset(p.x.coerceIn(-0.95f, 0.95f), p.y.coerceIn(-0.95f, 0.95f))
+        val r = boxed.getDistance()
+        if (r <= 0.95f && r >= 0.16f) return boxed
+        if (r <= 0.0001f) return Offset(0.30f, 0f)
+        val fixed = r.coerceIn(0.16f, 0.95f)
+        return Offset(boxed.x / r * fixed, boxed.y / r * fixed)
+    }
+    repeat(SeparationPasses) {
+        for (i in gathered.indices) {
+            for (j in i + 1 until gathered.size) {
+                val delta = gathered[j] - gathered[i]
+                val d = delta.getDistance()
+                if (d < MinStarGap) {
+                    val push = (MinStarGap - d) * 0.5f
+                    val ux = if (d <= 0.0001f) 1f else delta.x / d
+                    val uy = if (d <= 0.0001f) 0f else delta.y / d
+                    gathered[i] = clampUnit(Offset(gathered[i].x - ux * push, gathered[i].y - uy * push))
+                    gathered[j] = clampUnit(Offset(gathered[j].x + ux * push, gathered[j].y + uy * push))
+                }
+            }
+        }
+    }
+    return gathered.map { p ->
+        val radius = p.getDistance().coerceIn(0.16f, 0.95f)
+        val angle = if (radius <= 0.0001f) 0f else kotlin.math.atan2(p.y, p.x)
         StarSlot(angle = angle, radius = radius)
     }
 }
@@ -3907,19 +3955,30 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
 private data class StarLink(val first: Int, val second: Int, val cross: Boolean)
 
 /**
- * v476 — THE CONSTELLATION'S HAIRLINES, GROUPED BY FAMILY.
+ * THE CONSTELLATION'S HAIRLINES — v476 asked for branches, v480 draws them.
  *
- * Two rules, straight from the member's ask (*"kee the pattern same same dot
- * connections group like similar category in that branch"* and, of the whole sky,
- * *"one connected sky"*):
+ *  ── v480 — A CHAIN PER FAMILY, AND THE FEWEST LINES BETWEEN THEM ──────
  *
- *  * **Within a family** each star joins its NEAREST FAMILY-MATE — the old
- *    nearest-neighbour rule, scoped to the branch — so a family reads as its own
- *    small constellation rather than a knot shared with strangers;
- *  * **Between families** each family keeps exactly ONE tie, to the nearest star
- *    of any OTHER family. That single long hairline is what keeps the sky one web
- *    instead of twelve floating islands, and it is marked `cross` so the painter
- *    can let it reach and light it only once BOTH branches are on.
+ * The member, of the sky: *"the drawer patterns are overlapping each other some
+ * lines etc … make it more sensible and beautiful"*. The v476 rules drew a
+ * nearest-neighbour WEB — every star joined its nearest family-mate, so a star in
+ * the middle of a branch collected several hairlines and they fanned over one
+ * another, and each family added its OWN long tie to the outside, so up to twelve
+ * long lines crossed the sky and overlapped. Asked how to draw it instead, the
+ * member chose **"Chain per family + one minimal web"**:
+ *
+ *  * **Within a family**: a CHAIN. The branch starts at the member farthest from
+ *    its own centre of mass (an edge of the cluster) and walks to the nearest
+ *    unvisited lane, so the family is a DRAWN LINE — a path — and no star carries
+ *    more than two hairlines. No fans, no knots shared with strangers;
+ *  * **Between families**: a MINIMUM SPANNING TREE over the family centres
+ *    (Prim's). That is the FEWEST lines that still keep the sky one web, so no
+ *    reciprocal, redundant or duplicate cross ties are left to cross each other;
+ *    each tree edge is realised as the closest pair of stars across the two
+ *    families it joins, so the tie is the shortest one that does the job.
+ *
+ *  A `cross` link is still marked so the painter can exempt it from the join cap
+ *  and light it only once BOTH its branches are on.
  *
  * Measured in unit space (the same ellipse [starPoint] scales) and computed once
  * per lane layout.
@@ -3932,45 +3991,101 @@ private fun starLinksGrouped(
     val points = slots.map { slot ->
         Offset(cos(slot.angle) * slot.radius, sin(slot.angle) * slot.radius)
     }
-    val links = LinkedHashSet<StarLink>()
-    // Within a family: the one mate a star is actually closest to.
-    slots.indices.forEach { i ->
-        val mate = slots.indices
-            .filter { it != i && familyOf.getOrNull(it) == familyOf.getOrNull(i) }
-            .minByOrNull { d -> (points[d] - points[i]).getDistanceSquared() }
-        if (mate != null) {
-            links.add(StarLink(minOf(i, mate), maxOf(i, mate), cross = false))
+    val families = familyOf.distinct()
+    val members = families.associateWith { family ->
+        slots.indices.filter { familyOf.getOrNull(it) == family }
+    }
+    fun centreOf(ids: List<Int>): Offset =
+        if (ids.isEmpty()) Offset.Zero
+        else Offset(
+            ids.map { points[it].x }.average().toFloat(),
+            ids.map { points[it].y }.average().toFloat()
+        )
+
+    val links = ArrayList<StarLink>()
+
+    // ── 1) ONE CHAIN PER FAMILY (a path, so no star carries more than two) ──
+    families.forEach { family ->
+        val ids = members.getValue(family)
+        if (ids.size < 2) return@forEach
+        val centre = centreOf(ids)
+        val unvisited = ids.toMutableSet()
+        // Start at the cluster's edge, not its middle: the farthest member from
+        // the centre is an end of the branch, so the walk reads as a line.
+        var current = ids.maxByOrNull { (points[it] - centre).getDistanceSquared() }
+            ?: return@forEach
+        unvisited.remove(current)
+        while (unvisited.isNotEmpty()) {
+            val next = unvisited.minByOrNull { (points[it] - points[current]).getDistanceSquared() }
+                ?: break
+            links.add(StarLink(minOf(current, next), maxOf(current, next), cross = false))
+            unvisited.remove(next)
+            current = next
         }
     }
-    // Between families: ONE tie per family, to the nearest star outside it.
-    familyOf.distinct().forEach { family ->
-        val mine = slots.indices.filter { familyOf.getOrNull(it) == family }
-        val others = slots.indices.filter { familyOf.getOrNull(it) != family }
-        if (mine.isEmpty() || others.isEmpty()) return@forEach
-        var bestFirst = -1
-        var bestSecond = -1
-        var bestDist = Float.MAX_VALUE
-        mine.forEach { i ->
-            others.forEach { j ->
-                val d = (points[j] - points[i]).getDistanceSquared()
-                if (d < bestDist) {
-                    bestDist = d
-                    bestFirst = i
-                    bestSecond = j
+
+    // ── 2) ONE MINIMAL WEB BETWEEN THE FAMILIES (an MST over the centres) ──
+    if (families.size >= 2) {
+        val centres = families.map { centreOf(members.getValue(it)) }
+        val inTree = BooleanArray(families.size)
+        val best = FloatArray(families.size) { Float.MAX_VALUE }
+        val from = IntArray(families.size) { -1 }
+        inTree[0] = true
+        for (j in 1 until families.size) {
+            best[j] = (centres[j] - centres[0]).getDistanceSquared()
+            from[j] = 0
+        }
+        repeat(families.size - 1) {
+            var pick = -1
+            var pickDist = Float.MAX_VALUE
+            for (j in families.indices) {
+                if (!inTree[j] && best[j] < pickDist) {
+                    pickDist = best[j]
+                    pick = j
+                }
+            }
+            if (pick < 0) return@repeat
+            // The edge becomes the closest pair of stars across the two families
+            // it joins, so the tie is that edge's shortest realisation.
+            val a = members.getValue(families[from[pick]])
+            val b = members.getValue(families[pick])
+            var bestFirst = -1
+            var bestSecond = -1
+            var bestPairDist = Float.MAX_VALUE
+            a.forEach { i ->
+                b.forEach { j ->
+                    val d = (points[j] - points[i]).getDistanceSquared()
+                    if (d < bestPairDist) {
+                        bestPairDist = d
+                        bestFirst = i
+                        bestSecond = j
+                    }
+                }
+            }
+            if (bestFirst >= 0) {
+                links.add(
+                    StarLink(
+                        minOf(bestFirst, bestSecond),
+                        maxOf(bestFirst, bestSecond),
+                        cross = true
+                    )
+                )
+            }
+            inTree[pick] = true
+            // Grow the frontier from the family just joined.
+            for (j in families.indices) {
+                if (!inTree[j]) {
+                    val d = (centres[j] - centres[pick]).getDistanceSquared()
+                    if (d < best[j]) {
+                        best[j] = d
+                        from[j] = pick
+                    }
                 }
             }
         }
-        if (bestFirst >= 0) {
-            links.add(
-                StarLink(
-                    minOf(bestFirst, bestSecond),
-                    maxOf(bestFirst, bestSecond),
-                    cross = true
-                )
-            )
-        }
     }
-    return links.toList()
+
+    return links
 }
 
 /**

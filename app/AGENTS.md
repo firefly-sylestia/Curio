@@ -9702,6 +9702,25 @@ scheme role means something different there than in the app's own schemes.
   * the map's box takes `clipToBounds()`, so its gradients can never wash the
     brain panel above it (the blank-top symptom).
 
+- **v480 — A CHAIN PER FAMILY, AND THE FEWEST LINES BETWEEN THEM.** The member:
+  *"the drawer patterns are overlapping each other some lines etc … make it more
+  sensible and beautiful"*, and asked what overlapped they answered **both** (the
+  clusters AND the lines); asked how to draw the constellation they chose **"Chain
+  per family + one minimal web"**. So `starScatterByFamily` now ends with a
+  deterministic separation pass — `MinStarGap` 0.090 (unit space, ~a 16dp gap on
+  the drawer's own map, past a lit star's 2.7× halo) relaxed over
+  `SeparationPasses` 24, with the clamp INSIDE each pass so two rim-clamped stars
+  cannot land on each other again — and no two dots (or halos) sit on one another.
+  And `starLinksGrouped` no longer draws a nearest-neighbour WEB: **within a
+  family** it walks a CHAIN (start at the member farthest from the family's centre
+  of mass, then nearest-unvisited), so a branch is a drawn line and **no star
+  carries more than two hairlines**; **between families** it builds a
+  **minimum spanning tree over the family centres** (Prim's), so exactly
+  `families − 1` cross lines keep the sky one web with no reciprocal, redundant or
+  duplicate ties to cross each other — each tree edge realised as the closest PAIR
+  of stars across the two families it joins. `cross` still marks the tree's edges
+  for the join-cap exemption and the both-branches light-up.
+
 ### The hero stat pane is one shade (v476)
 
 - **THE TORN HERO'S STAT PANE MATCHES THE GLASS HEADER'S.** The member: *"in glass
