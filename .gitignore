@@ -46,11 +46,22 @@ release.keystore
 keystore_base64.txt
 result/
 logcat.txt
-.idx/
+# IDX workspace files stay local — except the toolchain, which is tracked on
+# its own. (The pattern is `.idx/*` rather than `.idx/` because git cannot
+# re-include a file whose parent DIRECTORY is excluded.)
+.idx/*
+!.idx/dev.nix
 .vscode/
 node_modules/
 node_modules
 .env
+
+# Agent-tool shims written the first time `npx skills` runs. The skills
+# themselves live in .agents/skills/ (tracked) with skills-lock.json; these are
+# per-tool copies and links, so they are regenerated rather than committed.
+/.claude/
+/agent/
+/data/skills/
 ./release-key.jks
 
 # Python
