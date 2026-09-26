@@ -562,6 +562,7 @@ real destination the project's Site URL answers instead, whose default is
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
 - [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)
 - [fastlane/AGENTS.md](fastlane/AGENTS.md) — Android store metadata and release notes
+- [fdroid/AGENTS.md](fdroid/AGENTS.md) — F-Droid listing material (fdroiddata metadata draft + inclusion checklist; not part of the app build)
 - [desktop/](desktop/) — Compose Multiplatform desktop port (see the
   Desktop App section above)
 - [.github/AGENTS.md](.github/AGENTS.md) — GitHub CI/CD and issue templates

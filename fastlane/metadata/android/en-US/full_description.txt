@@ -1,0 +1,27 @@
+Curio hands you a topic worth exploring — an artist, an album, a film, a book, a painting, a scientific discovery, or a wildcard surprise — then helps you capture what you noticed in a beautiful, personal library.
+
+THE SPIN — a discovery deck, not a feed
+Pick from 38 curated lanes (Music, Films, Books, Art, Science, Games, Anime, Food, History, Sports, Internet, Mythology, and more) or blend a mixed deck. Curio shuffles a roulette of 16,000+ hand-written topics, each with a teaser, imagery and a structured "go do this" explore action with a suggested time. Anti-repeat history means you never see the same topic back to back, and finishing a topic marks it Completed everywhere.
+
+SIX CAPTURE FORMATS ON PAPER-TEXTURED NOTES
+SoundBite (voice notes) · ReelNotes (reviews) · Marginalia (journals) · Gallery Wall (mood boards) · Field Notes (observations) · Open Notebook (wildcard). Every note lives on a rich paper editor with ruled lines, torn edges, coffee stains and watermark paper. Full rich text, quotes, images, audio and tags — all autosaving.
+
+BOOKS & READING
+Keep a shelf, open an EPUB or PDF in a reader that follows the book's own order, highlight, bookmark, and take selection notes. Read aloud reads a sentence at a time, marks it on the page, and can keep going in the background with lock-screen controls. Look up any word in the built-in dictionary (Webster's 1913 + WordNet).
+
+EXPLORE SESSIONS
+Start a timed session and a floating bubble follows you over other apps, so your timer stays visible while you dig in. Sessions survive reboots and queue for later.
+
+THE CABINET — your personal museum
+Browse by category, search your whole library, zoom images in a lightbox, and revisit rich entry pages. Streaks, levels, and lane stats make the habit rewarding — with daily and weekly quests, XP across 50 levels, and a pixel pet companion that grows with you (and is fully redesignable in its own pixel editor).
+
+SHARE CARDS
+Turn a discovery into a beautiful card — 8 styles including 50+ topic-specific custom designs and 13 category-specific Signature styles. Save as image or share directly.
+
+PRIVATE BY DEFAULT
+Everything lives on your device: no analytics, no tracking, no ads. Your captures, recordings, photos and screenshots never leave the phone. An optional online layer (friends, a 24-hour community wall, private messages) stays completely off until you switch it on — and it carries text only.
+
+DESIGN
+A Material-inspired custom design language: Material 3 wrapped in a warm-cream paper world — torn-paper heroes, category colors, custom typography — with real liquid glass (blur, refraction, frost) on nav, headers and sheets, in light and dark, with Curio, AMOLED and Material You themes.
+
+Built with Kotlin + Jetpack Compose. Free and open source under AGPL-3.0.

@@ -6,7 +6,28 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §87 — how to list on F-Droid, and the F-Droid builds switched OFF for now (v486)
+## 0. THE CURRENT REQUEST — §88 — the F-Droid inclusion draft (fdroiddata metadata + checklist + the missing fastlane descriptions)
+
+> "Draft the fdroiddata metadata yml for Curio so the inclusion MR is ready"
+
+**FACTS VERIFIED FROM GIT, NOT MEMORY:** v1.4.0 (tag 2026-09-22) was a SINGLE-FLAVOR build — no productFlavors, no ML Kit, no vendored AAR, Vosk as a plain `implementation` (Apache-2.0) — so it is the cleanest first F-Droid build target (no blob to explain). v1.4.6/code 20260929 is current but untagged. The 2048×2048 `ic_launcher_icon.png` exists to source `icon.png`. The topic catalog lives at `data/topics/` (38 files) and is copied into assets by CI at build time — **a clean F-Droid checkout would ship an empty catalog without a `prebuild` copy**, which is the draft's most important line. A stray `v2.1-beta6` tag (typo of v1.2.0-beta6, 2026-09-14) sorts above v1.4.x and would hijack the update check — handled by `UpdateCheckIgnore` + a TODO to delete it.
+
+### WHAT WAS CREATED
+
+1. **`fdroid/com.curio.app.yml`** — the fdroiddata metadata draft: two build blocks (v1.4.0 via `gradle: yes`, v1.4.6 via `gradle: core` + `scandelete` for the AAR), the load-bearing `prebuild` topic-JSON copy, `AutoUpdateMode: Version v%v` + `UpdateCheckMode: Tags`, and ⚠️ TODO markers for the email + the tag.
+2. **`fdroid/README.md`** — the inclusion checklist: an 8-step fork→MR path, a status table (done vs ❌: icon.png + phoneScreenshots missing), the sherpa-onnx-blob answer to have ready for the packager, and the note that F-Droid runs `gradle: core`, NOT this repo's `fdroid` build type.
+3. **`fastlane/metadata/android/en-US/short_description.txt` + `full_description.txt`** — these were MISSING despite fastlane/AGENTS.md claiming them; F-Droid requires both. Written from the app's real surfaces.
+4. **`fdroid/AGENTS.md`** — the DOX child contract (ownership, the load-bearing prebuild/scandelete contracts, guidance); indexed in the root rail's Child DOX Index.
+
+### ⚠️ OPEN (the human half of the MR)
+
+- Capture the phone screenshots + resize the icon into fastlane images (the ❌ rows in fdroid/README.md).
+- Push tag `v1.4.6` (or drop the second build block until auto-update adds it), and delete/rename the stray `v2.1-beta6` tag.
+- Create the fdroiddata fork + MR on GitLab; fdroiddata's CI does the first real build test. Nothing here can run that build locally.
+
+---
+
+## §87 — how to list on F-Droid, and the F-Droid builds switched OFF for now (v486)
 
 > "how do we list in fdroid ? and turn off frdoid builds for now. just off"
 
