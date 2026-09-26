@@ -33,9 +33,9 @@ Skills were found (not recalled) with `npx skills find` across five queries — 
 
 ### ⚠️ OPEN
 
-- **NOT pushed.** The member's standing instruction is that they say when (see §66/§67), and this change is instructions + environment, not a user-visible build.
-- **`.idx/dev.nix` is untracked** — `.idx/` is in `.gitignore` (line 49), so the package set lives only in this workspace and would not survive a fresh clone. Asked; awaiting the member's word.
-- **The installer also wrote `.claude/`, `agent/` and `data/skills/`** (symlink farms for other agent tools; `.claude/skills/` holds one link, not six) beside `.agents/skills/`. Left in place rather than removed — the member is asked before a removal.
+- **NOT pushed** (`7d5f72e3`, `8167ab74`) — the member chose "leave it committed for now", which is also their standing instruction that they say when.
+- **`.idx/dev.nix` IS tracked now** (the member's answer): `.gitignore`'s `.idx/` became `.idx/*` with a `!.idx/dev.nix` exception, because git cannot re-include a file whose parent *directory* is excluded — a plain `!.idx/dev.nix` under `.idx/` silently did nothing (verified with `git check-ignore -v` before trusting it).
+- **The installer's extra folders are ignored, not committed** (the member's answer): `.claude/`, `agent/` and `data/skills/` went into `.gitignore` — `.agents/skills/` + `skills-lock.json` are the tracked source of truth, and those three are regenerated per tool.
 
 ---
 
