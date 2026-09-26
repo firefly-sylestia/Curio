@@ -3099,9 +3099,11 @@ private val DrawerStarMapHeight = 372.dp
  * no longer lists lanes as tiles; it DRAWS them.
  *
  * Every lane is one star:
- *  * **Position** — fixed for a given lane count ([starScatter]: a golden-angle
- *    spiral with a small hashed wobble, deterministic and identical at every
- *    knowledge level, so the map is a landmark the member learns). v419
+ *  * **Position** — fixed for a given lane count ([starScatterByFamily]: a
+ *    golden-angle spiral with a small hashed wobble, deterministic and
+ *    identical at every knowledge level, so the map is a landmark the member
+ *    learns; v476 keeps that shape but pulls each family's lanes into one
+ *    cluster so similar categories read as a branch). v419
  *    replaced the v414 ring-and-spoke lattice with this — the lattice was too
  *    symmetric (member: "the drawer graph is bad … its too symmetric") — and a
  *    faint dust field ([starDust]) gives the panel its depth instead of a grid.
@@ -3109,8 +3111,10 @@ private val DrawerStarMapHeight = 372.dp
  *    An explored lane is a big lit star; an untouched one is a dim hollow
  *    point, so the map shows the member what is left without being a meter.
  *  * **Colour** — the lane's own accent, glowing through two halo steps.
- *  * **Hairlines** — each star joined to its NEAREST neighbour, so the sky reads
- *    as loose constellations rather than rings ([starLinks]).
+ *  * **Hairlines** — each star joined to its NEAREST family-mate, and each
+ *    family tied to its nearest other family by ONE longer hairline, so every
+ *    branch is a loose constellation and the sky is still a single web
+ *    ([starLinksGrouped], v476).
  *
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
@@ -3160,8 +3164,25 @@ private fun DrawerLaneStarMap(
     // halos, the hairlines and the dust reading in white AND in dark mode.
     val page = MaterialTheme.colorScheme.surface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val slots = remember(lanes.size) { starScatter(lanes.size) }
-    val links = remember(slots) { starLinks(slots) }
+    val ink = MaterialTheme.colorScheme.onSurface
+    val dark = isCurioDarkTheme()
+    // ── v476 — THE LANES GROUP BY FAMILY ──────
+    // The member: *"kee the pattern same same dot connections group like similar
+    // category in that branch"*. Similar categories already have a name in the
+    // catalog — [CategoryFamily] (Artists · Albums · Songs are MUSIC, and so on)
+    // — so the scatter keeps its golden-angle shape and its dot-to-dot look, but
+    // a family's stars are pulled into one CLUSTER and linked to each other, and
+    // each family keeps ONE link to its nearest other family so the sky is still
+    // a single web (the member: "one connected sky").
+    val familyOf: List<CategoryFamily> = remember(lanes) {
+        lanes.map { CategoryFamily.of(it.id) }
+    }
+    val slots = remember(familyOf) { starScatterByFamily(familyOf) }
+    val links = remember(slots, familyOf) { starLinksGrouped(slots, familyOf) }
+    // Each family's own turn in the light-up (v476): the sky lights BRANCH BY
+    // BRANCH rather than star by star (the member's own words).
+    val familyOrder = remember(familyOf) { familyOf.distinct() }
+    val slotFamily = remember(familyOf, familyOrder) { familyOf.map { familyOrder.indexOf(it) } }
     // A faint dust field behind the stars, so the panel has depth without the
     // regular grid the member rejected (v419).
     val dust = remember { starDust(STAR_DUST_COUNT) }
@@ -3260,7 +3281,7 @@ private fun DrawerLaneStarMap(
     // solid point v422 settled on.
     val lanesKey = lanes.joinToString(",") { "${it.id.name}:${it.knowledge}:${it.explored}" }
     val starHalos: List<Pair<Float, Brush>?> = remember(
-        lanesKey, starPoints, selected, page, strongest, density
+        lanesKey, starPoints, selected, page, ink, dark, strongest, density
     ) {
         lanes.mapIndexed { index, lane ->
             val picked = lane.id == selected
@@ -3276,7 +3297,11 @@ private fun DrawerLaneStarMap(
                 2.9f
             }) * (if (picked) 1.18f else 1f)
             val corePx = with(density) { core.dp.toPx() }
-            val accent = lane.accent
+            // v476 — the star's own colour, deepened a touch on the light page
+            // so a lit dot reads as a dot rather than as a slightly coloured
+            // smudge (the member: *"the lines and the dots make it more
+            // noticable, in light mode darker shade and similar"*).
+            val accent = if (dark) lane.accent else lerp(lane.accent, ink, LightDotDarken)
             // v460 — the same eased falloff the sky's own wash uses, at the
             // star's strength: a star's aura was four stops too, so on the dark
             // page it carried the same visible rings the centre wash did (see
@@ -3287,7 +3312,7 @@ private fun DrawerLaneStarMap(
                 colors = glowStops(
                     page = page,
                     tint = accent,
-                    strength = if (picked) 0.97f else 0.90f,
+                    strength = if (picked) 0.99f else 0.95f,
                     power = 1.5f
                 ),
                 center = centre,
@@ -3298,7 +3323,10 @@ private fun DrawerLaneStarMap(
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
         lit.snapTo(0f)
-        lit.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+        // v476 — a longer sweep, because it now carries one BRANCH per turn
+        // instead of one star per turn: at 900ms a family was on and off the
+        // page before the eye could follow it (see [bornOf]).
+        lit.animateTo(1f, tween(1150, easing = FastOutSlowInEasing))
     }
     // ── v444 — THE SKY ARRIVES AND LEAVES WITH THE DRAWER ─────────────
     //
@@ -3385,11 +3413,21 @@ private fun DrawerLaneStarMap(
             //    hairline stop exactly at the edge of the halo it runs into
             //    instead of disappearing under it. ──
             fun bornOf(index: Int): Float {
-                val wait = (index * 0.012f).coerceAtMost(0.55f)
-                // v444 — and the whole sky is dressed by the drawer's own progress,
-                // so a close takes every star with it.
-                return (((lit.value - wait) / (1f - wait)).coerceIn(0f, 1f) * reveal.value)
-                    .coerceIn(0f, 1f)
+                // ── v476 — ONE BRANCH AT A TIME ─────────────────────────────
+                // Every star of a family shares its family's own window, so a
+                // branch comes on AS A BRANCH — its stars and its own lines
+                // together — and the next family starts a beat later (the
+                // member: *"the animation make it light by branch by branch"*).
+                // The windows are laid across the sweep with a little overlap,
+                // so the sky reads as growing branches, not as a metronome.
+                val f = slotFamily.getOrElse(index) { 0 }
+                val step = 1f / familyOrder.size.coerceAtLeast(1)
+                val start = f * step * BranchStagger
+                val span = (step * BranchSpan).coerceAtLeast(0.0001f)
+                val branch = ((lit.value - start) / span).coerceIn(0f, 1f)
+                // v444 — and the whole sky is dressed by the drawer's own
+                // progress, so a close takes every star with it.
+                return (branch * reveal.value).coerceIn(0f, 1f)
             }
             fun corePxOf(index: Int): Float {
                 val born = bornOf(index)
@@ -3417,6 +3455,20 @@ private fun DrawerLaneStarMap(
             // of the two axes: the field is taller than it is wide now, so a
             // width-only cap would quietly drop the vertical constellations.
             val joinReach = (size.width + size.height) * 0.15f
+            // ── v476 — A LINE'S SHADE, DEEPER IN LIGHT MODE ─────────────────
+            // The member: *"the lines and the dots make it more noticable, in
+            // light mode darker shade and similar"*. Both modes mix the hue in
+            // harder than before, and the LIGHT page gets one extra step: the
+            // mixed line is pulled a little toward the ink, because a coloured
+            // mix on a near-white page is a pastel by construction and a pastel
+            // is exactly what the member could not see. The darken follows the
+            // amount, so a line that is only just being drawn out (see
+            // [linkBorn]) is never a grey ghost ahead of its branch.
+            fun lineMix(hue: Color, amount: Float): Color {
+                val a = (amount * (if (dark) DarkLineBoost else LightLineBoost)).coerceIn(0f, 1f)
+                val mixed = lerp(page, hue, a)
+                return if (dark) mixed else lerp(mixed, ink, LightLineDarken * a)
+            }
             // ── v457 — THE GLOW THE SKY STANDS IN (see [centreGlow]) — one
             //    radial gradient, drawn first, so every star sits on a lit page
             //    rather than on a flat one. Opaque stops that end in the page's
@@ -3457,10 +3509,20 @@ private fun DrawerLaneStarMap(
             //       a lone star's nearest neighbour can be halfway across the
             //       map, and one such line ruins the chart.
             links.forEach { link ->
+                // ── v476 — A LINK LIGHTS WITH ITS BRANCH ─────────────────────
+                // A hairline belongs to the family that owns it, so it comes on
+                // with that branch (the later of its two stars) and draws itself
+                // out as the branch does — the mesh arrives branch by branch,
+                // exactly as the stars do. The ONE cross-family link per family
+                // waits for both its branches, and is exempt from the join cap:
+                // it is the tie that keeps the sky one web, so it is meant to
+                // reach across the map.
+                val linkBorn = minOf(bornOf(link.first), bornOf(link.second))
+                if (linkBorn <= 0.001f) return@forEach
                 val start = at(link.first)
                 val end = at(link.second)
                 val span = (end - start).getDistance()
-                if (span > joinReach) return@forEach
+                if (span > joinReach && !link.cross) return@forEach
                 val trimStart = corePxOf(link.first) * HaloTrimFactor + 2.dp.toPx()
                 val trimEnd = corePxOf(link.second) * HaloTrimFactor + 2.dp.toPx()
                 val floor = 6.dp.toPx()
@@ -3489,7 +3551,7 @@ private fun DrawerLaneStarMap(
                 // star toward the one it joins as the drawer comes in, which is
                 // what makes the map arrive as a constellation being drawn rather
                 // than as a finished chart being shown (see [reveal]).
-                val tip = from + (to - from) * reveal.value
+                val tip = from + (to - from) * linkBorn
                 val control = (from + tip) / 2f + Offset(-dir.y, dir.x) * (bow * side)
                 val hair = Path().apply {
                     moveTo(from.x, from.y)
@@ -3500,13 +3562,13 @@ private fun DrawerLaneStarMap(
                 // what draws the mesh the eye follows.
                 drawPath(
                     path = hair,
-                    color = lerp(page, hue, if (joined) 0.30f else 0.18f),
-                    style = Stroke(width = 2.6.dp.toPx(), cap = StrokeCap.Round)
+                    color = lineMix(hue, (if (joined) 0.30f else 0.20f) * linkBorn),
+                    style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
                 )
                 drawPath(
                     path = hair,
-                    color = lerp(page, hue, if (joined) 0.60f else 0.42f),
-                    style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
+                    color = lineMix(hue, (if (joined) 0.62f else 0.46f) * linkBorn),
+                    style = Stroke(width = 1.15.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
             // ── The stars. ──
@@ -3528,8 +3590,12 @@ private fun DrawerLaneStarMap(
                 val settled = starPoints.getOrNull(index) ?: return@forEachIndexed
                 val halo = starHalos.getOrNull(index)
                 if (halo == null) {
+                    // v476 — an untouched lane is still the solid dim point v422
+                    // settled on, only DEEPER now (the member asked for the dots
+                    // to be more noticeable, darker in light mode).
+                    val dim = lerp(page, muted, (0.34f + 0.40f * born).coerceIn(0f, 1f))
                     drawCircle(
-                        color = lerp(page, muted, 0.26f + 0.34f * born),
+                        color = if (dark) dim else lerp(dim, ink, 0.16f * born),
                         radius = 2.6f.dp.toPx(),
                         center = settled
                     )
@@ -3612,6 +3678,54 @@ private const val HaloTrimFactor = 1.35f
  */
 private const val HALO_REACH = 2.7f
 
+// ── v476 — THE CONSTELLATION'S OWN NUMBERS ────────────────────────────────
+//
+// The member: *"kee the pattern same same dot connections group like similar
+// category in that branch and the animation make it light by branch by branch,
+// the lines and the dots make it more noticable, in light mode darker shade and
+// similar"*. Six numbers do that and nothing else (see [bornOf], [lineMix] and
+// [starScatterByFamily]).
+
+/**
+ * Where a family's window of the light-up begins, as a share of one family's
+ * step through the sweep. Under 1 so a branch starts before the previous one has
+ * entirely finished (the member asked for branches, not a metronome) while still
+ * leaving the last branch room to complete before the sweep ends.
+ */
+private const val BranchStagger = 0.86f
+
+/**
+ * How long one family's own window runs, as a multiple of its step. Over 1 so the
+ * windows OVERLAP a little — the sky grows as branches, not as blinking groups.
+ */
+private const val BranchSpan = 1.40f
+
+/**
+ * How far a lane's own accent is pulled toward the ink when it becomes a halo in
+ * LIGHT mode (v476). A lit star's bloom is a wash of its accent on a near-white
+ * page, and a pure accent there is a pastel the member could not read ("in light
+ * mode darker shade"); dark mode keeps the true accent.
+ */
+private const val LightDotDarken = 0.18f
+
+/**
+ * How much harder the hairlines mix their hue, per theme (v476). More than 1 so
+ * both modes are more noticeable than before (the member: "the lines … make it
+ * more noticable"), and the light page asks for a little more boost because a
+ * coloured mix loses contrast against white.
+ */
+private const val DarkLineBoost = 1.15f
+private const val LightLineBoost = 1.30f
+
+/**
+ * The one extra step the LIGHT page's hairlines take: after mixing the hue in,
+ * the line is pulled this far toward the ink, because a coloured mix on a
+ * near-white page reads as a pastel and a pastel is exactly what the member
+ * could not see. It follows the line's own amount (see [lineMix]), so a line that
+ * is only just being drawn out is never a grey ghost ahead of its branch.
+ */
+private const val LightLineDarken = 0.30f
+
 /**
  * v419 — LANES ON A GOLDEN-ANGLE SCATTER (this replaced the v414 lattice).
  *
@@ -3622,7 +3736,6 @@ private const val HALO_REACH = 2.7f
  * reason the lattice was tried at all) and given a small deterministic wobble
  * so no two neighbours sit at the same radius or the same angle.
  *
- * The rules that keep it honest:
  *  * the i-th star sits at the GOLDEN ANGLE times i, the classic Vogel spiral,
  *    so the disc fills evenly at any lane count instead of clumping;
  *  * its radius grows with sqrt(i / count), so the sky reaches the panel's
@@ -3631,45 +3744,130 @@ private const val HALO_REACH = 2.7f
  *    same places, so the map stays the landmark the member learns) breaks the
  *    symmetry;
  *  * knowledge never moves a star; it changes size and brightness only.
+ *
+ * v476 — THE SAME SHAPE, GROUPED BY FAMILY. The member: *"kee the pattern same
+ * same dot connections group like similar category in that branch"*. So the
+ * scatter is still a golden-angle phyllotaxis with the same hashed wobble — the
+ * pattern the member knows — but the spiral is now asked once per FAMILY for the
+ * branch anchors, and each lane then hugs its own family's anchor. The result:
+ * the sky keeps its old character while Artists · Albums · Songs read as ONE
+ * little constellation, not three scattered stars.
  */
-private fun starScatter(count: Int): List<StarSlot> {
-    if (count <= 0) return emptyList()
+private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> {
+    if (familyOf.isEmpty()) return emptyList()
     // The golden angle in radians — Vogel's constant, irrational on purpose so
     // successive points never fall into a repeating spoke.
     val goldenAngle = 2.3999632f
-    return List(count) { i ->
-        // A deterministic 0..7 wobble per star, from a multiplicative hash.
-        val jitter = (((i * 2654435761L) and 7L)).toInt()
-        val wobble = jitter - 3
-        val base = kotlin.math.sqrt((i + 0.55f) / count)
-        StarSlot(
-            angle = i * goldenAngle + wobble * 0.055f,
-            radius = (0.20f + 0.74f * base + wobble * 0.011f).coerceIn(0.16f, 0.95f)
+    val order = familyOf.distinct()
+    // ── ONE ANCHOR PER FAMILY ─────────────────────────────────────────────
+    // The old per-lane Vogel scatter, asked once per FAMILY instead of once per
+    // lane, so the branches themselves spread the way the stars used to — evenly,
+    // and never stacked. Unit space (the same ellipse [starPoint] scales), so the
+    // anchors follow the box's shape.
+    val anchors = List(order.size) { f ->
+        val jitter = ((((f + 1) * 2654435761L) and 7L)).toInt() - 3
+        val base = kotlin.math.sqrt((f + 0.55f) / order.size)
+        val angle = f * goldenAngle + jitter * 0.045f
+        val radius = (0.38f + 0.54f * base + jitter * 0.010f).coerceIn(0.32f, 0.90f)
+        Offset(cos(angle) * radius, sin(angle) * radius)
+    }
+    // ── AND EACH LANE HUGS ITS ANCHOR ─────────────────────────────────────
+    // A lane is nudged off its family's anchor by its own small golden-angle
+    // spiral (2%–9% of the sky), so a family reads as ONE tight constellation of
+    // two to five stars instead of a scatter shared with strangers. The offset is
+    // deliberately tiny: the member asked for the SAME dot-to-dot pattern,
+    // regrouped — not for a new shape.
+    val seen = HashMap<CategoryFamily, Int>()
+    return familyOf.map { family ->
+        val anchor = anchors[order.indexOf(family)]
+        val local = seen.getOrDefault(family, 0)
+        seen[family] = local + 1
+        val localAngle = local * goldenAngle
+        // The first star sits ON the anchor; the rest spiral out around it.
+        val localRadius = if (local == 0) 0f else 0.075f * kotlin.math.sqrt(local.toFloat())
+        val unit = anchor + Offset(cos(localAngle) * localRadius, sin(localAngle) * localRadius)
+        val clamped = Offset(
+            unit.x.coerceIn(-0.95f, 0.95f),
+            unit.y.coerceIn(-0.95f, 0.95f)
         )
+        val radius = clamped.getDistance().coerceIn(0.16f, 0.95f)
+        val angle = if (radius <= 0.0001f) 0f else kotlin.math.atan2(clamped.y, clamped.x)
+        StarSlot(angle = angle, radius = radius)
     }
 }
 
 /**
- * The sky's hairlines: each star joined to its NEAREST neighbour.
+ * v476 — ONE HAIRLINE ON THE SKY, and whether it is the tie between two families.
  *
- * The v414 lattice drew a closed polygon per orbit, which is what made the
- * chart read as rings. With a scatter there are no orbits, so the link is
- * LOCAL — the one neighbour a star is actually closest to — and the result is a
- * loose constellation, not a mesh. Measured in unit space (the same ellipse the
- * drawer's aspect would give) and computed once per lane count.
+ * The old nearest-neighbour pass answered a `Pair<Int, Int>`; the family map has
+ * to KNOW which links cross families, because those are the ones exempt from the
+ * join cap (they are meant to reach) and the ones that wait for BOTH branches to
+ * light (see the painter).
  */
-private fun starLinks(slots: List<StarSlot>): List<Pair<Int, Int>> {
+private data class StarLink(val first: Int, val second: Int, val cross: Boolean)
+
+/**
+ * v476 — THE CONSTELLATION'S HAIRLINES, GROUPED BY FAMILY.
+ *
+ * Two rules, straight from the member's ask (*"kee the pattern same same dot
+ * connections group like similar category in that branch"* and, of the whole sky,
+ * *"one connected sky"*):
+ *
+ *  * **Within a family** each star joins its NEAREST FAMILY-MATE — the old
+ *    nearest-neighbour rule, scoped to the branch — so a family reads as its own
+ *    small constellation rather than a knot shared with strangers;
+ *  * **Between families** each family keeps exactly ONE tie, to the nearest star
+ *    of any OTHER family. That single long hairline is what keeps the sky one web
+ *    instead of twelve floating islands, and it is marked `cross` so the painter
+ *    can let it reach and light it only once BOTH branches are on.
+ *
+ * Measured in unit space (the same ellipse [starPoint] scales) and computed once
+ * per lane layout.
+ */
+private fun starLinksGrouped(
+    slots: List<StarSlot>,
+    familyOf: List<CategoryFamily>
+): List<StarLink> {
     if (slots.size < 2) return emptyList()
     val points = slots.map { slot ->
         Offset(cos(slot.angle) * slot.radius, sin(slot.angle) * slot.radius)
     }
-    val links = LinkedHashSet<Pair<Int, Int>>()
+    val links = LinkedHashSet<StarLink>()
+    // Within a family: the one mate a star is actually closest to.
     slots.indices.forEach { i ->
-        val nearest = slots.indices
-            .filter { it != i }
+        val mate = slots.indices
+            .filter { it != i && familyOf.getOrNull(it) == familyOf.getOrNull(i) }
             .minByOrNull { d -> (points[d] - points[i]).getDistanceSquared() }
-        if (nearest != null) {
-            links.add(minOf(i, nearest) to maxOf(i, nearest))
+        if (mate != null) {
+            links.add(StarLink(minOf(i, mate), maxOf(i, mate), cross = false))
+        }
+    }
+    // Between families: ONE tie per family, to the nearest star outside it.
+    familyOf.distinct().forEach { family ->
+        val mine = slots.indices.filter { familyOf.getOrNull(it) == family }
+        val others = slots.indices.filter { familyOf.getOrNull(it) != family }
+        if (mine.isEmpty() || others.isEmpty()) return@forEach
+        var bestFirst = -1
+        var bestSecond = -1
+        var bestDist = Float.MAX_VALUE
+        mine.forEach { i ->
+            others.forEach { j ->
+                val d = (points[j] - points[i]).getDistanceSquared()
+                if (d < bestDist) {
+                    bestDist = d
+                    bestFirst = i
+                    bestSecond = j
+                }
+            }
+        }
+        if (bestFirst >= 0) {
+            links.add(
+                StarLink(
+                    minOf(bestFirst, bestSecond),
+                    maxOf(bestFirst, bestSecond),
+                    cross = true
+                )
+            )
         }
     }
     return links.toList()

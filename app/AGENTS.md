@@ -9408,7 +9408,8 @@ scheme role means something different there than in the app's own schemes.
   stats and the lane readout; that part still holds. **v422: 254 → 320dp** (see
   the star-map section — the height is the only dial that sizes the pattern).
 - **POSITION: a golden-angle scatter with a hashed wobble.** `starScatter(count)`
-  replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
+  (v476: `starScatterByFamily(familyOf)` — the same shape, grouped by family; see
+  the star-map section) replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
   the previous version was at least better … its too symmetric". The i-th star
   sits at the GOLDEN ANGLE (2.3999632 rad) times i, its radius grows with
   `sqrt((i + 0.55) / count)` so the disc fills evenly, and a deterministic 0..7
@@ -9420,9 +9421,10 @@ scheme role means something different there than in the app's own schemes.
   12 spokes, a hub) was the symmetry the member rejected, so it is GONE — and so
   are those constants and `TWO_PI`. A faint `starDust(STAR_DUST_COUNT = 46)`
   field (a deterministic LCG in unit space) gives the panel its depth instead.
-- **HAIRLINES ARE LOCAL AGAIN.** `starRingLinks` is GONE; `starLinks` joins each
-  star to its NEAREST neighbour (unit-space `getDistanceSquared`), so the sky
-  reads as loose constellations, never rings or a regular mesh.
+- **HAIRLINES ARE LOCAL AGAIN.** `starRingLinks` is GONE; `starLinks` (v476:
+  `starLinksGrouped`) joins each star to its NEAREST neighbour (unit-space
+  `getDistanceSquared`), so the sky reads as loose constellations, never rings or
+  a regular mesh.
 - **SLOTS STAY.** `StarSlot(angle, radius)` is unchanged, and
   `starPoint(slot, hub, unitPx)` is still the ONE placement function the canvas
   and the hit test both call (pixel space, radius × the SHORTER side) — so the
@@ -9576,9 +9578,10 @@ scheme role means something different there than in the app's own schemes.
 ### The drawer's lanes are a star map (the grid is gone)
 
 - `DrawerLaneStarMap` replaces the lane grid in the drawer: one star per lane,
-  phyllotaxis-scattered by lane COUNT (`starScatter`) so a star never moves when
-  knowledge changes, sized and brightened by knowledge, coloured by the lane's
-  own accent, and joined to its nearest neighbour (`starLinks`). Stars are
+  phyllotaxis-scattered by lane COUNT (`starScatter`; v476 `starScatterByFamily`)
+  so a star never moves when knowledge changes, sized and brightened by knowledge,
+  coloured by the lane's own accent, and joined to its nearest neighbour
+  (`starLinks`; v476 `starLinksGrouped`). Stars are
   TAPPABLE (a 30dp halo, nearest star wins) and the readout under the map is
   `CurioLaneDetailStrip`. `CurioLaneGrid` still serves the Stats page — only the
   drawer changed.
@@ -9630,6 +9633,30 @@ scheme role means something different there than in the app's own schemes.
   the light-up is a ONE-SHOT `Animatable`, never an infinite transition: the
   drawer is composed while it is closed, so an idle twinkle would spend the
   battery on a surface nobody is looking at.
+- **v476 — THE SKY IS GROUPED BY FAMILY AND LIGHTS BRANCH BY BRANCH.** The
+  member: *"kee the pattern same same dot connections group like similar category
+  in that branch and the animation make it light by branch by branch, the lines
+  and the dots make it more noticable, in light mode darker shade and similar"*.
+  Four pieces:
+  * `starScatter` is `starScatterByFamily(familyOf)` now: the SAME golden-angle
+    spiral with the same hashed wobble, asked once per FAMILY for the branch
+    ANCHORS, with each lane then nudged off its own anchor by a tiny local
+    golden-angle step — so Artists · Albums · Songs read as ONE small
+    constellation while the sky keeps the shape the member knows.
+  * `starLinks` is `starLinksGrouped(slots, familyOf)` and answers
+    `StarLink(first, second, cross)`: each star joins its NEAREST FAMILY-MATE
+    (the old local rule, scoped to the branch) and each family keeps exactly ONE
+    `cross = true` tie to the nearest star of any OTHER family, so the sky stays
+    "one connected sky" rather than twelve floating islands.
+  * The light-up is per branch: `bornOf` gives every star of a family the same
+    window (`BranchStagger = 0.86f`, `BranchSpan = 1.40f` — the windows overlap
+    a little), and a `cross` hairline waits for BOTH branches (`linkBorn = min`)
+    and is exempt from the join cap because it is meant to reach.
+  * In LIGHT mode the dots and lines are deepened: a lit lane's halo mixes its
+    accent `LightDotDarken` (0.18) toward the ink, the hairlines mix harder
+    (`LightLineBoost` 1.30 / `DarkLineBoost` 1.15) and the light page then pulls
+    the mixed line a further `LightLineDarken` (0.30) toward the ink, because a
+    coloured mix on a near-white page is a pastel the member could not see.
 
 ### The reader owns the page it is showing
 
