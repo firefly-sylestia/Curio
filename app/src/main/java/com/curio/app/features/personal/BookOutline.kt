@@ -66,6 +66,73 @@ internal fun epubOutline(zip: ZipFile): List<ReaderOutlineEntry> {
 }
 
 /**
+ * v475 — THE BOOK'S OWN READING ORDER.
+ *
+ * An EPUB's reading order is the OPF **spine**: the ordered list of `<itemref>`
+ * ids that names which content document follows which. The order the files
+ * happen to sit in inside the ZIP archive is a packer's business and nothing to
+ * do with the book — several real EPUBs store `chapter10.xhtml` before
+ * `chapter2.xhtml`, or keep a whole appendix ahead of the text.
+ *
+ * The reader used to walk `zip.entries()` and call that the book, so those
+ * EPUBs opened with their sections scrambled — the contents list was right
+ * while the reading was not (member: *"the app isnt showing the contents
+ * properly. they are not arranged correctly. look into that, in some epubs
+ * only"*). It also poisoned the progress the member saw: a chapter's section
+ * number came from archive position, so "pages left in this chapter" (which
+ * walks from a section's first to its last block) counted across whatever
+ * happened to sit between them — a random-looking number on every turn.
+ *
+ * Answers the content documents' archive paths in the order the BOOK says they
+ * read. Empty when the OPF cannot be read, so the caller keeps the archive
+ * order as its fallback — a malformed file must never hide a document.
+ */
+internal fun epubReadingOrder(zip: ZipFile): List<String> {
+    // The OPF the container names, else the first one in the archive.
+    val container = runCatching {
+        zip.getEntry("META-INF/container.xml")?.let { entry ->
+            zip.getInputStream(entry).bufferedReader().use { it.readText() }
+        }
+    }.getOrNull()
+    val rootPath = container
+        ?.let { raw ->
+            Regex("full-path\\s*=\\s*[\"']([^\"']+)[\"']", RegexOption.IGNORE_CASE)
+                .find(raw)?.groupValues?.getOrNull(1)
+        }
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: zip.entries().asSequence()
+            .firstOrNull { !it.isDirectory && it.name.endsWith(".opf", true) }
+            ?.name
+        ?: return emptyList()
+    val opf = zip.getEntry(rootPath) ?: return emptyList()
+    val raw = runCatching {
+        zip.getInputStream(opf).bufferedReader().use { it.readText() }
+    }.getOrNull() ?: return emptyList()
+    val base = rootPath.substringBeforeLast('/', "")
+    // id -> archive path, from the manifest.
+    val manifest = HashMap<String, String>()
+    Regex("<item\\b[^>]*>", RegexOption.IGNORE_CASE).findAll(raw).forEach { match ->
+        val id = epubAttr(match.value, "id") ?: return@forEach
+        val href = epubAttr(match.value, "href") ?: return@forEach
+        manifest[id] = resolveTarget(base, href)
+    }
+    // The spine, in order: each `<itemref idref>` resolves through the manifest
+    // to the document it names.
+    return Regex("<itemref\\b[^>]*>", RegexOption.IGNORE_CASE).findAll(raw)
+        .mapNotNull { match -> epubAttr(match.value, "idref") }
+        .mapNotNull { idref -> manifest[idref] }
+        .filter { it.endsWith(".xhtml", true) || it.endsWith(".html", true) || it.endsWith(".htm", true) }
+        .distinct()
+        .toList()
+}
+
+/** Reads one XML attribute out of a single tag's text. */
+private fun epubAttr(tag: String, name: String): String? =
+    Regex("\\b" + name + "\\s*=\\s*[\"']([^\"']*)[\"']", RegexOption.IGNORE_CASE)
+        .find(tag)?.groupValues?.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }
+
+/**
  * v389c — THE BOOK'S OWN PRINTED PAGE NUMBERS.
  *
  * An EPUB is reflowable, so it has no pages of its own — but a book that was

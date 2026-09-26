@@ -3137,12 +3137,23 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         val tailMask = if (afterText.isEmpty()) after
         else IntArray(after.size) { after[it] and FLAG_TITLE.inv() }
+        // ── v475 — A BULLET'S OWN MARKER CROSSES THE BREAK TOO ─────────────
+        // A marker (star, ring, dash, heart …) is stored on the BLOCK, not in
+        // the line's mask, so re-stamping `headFlags` onto the new line carried
+        // the BULLET FLAG across while leaving the chosen marker behind — every
+        // finished bullet therefore started the next one as the default dot
+        // (member report: "when i click a bulletpoint and start typing and then
+        // i tap enter to go to a new line the bulletpoint changes to the default
+        // dot"). The new line wears the SAME marker as the line it was broken
+        // off; a line that is not a bullet keeps no marker at all.
+        val tailMarker = if (carried and FLAG_BULLET != 0) block.marker else ""
         val head = block.copy(text = block.text.take(caretIndex), runs = maskToRuns(before))
         val tail = PersonalBlock(
             id = newBlockId(),
             text = afterText,
             runs = maskToRuns(tailMask),
-            align = if (afterText.isEmpty()) block.align else PersonalAlign.START
+            align = if (afterText.isEmpty()) block.align else PersonalAlign.START,
+            marker = tailMarker
         )
         blocks[id] = head
         masks[id] = runsToMask(head.text.length, head.runs)

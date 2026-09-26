@@ -502,6 +502,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // here, because at this point in the body the pager it names does not exist
     // yet, and v431 it also needs the live place every surface reports).
     var textPageCount by remember { mutableIntStateOf(0) }
+    // ── v475 — THE PAGED FLOW'S OWN PAGE RANGES, HOISTED ─────────────────
+    // The scrubber wants to mark where each chapter opens, and for a reflowed
+    // book read as pages that means mapping a chapter's BLOCK to the page whose
+    // range covers it. The ranges belong to the paged reader (only it can
+    // paginate), so it reports them up here exactly as it already reports the
+    // count — see [TextPagedReader], which reports its page ranges up too.
+    var textPageRanges by remember { mutableStateOf<List<IntRange>>(emptyList()) }
     val textPager = rememberPagerState { textPageCount }
     // v431 — the keyboard goes down with the search bar (see `onCloseSearch`).
     val focusManager = LocalFocusManager.current
@@ -913,6 +920,47 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     fun printedPageAt(block: Int): String =
         printedPages.lastOrNull { it.block in 0..block }?.title.orEmpty()
 
+    // ── THE BOOK'S OWN CONTENTS (v389) ─────────────────────────────────
+    //
+    // The chapters sheet lists what the FILE says, not what the reader could
+    // guess for itself: an EPUB's nav document or NCX, a PDF's own outline, and
+    // the reader's own headings only when the file has neither. A PDF's outline
+    // costs a parse, so it is read when the sheet is OPENED and not a moment
+    // before — a book must never open slower for a list nobody has asked for
+    // (user request: "instead of the chapters tab where in chapters i see the
+    // pages it should show the chapters and all detected from the epub or pdf,
+    // im sure boo pdf hav that table of contnt etc"). This block sits ABOVE the
+    // scrubber because the scrubber's chapter notches read the same list, and a
+    // chapter's own page needs the outline too — so the outline is also read
+    // when the PAGE SLIDER opens (v475), not only the contents sheet.
+    var pdfChapters by remember(document) { mutableStateOf<List<ReaderOutlineEntry>?>(null) }
+    LaunchedEffect(sheet, scrubOpen, document) {
+        if (sheet != ReaderSheet.CONTENTS && !scrubOpen) return@LaunchedEffect
+        if (content !is ReaderContent.Pages) return@LaunchedEffect
+        if (pdfChapters != null || document.isBlank()) return@LaunchedEffect
+        pdfChapters = withContext(Dispatchers.IO) {
+            runCatching { pdfOutline(context, document) }.getOrNull()
+        }
+    }
+    val chapters: List<ReaderOutlineEntry> = when (val loaded = content) {
+        is ReaderContent.Text -> if (loaded.outline.isNotEmpty()) {
+            loaded.outline.map { entry -> entry.copy(block = blockForEntry(loaded, entry)) }
+        } else {
+            loaded.blocks.withIndex()
+                .filter { it.value.isHeading }
+                .map { (index, block) ->
+                    ReaderOutlineEntry(
+                        title = block.text,
+                        block = index,
+                        depth = block.headingLevel.coerceIn(1, 3)
+                    )
+                }
+        }
+
+        is ReaderContent.Pages -> pdfChapters.orEmpty()
+        null -> emptyList()
+    }
+
     // ── v431 — WHERE THE READER IS, AND THE THREE WAYS TO MOVE ────────
     //
     // ONE description, built here, read by the foot pill's middle button and by
@@ -930,6 +978,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 label = "Page ${at + 1} of ${loaded.pageCount}",
                 at = at + 1,
                 total = loaded.pageCount,
+                chapters = scrubChapters(chapters, loaded.pageCount) { it.page },
                 onPrev = {
                     askedByReader = true
                     scope.launch {
@@ -959,6 +1008,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                 label = "Page ${at + 1} of ${loaded.pageCount}",
                 at = at + 1,
                 total = loaded.pageCount,
+                chapters = scrubChapters(chapters, loaded.pageCount) { it.page },
                 onPrev = { turnPageFromBar(stepFrom(at, -1, loaded.pageCount - 1)) },
                 onNext = { turnPageFromBar(stepFrom(at, 1, loaded.pageCount - 1)) },
                 onScrub = { page ->
@@ -982,6 +1032,13 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     label = named.ifBlank { "Page ${at + 1} of $textPageCount" },
                     at = at + 1,
                     total = textPageCount,
+                    // A chapter's BLOCK -> the page whose range covers it (the
+                    // ranges the paged reader reported up). A block the current
+                    // pagination does not place answers 0 and drops out.
+                    chapters = scrubChapters(chapters, textPageCount) { entry ->
+                        if (entry.block < 0) 0
+                        else textPageRanges.indexOfFirst { entry.block in it } + 1
+                    },
                     onPrev = {
                         askedByReader = true
                         scope.launch {
@@ -1015,6 +1072,9 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     label = "Section ${at + 1} of $blocks",
                     at = at + 1,
                     total = blocks,
+                    // A reflowed book read as a scroll counts BLOCKS, so a
+                    // chapter's own block is already its place (1-based).
+                    chapters = scrubChapters(chapters, blocks) { it.block + 1 },
                     onPrev = { put(stepFrom(at, -1, blocks - 1)) },
                     onNext = { put(stepFrom(at, 1, blocks - 1)) },
                     onScrub = { place -> put(place - 1) }
@@ -1066,43 +1126,6 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         null -> ""
     }
 
-    // ── THE BOOK'S OWN CONTENTS (v389) ─────────────────────────────────
-    //
-    // The chapters sheet lists what the FILE says, not what the reader could
-    // guess for itself: an EPUB's nav document or NCX, a PDF's own outline, and
-    // the reader's own headings only when the file has neither. A PDF's outline
-    // costs a parse, so it is read when the sheet is OPENED and not a moment
-    // before — a book must never open slower for a list nobody has asked for
-    // (user request: "instead of the chapters tab where in chapters i see the
-    // pages it should show the chapters and all detected from the epub or pdf,
-    // im sure boo pdf hav that table of contnt etc").
-    var pdfChapters by remember(document) { mutableStateOf<List<ReaderOutlineEntry>?>(null) }
-    LaunchedEffect(sheet, document) {
-        if (sheet != ReaderSheet.CONTENTS) return@LaunchedEffect
-        if (content !is ReaderContent.Pages) return@LaunchedEffect
-        if (pdfChapters != null || document.isBlank()) return@LaunchedEffect
-        pdfChapters = withContext(Dispatchers.IO) {
-            runCatching { pdfOutline(context, document) }.getOrNull()
-        }
-    }
-    val chapters: List<ReaderOutlineEntry> = when (val loaded = content) {
-        is ReaderContent.Text -> if (loaded.outline.isNotEmpty()) {
-            loaded.outline.map { entry -> entry.copy(block = blockForEntry(loaded, entry)) }
-        } else {
-            loaded.blocks.withIndex()
-                .filter { it.value.isHeading }
-                .map { (index, block) ->
-                    ReaderOutlineEntry(
-                        title = block.text,
-                        block = index,
-                        depth = block.headingLevel.coerceIn(1, 3)
-                    )
-                }
-        }
-
-        is ReaderContent.Pages -> pdfChapters.orEmpty()
-        null -> emptyList()
-    }
 
     // A JUMP ASKED FOR FROM OUTSIDE the reading surface — the chapters sheet, a
     // search find. It is handed to whichever surface is showing (the scroll list
@@ -1740,6 +1763,7 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
                     hitLength = searching?.query?.length ?: 0,
             pagerState = textPager,
             onPageCount = { count -> textPageCount = count },
+            onPages = { ranges -> textPageRanges = ranges },
             ownPages = loaded.ownPages,
             pendingBlock = pendingBlock,
             onPendingConsumed = { pendingBlock = null },
@@ -2766,6 +2790,8 @@ private fun TextReader(
     /** Hoisted to the SCREEN, because the page bar lives in the chrome. */
     pagerState: PagerState,
     onPageCount: (Int) -> Unit,
+    /** v475 — the paged flow's own page RANGES, for the scrubber's chapter marks. */
+    onPages: (List<IntRange>) -> Unit,
     /** v440 — what the paged flow says is left of the chapter (see [TextPagedReader]). */
     onSectionPagesLeft: (Int?) -> Unit,
     ownPages: Boolean,
@@ -2878,6 +2904,7 @@ private fun TextReader(
             content = content,
             pagerState = pagerState,
             onPageCount = onPageCount,
+            onPages = onPages,
             onBlockShown = onBlockShown,
             onSectionPagesLeft = onSectionPagesLeft,
             restoredBlock = restoredBlock,
@@ -3546,6 +3573,16 @@ private fun TextPagedReader(
     content: ReaderContent.Text,
     pagerState: PagerState,
     onPageCount: (Int) -> Unit,
+    /**
+     * v475 — THE PAGE RANGES, REPORTED UP FOR THE SCRUBBER'S CHAPTER MARKS.
+     *
+     * The scrubber wants a notch at each chapter opening, and for a reflowed
+     * book read as pages a chapter's BLOCK only means a page through the ranges
+     * this reader just computed. They are hoisted with the count, in the same
+     * pass, so the page bar can place a tick without paginating the book a
+     * second time.
+     */
+    onPages: (List<IntRange>) -> Unit,
     /** v406 — the block this page opens on, reported live. */
     onBlockShown: (Int) -> Unit,
     /**
@@ -3598,6 +3635,8 @@ private fun TextPagedReader(
     }
 
     LaunchedEffect(pages.size) { onPageCount(pages.size) }
+    // v475 — and the ranges themselves, for the page bar's chapter notches.
+    LaunchedEffect(pages) { onPages(pages) }
 
     // ── v440 — AND WHAT IS LEFT OF THE CHAPTER (see [onSectionPagesLeft]) ──
     //
@@ -5948,8 +5987,12 @@ private fun ReaderScrubPill(
             .fillMaxWidth()
             .curioAmbientGlass(body, shape = RoundedCornerShape(28.dp), blurMultiplier = 1.2f)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 7.dp)
+        ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -5963,18 +6006,30 @@ private fun ReaderScrubPill(
             // whose range is a single value is a divide by zero wearing a thumb
             // (a one-page PDF is the honest case). The arrows still work.
             if (last > 1) {
-                Slider(
-                    value = dragged.coerceIn(1, last).toFloat(),
-                    onValueChange = { next -> dragged = next.roundToInt() },
-                    onValueChangeFinished = { scrubber.onScrub(dragged.coerceIn(1, last)) },
-                    valueRange = 1f..last.toFloat(),
-                    modifier = Modifier.weight(1f),
-                    colors = SliderDefaults.colors(
-                        thumbColor = palette.accent,
-                        activeTrackColor = palette.accent,
-                        inactiveTrackColor = lerp(body, palette.ink, 0.18f)
+                // ── v475 — THE CHAPTER MARKS RIDE ON THE TRACK ───────────────
+                // The scrubber is one drag across the whole book, and a book's
+                // chapters are the landmarks along it. The notches are drawn on
+                // the slider's own track, so a tick sits where its page does.
+                Box(modifier = Modifier.weight(1f)) {
+                    Slider(
+                        value = dragged.coerceIn(1, last).toFloat(),
+                        onValueChange = { next -> dragged = next.roundToInt() },
+                        onValueChangeFinished = { scrubber.onScrub(dragged.coerceIn(1, last)) },
+                        valueRange = 1f..last.toFloat(),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = SliderDefaults.colors(
+                            thumbColor = palette.accent,
+                            activeTrackColor = palette.accent,
+                            inactiveTrackColor = lerp(body, palette.ink, 0.18f)
+                        )
                     )
-                )
+                    ReaderChapterNotches(
+                        total = last,
+                        chapters = scrubber.chapters,
+                        ink = palette.ink,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                }
             } else {
                 Spacer(Modifier.weight(1f))
             }
@@ -6018,6 +6073,60 @@ private fun ReaderScrubPill(
                     )
                 }
             }
+        }
+        // ── v475 — A SMALL HINT, NAMING THE CHAPTER THE THUMB IS IN ───────
+        // The member asked for the chapters to show on the bar with *"a small
+        // text hint below"* — the notches say WHERE a book's chapters are, and
+        // this line says WHICH one the thumb is in, so a drag across a long
+        // book always has a name under the finger.
+        val hint = scrubber.chapters.lastOrNull { it.at <= dragged }?.title.orEmpty()
+        if (hint.isNotBlank()) {
+            Text(
+                hint,
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.ink.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 42.dp, end = 80.dp, top = 3.dp)
+            )
+        }
+        }
+    }
+}
+
+/**
+ * v475 — THE CHAPTER NOTCHES, drawn on the scrubber's own track.
+ *
+ * A short tick per chapter, laid on the span the Slider's track really occupies:
+ * the thumb radius (10dp) insets the track at both ends, and the ticks ride the
+ * same inset so a chapter's mark lines up with the page it opens. A tick the
+ * thumb is standing over is simply drawn under it, which is the same answer the
+ * count beside the bar gives.
+ */
+@Composable
+private fun ReaderChapterNotches(
+    total: Int,
+    chapters: List<ReaderScrubberChapter>,
+    ink: Color,
+    modifier: Modifier = Modifier
+) {
+    if (chapters.isEmpty() || total <= 1) return
+    Canvas(modifier = modifier.fillMaxWidth().height(20.dp)) {
+        val inset = 10.dp.toPx()
+        val span = (size.width - inset * 2f).coerceAtLeast(1f)
+        val half = 5.dp.toPx()
+        chapters.forEach { chapter ->
+            val fraction = ((chapter.at - 1).toFloat() / (total - 1).toFloat())
+                .coerceIn(0f, 1f)
+            val x = inset + fraction * span
+            drawLine(
+                color = ink.copy(alpha = 0.35f),
+                start = Offset(x, size.height / 2f - half),
+                end = Offset(x, size.height / 2f + half),
+                strokeWidth = 1.5.dp.toPx()
+            )
         }
     }
 }
@@ -12975,10 +13084,47 @@ private class ReaderScrubber(
     val label: String,
     val at: Int,
     val total: Int,
+    /**
+     * v475 — WHERE EACH CHAPTER OPENS, in the scrubber's OWN units (1-based,
+     * the same scale as [at]/[total]). Built by the reader body, which is the
+     * only place that knows what this book counts in — a PDF's chapters are
+     * pages, a reflowed book read as a scroll counts blocks, and one read as
+     * pages asks the paged reader for the ranges (see [scrubChapters]). The
+     * scrubber draws a notch at each one and names the one the thumb is in.
+     */
+    val chapters: List<ReaderScrubberChapter> = emptyList(),
     val onPrev: () -> Unit,
     val onNext: () -> Unit,
     val onScrub: (Int) -> Unit
 )
+
+/** One chapter's opening on the scrubber: a 1-based position and its name. */
+private class ReaderScrubberChapter(val at: Int, val title: String)
+
+/**
+ * v475 — THE CHAPTER NOTCHES for the page scrubber.
+ *
+ * [entries] is the book's own contents and [positionOf] says where each entry
+ * falls on the scrubber's scale. Entries the reader could not place (a PDF
+ * outline entry with no resolved page, a nav link whose document it never
+ * found) answer <= 0 and are dropped, duplicates collapse onto one notch, and
+ * the list is sorted so the marks run the way the book does. A single-page
+ * book has no track to mark, so it answers nothing.
+ */
+private fun scrubChapters(
+    entries: List<ReaderOutlineEntry>,
+    total: Int,
+    positionOf: (ReaderOutlineEntry) -> Int
+): List<ReaderScrubberChapter> {
+    if (total <= 1 || entries.isEmpty()) return emptyList()
+    return entries
+        .mapNotNull { entry ->
+            val at = positionOf(entry)
+            if (at <= 0 || at > total) null else ReaderScrubberChapter(at, entry.title)
+        }
+        .distinctBy { it.at }
+        .sortedBy { it.at }
+}
 
 private data class ReaderSearchHit(
     /** The block index of a reflowable book, or the page of a PDF. */
@@ -13296,13 +13442,26 @@ private fun readEpubText(
             // archive is open anyway (two navigation lists, one pass).
             outline = epubOutline(zip)
             printedPages = epubPageList(zip)
-            val pages = zip.entries().asSequence()
+            val documents = zip.entries().asSequence()
                 .filter { entry ->
                     !entry.isDirectory &&
                         (entry.name.endsWith(".xhtml", true) || entry.name.endsWith(".html", true) ||
                             entry.name.endsWith(".htm", true))
                 }
                 .toList()
+            // ── v475 — THE BOOK'S OWN READING ORDER (see [epubReadingOrder]) ──
+            // The spine first, in the order the BOOK says its documents read;
+            // any content document the spine does not name (a nav document, a
+            // cover the publisher left out) follows in archive order so nothing
+            // is lost. Before this the archive's own entry order WAS the book,
+            // which is scrambled in several real EPUBs (member: "the app isnt
+            // showing the contents properly. they are not arranged correctly.
+            // look into that, in some epubs only").
+            val byName = documents.associateBy { it.name }
+            val pages = ArrayList<java.util.zip.ZipEntry>(documents.size)
+            epubReadingOrder(zip).forEach { name -> byName[name]?.let { pages.add(it) } }
+            val placed = pages.mapTo(HashSet()) { it.name }
+            documents.forEach { entry -> if (entry.name !in placed) pages.add(entry) }
             pages.forEachIndexed { sectionIndex, entry ->
                 val raw = zip.getInputStream(entry).bufferedReader().use { it.readText() }
                 val section = sectionIndex + 1
