@@ -70,7 +70,9 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
 import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.components.CurioGlassToolbar
+import com.curio.app.ui.components.CurioPillHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
@@ -423,6 +425,13 @@ private data class HistoryHeroPair(
 
 @Composable
 private fun HistoryHeroHeader(onBack: () -> Unit) {
+    // v479 — a compact window wears the floating pill instead of the torn banner
+    // (the member's landscape verdict; see [CurioLayout.floatingPillHeader]). The
+    // header is a Column child on this page, so the pill simply takes less room.
+    if (CurioLayout.floatingPillHeader()) {
+        CurioPillHeader(title = "Topic History", onBack = onBack)
+        return
+    }
     val heroTornShape = remember(HISTORY_TEAR_SEED) { SoftTornBottomShape(HISTORY_TEAR_SEED, bold = true) }
     val sheetShape = remember(HISTORY_TEAR_SEED) {
         SoftTornSheetShape(HISTORY_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)

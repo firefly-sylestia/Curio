@@ -67,6 +67,7 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioGlassToolbar
+import com.curio.app.ui.components.CurioPillHeader
 import com.curio.app.ui.components.CurioLaneDetailStrip
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.LaneGridItem
@@ -157,12 +158,12 @@ fun StatsScreen(navController: NavController) {
                 start = 16.dp,
                 end = 16.dp,
                 // v479 — the reservation follows the header the screen will
-                // actually get: the glass style on a compact window is the 48dp
-                // floating pill, so reserving the glass bar's 150dp left the first
+                // actually get: on a compact window that is the 48dp floating pill
+                // (torn OR glass), so reserving the bar's own height left the first
                 // card's worth of page empty under it ([CurioLayout.reserveForPill]).
-                // The sky header (non-glass) keeps its own reserve untouched.
-                top = if (statsGlass) CurioLayout.reserveForPill(150.dp)
-                      else StatsHeaderHeight + 14.dp,
+                top = CurioLayout.reserveForPill(
+                    if (statsGlass) 150.dp else StatsHeaderHeight + 14.dp
+                ),
                 bottom = 24.dp
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -244,6 +245,14 @@ private fun StatsSkyHeader(
     skyBottom: Color,
     skyInk: Color
 ) {
+    // v479 — a compact window wears the floating pill instead of the 148dp sky
+    // band (the member's landscape verdict; see [CurioLayout.floatingPillHeader]).
+    // The page is a plain NavHost destination, so there is no back control to
+    // carry and nothing the band carried is lost.
+    if (CurioLayout.floatingPillHeader()) {
+        CurioPillHeader(title = "Your Curiosity")
+        return
+    }
     val context = LocalContext.current
     // v178 — theme-picked drawer-hero sky SVG (dark → night, light → day).
     val heroSkyRes = if (isCurioDarkTheme()) R.raw.drawer_hero_sky_dark else R.raw.drawer_hero_sky_light

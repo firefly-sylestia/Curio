@@ -104,6 +104,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
@@ -991,7 +992,19 @@ private fun DetailContentEntrance(content: @Composable () -> Unit) {
 // vertical breathing room on compact screens. Keeping this as the shared
 // hero/morph height prevents the body header from being painted underneath
 // the category and entry text while preserving one stable transition target.
-private val EntryDetailHeroHeight = 400.dp
+private val EntryDetailHeroHeightTall = 400.dp
+/** v479 — the short-window twin: a landscape phone's whole window is ~360dp, so
+ *  the 400dp banner alone was taller than it. The title block and its metadata
+ *  strip are held at their content floor and the page keeps the rest. */
+private val EntryDetailHeroHeightShort = 272.dp
+
+/**
+ * The hero height this window gets — see [EntryDetailHeroHeightShort]. A getter,
+ * because the answer follows the window; a landscape TABLET is not short
+ * (`CurioLayout.isShortWindow` reads height only) and keeps the tall banner.
+ */
+private val EntryDetailHeroHeight: Dp
+    get() = if (CurioLayout.shortWindowNow()) EntryDetailHeroHeightShort else EntryDetailHeroHeightTall
 /** Extra layout space reserved for the white sheet below the clipped hero. */
 // v91 — 16 → 24dp: matches Home's under-sheet geometry so the detail tear
 // carries the same clean paper lip below the seam.
@@ -999,8 +1012,13 @@ private val EntryDetailSheetExtent = 24.dp
 
 /** Hero height + a small gap — the watermark's top clearance on this page
  *  (keeps the backdrop glyphs clear of the narrow white under-sheet lip
- *  below the hero's torn edge). */
-private val EntryDetailHeroClearance = EntryDetailHeroHeight + 30.dp
+ *  below the hero's torn edge).
+ *
+ *  v479 — a GETTER, not an initializer: `EntryDetailHeroHeight` follows the
+ *  window now, and a `val` initializer is evaluated once at class load, which
+ *  would freeze the clearance at the tall hero's 430dp forever. */
+private val EntryDetailHeroClearance: Dp
+    get() = EntryDetailHeroHeight + 30.dp
 
 /** Scroll distance (dp) before the back / more pills fully pin as frosted
  *  floating pills — mirrors Home's sticky menu/profile bar threshold. */

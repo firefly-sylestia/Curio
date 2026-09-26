@@ -153,6 +153,7 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
@@ -623,7 +624,13 @@ fun HomeScreen(navController: NavController) {
                 SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
             }
             // Adaptive hero height — shorter in landscape to leave room for content
-            val homeHeroHeight = if (windowWidthSizeClass().isWide) HomeQuestHeroHeightLandscape else HomeQuestHeroHeightPortrait
+            // v479 — the short height follows a SHORT WINDOW, not merely a wide
+            // one: a split-screen window under 600dp wide but under 520dp tall was
+            // taking the 380dp portrait banner, which is taller than it. Both tests
+            // are true for a landscape phone; only the height is true for a short
+            // half-screen. A landscape TABLET is not short, so it keeps its room.
+            val homeHeroHeight = if (windowWidthSizeClass().isWide || CurioLayout.isShortWindow())
+                HomeQuestHeroHeightLandscape else HomeQuestHeroHeightPortrait
             // The quest is always the wildcard Surprise now (the category
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to

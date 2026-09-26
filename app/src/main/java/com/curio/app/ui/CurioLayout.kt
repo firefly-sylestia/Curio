@@ -100,6 +100,7 @@ object CurioLayout {
 
     /** The window as [noteWindow] last saw it, for the non-composable readers below. */
     private var compactNow by mutableStateOf(false)
+    private var shortNow by mutableStateOf(false)
     private var statusTopDp by mutableStateOf(0)
 
     /**
@@ -110,6 +111,7 @@ object CurioLayout {
     @Composable
     fun noteWindow() {
         compactNow = isCompact()
+        shortNow = isShortWindow()
         statusTopDp = WindowInsets.statusBars
             .asPaddingValues()
             .calculateTopPadding()
@@ -148,6 +150,27 @@ object CurioLayout {
         return config.orientation == Configuration.ORIENTATION_LANDSCAPE ||
             config.screenHeightDp < COMPACT_HEIGHT_DP
     }
+
+    /**
+     * ── v479 — SHORT IS ABOUT HEIGHT ONLY, COMPACT IS NOT ─────────────────
+     *
+     * [isCompact] ORs the orientation in, so it is true for a **tablet in
+     * landscape** too — which has the room the compact pass exists to save. Where
+     * the answer being asked for is "is there enough VERTICAL room for a full
+     * hero", the truth is the height alone, so the tall content heroes (Profile,
+     * Entry Detail, Home's quest banner) ask this instead and a landscape tablet
+     * keeps its room. The pill header still keys on [isCompact]/[floatingPillHeader]
+     * — a 48dp bar is a saving everywhere.
+     */
+    @Composable
+    @ReadOnlyComposable
+    fun isShortWindow(): Boolean = LocalConfiguration.current.screenHeightDp < COMPACT_HEIGHT_DP
+
+    /**
+     * The non-composable twin of [isShortWindow] (see [noteWindow]), for the plain
+     * height getters a short hero's reserve is built from.
+     */
+    fun shortWindowNow(): Boolean = shortNow
 
     /**
      * True when a header should be the small floating pill rather than the hero or

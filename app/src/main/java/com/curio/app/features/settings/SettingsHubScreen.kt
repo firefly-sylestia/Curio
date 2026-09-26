@@ -103,6 +103,7 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioGlassToolbar
+import com.curio.app.ui.components.CurioPillHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
@@ -182,15 +183,14 @@ val SettingsHeroTotalHeight: Dp
  * [SettingsHeroTotalHeight].
  */
 fun settingsHeroTotalHeight(footerHeight: Dp = 0.dp): Dp {
-    // v479 — the style is PART of the question, not a detail beside it. The pill
-    // is reachable ONLY through the glass toolbar path ([SettingsHeroHeader]'s
-    // `== GLASS` branch is the only thing that draws it), while a TORN header
-    // keeps its torn banner on a compact window too — its branch never consults
-    // `floatingPillHeader`. Reserving the pill for a header that will actually be
-    // the 204dp torn banner is what slides the page's first rows under the hero.
+    // v479 — the pill is the header on ANY compact window now, torn or glass:
+    // [SettingsHeroHeader] asks `floatingPillHeader()` first, before the style
+    // branch, so the reserve that answers `floatingPillHeaderNow()` is the same
+    // question the header itself asked. The style only decides the NON-compact
+    // footprint (the glass bar vs the torn banner).
     val glass = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
     return when {
-        glass && CurioLayout.floatingPillHeaderNow() ->
+        CurioLayout.floatingPillHeaderNow() ->
             // ── v479 — THE PILL IS 48dp, NOT A HERO ────────────────────
             // When the floating pill is the header this screen will get (a compact
             // window, or the member's own switch), the reservation is the PILL's
@@ -279,6 +279,37 @@ fun SettingsHeroHeader(
     // liquid glass — no self-sample cycle. Null → classic opaque pill.
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    // ── v479 — A COMPACT WINDOW WEARS THE FLOATING PILL, TORN OR GLASS ─────
+    //
+    // The member's landscape verdict: *"in a short window every header becomes
+    // the floating pill"*. This sits BEFORE the style branch, so a TORN header
+    // gets the pill too — the torn banner is a 204dp block, and on a landscape
+    // phone (~360dp tall) it was most of the page. The pill carries the same
+    // back chevron and the same action pills; a FOOTER (the Social wall's door
+    // row) still rides under it, inside one Column, so nothing it carried is
+    // lost. Every settings-family screen reserves exactly this footprint via
+    // [settingsHeroTotalHeight].
+    if (CurioLayout.floatingPillHeader()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            CurioPillHeader(
+                title = title,
+                onBack = onBack,
+                trailing = trailing,
+                glassBackdrop = glassBackdrop
+            )
+            if (footer != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = SettingsHeroFooterGap)
+                ) {
+                    footer(MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
+        return
+    }
     // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
     // option swaps the torn paper banner for the content-height glass bar
     // (the old Cabinet v2 toolbar look, more blurry + its own tint). Every

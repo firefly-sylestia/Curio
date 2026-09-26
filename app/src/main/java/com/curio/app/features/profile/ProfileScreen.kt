@@ -88,6 +88,7 @@ import com.curio.app.data.supabase.ModerationRecord
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -154,7 +155,21 @@ import kotlinx.coroutines.launch
 /** The torn banner's solid body height — tall enough for the top pills,
  *  identity row, edit pill and the stat bar pinned above the tear, with
  *  flex slack held against large font scales. */
-private val ProfileHeroHeight = 372.dp
+private val ProfileHeroHeightTall = 372.dp
+/** v479 — the short-window twin: on a landscape phone (~360dp tall) the 372dp
+ *  banner was taller than the whole window, so the identity strip, edit pill
+ *  and stat bar are held at their own content floor and the list gets the
+ *  rest. A landscape TABLET is not short (`CurioLayout.isShortWindow` reads
+ *  height only), so it keeps the tall banner. */
+private val ProfileHeroHeightShort = 260.dp
+
+/**
+ * The banner height this window gets — the tall banner, or its short-window
+ * twin. A getter (not a constant) because the answer follows the window; every
+ * reader is in composition or a reserve getter, so the snapshot read is safe.
+ */
+private val ProfileHeroHeight: Dp
+    get() = if (CurioLayout.shortWindowNow()) ProfileHeroHeightShort else ProfileHeroHeightTall
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val ProfileHeroSheetExtent = 24.dp
 /** Total hero footprint — the torn banner plus its under-sheet extent. */

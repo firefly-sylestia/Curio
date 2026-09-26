@@ -31,6 +31,7 @@ ADD:
 - Reading: the page slider is the book's whole bar now — the track runs the full width of the pill with a small mark at every chapter opening, the chapter your thumb is in is named beside the arrows, and the page count sits at the bar's end in the Contents list's own quiet style. The handle is the reader's ink, so it no longer disappears into the track it stands in.
 
 FIX:
+- Landscape: a short window is no longer a stretched tablet — the header is the small floating pill (torn style included, not just glass) instead of a full-height banner, Profile's and Entry Detail's tall torn heroes shrink to fit the window, and Home's shorter quest banner follows a **short window** rather than merely a wide one, so a split-screen page keeps the room it needs. A landscape tablet keeps its full height.
 - The words have had a pass: the list of doors in Settings says what each page holds in a few words instead of a sentence, the picker that opens a row is titled with that row's own name, the phone's built-in voice is called **Phone voice** everywhere instead of "the phone's own", and the voice packs' own row states what it is doing in one line.
 - Home: the **+** sheet is a grid of tiles now — Journal page, Book, Note on a topic and To-do list in two columns, with the dictionary across the foot — so the five doors are one glance instead of a list to read.
 - Home: the explores you set aside are one row now instead of a card each — the newest is shown with the count in the heading, and a **2 more** note opens the rest in place.
