@@ -59,6 +59,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
+import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.unit.DpOffset
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop

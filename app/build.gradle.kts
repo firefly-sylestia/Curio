@@ -216,11 +216,11 @@ android {
         // territories now (no branch runs through another's stars, no two dots or
         // halos overlap), and its connections wear one of three styles — threads,
         // bones or swept arcs — cycled by a HOLD on the sky and remembered.
-        versionCode = 20260927
+        versionCode = 20260928
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.4"
+        versionName = envReleaseVersion ?: "1.4.5"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

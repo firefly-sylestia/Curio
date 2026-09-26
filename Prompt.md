@@ -6,13 +6,26 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §83 — the glass is a wash again, dark gets its smudge, and sheets/dialogs are glass over a really blurred page (v484; BUILT, pushed with the version bump — and §82 pushed with it on the member's word)
+## 0. THE CURRENT REQUEST — §84 — the failed CL (the v484 nav-bar frost forgot its import; FIXED, pushed as v1.4.5 / code 20260928)
+
+> "cl failed"
+
+**THE RUN:** `1b61f76b` (feat(glass) §83/v484) failed all four app jobs — core/full × lint/build — on ONE error: `CurioLiquidGlassTabBar.kt:164 — Unresolved reference 'isCurioDarkTheme'`. The v482→v484 frost pass added `val frostedDark = isCurioDarkTheme()` to the tab bar's dark-lift branch but never added `import com.curio.app.ui.theme.isCurioDarkTheme` (the function lives in `CurioTheme.kt`; every other call site imports it). Desktop compile was skipped and everything else was green.
+
+**THE FIX:** one import line. Read back the imports block and the `frostedDark` uses (declaration + line 402's `Frost.DarkLift`/`LightLift` pick) — no other unresolved references in the liquidglass package. Changelog 20260928 carries the FIX bullet ("dark mode's own frost reaches the nav bar too").
+
+### ⚠️ NOTE FOR THE NEXT SESSION
+This is the third failed CL in recent history that is a missing import or a composable-context slip in one freshly-added line (§33's `LocalContext`-in-onClick, the `positionChanged` import, now this). The line COMPILED against nothing because the reference text exists elsewhere in the file family. **A hand-grep of every newly-added call against its import block, before push, is the cheap guard.**
+
+---
+
+## §83 (SUPERSEDED BY §84 as the current request — the glass pass itself, v484) — the glass is a wash again, dark gets its smudge, and sheets/dialogs are glass over a really blurred page (BUILT, pushed with the version bump — and §82 pushed with it on the member's word)
 
 > "for liquid glass make the buttom sheet and dialog box etc liquid glass too with the clear glass too, also the frosted blur doesnt refract and its too opaque make it 40 mybe and also for dark mode too its just for light mode rn, the smudged."
 
 **THREE QUESTIONS WERE ASKED BEFORE ANY EDIT** (this is a look the member has now revised twice) and every answer shaped the work: thin the frost to ~40% **and bring the lens back everywhere except the reader**; **attempt real window blur behind sheets and dialogs**; and give dark **its own smudge — a lifted dark container, never white**.
 
-### WHAT WAS READ BEFORE ANYTHING WAS WRITTEN
+### WHAT WAS READ BEFORE ANYTHING WAS WRITTEN (§83, unchanged)
 
 - `LiquidGlassPills.kt` — the frost (v482: white at 92%, dark breathed 0.62 toward white, lens dropped), `fauxGlassCapsule` (the pre-12 twin), and the `CurioGlassScreen` / `ProvideCurioGlass` hand-off the reader already uses.
 - **The RESOLVED libraries, not memory:** the BOM `2026.05.01` pins `ui` **1.11.2** and `material3` **1.4.0**. The `ui-android-1.11.2-sources.jar` says `DialogProperties` has **no** blur parameters (blurBehind/BG exist only on `androidx-main`, unreleased), so the platform route was the only one available; the same jar says Compose's `DialogLayout` **is** a `DialogWindowProvider`, and `material3-android-1.4.0-sources.jar` says `ModalBottomSheetDialogLayout` is one too, with `window.setBackgroundDrawableResource(transparent)` — which is what makes `LocalView.current` inside either window the way to reach it.
