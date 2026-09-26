@@ -9410,24 +9410,24 @@ scheme role means something different there than in the app's own schemes.
   stats and the lane readout; that part still holds. **v422: 254 → 320dp** (see
   the star-map section — the height is the only dial that sizes the pattern).
 - **POSITION: a golden-angle scatter with a hashed wobble.** `starScatter(count)`
-  (v476/477: `starScatterByFamily(familyOf)` — the ORIGINAL spiral, with each lane
-  pulled only a little toward its family's centre; see the star-map section)
-  replaces `starLattice` — the member reversed v414: "the drawer graph is bad …
-  the previous version was at least better … its too symmetric". The i-th star
-  sits at the GOLDEN ANGLE (2.3999632 rad) times i, its radius grows with
-  `sqrt((i + 0.55) / count)` so the disc fills evenly, and a deterministic 0..7
-  hash (`i * 2654435761L and 7`) wobbles the angle and radius so no two
-  neighbours align. Still deterministic — the same lanes always land in the same
-  places — and knowledge still never MOVES a star (colour and light only), so
-  the map stays the landmark the member learns.
+  replaced `starLattice` — the member reversed v414: "the drawer graph is bad …
+  the previous version was at least better … its too symmetric". **v483 supersedes
+  this with TERRITORIES** (`starScatterByFamily(familyOf)` — one anchor per family
+  spread round the sky by the same golden angle, each family's lanes on a small
+  local Vogel spiral inside its own patch; see the star-map section). Still
+  deterministic — the same lanes always land in the same places — and knowledge
+  still never MOVES a star (colour and light only), so the map stays the landmark
+  the member learns.
 - **NO GRID.** The v414 astrolabe (one circle per orbit, `STAR_CHART_SPOKES` =
   12 spokes, a hub) was the symmetry the member rejected, so it is GONE — and so
   are those constants and `TWO_PI`. A faint `starDust(STAR_DUST_COUNT = 46)`
   field (a deterministic LCG in unit space) gives the panel its depth instead.
-- **HAIRLINES ARE LOCAL AGAIN.** `starRingLinks` is GONE; `starLinks` (v476:
-  `starLinksGrouped`) joins each star to its NEAREST neighbour (unit-space
-  `getDistanceSquared`), so the sky reads as loose constellations, never rings or
-  a regular mesh.
+- **HAIRLINES ARE LOCAL AGAIN.** `starRingLinks` is GONE, so the sky reads as
+  loose constellations, never rings or a regular mesh. **v476–v483:**
+  `starLinksGrouped` grouped the links by family; **v483 replaces it with
+  `starConstellation`** — each family's stars ordered by ANGLE (a branch that
+  cannot cross itself) plus a minimum spanning tree of bridges (see the star-map
+  section).
 - **SLOTS STAY.** `StarSlot(angle, radius)` is unchanged, and
   `starPoint(slot, hub, unitPx)` is still the ONE placement function the canvas
   and the hit test both call (pixel space, radius × the SHORTER side) — so the
@@ -9581,12 +9581,13 @@ scheme role means something different there than in the app's own schemes.
 ### The drawer's lanes are a star map (the grid is gone)
 
 - `DrawerLaneStarMap` replaces the lane grid in the drawer: one star per lane,
-  phyllotaxis-scattered by lane COUNT (`starScatter`; v476/477
-  `starScatterByFamily` = that same spiral with a gentle pull toward each family's
-  centre) so a star never moves when knowledge changes, lit — not sized — by
-  knowledge (v477: one fixed core, `StarCoreDp`), coloured by the lane's own
-  accent, and joined to its nearest neighbour (`starLinks`; v476
-  `starLinksGrouped`). Stars are
+  laid out in per-family TERRITORIES (`starScatterByFamily` — one anchor per
+  family, its lanes on a local spiral inside its patch, v483) so a star never
+  moves when knowledge changes, lit — not sized — by knowledge (v477: one fixed
+  core, `StarCoreDp`), coloured by the lane's own accent, and joined in ANGULAR
+  order within a branch with MST bridges between branches (`starConstellation`,
+  v483). The connections are drawn in the member's chosen `DrawerLinkStyle`
+  (threads / bones / arcs), cycled by a HOLD on the sky (v483). Stars are
   TAPPABLE (a 30dp halo, nearest star wins) and the readout under the map is
   `CurioLaneDetailStrip`. `CurioLaneGrid` still serves the Stats page — only the
   drawer changed.
@@ -9720,6 +9721,41 @@ scheme role means something different there than in the app's own schemes.
   duplicate ties to cross each other — each tree edge realised as the closest PAIR
   of stars across the two families it joins. `cross` still marks the tree's edges
   for the join-cap exemption and the both-branches light-up.
+
+- **v483 — TERRITORIES, ANGULAR BRANCHES, AND THREE STYLES OF LINE.** The
+  member, after five revisions of this surface: *"the drawer pattern and
+  connections are still very much messy and overlapping … please please make it
+  beautiful"*. **Two questions were asked before any edit** and both shaped it:
+  the layout — **"Territories per family"**; the lines — **all three styles**, and
+  *"they will change when i tap and hold on the drawer star"*. So:
+  * **TERRITORIES.** `starScatterByFamily` gives every family ONE ANCHOR spread
+    round the sky by the golden angle (`TerritoryAnchorInner` 0.26 +
+    `TerritoryAnchorOuter` 0.46 × √(index/count)) and its own patch, with its
+    lanes on a small local Vogel spiral inside it (`TerritorySpreadBase` 0.070 +
+    `TerritorySpreadPerLane` 0.046 × √n). No branch's stars sit inside another
+    family's patch, so a line can never run through a stranger's constellation.
+    The whole layout is scaled back inside `TerritoryFitRadius` (0.92) if a big
+    family would reach the rim — scaling keeps the shape, where per-point clamping
+    would bunch a family against the edge. Deterministic as ever.
+  * **NO TWO DOTS OR HALOS TOUCH.** `MinStarGap` 0.090 → **0.115** (unit space;
+    0.115 × the 152dp half-width is 17.5dp, just past two 2.7× halos) and
+    `SeparationPasses` 24 → **32**.
+  * **CLEAN BRANCHES.** `starLinksGrouped` → **`starConstellation(slots,
+    familyOf)`**, answering a new `StarConstellation(chains, bridges)`. A branch
+    is its family's stars ordered by ANGLE around the family's centre — a greedy
+    nearest-unvisited walk doubles back on itself and crosses its own hairlines,
+    which is the mess the member kept seeing; an angular sweep cannot cross. The
+    bridges are unchanged: a minimum spanning tree over the family centres
+    (Prim's), each edge the closest pair of stars across the two families.
+  * **THREE LINE STYLES (`DrawerLinkStyle`), CYCLED BY A HOLD ON THE SKY.** A
+    long-press on the map cycles THREADS (a delicate filament: three straight
+    passes where the widest is the shortest), BONES (the branch drawn boldly, the
+    bridge a whisper under it) and ARCS (one swept curve per branch, Catmull-Rom
+    control points from each star's chain neighbours, cut by de Casteljau at the
+    branch's own progress so it still draws itself). Tap still picks a star; the
+    hold plays the long-press haptic and writes
+    `AppPreferences.drawerLinkStyleState` (new pref, `drawer_link_style_v1`,
+    default 0 = THREADS), so the choice survives a restart.
 
 ### The hero stat pane is one shade (v476)
 

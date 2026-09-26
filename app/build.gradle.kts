@@ -209,11 +209,18 @@ android {
         // build that code shipped as). What it carries: completing a topic from
         // its page marks it explored (a recents row, and no more stale
         // **Unexplored** tag), and Recents lists the topics already finished.
-        versionCode = 20260925
+        // v483 — 20260926 / 1.4.3: the +1 / +0.0.1 bump for this push, and
+        // `changelogs/20260926.txt` is its notes file (copied forward from
+        // 20260925.txt, which stays exactly as it was — it is the record of the
+        // build that code shipped as). What it carries: the drawer's sky is
+        // territories now (no branch runs through another's stars, no two dots or
+        // halos overlap), and its connections wear one of three styles — threads,
+        // bones or swept arcs — cycled by a HOLD on the sky and remembered.
+        versionCode = 20260926
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.2"
+        versionName = envReleaseVersion ?: "1.4.3"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

@@ -1679,6 +1679,16 @@ object AppPreferences {
     var glassFrostedState by mutableStateOf(true)
         private set
 
+    // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
+    // The member: *"the drawer pattern and connections are still very much
+    // messy and overlapping … make it beautiful"* — and, asked how the lines
+    // should look, wanted **all three** styles with a **tap-and-hold on the
+    // sky** cycling between them. Stored as the `DrawerLinkStyle` ordinal
+    // (0 = delicate threads, 1 = branch bones, 2 = swept arcs); the gesture in
+    // `DrawerLaneStarMap` writes it, so the choice survives a restart.
+    var drawerLinkStyleState by mutableStateOf(0)
+        private set
+
     // v454 — LITE MODE (default OFF): one switch that makes the app cheaper
     // on weaker hardware — refraction/blur everywhere is skipped, the
     // always-running decorative clocks (shimmer, twinkle, breathe, pulse)
@@ -2094,6 +2104,7 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassFrostedState = isGlassFrostedEnabled(context)
+        drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
         pinnedTitleViewState = isPinnedTitleViewEnabled(context)
@@ -2591,6 +2602,8 @@ object AppPreferences {
     // clear refraction. Default ON (the member's ask); the toggle turns it off
     // and returns the old clear glass.
     private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
+    // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
+    private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
@@ -2917,6 +2930,16 @@ object AppPreferences {
     fun setGlassFrostedEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_FROSTED, enabled).apply()
         glassFrostedState = enabled
+    }
+
+    // ── The drawer sky's connection style (v483) ─────────────────────
+    fun getDrawerLinkStyle(context: Context): Int =
+        prefs(context).getInt(KEY_DRAWER_LINK_STYLE, 0).coerceIn(0, 2)
+
+    fun setDrawerLinkStyle(context: Context, style: Int) {
+        val fixed = style.coerceIn(0, 2)
+        prefs(context).edit().putInt(KEY_DRAWER_LINK_STYLE, fixed).apply()
+        drawerLinkStyleState = fixed
     }
 
     // ── Liquid glass tuning (Appearance; stored as percent ints) ──────

@@ -3122,9 +3122,8 @@ private val DrawerStarMapHeight = 372.dp
  *  * **Position** — fixed for a given lane count ([starScatterByFamily]: a
  *    golden-angle spiral with a small hashed wobble, deterministic and
  *    identical at every knowledge level, so the map is a landmark the member
- *    learns; v477 keeps that shape exactly and only pulls each family's lanes a
- *    little toward each other, so similar categories read as a soft
- *    neighbourhood). v419
+ *    learns; v483 gives each family its own TERRITORY instead — see
+ *    [starScatterByFamily]). v419
  *    replaced the v414 ring-and-spoke lattice with this — the lattice was too
  *    symmetric (member: "the drawer graph is bad … its too symmetric") — and a
  *    faint dust field ([starDust]) gives the panel its depth instead of a grid.
@@ -3135,10 +3134,11 @@ private val DrawerStarMapHeight = 372.dp
  *    any dot growing fat as an archive fills (the member: *"dont … grow bigger
  *    when too much knowledge dont let them grow at all"*).
  *  * **Colour** — the lane's own accent, glowing through two halo steps.
- *  * **Hairlines** — each star joined to its NEAREST family-mate, and each
- *    family tied to its nearest other family by ONE longer hairline, so every
- *    branch is a loose constellation and the sky is still a single web
- *    ([starLinksGrouped], v476).
+ *  * **Hairlines** (v483) — a family's stars are joined in ANGULAR order, so a
+ *    branch is a clean constellation outline that never crosses itself, and a
+ *    minimum spanning tree over the family centres ties the branches into one web
+ *    with the fewest possible lines ([starConstellation]). The lines are drawn in
+ *    the member's chosen [DrawerLinkStyle], cycled by a HOLD on the sky.
  *
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
@@ -3194,15 +3194,51 @@ private fun DrawerLaneStarMap(
     // The member: *"kee the pattern same same dot connections group like similar
     // category in that branch"*. Similar categories already have a name in the
     // catalog — [CategoryFamily] (Artists · Albums · Songs are MUSIC, and so on)
-    // — so similar lanes are linked to each other and each family keeps ONE link
-    // to its nearest other family, so the sky is still a single web (the member:
-    // "one connected sky"). v477 softens how hard that grouping MOVES the stars
-    // (see [starScatterByFamily]) — the links stay, the herding does not.
+    // — so similar lanes are linked to each other and each family keeps ONE tie to
+    // its nearest other family, so the sky is still a single web (the member:
+    // "one connected sky"). v483 gives each family its own TERRITORY (see
+    // [starScatterByFamily]) and draws a branch in an order that cannot cross
+    // itself (see [starConstellation]).
     val familyOf: List<CategoryFamily> = remember(lanes) {
         lanes.map { CategoryFamily.of(it.id) }
     }
     val slots = remember(familyOf) { starScatterByFamily(familyOf) }
-    val links = remember(slots, familyOf) { starLinksGrouped(slots, familyOf) }
+    // ── v483 — THE BRANCHES, AND THE STYLE THEY ARE DRAWN IN ─────────────
+    // The member: *"the drawer pattern and connections are still very much
+    // messy and overlapping … make it beautiful"*. The sky is territories now
+    // (see [starScatterByFamily]) and the lines are [starConstellation]'s
+    // ordered chains plus the fewest bridges between them (see its note).
+    val constellation = remember(slots, familyOf) { starConstellation(slots, familyOf) }
+    // One hue per branch: the average of the lanes it joins, so a swept arc
+    // wears its family's own shade instead of a single lane's.
+    val chainHues = remember(constellation, lanes) {
+        constellation.chains.map { chain -> averageAccent(chain.map { lanes[it].accent }) }
+    }
+    // ── v483 — THE LINES IN ONE FLAT LIST ────────────────────────────────
+    // A branch's own edges first, then the bridges between them, in the same
+    // [StarLink] shape the painter has always walked (`cross` marks a bridge, so
+    // it is exempt from the join cap and lights only once BOTH its branches are
+    // on). The ARC style walks [constellation]'s chains directly instead, because
+    // its curve leans on a star's chain neighbours.
+    val links = remember(constellation) {
+        val out = ArrayList<StarLink>()
+        constellation.chains.forEach { chain ->
+            for (k in 0 until chain.size - 1) {
+                out.add(StarLink(chain[k], chain[k + 1], cross = false))
+            }
+        }
+        out.addAll(constellation.bridges)
+        out
+    }
+    // ── v483 — THE STYLE, AND THE GESTURE THAT CHANGES IT ────────────────
+    // The member wanted all three line styles, *"they will change when i tap and
+    // hold on the drawer star"*, so a HOLD on the sky cycles them (a tap still
+    // picks a star) and the pick is written through to the preference.
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val linkStyle = DrawerLinkStyle.entries[
+        AppPreferences.drawerLinkStyleState.coerceIn(0, DrawerLinkStyle.entries.size - 1)
+    ]
     // Each family's own turn in the light-up (v476): the sky lights BRANCH BY
     // BRANCH rather than star by star (the member's own words).
     val familyOrder = remember(familyOf) { familyOf.distinct() }
@@ -3437,8 +3473,18 @@ private fun DrawerLaneStarMap(
             .clipToBounds()
             // v422 — no clip and no fill: the pattern is the whole thing, drawn
             // on the drawer's page. (The touch target still spans the full box.)
-            .pointerInput(lanes, selected, starPoints) {
-                detectTapGestures { tap ->
+            .pointerInput(lanes, selected, starPoints, linkStyle) {
+                detectTapGestures(
+                    // v483 — a HOLD on the sky cycles the connection style (the
+                    // member's own control: *"they will change when i tap and hold
+                    // on the drawer star"*). The haptic is the answer to the hold,
+                    // since the change is a look rather than a new page.
+                    onLongPress = {
+                        val next = (linkStyle.ordinal + 1) % DrawerLinkStyle.entries.size
+                        AppPreferences.setDrawerLinkStyle(context, next)
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                ) { tap ->
                     // The finger is the target: a 30dp halo around a star. The
                     // points measured here are the SAME ones the canvas draws
                     // (pixel space, not unit space), so a tap can never land a
@@ -3559,25 +3605,98 @@ private fun DrawerLaneStarMap(
                     center = Offset(dot.x * size.width, dot.y * size.height)
                 )
             }
-            // ── THE CONSTELLATIONS (v427). Each star is still joined to its
-            //    NEAREST neighbour — never rings, never a mesh — but the JOIN
-            //    itself is drawn properly now, because the flat grey hairline
-            //    was the part the member called out ("the lines are not visually
-            //    greate"):
-            //
-            //     · it wears the TWO lanes' own colours, faintly, instead of
-            //       one grey — a constellation is made of the stars it joins,
-            //       and grey over a coloured sky read as wire;
-            //     · it STOPS AT THE GLOW: each end is pulled back to the star's
-            //       own lit size, so no line pierces a halo;
-            //     · a wide faint pass sits under a crisp one — the same
-            //       OPAQUE-mix trick the halos use, which is the only kind of
-            //       soft edge this surface allows (no alpha anywhere);
-            //     · and a hop that is still long enough to cross a quarter of
-            //       the sky is dropped rather than drawn: with no orbits left,
-            //       a lone star's nearest neighbour can be halfway across the
-            //       map, and one such line ruins the chart.
-            links.forEach { link ->
+            // ── THE CONSTELLATION (v427 → v483) ────────────────────────────
+            //    The lines wear the TWO stars' own colours faintly (grey over a
+            //    coloured sky reads as wire), an end is pulled back to the star's
+            //    own glow rather than vanishing under it, and a hop long enough to
+            //    cross the sky is dropped rather than drawn. v483 draws all of that
+            //    in the member's chosen style — see [DrawerLinkStyle]; a HOLD on
+            //    the sky cycles them (see the pointerInput above).
+            // ── v483 · STYLE 3 — SMOOTH SWEPT ARCS ──────────────────────────
+            //    The member's third style: a branch is ONE swept curve rather than
+            //    a join with a knuckle at every star. Each edge is a cubic Bézier
+            //    whose control points lean on the star's CHAIN NEIGHBOURS
+            //    (Catmull-Rom), so consecutive segments share a tangent and the
+            //    branch draws as a single brush stroke. The light-up rides the
+            //    same curve — the cubic is cut at the branch's own progress with
+            //    de Casteljau, so it DRAWS itself without changing shape.
+            if (linkStyle == DrawerLinkStyle.ARCS) {
+                constellation.chains.forEachIndexed { ci, chain ->
+                    val hue = chainHues.getOrElse(ci) { lanes[chain.first()].accent }
+                    for (k in 0 until chain.size - 1) {
+                        val first = chain[k]
+                        val second = chain[k + 1]
+                        val born = minOf(bornOf(first), bornOf(second))
+                        if (born <= 0.001f) continue
+                        val p1 = at(first)
+                        val p2 = at(second)
+                        val before = at(chain[maxOf(0, k - 1)])
+                        val after = at(chain[minOf(chain.size - 1, k + 2)])
+                        val c1 = p1 + (p2 - before) * (1f / 6f)
+                        val c2 = p2 - (after - p1) * (1f / 6f)
+                        val joined = pickedIndex == first || pickedIndex == second
+                        val amount = (born * (if (joined) 1.5f else 1f)).coerceAtMost(1f)
+                        val r0 = p1 + (c1 - p1) * born
+                        val r1 = c1 + (c2 - c1) * born
+                        val r2 = c2 + (p2 - c2) * born
+                        val t0 = r0 + (r1 - r0) * born
+                        val t1 = r1 + (r2 - r1) * born
+                        val cut = t0 + (t1 - t0) * born
+                        val arc = Path().apply {
+                            moveTo(p1.x, p1.y)
+                            cubicTo(r0.x, r0.y, t0.x, t0.y, cut.x, cut.y)
+                        }
+                        drawPath(
+                            path = arc,
+                            color = lineMix(hue, 0.20f * amount),
+                            style = Stroke(width = 3.0.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                        drawPath(
+                            path = arc,
+                            color = lineMix(hue, 0.56f * amount),
+                            style = Stroke(width = 1.15.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                    }
+                }
+                // The bridges stay gentle bows — the few long lines that keep the
+                // sky one web read as a thread between two constellations, not as
+                // a boundary.
+                constellation.bridges.forEach { bridge ->
+                    val born = minOf(bornOf(bridge.first), bornOf(bridge.second))
+                    if (born <= 0.001f) return@forEach
+                    val start = at(bridge.first)
+                    val end = at(bridge.second)
+                    val span = (end - start).getDistance()
+                    if (span <= 6.dp.toPx()) return@forEach
+                    val dir = (end - start) / span
+                    val bow = minOf(span * 0.10f, 6.dp.toPx())
+                    val side = if ((bridge.first + bridge.second) % 2 == 0) 1f else -1f
+                    val tip = start + (end - start) * born
+                    val control = (start + tip) / 2f + Offset(-dir.y, dir.x) * (bow * side)
+                    val hue = lerp(lanes[bridge.first].accent, lanes[bridge.second].accent, 0.5f)
+                    val joined = pickedIndex == bridge.first || pickedIndex == bridge.second
+                    val bowPath = Path().apply {
+                        moveTo(start.x, start.y)
+                        quadraticBezierTo(control.x, control.y, tip.x, tip.y)
+                    }
+                    drawPath(
+                        path = bowPath,
+                        color = lineMix(hue, (if (joined) 0.30f else 0.20f) * born),
+                        style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                    drawPath(
+                        path = bowPath,
+                        color = lineMix(hue, (if (joined) 0.62f else 0.46f) * born),
+                        style = Stroke(width = 1.15.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                }
+            }
+            // ── v483 · STYLES 1 & 2 — STRAIGHT LINES ────────────────────────
+            //    Threads (a delicate filament) and Bones (a bold branch under a
+            //    faint bridge) are both STRAIGHT, so they share this walk and
+            //    differ only in their passes (see the tail of the loop). The
+            //    swept-arc style is drawn above.
+            if (linkStyle != DrawerLinkStyle.ARCS) links.forEach { link ->
                 // ── v476 — A LINK LIGHTS WITH ITS BRANCH ─────────────────────
                 // A hairline belongs to the family that owns it, so it comes on
                 // with that branch (the later of its two stars) and draws itself
@@ -3605,40 +3724,40 @@ private fun DrawerLaneStarMap(
                     0.5f
                 )
                 val joined = pickedIndex == link.first || pickedIndex == link.second
-                // ── v428b — THE JOIN LEANS (member: "in drawer make the pattern
-                //    straight lines a little curvy just a little"). A
-                //    constellation is drawn by hand and a hand bows, so each
-                //    hairline is a SHALLOW arc rather than a segment: the control
-                //    point is pushed off the midpoint's perpendicular by a few
-                //    percent of the span, capped in dp — a join across the sky is
-                //    barely bowed, and a short one is not a squiggle. The side is
-                //    fixed by the pair's own indices, so the drawing is identical
-                //    on every recomposition and through the whole light-up. ──
-                val bow = minOf(span * 0.10f, 6.dp.toPx())
-                val side = if ((link.first + link.second) % 2 == 0) 1f else -1f
-                // v444 — THE MESH DRAWS ITSELF: each hairline runs out from its own
-                // star toward the one it joins as the drawer comes in, which is
-                // what makes the map arrive as a constellation being drawn rather
-                // than as a finished chart being shown (see [reveal]).
-                val tip = from + (to - from) * linkBorn
-                val control = (from + tip) / 2f + Offset(-dir.y, dir.x) * (bow * side)
-                val hair = Path().apply {
-                    moveTo(from.x, from.y)
-                    quadraticBezierTo(control.x, control.y, tip.x, tip.y)
+                // v483 — STRAIGHT for the two remaining styles: a thread and a
+                // bone are drawn star to star, and the light-up walks the SEGMENT
+                // itself, so the line still runs OUT of its star as the branch
+                // comes on (v444's draw-it-yourself arrival, kept). What each style
+                // changes is only its passes: a THREAD is three
+                // passes where the widest is the shortest (hair-thin where it
+                // leaves a star, a soft glow at its waist), a BONE is a bold
+                // branch with a whisper of a bridge under it.
+                val delta = to - from
+                val tip = from + delta * linkBorn
+                val amount = (linkBorn * (if (joined) 1.5f else 1f)).coerceAtMost(1f)
+                fun pass(widthDp: Float, mix: Float, keep: Float) {
+                    val inset = (1f - keep) / 2f
+                    drawLine(
+                        color = lineMix(hue, mix * amount),
+                        start = from + delta * inset,
+                        end = tip - delta * inset,
+                        strokeWidth = widthDp.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
                 }
-                // v457 — a notch stronger than v444's pair: the member asked for
-                // the pattern's shade to be more noticeable, and the hairlines are
-                // what draws the mesh the eye follows.
-                drawPath(
-                    path = hair,
-                    color = lineMix(hue, (if (joined) 0.30f else 0.20f) * linkBorn),
-                    style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
-                )
-                drawPath(
-                    path = hair,
-                    color = lineMix(hue, (if (joined) 0.62f else 0.46f) * linkBorn),
-                    style = Stroke(width = 1.15.dp.toPx(), cap = StrokeCap.Round)
-                )
+                if (linkStyle == DrawerLinkStyle.BONES) {
+                    if (link.cross) {
+                        pass(1.5f, 0.09f, 1f)
+                        pass(0.8f, 0.18f, 1f)
+                    } else {
+                        pass(3.0f, 0.24f, 1f)
+                        pass(1.2f, 0.58f, 1f)
+                    }
+                } else {
+                    pass(2.5f, 0.12f, 0.64f)
+                    pass(1.5f, 0.28f, 0.86f)
+                    pass(0.85f, 0.58f, 1f)
+                }
             }
             // ── The stars. ──
             //
@@ -3754,7 +3873,7 @@ private const val HALO_REACH = 2.7f
 // category in that branch and the animation make it light by branch by branch,
 // the lines and the dots make it more noticable, in light mode darker shade and
 // similar"*. These numbers do that and nothing else (see [bornOf], [lineMix],
-// [starScatterByFamily], [StarCoreDp] and [FamilyPull]).
+// [starScatterByFamily], [StarCoreDp], [MinStarGap] and [starConstellation]).
 
 /**
  * Where a family's window of the light-up begins, as a share of one family's
@@ -3797,36 +3916,41 @@ private const val LightLineBoost = 1.30f
 private const val LightLineDarken = 0.30f
 
 /**
- * v477 — HOW BIG A DOT IS, and how far a lane is pulled toward its family.
+ * v477 — HOW BIG A DOT IS.
  *
- * Windows of the two v477 numbers, both answered by the member's own report on
- * v476: the dots had been growing with knowledge and the scatter had been rebuilt
- * as tight family clusters. Every star's core is [StarCoreDp]; the lane's
- * knowledge decides its colour and whether it carries a lit halo, never how fat it
- * is (see [starHalos] and [corePxOf]). Every lane lands on the ORIGINAL Vogel
- * spiral and then moves [FamilyPull] of the way toward its family's centre of mass
- * (see [starScatterByFamily]) — grouping you can see, pattern you can still read.
+ * The member's own report on v476: the dots had been growing with knowledge. Every
+ * star's core is [StarCoreDp]; the lane's knowledge decides its colour and whether
+ * it carries a lit halo, never how fat it is (see [starHalos] and [corePxOf]).
  */
 private const val StarCoreDp = 3.0f
-private const val FamilyPull = 0.35f
+
+// ── v483 — THE TERRITORIES (see [starScatterByFamily]) ────────────────────
+// A family's anchor is spread round the sky between these radii by the golden
+// angle, and its own patch grows with its lane count (a square root, so the big
+// families share the sky with the single-lane ones). The whole layout is scaled
+// back inside [TerritoryFitRadius] if a big family would otherwise reach the rim.
+private const val TerritoryAnchorInner = 0.26f
+private const val TerritoryAnchorOuter = 0.46f
+private const val TerritorySpreadBase = 0.070f
+private const val TerritorySpreadPerLane = 0.046f
+private const val TerritoryFitRadius = 0.92f
 
 /**
- * ── v480 — HOW CLOSE TWO STARS MAY SIT, AND HOW HARD THEY PUSH APART ──────
+ * ── v480/483 — HOW CLOSE TWO STARS MAY SIT, AND HOW HARD THEY PUSH APART ──
  *
  * The member, of the sky: *"the drawer patterns are overlapping each other some
  * lines etc"* — and, asked what overlapped, **both** the lines and the clusters.
  *
- * [FamilyPull] gathers a branch by moving every lane toward its family's centre,
- * and the spiral underneath is dense, so two lanes could land almost on the same
- * spot and their dots (and halos) drew over one another. [MinStarGap] is the
- * smallest distance two stars may keep, in the SAME unit space [starPoint] scales
- * (~a 16dp gap on the drawer's own map: 0.09 × 186dp), which is comfortably past
- * the two dots plus a lit star's 2.7× halo; [SeparationPasses] deterministic
- * relaxation passes push any closer pair apart, half each, so the sky settles into
- * separated stars without leaving the shape the member knows.
+ * Two lit stars show a 2.7× halo each ([HALO_REACH]) around a [StarCoreDp] core,
+ * so their centre-to-centre distance must clear ~16dp or the glows touch. v483
+ * raises [MinStarGap] to just past that (unit space is the ellipse [starPoint]
+ * scales; 0.115 × the 152dp half-width is 17.5dp, the tightest axis) so NO two
+ * dots or halos overlap, and the deterministic relaxation is a few passes longer
+ * to settle the tighter territories. The clamp runs inside every pass, so a star
+ * pushed off the rim is brought back before the next pair is measured.
  */
-private const val MinStarGap = 0.090f
-private const val SeparationPasses = 24
+private const val MinStarGap = 0.115f
+private const val SeparationPasses = 32
 
 /**
  * v476 — HOW A BRANCH DRAWS ITSELF.
@@ -3860,14 +3984,16 @@ private const val BranchEasePower = 1.8f
  *    symmetry;
  *  * knowledge never moves a star; it changes colour and light only.
  *
- * v477 — THE SAME SHAPE, GENTLY GROUPED BY FAMILY. v476 rebuilt the scatter as
- * one TIGHT cluster per family, and the member read that as a different pattern
- * entirely: *"the scattering is bad i asked not to chnage the attern too much …
- * very small scatters"*. So nothing is rebuilt. Every lane lands exactly where the
- * original per-lane Vogel spiral put it (the same formula, untouched), and is then
- * pulled only a little ([FamilyPull]) toward its own family's centre of mass — the
- * sky the member knows is still the sky, with similar lanes loosened into soft
- * neighbourhoods rather than herded into knots.
+ * v483 — TERRITORIES PER FAMILY. The member, after five revisions of this
+ * surface: *"the drawer pattern and connections are still very much messy and
+ * overlapping … make it beautiful"* — and, asked how the sky should be laid out,
+ * chose **"Territories per family"**. So the spiral no longer runs across the whole
+ * sky: each family gets ONE ANCHOR (spread round the sky by the same golden angle)
+ * and its own patch, its lanes on a small local Vogel spiral inside it, and the
+ * whole layout is scaled to fit the field ([TerritoryFitRadius]). Nothing a branch
+ * draws can reach into another family's territory, which is what stops the lines
+ * running through stranger stars. Deterministic as ever — the same lanes always
+ * land in the same places.
  */
 private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> {
     if (familyOf.isEmpty()) return emptyList()
@@ -3875,38 +4001,48 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
     // successive points never fall into a repeating spoke.
     val goldenAngle = 2.3999632f
     val count = familyOf.size
-    // ── 1) THE ORIGINAL SPIRAL, LANE BY LANE (the v419 formula, unchanged) ──
-    // Unit space (the same ellipse [starPoint] scales), so every lane lands where
-    // it always did and the pattern is the one the member learns.
-    val start = List(count) { i ->
-        val wobble = (((i * 2654435761L) and 7L)).toInt() - 3
-        val base = kotlin.math.sqrt((i + 0.55f) / count)
-        val radius = (0.20f + 0.74f * base + wobble * 0.011f).coerceIn(0.16f, 0.95f)
-        val angle = i * goldenAngle + wobble * 0.055f
-        Offset(cos(angle) * radius, sin(angle) * radius)
+    // ── 1) ONE ANCHOR PER FAMILY, AND EACH FAMILY'S OWN PATCH ─────────────
+    // v483 — TERRITORIES (the member's own answer, *"Territories per family"*):
+    // every family owns a region of the sky and no branch's stars sit inside
+    // another family's patch, so a line can never run through a stranger's
+    // constellation. The anchors are spread round the whole sky by the golden
+    // angle the sky has always used, and a family's patch grows with its size —
+    // balanced by a square root so a fourteen-lane SCIENCE does not swallow a
+    // one-lane SPORTS.
+    val families = familyOf.distinct()
+    val familyCount = families.size
+    val gathered = MutableList(count) { Offset.Zero }
+    families.forEachIndexed { fi, family ->
+        val ids = familyOf.indices.filter { familyOf[it] == family }
+        val n = ids.size
+        val anchorAngle = fi * goldenAngle
+        val anchorRadius = TerritoryAnchorInner +
+            TerritoryAnchorOuter * kotlin.math.sqrt((fi + 0.5f) / familyCount)
+        val anchor = Offset(cos(anchorAngle) * anchorRadius, sin(anchorAngle) * anchorRadius)
+        // Each family's lanes sit on a small Vogel spiral inside its own patch, so
+        // a branch reads as a constellation rather than as a blob.
+        val spread = TerritorySpreadBase + TerritorySpreadPerLane * kotlin.math.sqrt(n.toFloat())
+        ids.forEachIndexed { k, index ->
+            val localAngle = k * goldenAngle + fi * 0.9f
+            val localRadius = spread * kotlin.math.sqrt((k + 0.5f) / n)
+            gathered[index] = Offset(
+                anchor.x + cos(localAngle) * localRadius,
+                anchor.y + sin(localAngle) * localRadius
+            )
+        }
     }
-    // ── 2) EACH FAMILY'S CENTRE OF MASS ───────────────────────────────────
-    val sums = HashMap<CategoryFamily, Offset>()
-    val members = HashMap<CategoryFamily, Int>()
-    start.forEachIndexed { i, point ->
-        val family = familyOf[i]
-        sums[family] = (sums[family] ?: Offset.Zero) + point
-        members[family] = (members[family] ?: 0) + 1
+    // ── 2) AND THE WHOLE LAYOUT IS KEPT INSIDE THE FIELD ───────────────────
+    // A big family anchored near the rim can reach past it. The LAYOUT is scaled
+    // to fit rather than each point clamped on its own: scaling moves every
+    // territory together and keeps the shape, where clamping alone would bunch a
+    // family up against the edge.
+    val reach = gathered.maxOf { it.getDistance() }
+    if (reach > TerritoryFitRadius) {
+        val fit = TerritoryFitRadius / reach
+        for (i in gathered.indices) gathered[i] = gathered[i] * fit
     }
-    val centres = sums.mapValues { (family, sum) ->
-        val n = members[family] ?: 1
-        Offset(sum.x / n, sum.y / n)
-    }
-    // ── 3) AND A GENTLE PULL TOWARD IT ────────────────────────────────────
-    // A fraction of the way in and no further ([FamilyPull]): the member asked for
-    // the same pattern with similar lanes reading together, not for the tight
-    // clusters v476 drew.
-    val gathered = start.mapIndexed { i, point ->
-        val centre = centres[familyOf[i]] ?: point
-        point + (centre - point) * FamilyPull
-    }.toMutableList()
-    // ── 4) AND NO TWO STARS SIT ON EACH OTHER ─────────────────────────────
-    // The pull can gather two lanes onto the same spot, which is what drew their
+    // ── 3) AND NO TWO STARS SIT ON EACH OTHER ─────────────────────────────
+    // A tight family patch can put two lanes near the same spot, which draws their
     // dots (and halos) over one another — the member's "overlapping". A short,
     // deterministic relaxation pushes any pair closer than [MinStarGap] apart,
     // half each pass; it is seeded from the same gathered positions every time, so
@@ -3955,39 +4091,89 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
 private data class StarLink(val first: Int, val second: Int, val cross: Boolean)
 
 /**
- * THE CONSTELLATION'S HAIRLINES — v476 asked for branches, v480 draws them.
+ * v483 — THE SKY, IN THE FORM THE PAINTER DRAWS IT.
  *
- *  ── v480 — A CHAIN PER FAMILY, AND THE FEWEST LINES BETWEEN THEM ──────
+ * [chains] are the branches: each is one family's star indices in the order the
+ * line is drawn through them (angular order — see [starConstellation]). [bridges]
+ * are the fewest ties that keep the sky one web (a minimum spanning tree over the
+ * family centres), each realised as the closest pair of stars across the two
+ * families it joins.
+ */
+private data class StarConstellation(
+    val chains: List<List<Int>>,
+    val bridges: List<StarLink>
+)
+
+/**
+ * v483 — HOW THE DRAWER'S CONNECTIONS ARE DRAWN.
  *
- * The member, of the sky: *"the drawer patterns are overlapping each other some
- * lines etc … make it more sensible and beautiful"*. The v476 rules drew a
- * nearest-neighbour WEB — every star joined its nearest family-mate, so a star in
- * the middle of a branch collected several hairlines and they fanned over one
- * another, and each family added its OWN long tie to the outside, so up to twelve
- * long lines crossed the sky and overlapped. Asked how to draw it instead, the
- * member chose **"Chain per family + one minimal web"**:
+ * The member: *"the drawer pattern and connections are still very much messy and
+ * overlapping … make it beautiful"*, and, asked how the lines should look, wanted
+ * **all three** — *"they will change when i tap and hold on the drawer star"*.
+ * A HOLD on the sky cycles them in this order and the choice is persisted
+ * (`AppPreferences.drawerLinkStyleState`).
  *
- *  * **Within a family**: a CHAIN. The branch starts at the member farthest from
- *    its own centre of mass (an edge of the cluster) and walks to the nearest
- *    unvisited lane, so the family is a DRAWN LINE — a path — and no star carries
- *    more than two hairlines. No fans, no knots shared with strangers;
+ *  * [THREADS] — a delicate filament: three straight passes where the widest is
+ *    the shortest, so the line is hair-thin where it leaves a star and carries a
+ *    soft glow at its waist.
+ *  * [BONES] — the branch IS the structure: its own lines are drawn boldly and
+ *    the bridge between two branches is a whisper under them.
+ *  * [ARCS] — one swept curve per branch, leaning on each star's chain
+ *    neighbours (Catmull-Rom), so a family draws as a single brush stroke.
+ */
+private enum class DrawerLinkStyle { THREADS, BONES, ARCS }
+
+/**
+ * v483 — THE AVERAGE OF A BRANCH'S OWN ACCENTS, so a swept arc wears the family's
+ * shade rather than one lane's (a branch is not one hue — MUSIC's three lanes
+ * carry three accents).
+ */
+private fun averageAccent(colors: List<Color>): Color {
+    if (colors.isEmpty()) return Color.Unspecified
+    var r = 0f
+    var g = 0f
+    var b = 0f
+    colors.forEach { c ->
+        r += c.red
+        g += c.green
+        b += c.blue
+    }
+    val n = colors.size
+    return Color(r / n, g / n, b / n)
+}
+
+/**
+ * THE CONSTELLATION'S HAIRLINES — v476 asked for branches, v480 drew them, v483
+ * makes them clean.
+ *
+ *  ── v483 — AN ANGULAR BRANCH, AND THE FEWEST BRIDGES BETWEEN THE BRANCHES ─
+ *
+ * The member, of the sky: *"the drawer pattern and connections are still very much
+ * messy and overlapping … make it beautiful"*. v480's branch walked
+ * nearest-unvisited, which doubles back on itself and crosses its own hairlines —
+ * the mess the member kept seeing. So:
+ *
+ *  * **Within a family**: the stars are ordered by ANGLE around the family's own
+ *    centre. Consecutive stars in an angular sweep lie in their own wedges, so
+ *    their segments CANNOT cross, and the branch reads as a clean constellation
+ *    outline (see [starScatterByFamily] for the territories the branches sit in);
  *  * **Between families**: a MINIMUM SPANNING TREE over the family centres
- *    (Prim's). That is the FEWEST lines that still keep the sky one web, so no
- *    reciprocal, redundant or duplicate cross ties are left to cross each other;
- *    each tree edge is realised as the closest pair of stars across the two
- *    families it joins, so the tie is the shortest one that does the job.
+ *    (Prim's) — the FEWEST lines that still keep the sky one web, so no
+ *    reciprocal, redundant or duplicate ties are left to cross each other. Each
+ *    tree edge is realised as the closest pair of stars across the two families it
+ *    joins, so the bridge is also its own shortest.
  *
- *  A `cross` link is still marked so the painter can exempt it from the join cap
- *  and light it only once BOTH its branches are on.
+ *  A `cross` link is marked so the painter can exempt it from the join cap and
+ *  light it only once BOTH its branches are on.
  *
  * Measured in unit space (the same ellipse [starPoint] scales) and computed once
  * per lane layout.
  */
-private fun starLinksGrouped(
+private fun starConstellation(
     slots: List<StarSlot>,
     familyOf: List<CategoryFamily>
-): List<StarLink> {
-    if (slots.size < 2) return emptyList()
+): StarConstellation {
+    if (slots.size < 2) return StarConstellation(emptyList(), emptyList())
     val points = slots.map { slot ->
         Offset(cos(slot.angle) * slot.radius, sin(slot.angle) * slot.radius)
     }
@@ -4002,26 +4188,24 @@ private fun starLinksGrouped(
             ids.map { points[it].y }.average().toFloat()
         )
 
-    val links = ArrayList<StarLink>()
+    val chains = ArrayList<List<Int>>()
+    val bridges = ArrayList<StarLink>()
 
-    // ── 1) ONE CHAIN PER FAMILY (a path, so no star carries more than two) ──
+    // ── 1) EACH FAMILY IS A DRAWN BRANCH, IN ANGULAR ORDER ─────────────────
+    // A branch used to walk nearest-unvisited, which doubles back on itself and
+    // crosses its own hairlines — the "messy lines" the member kept seeing. It is
+    // ordered by ANGLE around the family's own centre instead: consecutive stars
+    // in an angular sweep lie in their own wedges, so their segments cannot
+    // cross, and the branch reads as a clean constellation outline.
     families.forEach { family ->
         val ids = members.getValue(family)
         if (ids.size < 2) return@forEach
         val centre = centreOf(ids)
-        val unvisited = ids.toMutableSet()
-        // Start at the cluster's edge, not its middle: the farthest member from
-        // the centre is an end of the branch, so the walk reads as a line.
-        var current = ids.maxByOrNull { (points[it] - centre).getDistanceSquared() }
-            ?: return@forEach
-        unvisited.remove(current)
-        while (unvisited.isNotEmpty()) {
-            val next = unvisited.minByOrNull { (points[it] - points[current]).getDistanceSquared() }
-                ?: break
-            links.add(StarLink(minOf(current, next), maxOf(current, next), cross = false))
-            unvisited.remove(next)
-            current = next
-        }
+        chains.add(
+            ids.sortedBy { id ->
+                kotlin.math.atan2(points[id].y - centre.y, points[id].x - centre.x)
+            }
+        )
     }
 
     // ── 2) ONE MINIMAL WEB BETWEEN THE FAMILIES (an MST over the centres) ──
@@ -4063,7 +4247,7 @@ private fun starLinksGrouped(
                 }
             }
             if (bestFirst >= 0) {
-                links.add(
+                bridges.add(
                     StarLink(
                         minOf(bestFirst, bestSecond),
                         maxOf(bestFirst, bestSecond),
@@ -4085,7 +4269,7 @@ private fun starLinksGrouped(
         }
     }
 
-    return links
+    return StarConstellation(chains, bridges)
 }
 
 /**

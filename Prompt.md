@@ -6,7 +6,41 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §80 — the glass is WHITE FROSTED (smudged) now, the reader's chrome stops glitching, and the smudge reaches every sheet and dialog (v482; BUILT, NOT pushed)
+## 0. THE CURRENT REQUEST — §81 — the drawer's sky is TERRITORIES with three connection styles (v483; BUILT, pushed with the version bump)
+
+> the drawer pattern and connections are still very much messy and overlaping etc, and not beautiful to look at. please please make it beautiful
+
+**THE SIXTH PASS ON THIS SURFACE, SO TWO QUESTIONS WERE ASKED BEFORE ANY EDIT** (the member has revised the drawer five times — §72/73/74/78 — so a seventh guess was the real risk). The answers shaped everything: the layout — **"Territories per family"**; the lines — **all three styles**, and, in the member's own words, *"they will change when i tap and hold on the drawer star"*.
+
+### WHAT WAS ACTUALLY WRONG, READ OFF THE CODE
+
+1. **The branches zig-zagged.** `starLinksGrouped` walked nearest-unvisited from the farthest member — a greedy path over a scattered set doubles back and crosses its own hairlines. That is the "messy lines" (and it is why v480's fix, which was correct about *counts*, still looked tangled).
+2. **The families interleaved.** `starScatterByFamily` was one Vogel spiral across the whole sky with each family pulled 35% toward its own centre, so a family's stars still sat inside other families' — lines necessarily ran through stranger constellations.
+3. **The dots still touched.** `MinStarGap` 0.090 unit is only ~14–17px against a lit star's 2.7× halo, so halos overlapped even after the v480 relaxation.
+
+### WHAT WAS BUILT
+
+1. **TERRITORIES** (`starScatterByFamily`): one anchor per family spread round the sky by the golden angle, each family's lanes on a local Vogel spiral inside its own patch (`TerritoryAnchorInner` 0.26 + `TerritoryAnchorOuter` 0.46 × √(i/n); `TerritorySpreadBase` 0.070 + `TerritorySpreadPerLane` 0.046 × √n). The whole layout is scaled back inside `TerritoryFitRadius` (0.92) rather than clamped per point, so a big family scales WITH the sky instead of bunching at the rim. No branch can reach into another's territory.
+2. **BREATHING ROOM:** `MinStarGap` 0.090 → **0.115** (just past two 2.7× halos on the tightest axis), `SeparationPasses` 24 → **32**.
+3. **CLEAN BRANCHES:** `starLinksGrouped` → **`starConstellation(slots, familyOf)`** → `StarConstellation(chains, bridges)`. Within a family the stars are ordered by **ANGLE** around the family centre — an angular sweep's segments lie in their own wedges, so they provably cannot cross. Between families it is still the MST over family centres (Prim's) realised as the closest pair across each edge, so the sky stays one web with `families − 1` bridges.
+4. **THREE LINE STYLES**, cycled by a **HOLD on the sky** (tap still picks a star), with the long-press haptic, persisted in the new `AppPreferences.drawerLinkStyleState` (`drawer_link_style_v1`, default 0):
+   * **THREADS** — three straight passes, widest shortest, so the thread is hair-thin leaving a star and glows at its waist;
+   * **BONES** — the branch drawn boldly, the bridge a whisper under it;
+   * **ARCS** — one swept curve per branch: Catmull-Rom control points from each star's chain NEIGHBOURS, cut with de Casteljau at the branch's own progress so it still draws itself.
+
+### CHECKS, IN THIS ENVIRONMENT'S TERMS
+
+- **No Gradle command was run** (root `AGENTS.md` forbids it here); CI is the validation. Brace/paren/bracket balance verified with a string-and-comment-aware Node check for both edited Kotlin files (469/469, 1604/1604, 62/62 in HomeScreen; 474/474, 2909/2909, 57/57 in AppPreferences).
+- **No duplicated or displaced annotations** (root rule 13): every top-level declaration added (`StarConstellation`, `DrawerLinkStyle`, `averageAccent`, the territory constants) sits under its own KDoc with no annotation above it to steal.
+- **Every removed identifier was grepped** — `starLinksGrouped`, `FamilyPull`, `edges`/`DrawerEdge` and the old `starScatter` formula have no code references left (only history notes in the docs, all updated).
+- **`StarLink.cross` was kept**, so the painter's join-cap exemption and both-branches light-up are unchanged.
+- **The territory numbers are judgements, not measured** — anchor radii and spreads are set from the map's own 304×372dp box; whether the territories read at the right size on a device is the first thing to look at.
+- **`gh` is not installed here**, so no CI run could be read.
+- **PUSHED** with the standing version bump: `versionCode` 20260926, `versionName` 1.4.3, and `changelogs/20260926.txt` (a copy of 20260925.txt, which stays as it was, plus this change's ADD/FIX bullets).
+
+---
+
+## 0 (previous). §80 — the glass is WHITE FROSTED (smudged) now, the reader's chrome stops glitching, and the smudge reaches every sheet and dialog (v482; PUSHED)
 
 > fix the liquid glass in screens spoecially th reader it has really glithy and also make it whitish frostry glss not transoarent at all more smudhed, add a toggle for the whole smudged look too . and expand the smudge look to buttom sheets dialog box etc
 
