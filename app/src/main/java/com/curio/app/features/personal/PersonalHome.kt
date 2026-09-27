@@ -178,7 +178,9 @@ fun CreateEntrySheet(
     onTopicNote: () -> Unit,
     onTodoList: () -> Unit,
     /** v449 — the dictionary's own page (see `ReaderDictionaryPage`). */
-    onDictionary: () -> Unit
+    onDictionary: () -> Unit,
+    /** v493 — the time capsule's own page (see `TimeCapsuleScreen`). */
+    onTimeCapsule: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // v474 — read ONCE for the whole sheet (it was called again inside every
@@ -257,6 +259,20 @@ fun CreateEntrySheet(
                     drawn = { TodoGlyph(active = false, iconSize = 20.dp) }
                 )
             }
+            // ── v493 — THE TIME CAPSULE IS ITS OWN MACHINE ─────────────
+            //
+            // The member: *"a new time capsule option with its page"*. It takes
+            // the sheet's whole width like the dictionary does, and for the same
+            // structural reason: it is not one of the four writing tiles — it is
+            // a whole machine behind the door — and a wide tile keeps the 2×2 of
+            // writing above it from ever leaving a hole.
+            CreateEntryTile(
+                glyph = CurioIcons.Inventory2,
+                title = "A time capsule",
+                accent = accent,
+                onClick = onTimeCapsule,
+                wide = true
+            )
             // ── v449 — AND THE DICTIONARY, WHICH IS NOT WRITING ────────
             //
             // The member asked for this page to be reachable from Home's "+" as well

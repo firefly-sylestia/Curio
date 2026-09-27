@@ -115,6 +115,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRecall
+import com.curio.app.data.CurioTimeCapsules
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
@@ -122,6 +123,7 @@ import com.curio.app.data.SavedQuote
 import com.curio.app.features.feedback.FeedbackFormCard
 import com.curio.app.features.feedback.FeedbackFormState
 import com.curio.app.features.personal.CreateEntrySheet
+import com.curio.app.features.timecapsule.TimeCapsuleArrival
 import com.curio.app.features.incursion.IncursionHomeButton
 import com.curio.app.features.personal.PersonalCreateLauncher
 import com.curio.app.features.personal.PersonalChipsRow
@@ -352,10 +354,22 @@ fun HomeScreen(navController: NavController) {
     // into a local: the hero and this sheet both read [CurioRecall.dueState],
     // which is Compose state, so keeping one answers the other instantly.
     var recallOpen by remember { mutableStateOf(false) }
+    // v493 — the capsule that is covering the screen right now. It is a LOCAL,
+    // not a live read of [CurioTimeCapsules.dueState]: breaking the seal writes
+    // `openedAt`, the next letter becomes due in that same instant, and reading
+    // the store live would swap the page out from under the member mid-sentence.
+    // It moves on only when they put the letter away.
+    var arrivalCapsule by remember { mutableStateOf<CurioTimeCapsules.Capsule?>(null) }
     // Recomputed on every entry to Home: the day may have turned while the app
     // sat in the background, and a recall that has come due must lead the hero
     // the moment the member looks. Cheap — one prefs read and a filter.
-    LaunchedEffect(Unit) { CurioRecall.refresh(context) }
+    LaunchedEffect(Unit) {
+        CurioRecall.refresh(context)
+        // v493 — and the same for a time capsule: the day a letter lands, it
+        // takes the whole screen the moment Home is looked at.
+        CurioTimeCapsules.refresh(context)
+        arrivalCapsule = CurioTimeCapsules.dueState
+    }
     // v387 — the writing sheet behind the floating "+" (a journal page or a
     // book). The button itself hides while the page is scrolled down, so a
     // long read is never covered by it.
@@ -1515,6 +1529,14 @@ fun HomeScreen(navController: NavController) {
                         navController.navigate(CurioRoutes.READER_DICTIONARY) {
                             launchSingleTop = true
                         }
+                    },
+                    // v493 — and the time capsule's own page: a letter written
+                    // now and handed back on a day the member sets with a dial.
+                    onTimeCapsule = {
+                        writeSheetOpen = false
+                        navController.navigate(CurioRoutes.TIME_CAPSULE) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -1828,6 +1850,25 @@ fun HomeScreen(navController: NavController) {
                 CurioRecall.answer(context, dueRecallForSheet, text)
                 recallOpen = false
             }
+        )
+    }
+
+    // ── v493 — the time capsule's arrival ──
+    //
+    // On the day a letter is due it does not sit in a list: it covers Home, and
+    // the words inside do not exist until the wax is broken. Breaking the seal is
+    // the WRITE — `open` stamps `openedAt`, so the letter is retired and whatever
+    // was written after it becomes due behind it — while [arrivalCapsule] keeps
+    // THIS letter on screen while it is read. "Put it away" then hands over to
+    // whatever the store says is next, which is how a stack of letters is walked
+    // one at a time rather than all at once.
+    val capsuleNow = arrivalCapsule
+    if (capsuleNow != null) {
+        TimeCapsuleArrival(
+            capsule = capsuleNow,
+            waiting = CurioTimeCapsules.waitingState,
+            onOpened = { CurioTimeCapsules.open(context, it) },
+            onDismiss = { arrivalCapsule = CurioTimeCapsules.dueState }
         )
     }
 }

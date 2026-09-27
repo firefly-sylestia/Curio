@@ -497,7 +497,7 @@ fun CurioNavHost(
     // shares, and that page has its own (different) bottom treatment. So the
     // dictionary is named by its full route, and it clears the gesture bar
     // itself — its own `navigationBarsPadding` (see ReaderDictionaryPage).
-    val fullBleedBottomRoutes = setOf(CurioRoutes.READER_DICTIONARY)
+    val fullBleedBottomRoutes = setOf(CurioRoutes.READER_DICTIONARY, CurioRoutes.TIME_CAPSULE)
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -1416,6 +1416,14 @@ composable(CurioRoutes.COMMUNITY) {
             // wears the reader's paper and ink like the reader's settings do.
             composable(CurioRoutes.READER_DICTIONARY) {
                 com.curio.app.features.personal.ReaderDictionaryPage(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            // v493 — the time capsule's writing page: a dial, the member's paper
+            // and a wax seal that is pressed. It paints its own background edge to
+            // edge and clears the gesture bar itself (see [fullBleedBottomRoutes]).
+            composable(CurioRoutes.TIME_CAPSULE) {
+                com.curio.app.features.timecapsule.TimeCapsuleScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

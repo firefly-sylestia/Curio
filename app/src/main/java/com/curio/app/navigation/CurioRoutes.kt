@@ -405,6 +405,16 @@ object CurioRoutes {
      * `ReaderDictionaryPage`.
      */
     const val READER_DICTIONARY = "reader/dictionary"
+    /**
+     * v493 — THE TIME CAPSULE'S WRITING PAGE.
+     *
+     * A letter to a future day (agenda § 5.5), opened from Home's "+" sheet. It
+     * is a REAL route rather than a sheet on purpose: the dial, the paper and the
+     * wax seal are the whole surface, and the return the day it lands is a
+     * full-screen arrival over Home rather than a card on it. See
+     * `TimeCapsuleScreen`.
+     */
+    const val TIME_CAPSULE = "time-capsule"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).

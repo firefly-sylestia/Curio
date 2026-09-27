@@ -1721,6 +1721,15 @@ object AppPreferences {
     var readerMarginState by mutableStateOf(true)
         private set
 
+    // v493 — THE TIME CAPSULE (default ON): a letter written now that Curio hands
+    // back on the day it is set for — the writing page is its own route (see
+    // [com.curio.app.features.timecapsule.TimeCapsuleScreen]) and the return is a
+    // full-screen arrival over Home (see `TimeCapsuleArrival`). The switch gates
+    // what Home shows and nothing else: with it off the letters stay sealed in
+    // `curio_time_capsules` and arrive the moment it is switched back on.
+    var timeCapsuleEnabledState by mutableStateOf(true)
+        private set
+
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"* — and, asked how the lines
@@ -2157,6 +2166,7 @@ object AppPreferences {
         riffleDeckState = isDeckRiffleEnabled(context)
         passportStampState = isPassportStampEnabled(context)
         readerMarginState = isReaderMarginEnabled(context)
+        timeCapsuleEnabledState = isTimeCapsuleEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2659,6 +2669,7 @@ object AppPreferences {
     private const val KEY_DECK_RIFFLE = "deck_riffle_v1"
     private const val KEY_PASSPORT_STAMP = "passport_stamp_v1"
     private const val KEY_READER_MARGIN = "reader_margin_v1"
+    private const val KEY_TIME_CAPSULE_ENABLED = "time_capsule_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -3014,6 +3025,15 @@ object AppPreferences {
     fun setReaderMarginEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_READER_MARGIN, enabled).apply()
         readerMarginState = enabled
+    }
+
+    // ── The time capsule (v493, default ON) ───────────────────────────
+    fun isTimeCapsuleEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_TIME_CAPSULE_ENABLED, true)
+
+    fun setTimeCapsuleEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_TIME_CAPSULE_ENABLED, enabled).apply()
+        timeCapsuleEnabledState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

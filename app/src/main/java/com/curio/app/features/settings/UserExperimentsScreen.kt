@@ -32,6 +32,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioAlivePreferences
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioRecall
+import com.curio.app.data.CurioTimeCapsules
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -347,6 +348,20 @@ fun UserExperimentsScreen(navController: NavController) {
                         // card the member is looking at, not leave it until the
                         // next launch.
                         CurioRecall.refresh(context)
+                    }
+                    CurioSettingsDivider()
+                    // v493 — THE TIME CAPSULE, in Memory beside the Return: both
+                    // are things the member gets BACK rather than does. On by
+                    // default; the switch comes out once it has settled.
+                    ExperimentSwitchRow(
+                        "Time capsule",
+                        "Write a letter to a future day. Home's \"+\" opens a page with a brass dial for how far ahead, and on the day you set the letter covers the whole screen until you break its wax seal. Off hides the arrival; every letter already sealed is kept and lands when you switch it back on.",
+                        AppPreferences.timeCapsuleEnabledState
+                    ) {
+                        AppPreferences.setTimeCapsuleEnabled(context, it)
+                        // Recompute at once, exactly as the Return does: off clears
+                        // a letter in front of the member, on shows one already due.
+                        CurioTimeCapsules.refresh(context)
                     }
                 }
                 }

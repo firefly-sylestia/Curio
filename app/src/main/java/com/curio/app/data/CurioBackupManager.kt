@@ -107,6 +107,7 @@ object CurioBackupManager {
         "curio_passport",         // CurioPassport — category stamps + counters (v8.5)
         "curio_recall",           // CurioRecall — the Return's ladder + answers (v489)
         "curio_reader_margin",    // ReaderMarginInk — the pencil margin, per book page (v492)
+        "curio_time_capsules",    // CurioTimeCapsules — letters sealed for a future day (v493)
         "curio_onboarding"        // onboarding-completed flag
     )
 

@@ -248,10 +248,18 @@ the crease stays visible in the Cabinet afterwards. Unfold to read it again.
 
 **Why.** No button, no toast — the paper states the state.
 
-**⚠️ Open question.** 5.2 and 5.3 are BOTH a save verb. They cannot both own the
-same act on the same surface: the tear belongs to the reveal (the act of taking
-something out of the page) and the fold to the Cabinet card (the state of having
-kept it) — **confirm which surface each owns before building either.**
+**✅ SETTLED (member, 2026-09-27): "Tear saves on the reveal; folding closes a
+Cabinet card."** That is exactly the split this entry proposed — the tear is the
+act of taking something out of the page (the reveal's save) and the fold is the
+state of having kept it (a Cabinet card closing) — so **each owns a different
+surface** and neither is a rival save verb on the other's page.
+
+**⚠️ Removal warning (applies to 5.2).** The tear REPLACES the save control on the
+reveal, and the standing rule is that a removal is asked for: **the control it
+retires must be confirmed before it goes, and a visible fallback must survive** (a
+gesture may never be the only way to do something). Building the tear as a second
+way to save — with the existing control left in place — needs no permission; retiring
+the control does.
 
 ### 5.4 Press the stamp — the Passport (BUILT, v491)
 
@@ -290,9 +298,18 @@ the imperfection is deterministic per lane (seeded), never random per frame.
   PROCEDURAL doodle, it does not take freehand input, so the margin has its own
   two-pass pencil renderer (`ReaderMargin.kt`). Full description and the traps
   are in `app/AGENTS.md`'s v492 section.
-- **Time-capsule notes — OWED.** Seal a note (wax seal / envelope) and Curio
-  returns it in three months. Agenda §3.5; `PersonalNotes` + a "sealed until"
-  field and one delivery surface.
+- **Time-capsule notes — BUILT (v493).** The member gave it its own shape when
+  the round was offered: *"a new time capsule option with its page … a really
+  beautiful time machine style ui to write the message"*, and, asked where the
+  return should land, **"it covers the whole screen on the day it returns"**.
+  So it is not the note-with-a-date the original idea described: it is a **writing
+  page of its own** (a brass dial for how far ahead, the message on the member's
+  paper, a wax seal that is pressed) behind Home's **+** door, and the return is a
+  **full-screen sealed envelope** over Home that waits rather than expiring. Five
+  fixed spans (1 / 3 / 6 / 12 / 60 months) instead of a date picker. Its own prefs
+  file `curio_time_capsules`, in the backup list. Behind **Time capsule** in
+  Settings → Experiments → Memory, on by default. Full description and the traps
+  are in `app/AGENTS.md`'s v493 section.
 - **5.6 Turn the page for real** was offered but NOT picked; if the pencil margin
   is built, that surface is where its page-turn would live.
 
@@ -307,10 +324,12 @@ the imperfection is deterministic per lane (seeded), never random per frame.
 5. **The reveal as one object** (3.4), then the **sound layer** (3.6) and the
    **pet** (3.7).
 6. **The second round** (§5), which the member took as its own workstream and
-   which is mostly built: **5.1 the riffle (v490)**, **5.4 the press-stamp
-   (v491)** and **5.5's pencil margin (v492)**. Remaining: **5.5's time-capsule
-   notes**, and **5.2/5.3 (tear / fold)** — held until the member settles which
-   surface owns which, because they are BOTH a save verb and cannot both own it.
+   which is nearly built: **5.1 the riffle (v490)**, **5.4 the press-stamp
+   (v491)**, **5.5's pencil margin (v492)** and **5.5's time capsule (v493)**.
+   Remaining: **5.2 tear-it-off** and **5.3 fold-the-card**. The surface question
+   is now SETTLED by the member — **the tear saves on the reveal; the fold closes
+   a Cabinet card** — so each owns a different surface and neither is a rival save
+   verb on the other's page.
 
 ## Sources
 
