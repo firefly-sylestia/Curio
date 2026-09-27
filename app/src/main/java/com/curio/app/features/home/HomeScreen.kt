@@ -3137,11 +3137,14 @@ private val DrawerStarMapHeight = 372.dp
  *    any dot growing fat as an archive fills (the member: *"dont … grow bigger
  *    when too much knowledge dont let them grow at all"*).
  *  * **Colour** — the lane's own accent, glowing through two halo steps.
- *  * **Hairlines** (v483) — a family's stars are joined in ANGULAR order, so a
- *    branch is a clean constellation outline that never crosses itself, and a
- *    minimum spanning tree over the family centres ties the branches into one web
- *    with the fewest possible lines ([starConstellation]). The lines are drawn in
- *    the member's chosen [DrawerLinkStyle], cycled by a HOLD on the sky.
+ *  * **Hairlines** (v483, v488) — a family's stars are joined in ANGULAR order, so
+ *    a branch is a clean constellation outline that never crosses itself
+ *    ([starConstellation]). **Each family is its own constellation**: v488 dropped
+ *    the minimum spanning tree that used to tie the branches together, because its
+ *    long ties joined families that had nothing to do with each other ("still
+ *    theres huge thing connecting even though ith no particular link"). The lines
+ *    are drawn in the member's chosen [DrawerLinkStyle], cycled by a HOLD on the
+ *    sky.
  *
  * It is TAPPABLE: the star nearest a touch within a 30dp halo is picked (the
  * tap target is the finger, not the dot) and the readout under the map names
@@ -3206,31 +3209,32 @@ private fun DrawerLaneStarMap(
         lanes.map { CategoryFamily.of(it.id) }
     }
     val slots = remember(familyOf) { starScatterByFamily(familyOf) }
-    // ── v483 — THE BRANCHES, AND THE STYLE THEY ARE DRAWN IN ─────────────
+    // ── v483/488 — THE BRANCHES, AND THE STYLE THEY ARE DRAWN IN ─────────
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"*. The sky is territories now
-    // (see [starScatterByFamily]) and the lines are [starConstellation]'s
-    // ordered chains plus the fewest bridges between them (see its note).
+    // (see [starScatterByFamily]) and the lines are [starConstellation]'s ordered
+    // chains — ONE PER FAMILY and nothing else: v488 removed the cross-family
+    // bridges (see [StarConstellation]), so no line reaches across a territory.
     val constellation = remember(slots, familyOf) { starConstellation(slots, familyOf) }
     // One hue per branch: the average of the lanes it joins, so a swept arc
     // wears its family's own shade instead of a single lane's.
     val chainHues = remember(constellation, lanes) {
         constellation.chains.map { chain -> averageAccent(chain.map { lanes[it].accent }) }
     }
-    // ── v483 — THE LINES IN ONE FLAT LIST ────────────────────────────────
-    // A branch's own edges first, then the bridges between them, in the same
-    // [StarLink] shape the painter has always walked (`cross` marks a bridge, so
-    // it is exempt from the join cap and lights only once BOTH its branches are
-    // on). The ARC style walks [constellation]'s chains directly instead, because
-    // its curve leans on a star's chain neighbours.
+    // ── v483/488 — THE LINES IN ONE FLAT LIST ────────────────────────────
+    // A branch's own edges, in the same [StarLink] shape the painter has always
+    // walked. v488 deleted the bridges that used to be appended here ("each family
+    // is its own constellation" — see [StarConstellation]), so this list is now
+    // exactly the families' own drawn branches. The ARC style walks
+    // [constellation]'s chains directly instead, because its curve leans on a
+    // star's chain neighbours.
     val links = remember(constellation) {
         val out = ArrayList<StarLink>()
         constellation.chains.forEach { chain ->
             for (k in 0 until chain.size - 1) {
-                out.add(StarLink(chain[k], chain[k + 1], cross = false))
+                out.add(StarLink(chain[k], chain[k + 1]))
             }
         }
-        out.addAll(constellation.bridges)
         out
     }
     // ── v483 — THE STYLE, AND THE GESTURE THAT CHANGES IT ────────────────
@@ -3661,59 +3665,32 @@ private fun DrawerLaneStarMap(
                         )
                     }
                 }
-                // The bridges stay gentle bows — the few long lines that keep the
-                // sky one web read as a thread between two constellations, not as
-                // a boundary.
-                constellation.bridges.forEach { bridge ->
-                    val born = minOf(bornOf(bridge.first), bornOf(bridge.second))
-                    if (born <= 0.001f) return@forEach
-                    val start = at(bridge.first)
-                    val end = at(bridge.second)
-                    val span = (end - start).getDistance()
-                    if (span <= 6.dp.toPx()) return@forEach
-                    val dir = (end - start) / span
-                    val bow = minOf(span * 0.10f, 6.dp.toPx())
-                    val side = if ((bridge.first + bridge.second) % 2 == 0) 1f else -1f
-                    val tip = start + (end - start) * born
-                    val control = (start + tip) / 2f + Offset(-dir.y, dir.x) * (bow * side)
-                    val hue = lerp(lanes[bridge.first].accent, lanes[bridge.second].accent, 0.5f)
-                    val joined = pickedIndex == bridge.first || pickedIndex == bridge.second
-                    val bowPath = Path().apply {
-                        moveTo(start.x, start.y)
-                        quadraticBezierTo(control.x, control.y, tip.x, tip.y)
-                    }
-                    drawPath(
-                        path = bowPath,
-                        color = lineMix(hue, (if (joined) 0.30f else 0.20f) * born),
-                        style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
-                    )
-                    drawPath(
-                        path = bowPath,
-                        color = lineMix(hue, (if (joined) 0.62f else 0.46f) * born),
-                        style = Stroke(width = 1.15.dp.toPx(), cap = StrokeCap.Round)
-                    )
-                }
+                // v488 — AND NO CROSS-FAMILY BOWS. v483 drew one gentle bow per
+                // family pair here (the MST's edges). The member's report on it —
+                // *"still theres huge thing connecting even though ith no particular
+                // link"* — is what those bows were: the only lines on the sky that
+                // joined two stars with no family between them. Each family draws
+                // its own constellation now, and this is where the bows were.
             }
             // ── v483 · STYLES 1 & 2 — STRAIGHT LINES ────────────────────────
-            //    Threads (a delicate filament) and Bones (a bold branch under a
-            //    faint bridge) are both STRAIGHT, so they share this walk and
-            //    differ only in their passes (see the tail of the loop). The
-            //    swept-arc style is drawn above.
+            //    Threads (a delicate filament) and Bones (a bold branch) are both
+            //    STRAIGHT, so they share this walk and differ only in their passes
+            //    (see the tail of the loop). The swept-arc style is drawn above.
             if (linkStyle != DrawerLinkStyle.ARCS) links.forEach { link ->
                 // ── v476 — A LINK LIGHTS WITH ITS BRANCH ─────────────────────
                 // A hairline belongs to the family that owns it, so it comes on
                 // with that branch (the later of its two stars) and draws itself
                 // out as the branch does — the mesh arrives branch by branch,
-                // exactly as the stars do. The ONE cross-family link per family
-                // waits for both its branches, and is exempt from the join cap:
-                // it is the tie that keeps the sky one web, so it is meant to
-                // reach across the map.
+                // exactly as the stars do.
+                // v488 — NO EXEMPTION ANY MORE. Every remaining link is a family's
+                // own edge, so the join cap applies to all of them and a line long
+                // enough to cross a territory is simply not drawn (see [joinReach]).
                 val linkBorn = minOf(bornOf(link.first), bornOf(link.second))
                 if (linkBorn <= 0.001f) return@forEach
                 val start = at(link.first)
                 val end = at(link.second)
                 val span = (end - start).getDistance()
-                if (span > joinReach && !link.cross) return@forEach
+                if (span > joinReach) return@forEach
                 val trimStart = corePxOf(link.first) * HaloTrimFactor + 2.dp.toPx()
                 val trimEnd = corePxOf(link.second) * HaloTrimFactor + 2.dp.toPx()
                 val floor = 6.dp.toPx()
@@ -3749,13 +3726,10 @@ private fun DrawerLaneStarMap(
                     )
                 }
                 if (linkStyle == DrawerLinkStyle.BONES) {
-                    if (link.cross) {
-                        pass(1.5f, 0.09f, 1f)
-                        pass(0.8f, 0.18f, 1f)
-                    } else {
-                        pass(3.0f, 0.24f, 1f)
-                        pass(1.2f, 0.58f, 1f)
-                    }
+                    // v488 — one shape now: the branch itself, bold. (The faint
+                    // "bridge under it" pass went with the bridges.)
+                    pass(3.0f, 0.24f, 1f)
+                    pass(1.2f, 0.58f, 1f)
                 } else {
                     pass(2.5f, 0.12f, 0.64f)
                     pass(1.5f, 0.28f, 0.86f)
@@ -3932,8 +3906,14 @@ private const val StarCoreDp = 3.0f
 // angle, and its own patch grows with its lane count (a square root, so the big
 // families share the sky with the single-lane ones). The whole layout is scaled
 // back inside [TerritoryFitRadius] if a big family would otherwise reach the rim.
-private const val TerritoryAnchorInner = 0.26f
-private const val TerritoryAnchorOuter = 0.46f
+// v488 — the anchors sit a little FURTHER OUT (0.32…0.52, was 0.26…0.46). With the
+// cross-family lines gone each family stands on its own, and the member asked for
+// the sky to read "more … scattered … beautiful": pushing the anchors outward gives
+// the hub air and spreads the constellations round the rim, without touching the
+// patch sizes (a patch is what makes a branch read as a constellation rather than
+// as a blob, and widening it would put two territories back on top of each other).
+private const val TerritoryAnchorInner = 0.32f
+private const val TerritoryAnchorOuter = 0.52f
 private const val TerritorySpreadBase = 0.070f
 private const val TerritorySpreadPerLane = 0.046f
 private const val TerritoryFitRadius = 0.92f
@@ -4084,27 +4064,40 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
 }
 
 /**
- * v476 — ONE HAIRLINE ON THE SKY, and whether it is the tie between two families.
+ * v476 — ONE HAIRLINE ON THE SKY.
  *
- * The old nearest-neighbour pass answered a `Pair<Int, Int>`; the family map has
- * to KNOW which links cross families, because those are the ones exempt from the
- * join cap (they are meant to reach) and the ones that wait for BOTH branches to
- * light (see the painter).
+ * The old nearest-neighbour pass answered a `Pair<Int, Int>`; the family map
+ * answers this so the painter has one shape to walk whichever style it is drawing.
+ *
+ * v488 — AND NOTHING CARRIES A `cross` FLAG ANY MORE. v483 had marked the
+ * cross-family ties (`cross = true`) so they could be exempt from the join cap and
+ * wait for both of their branches. Those ties are gone (see [StarConstellation]) and
+ * with them the last reason a link would be anything other than a branch's own
+ * edge, so the flag and every branch on it were deleted rather than left to be
+ * always-false.
  */
-private data class StarLink(val first: Int, val second: Int, val cross: Boolean)
+private data class StarLink(val first: Int, val second: Int)
 
 /**
- * v483 — THE SKY, IN THE FORM THE PAINTER DRAWS IT.
+ * v483/v488 — THE SKY, IN THE FORM THE PAINTER DRAWS IT.
  *
  * [chains] are the branches: each is one family's star indices in the order the
- * line is drawn through them (angular order — see [starConstellation]). [bridges]
- * are the fewest ties that keep the sky one web (a minimum spanning tree over the
- * family centres), each realised as the closest pair of stars across the two
- * families it joins.
+ * line is drawn through them (angular order — see [starConstellation]).
+ *
+ * v488 — AND THAT IS THE WHOLE SKY. v483 also built a MINIMUM SPANNING TREE over
+ * the family centres and drew one tie along each edge, to keep the sky "one web"
+ * (the member's own v476 word). Living with it, the report was: *"the drawer
+ * pattern its still bad and still theres huge thing connecting even though ith no
+ * particular link"* — and that is exactly what an MST over family centres is: it
+ * connects whatever families happen to be nearest by CENTRE, so a one-lane family
+ * on one side of the sky carries a line across the whole map to a family it has
+ * nothing to do with. Asked what should happen to it, the member chose **"Drop
+ * them — each family is its own constellation"**, so the tree, the `bridges` list
+ * and the painter's bow are all gone: every line on the sky now joins two stars of
+ * the SAME family, and nothing reaches across a territory.
  */
 private data class StarConstellation(
-    val chains: List<List<Int>>,
-    val bridges: List<StarLink>
+    val chains: List<List<Int>>
 )
 
 /**
@@ -4160,14 +4153,14 @@ private fun averageAccent(colors: List<Color>): Color {
  *    centre. Consecutive stars in an angular sweep lie in their own wedges, so
  *    their segments CANNOT cross, and the branch reads as a clean constellation
  *    outline (see [starScatterByFamily] for the territories the branches sit in);
- *  * **Between families**: a MINIMUM SPANNING TREE over the family centres
- *    (Prim's) — the FEWEST lines that still keep the sky one web, so no
- *    reciprocal, redundant or duplicate ties are left to cross each other. Each
- *    tree edge is realised as the closest pair of stars across the two families it
- *    joins, so the bridge is also its own shortest.
- *
- *  A `cross` link is marked so the painter can exempt it from the join cap and
- *  light it only once BOTH its branches are on.
+ *  * **Between families: NOTHING** (v488). v483 also built a MINIMUM SPANNING TREE
+ *    over the family centres and drew one tie along each edge, to make the sky one
+ *    web. The member's answer to living with it: *"still theres huge thing
+ *    connecting even though ith no particular link"*, and asked what to do with
+ *    it, **"Drop them — each family is its own constellation"**. An MST over
+ *    family CENTRES ties families that happen to be nearest by centre, whatever
+ *    they are, so a lone family on one side of the map carried a line to a
+ *    stranger on the other. Every line on the sky is a branch's own edge now.
  *
  * Measured in unit space (the same ellipse [starPoint] scales) and computed once
  * per lane layout.
@@ -4176,7 +4169,7 @@ private fun starConstellation(
     slots: List<StarSlot>,
     familyOf: List<CategoryFamily>
 ): StarConstellation {
-    if (slots.size < 2) return StarConstellation(emptyList(), emptyList())
+    if (slots.size < 2) return StarConstellation(emptyList())
     val points = slots.map { slot ->
         Offset(cos(slot.angle) * slot.radius, sin(slot.angle) * slot.radius)
     }
@@ -4192,7 +4185,6 @@ private fun starConstellation(
         )
 
     val chains = ArrayList<List<Int>>()
-    val bridges = ArrayList<StarLink>()
 
     // ── 1) EACH FAMILY IS A DRAWN BRANCH, IN ANGULAR ORDER ─────────────────
     // A branch used to walk nearest-unvisited, which doubles back on itself and
@@ -4211,68 +4203,11 @@ private fun starConstellation(
         )
     }
 
-    // ── 2) ONE MINIMAL WEB BETWEEN THE FAMILIES (an MST over the centres) ──
-    if (families.size >= 2) {
-        val centres = families.map { centreOf(members.getValue(it)) }
-        val inTree = BooleanArray(families.size)
-        val best = FloatArray(families.size) { Float.MAX_VALUE }
-        val from = IntArray(families.size) { -1 }
-        inTree[0] = true
-        for (j in 1 until families.size) {
-            best[j] = (centres[j] - centres[0]).getDistanceSquared()
-            from[j] = 0
-        }
-        repeat(families.size - 1) {
-            var pick = -1
-            var pickDist = Float.MAX_VALUE
-            for (j in families.indices) {
-                if (!inTree[j] && best[j] < pickDist) {
-                    pickDist = best[j]
-                    pick = j
-                }
-            }
-            if (pick < 0) return@repeat
-            // The edge becomes the closest pair of stars across the two families
-            // it joins, so the tie is that edge's shortest realisation.
-            val a = members.getValue(families[from[pick]])
-            val b = members.getValue(families[pick])
-            var bestFirst = -1
-            var bestSecond = -1
-            var bestPairDist = Float.MAX_VALUE
-            a.forEach { i ->
-                b.forEach { j ->
-                    val d = (points[j] - points[i]).getDistanceSquared()
-                    if (d < bestPairDist) {
-                        bestPairDist = d
-                        bestFirst = i
-                        bestSecond = j
-                    }
-                }
-            }
-            if (bestFirst >= 0) {
-                bridges.add(
-                    StarLink(
-                        minOf(bestFirst, bestSecond),
-                        maxOf(bestFirst, bestSecond),
-                        cross = true
-                    )
-                )
-            }
-            inTree[pick] = true
-            // Grow the frontier from the family just joined.
-            for (j in families.indices) {
-                if (!inTree[j]) {
-                    val d = (centres[j] - centres[pick]).getDistanceSquared()
-                    if (d < best[j]) {
-                        best[j] = d
-                        from[j] = pick
-                    }
-                }
-            }
-        }
-    }
-
-    return StarConstellation(chains, bridges)
+    // ── 2) AND THAT IS ALL (v488 — the MST between families is gone) ───────
+    // "Each family is its own constellation": nothing is drawn between two
+    // territories any more, so there is no line on the sky that is not a family's
+    // own edge (see [StarConstellation]).
+    return StarConstellation(chains)
 }
 
 /**

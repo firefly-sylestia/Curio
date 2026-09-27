@@ -216,18 +216,19 @@ android {
         // territories now (no branch runs through another's stars, no two dots or
         // halos overlap), and its connections wear one of three styles — threads,
         // bones or swept arcs — cycled by a HOLD on the sky and remembered.
-        // v487 — 20260930 / 1.4.7: the +1 / +0.0.1 bump for this push, and
-        // `changelogs/20260930.txt` is its notes file (copied forward from
-        // 20260929.txt, which stays exactly as it was — it is the record of the
-        // build that code shipped as). What it carries: the frost is a heavy real
-        // blur under a thin tint (the blur was being quartered by the tuning
-        // slider's own default and the milky wash sat on top of it), and the nav
-        // bar's own labels stop ghosting themselves.
-        versionCode = 20260930
+        // v488 — 20260931 / 1.4.8: the +1 / +0.0.1 bump for this push, and
+        // `changelogs/20260931.txt` is its notes file (copied forward from
+        // 20260930.txt, which stays exactly as it was — it is the record of the
+        // build that code shipped as). What it carries: the refraction is clamped
+        // to the shape's own corner radius (a high Refraction used to break the
+        // pane in two), the frosted frost reaches the panels that have no window
+        // blur behind them and the dropdown menus, and the drawer sky drops its
+        // cross-family lines so each family is its own constellation.
+        versionCode = 20260931
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.7"
+        versionName = envReleaseVersion ?: "1.4.8"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.util.lerp
+import com.kyant.backdrop.BackdropEffectScope
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -190,6 +192,28 @@ object CurioGlassPills {
         const val ClearWash = 0.22f
 
         /**
+         * v488 — THE PANEL'S OWN FROST WHEN THERE IS NO BLUR BEHIND IT.
+         *
+         * The member, after v487 thinned the frost: *"the frost should be app wide
+         * with the option … bottom sheets, dialogs and dropdowns"* — the panels
+         * still read as flat colour. They did, and the reason is a plain
+         * regression of v487: `curioFrostedPanel` reaches for [OpaquePanel] when
+         * `windowBlurAvailable` is false (Android 12, cross-window blur switched
+         * off, Lite mode, or a window the platform refuses), and v487 had just cut
+         * the colour it draws there to a 12% whisper — so the pane that exists to
+         * look frosted became the plain container colour at 94% opacity. A FLAT
+         * SLAB is exactly what the member was looking at.
+         *
+         * With no blur to show, the panel has to BE the frost — so these two lifts
+         * are the milky pane the old recipe drew, kept separate from [LightLift] so
+         * the thin tint a really blurred page sits behind is never thickened by
+         * accident. Light lifts a lot (a light sheet is white glass), dark only a
+         * little (a dark sheet is DARK glass, never a grey slab).
+         */
+        const val PanelOpaqueLightLift = 0.42f
+        const val PanelOpaqueDarkLift = 0.10f
+
+        /**
          * The veil the SIMULATED recipe (pre-Android-12, [fauxGlassCapsule]) wears.
          * It cannot blur anything, so it may NOT use the thin [Wash] — a thin pane
          * over a sharp page reads as a mistake. Kept at a readable middle.
@@ -215,6 +239,58 @@ object CurioGlassPills {
  * handles the rare case of actual crashes by auto-disabling glass.
  */
 fun canUseLiquidGlass(@Suppress("UNUSED_PARAMETER") context: Context): Boolean = true
+
+/**
+ * v488 — THE LENS, DRAWN WITHIN THE LIMIT ITS OWN SHADER ASKS FOR.
+ *
+ * The member, on the glass with refraction turned up: *"when increasing
+ * refraction the break in the middle look bad"*. That break is documented, not a
+ * mystery: `lens(refractionHeight, refractionAmount)` requires **`refractionHeight`
+ * to be in `[0, shape.minCornerRadius]`** — the library's own effect docs say a
+ * larger height *"will have discontinuities at some corners"*.
+ *
+ * Every call site here passed `24.dp.toPx() * refractionScale`, i.e. 24dp at the
+ * default and 48dp at the slider's maximum — while the pills these are drawn on
+ * are 48dp tall (a `CircleShape`'s min corner radius is **24dp**). So the lens was
+ * sitting ON its ceiling at 1× and climbing straight past it above that, and the
+ * press bloom (×1.45) pushed the RESTING pill past it too. The visible result is a
+ * hard seam across the pane — worst in the middle, where the two corner lobes of
+ * the refraction meet.
+ *
+ * So the radius is not tuned down; it is CLAMPED to the shape's own real corner
+ * radius, read from the shape the backdrop is actually being drawn in. Below the
+ * ceiling the tunings behave exactly as before (which is why the default look is
+ * unchanged), and above it the bend simply stops growing instead of breaking. The
+ * amount is clamped to the surface's smaller side, the shader's other stated
+ * limit.
+ */
+internal fun BackdropEffectScope.curioLens(
+    radius: Float,
+    amount: Float = radius,
+    depthEffect: Boolean = false,
+    chromaticAberration: Boolean = false
+) {
+    val box = size
+    val maxRadius = box.minDimension / 2f
+    val cap = when (val s = shape) {
+        // Every corner, taking the SMALLEST: the lens has to fit the tightest
+        // one, and a stadium/circle's four radii are all `minDimension / 2`.
+        is CornerBasedShape -> minOf(
+            minOf(s.topStart.toPx(box, this), s.topEnd.toPx(box, this)),
+            minOf(s.bottomEnd.toPx(box, this), s.bottomStart.toPx(box, this))
+        ).coerceAtMost(maxRadius)
+        // A shape the library draws itself (its smoother rounded rectangles) or
+        // anything else: the smaller side's half is the safe reading, and it is
+        // exactly the stadium's own radius.
+        else -> maxRadius
+    }
+    lens(
+        refractionHeight = radius.coerceIn(0f, cap),
+        refractionAmount = amount.coerceIn(0f, box.minDimension),
+        depthEffect = depthEffect,
+        chromaticAberration = chromaticAberration
+    )
+}
 
 /**
  * Whether the user WANTS liquid glass (the toggle alone). On Android 12+
@@ -748,9 +824,12 @@ fun Modifier.liquidGlassCapsule(
                         // The reader passes `refractFrosted = false` (see
                         // [LocalCurioGlassFrostRefraction]).
                         if (frostRefracts) {
+                            // v488 — through [curioLens], so a high Refraction
+                            // stops growing at the pane's own corner radius
+                            // instead of breaking the shader's limit.
                             val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() *
                                 refrScale * (1f + 0.45f * press.value)
-                            lens(smudgeR, smudgeR)
+                            curioLens(smudgeR)
                         }
                     } else if (compact) {
                         // v291 — compact mode: no lens (invisible on <50dp
@@ -769,8 +848,10 @@ fun Modifier.liquidGlassCapsule(
                         // v246 — refraction blooms under the finger: the lens
                         // deepens with press progress, so the corners visibly
                         // bend the content while the pill is held.
+                        // v488 — and it stops at the pane's corner radius (see
+                        // [curioLens]) rather than breaking past it.
                         val lensR = 24f.dp.toPx() * refrScale * (1f + 0.45f * press.value)
-                        lens(lensR, lensR)
+                        curioLens(lensR)
                     }
                 },
                 highlight = { Highlight.Default.copy(alpha = reflScale) },

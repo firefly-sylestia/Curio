@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v393 — MENU STATE THAT CLOSES ON THE TAP THAT DISMISSED IT.
@@ -125,6 +127,27 @@ fun CurioDropdownMenu(
         accent,
         0.06f
     )
+    // ── v488 — THE MENU'S OWN FROST ──────────────────────────────────────
+    //
+    // The member, of the app's menus under the frosted look: *"…the frost should
+    // be app wide with the option … bottom sheets, dialogs and dropdowns"*. A menu
+    // is the one glass surface that CANNOT borrow the recipe: the inline branch
+    // below needs its own capture and a caller that positions it, so seven of the
+    // eight call sites take the [DropdownMenu] POPUP — which is its own window we
+    // have no handle on, so no `FLAG_BLUR_BEHIND` can reach it, and the fill was
+    // the flat accent tint this component has used since v30.
+    //
+    // A popup therefore wears the frost the only way it honestly can: the PANEL's
+    // own frosted pane — the same milky lift `curioFrostedPanel` falls back to when
+    // a window cannot be blurred — kept opaque, because a translucent menu over a
+    // sharp page is a legibility bug rather than a look. Dark lifts a whisper only:
+    // a dark menu is DARK glass, not the grey slab a white wash made of it.
+    val frostedPopup = AppPreferences.liquidGlassPillsState && AppPreferences.glassFrostedState
+    val popupContainer = if (frostedPopup) {
+        lerp(container, Color.White, if (isCurioDarkTheme()) 0.05f else 0.30f)
+    } else {
+        container
+    }
     if (glassBackdrop != null && isLiquidGlassPillsActive()) {
         // Inline glass frost — real backdrop sampling, no Popup.
         Surface(
@@ -158,7 +181,7 @@ fun CurioDropdownMenu(
             } else {
                 androidx.compose.ui.window.PopupProperties(focusable = true)
             },
-            containerColor = container,
+            containerColor = popupContainer,
             shape = shape,
             tonalElevation = 3.dp,
             shadowElevation = 14.dp

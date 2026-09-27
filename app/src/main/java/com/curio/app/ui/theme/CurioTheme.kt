@@ -650,8 +650,20 @@ fun curioFrostedPanel(base: Color): Color {
     // lift: the blurred page behind it is what the pane is made of. (Lerping
     // toward Transparent instead would premultiply the colour toward black —
     // the pane would go muddy, not clear.)
+    // v488 — TWO PANES, NOT ONE. With a real blur behind the window the pane is a
+    // thin tint OVER it; with none, the pane has to BE the frost, or the panel is
+    // the flat slab the member reported (see [CurioGlassPills.Frost.PanelOpaqueLightLift]).
     val pane = if (frosted) {
-        frostColor(base, dark)
+        if (blurred) {
+            frostColor(base, dark)
+        } else {
+            lerp(
+                base,
+                Color.White,
+                if (dark) CurioGlassPills.Frost.PanelOpaqueDarkLift
+                else CurioGlassPills.Frost.PanelOpaqueLightLift
+            )
+        }
     } else if (dark) {
         lerp(base, Color.White, 0.06f)
     } else {

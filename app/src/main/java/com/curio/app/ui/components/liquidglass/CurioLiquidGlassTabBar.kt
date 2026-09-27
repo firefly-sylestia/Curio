@@ -57,6 +57,7 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.CurioGlassPills
+import com.curio.app.ui.components.curioLens
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -67,7 +68,6 @@ import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
@@ -390,11 +390,14 @@ fun CurioLiquidGlassTabBar(
                                 // clear recipe's radius (see [CurioGlassPills.Frost.
                                 // LensDp]): the nav bar is the most-seen glass
                                 // surface and it was the flattest of them all.
+                                // v488 — through [curioLens]: the bend stops at
+                                // the capsule's own corner radius instead of
+                                // breaking past the shader's limit.
                                 val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() * refrScale
-                                lens(smudgeR, smudgeR)
+                                curioLens(smudgeR)
                             } else {
                                 blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                                lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                                curioLens(24f.dp.toPx() * refrScale)
                             }
                         }
                     },
@@ -475,7 +478,9 @@ fun CurioLiquidGlassTabBar(
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
                                 blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                                lens(24f.dp.toPx() * refrScale * progress, 24f.dp.toPx() * refrScale * progress)
+                                // v488 — clamped like every other lens (see
+                                // [curioLens]).
+                                curioLens(24f.dp.toPx() * refrScale * progress)
                             }
                         },
                         highlight = {
@@ -565,13 +570,15 @@ fun CurioLiquidGlassTabBar(
                                     )
                                     val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() *
                                         refrScale * (0.6f + 0.4f * progress)
-                                    lens(smudgeR, smudgeR, true)
+                                    // v488 — the frost's bend is clamped to the
+                                    // pill's corner radius (see [curioLens]).
+                                    curioLens(smudgeR, depthEffect = true)
                                 } else if (classicIndicator) {
                                     // v248 — classic style: ALWAYS-ON full
                                     // refraction, exactly like the nav capsule
                                     // (the pre-v247 look).
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                                    lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                                    curioLens(24f.dp.toPx() * refrScale)
                                 } else {
                                     // v292c — FROST AT REST is BACK for the
                                     // indicator (user call): the idle active pill
@@ -581,10 +588,12 @@ fun CurioLiquidGlassTabBar(
                                     // clean — the touch view itself is unchanged.
                                     val rest = 1f - progress
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * rest)
-                                    lens(
-                                        10f.dp.toPx() * refrScale * rest,
-                                        14f.dp.toPx() * refrScale * rest,
-                                        true
+                                    // v488 — clamped (see [curioLens]); the two
+                                    // axes keep their own tunings.
+                                    curioLens(
+                                        radius = 10f.dp.toPx() * refrScale * rest,
+                                        amount = 14f.dp.toPx() * refrScale * rest,
+                                        depthEffect = true
                                     )
                                 }
                             }
