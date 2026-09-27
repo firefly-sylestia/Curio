@@ -1692,6 +1692,17 @@ object AppPreferences {
     var glassFrostedState by mutableStateOf(true)
         private set
 
+    // v490 — THE RIFFLE (default ON): Spin's fan can be THUMBED like a real
+    // deck. Dragging it sideways tilts and slides the whole fan in the hand,
+    // each card's own travel deals the next one as the thumb crosses it, and
+    // letting go flings it on with momentum before the spring settles it back.
+    // **The deck's LOOK is untouched** — this is entirely gesture, so with the
+    // switch off the fan behaves exactly as it did before (a swipe past the
+    // threshold still cycles one card, which stays the honest fallback: a
+    // gesture must never be the only way to do something).
+    var riffleDeckState by mutableStateOf(true)
+        private set
+
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"* — and, asked how the lines
@@ -2125,6 +2136,7 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassFrostedState = isGlassFrostedEnabled(context)
+        riffleDeckState = isDeckRiffleEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2624,6 +2636,7 @@ object AppPreferences {
     // clear refraction. Default ON (the member's ask); the toggle turns it off
     // and returns the old clear glass.
     private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
+    private const val KEY_DECK_RIFFLE = "deck_riffle_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -2952,6 +2965,15 @@ object AppPreferences {
     fun setGlassFrostedEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_FROSTED, enabled).apply()
         glassFrostedState = enabled
+    }
+
+    // ── The deck riffle (v490, default ON) ───────────────────────────
+    fun isDeckRiffleEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DECK_RIFFLE, true)
+
+    fun setDeckRiffleEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DECK_RIFFLE, enabled).apply()
+        riffleDeckState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

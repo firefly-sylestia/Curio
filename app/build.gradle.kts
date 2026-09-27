@@ -224,11 +224,11 @@ android {
         // pane in two), the frosted frost reaches the panels that have no window
         // blur behind them and the dropdown menus, and the drawer sky drops its
         // cross-family lines so each family is its own constellation.
-        versionCode = 20260932
+        versionCode = 20260933
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.9"
+        versionName = envReleaseVersion ?: "1.4.10"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

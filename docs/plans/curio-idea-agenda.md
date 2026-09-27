@@ -173,6 +173,9 @@ Nothing here removes a dimension or a tip.
 
 ## 4. Decisions taken (2026-09-27, from the member)
 
+*(See also §5 for the second round's decisions — the four manipulation ideas, the
+deck-LOOK-untouched rule, and "full physical".)*
+
 - Build **all** of the ideas above; **save them first**, then take them in order.
 - **The Return lives in Home's quest hero.** Home's existing "Today's quest /
   Shuffle the deck" card **cycles** between the quest and a due recall — both
@@ -182,7 +185,90 @@ Nothing here removes a dimension or a tip.
   has settled.
 - **No leaderboards, no public comparison** — per the research.
 
-## 5. Proposed build order
+## 5. The second round — ideas you MANIPULATE (2026-09-27)
+
+The first round of "new ideas" offered after the agenda (a broadsheet of your
+week, a launcher widget, an audio stream, a gyro depth pass, a thread between
+entries, a reader pencil margin) was **rejected**: *"bad ones not good the ideas
+are bad, i said interactive thing visually interactive beautiful"*. The reading
+of that, and it is the rule for everything below: **every one of those was a
+screen you READ.** An idea earns its place by being an object with **mass,
+travel and a reaction under the thumb** — it moves because the member moved it,
+and you can see how far it has to go.
+
+Six were offered on that rule; **four were picked, in this order.** All four ship
+behind a Settings toggle, ON by default, per the standing rule for a new measure.
+The deck's LOOK is untouched by the first one.
+
+### 5.1 The riffle — BUILT (v490) ★
+
+Spin's fan is thumbed like a real deck: drag it sideways and the whole fan slides
+and leans in the hand, one card passes per 48dp of thumb travel (the OLD swipe
+threshold, so a short swipe still deals exactly one), and the release's own
+velocity flings it on before the spring settles it back with a small overshoot.
+`AppPreferences.riffleDeckState`, **Deck** section in both experiments screens.
+Full description and the traps are in `app/AGENTS.md`'s v490 section.
+
+### 5.2 Tear it off the page — the reveal's save (OWED)
+
+**What.** Saving stops being a button. The reveal is a page with a perforation
+across it; dragging the strip TEARS it along the finger, ragged edge and all, and
+the piece that comes away is the card that lands in the Cabinet.
+
+**Why.** The app already owns torn-paper shape language (`SoftTornBottomShape`
+and the hero's tear) — this makes that language the *mechanic* instead of the
+decoration, and it is the most literal "visually interactive" of the four.
+
+**Interaction.** Finger drag along the perforation; the tear line follows with a
+ragged jitter, a per-notch tick of haptics as it advances, and the sheet falling
+away with momentum when it lets go. Full physical (the member's choice:
+momentum, springs, overshoot).
+
+**Where it hooks in.** `TopicRevealScreen`'s save action; `PaperCard`/
+`SoftTornSheetShape` for the paper; the Cabinet entry is already the far end.
+
+**⚠️ Removal warning.** This REPLACES the save control on the reveal, and the
+standing rule is that a removal is asked for — the member has named it, but the
+control it retires must be confirmed before it goes, and a visible fallback must
+survive (a gesture may never be the only way to do something).
+
+### 5.3 Fold the card — the Cabinet's save/open (OWED)
+
+**What.** A card folds in half along a crease you drag; folded means saved, and
+the crease stays visible in the Cabinet afterwards. Unfold to read it again.
+
+**Why.** No button, no toast — the paper states the state.
+
+**⚠️ Open question.** 5.2 and 5.3 are BOTH a save verb. They cannot both own the
+same act on the same surface: the tear belongs to the reveal (the act of taking
+something out of the page) and the fold to the Cabinet card (the state of having
+kept it) — **confirm which surface each owns before building either.**
+
+### 5.4 Press the stamp — the Passport (OWED)
+
+**What.** The Passport's stamps stop appearing: a rubber stamp head hangs over the
+page, you bring your thumb down, it compresses and lands with a *thunk* — haptic
+plus a squashed ink silhouette that comes out slightly imperfect, like a real one.
+
+**Why.** The Passport's stamps are the app's most collector-ish moment and today
+they are drawn, not pressed. `CurioPassport` already writes the stamp.
+
+**Interaction.** Press-and-hold with compression, the imprint landing on release;
+the imperfection is deterministic per lane (seeded), never random per frame.
+
+**Where it hooks in.** `features/quests`'s stamp rendering + `CurioPassport`.
+
+### 5.5 Still on the list, not started
+
+- **The reader pencil margin** — drag in from the right edge, scrawl in the
+  margin with the `SignatureSketchbook` ink, anchored to that page. The member
+  said keep it, and it folds naturally into 5.6's surface.
+- **Time-capsule notes** — seal a note (wax seal / envelope) and Curio returns it
+  in three months. Agenda §3.5; `PersonalNotes` + a "sealed until" field.
+- **5.6 Turn the page for real** was offered but NOT picked; if the pencil margin
+  is built, that surface is where its page-turn would live.
+
+## 6. Proposed build order
 
 1. **The Return** (3.1) + the Home hero cycling — the one that changes what the
    app is for, and it reuses entries, paper, streaks and haptics.
@@ -192,6 +278,11 @@ Nothing here removes a dimension or a tip.
 4. **The Passport** (3.3), then **time capsules** (3.5).
 5. **The reveal as one object** (3.4), then the **sound layer** (3.6) and the
    **pet** (3.7).
+6. **The second round** (§5), which the member took as its own workstream and
+   which is already underway: **5.1 the riffle is built (v490)**; **5.4 the
+   stamp** and **5.5's two kept items** are next, and **5.2/5.3 (tear / fold)**
+   need their surface question answered first — they are both a save verb and
+   cannot both own it.
 
 ## Sources
 

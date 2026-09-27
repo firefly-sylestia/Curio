@@ -130,6 +130,19 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // v490 — THE RIFFLE. The deck's LOOK is untouched: this is purely
+            // how the fan answers a hand, so off is exactly the old behaviour.
+            item { SettingsSectionHeading("Deck") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Riffle the deck",
+                        "Thumb the deck like a real one: drag the fan sideways and it tilts and slides in your hand, one card passes for each step your thumb takes, and letting go flings it on before it settles. Off keeps the plain swipe.",
+                        AppPreferences.riffleDeckState
+                    ) { wanted -> AppPreferences.setDeckRiffleEnabled(context, wanted) }
+                }
+            }
+
             item { SettingsSectionHeading("Liquid glass") }
             item {
                 SettingsOptionCard {

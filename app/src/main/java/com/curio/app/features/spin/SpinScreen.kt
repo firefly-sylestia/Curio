@@ -28,7 +28,10 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.rememberScrollState
@@ -94,6 +97,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -186,8 +190,10 @@ import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.toHsl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.tanh
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -2714,6 +2720,32 @@ private const val SpinDensityExtraCompactDeckScale = 0.72f
 /** Deck scale factor applied in roomy (high-density) mode. */
 private const val SpinRoomyDeckScale = 1.05f
 
+// ── v490 — THE RIFFLE'S OWN NUMBERS ────────────────────────────────────────
+// [RiffleStepDp] is deliberately the OLD swipe threshold (48dp): a short swipe
+// past it deals exactly one card, the same as it always did, so the hand's
+// memory survives the change and a longer drag is what reads as new. The step
+// is measured in PIXELS at the deck; everything else is a shape of the motion,
+// not a duration — the settle is a spring.
+private val RiffleStepDp = 48.dp
+/** Past this the fan's travel has hard diminishing returns — it never leaves its box. */
+private val RiffleClampDp = 132.dp
+/** How far the fan turns when held at the clamp — it leans in the hand, it does not spin. */
+private const val RiffleTiltDeg = 5.5f
+/** A release is still travelling for this long; its speed becomes cards. */
+private const val RiffleFlingSeconds = 0.085f
+/** …but a hard flick through a whole lane is a SPIN, and the Spin button owns that. */
+private const val RiffleFlingMaxCards = 3
+/** Cards dealt by a single drag event — a jump in the gesture cannot skip half a deck. */
+private const val RiffleMaxCardsPerEvent = 3
+
+/**
+ * The fan's travel for a raw drag: tracks the finger 1:1 at rest and gives
+ * diminishing returns past [RiffleClampDp], so it can never be dragged off its
+ * own box and the tilt at the clamp is a fixed, known angle.
+ */
+private fun riffleTravel(raw: Float, clampPx: Float): Float =
+    if (clampPx <= 0f) 0f else clampPx * tanh(raw / clampPx)
+
 @Composable
 private fun Carousel(
     cat: CurioCategory,
@@ -2757,6 +2789,52 @@ private fun Carousel(
     // BoxWithConstraints) multiplies the tier scale, so short OR narrow
     // screens compress the fan together with the box below.
     val deckScale = tierScale * fitScale
+
+    // ── v490 — THE RIFFLE ──────────────────────────────────────────────
+    // The deck's LOOK is untouched. This is only how the fan answers a hand:
+    // dragging it sideways moves the whole fan (it slides and leans, so it
+    // reads as held rather than as a page scrolling), every [RiffleStepDp] of
+    // travel deals one card through the thumb, and letting go flings it on by
+    // the release's own VELOCITY before the spring settles it back with a
+    // small overshoot.
+    //
+    // Three deliberate choices, all from the 2026 research the agenda records:
+    //  · **The step IS the old 48dp swipe threshold**, so a short swipe past it
+    //    deals exactly one card — the hand's memory survives, and what is new
+    //    is only what a LONGER drag does.
+    //  · **A gesture never gatekeeps**: tap-to-open, the Spin button and the
+    //    plain swipe all still work, and the whole thing is behind a Settings
+    //    switch (`AppPreferences.riffleDeckState`, on by default) whose OFF is
+    //    bit-for-bit the old detector.
+    //  · **Momentum is capped at [RiffleFlingMaxCards]**: a hard flick through
+    //    a whole lane is a SPIN, and the Spin button owns that.
+    val riffleOn = AppPreferences.riffleDeckState
+    val riffleScope = rememberCoroutineScope()
+    val riffleStepPx = with(LocalDensity.current) { RiffleStepDp.toPx() }
+    val riffleClampPx = with(LocalDensity.current) { RiffleClampDp.toPx() }
+    val fanTravel = remember { Animatable(0f) }
+    // Travel not yet spent on a card. A plain state, separate from the
+    // Animatable: the fan's settle animation must never deal a card of its
+    // own while it springs home.
+    var riffleSpend by remember { mutableFloatStateOf(0f) }
+    val riffleDrag = rememberDraggableState { delta ->
+        if (riffleOn) {
+            riffleSpend += delta
+            var dealt = 0
+            while (abs(riffleSpend) >= riffleStepPx && dealt < RiffleMaxCardsPerEvent) {
+                val dir = if (riffleSpend > 0f) 1 else -1
+                // Same direction as the old swipe: right → next (+1).
+                onCycle(dir)
+                riffleSpend -= dir * riffleStepPx
+                dealt++
+            }
+            // Anything left over after the cap is dropped rather than banked:
+            // banking it would make a fast drag deal a queue of cards after
+            // the finger has already stopped.
+            if (dealt >= RiffleMaxCardsPerEvent) riffleSpend = 0f
+            riffleScope.launch { fanTravel.snapTo(fanTravel.value + delta) }
+        }
+    }
     Box(
         // v6.3 — grew with the hero ticket so the bigger card keeps its
         // breathing room above/below. The extra-compact box scales with the
@@ -2770,30 +2848,75 @@ private fun Carousel(
         // disambiguation is handled by the gesture system (a tap never
         // crosses drag slop, so the card's own clickable wins).
         modifier = modifier
-            .pointerInput(enabled, shuffling, opening) {
-                if (enabled && !shuffling && !opening) {
-                    val swipeThreshold = 48.dp.toPx()
-                    var totalDrag = 0f
-                    while (true) {
-                        detectHorizontalDragGestures(
-                            onDragStart = { totalDrag = 0f },
-                            onDragCancel = { totalDrag = 0f },
-                            onDragEnd = {
-                                when {
-                                    // Swipe follows the gesture: right → next
-                                    // (+1), left → previous (−1) (v8.41 fix —
-                                    // this was inverted on release).
-                                    totalDrag <= -swipeThreshold -> onCycle(-1)
-                                    totalDrag >= swipeThreshold -> onCycle(1)
-                                }
-                                totalDrag = 0f
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                totalDrag += dragAmount
+            .then(
+                if (riffleOn) {
+                    // The riffle owns the horizontal gesture while it is on. A
+                    // tap never crosses drag slop, so the front card's own
+                    // clickable still wins — the same disambiguation the old
+                    // detector relied on.
+                    Modifier.draggable(
+                        orientation = Orientation.Horizontal,
+                        enabled = enabled && !shuffling && !opening,
+                        state = riffleDrag,
+                        onDragStarted = { riffleSpend = 0f },
+                        onDragStopped = { velocity ->
+                            // Momentum: the release was still travelling, so
+                            // its speed becomes cards. `velocity` is px/s.
+                            val fling = velocity * RiffleFlingSeconds
+                            val cards = (abs(fling) / riffleStepPx).toInt()
+                                .coerceAtMost(RiffleFlingMaxCards)
+                            val dir = if (fling > 0f) 1 else -1
+                            repeat(cards) { onCycle(dir) }
+                            riffleSpend = 0f
+                            riffleScope.launch {
+                                // Bouncy is the one spring with overshoot — the
+                                // deck comes back and leans a little past rest,
+                                // which is what a released deck does.
+                                fanTravel.animateTo(0f, CurioMotion.Springs.Bouncy)
                             }
-                        )
+                        }
+                    )
+                } else {
+                    Modifier.pointerInput(enabled, shuffling, opening) {
+                        if (enabled && !shuffling && !opening) {
+                            val swipeThreshold = 48.dp.toPx()
+                            var totalDrag = 0f
+                            while (true) {
+                                detectHorizontalDragGestures(
+                                    onDragStart = { totalDrag = 0f },
+                                    onDragCancel = { totalDrag = 0f },
+                                    onDragEnd = {
+                                        when {
+                                            // Swipe follows the gesture: right → next
+                                            // (+1), left → previous (−1) (v8.41 fix —
+                                            // this was inverted on release).
+                                            totalDrag <= -swipeThreshold -> onCycle(-1)
+                                            totalDrag >= swipeThreshold -> onCycle(1)
+                                        }
+                                        totalDrag = 0f
+                                    },
+                                    onHorizontalDrag = { change, dragAmount ->
+                                        change.consume()
+                                        totalDrag += dragAmount
+                                    }
+                                )
+                            }
+                        }
                     }
+                }
+            )
+            // The fan's own transform. Read from the Animatable inside the
+            // layer block, so a drag re-draws the layer and never recomposes
+            // the deck — the cards and their wipes are untouched by this.
+            .graphicsLayer {
+                if (riffleOn) {
+                    val travel = riffleTravel(fanTravel.value, riffleClampPx)
+                    translationX = travel
+                    // Pivoted low, like a deck held at its base. Clamped by
+                    // construction (tanh), so the tilt has a known maximum
+                    // and can never spin the fan.
+                    transformOrigin = TransformOrigin(0.5f, 0.86f)
+                    rotationZ = (travel / riffleClampPx) * RiffleTiltDeg
                 }
             }
             .height(

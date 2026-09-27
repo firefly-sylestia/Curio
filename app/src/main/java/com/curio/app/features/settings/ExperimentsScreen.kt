@@ -255,6 +255,21 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
+            // v490 — THE RIFFLE. The deck's LOOK is untouched: this is purely
+            // how the fan answers a hand, so off is exactly the old behaviour.
+            item { SettingsSectionHeading("Deck") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Riffle the deck",
+                            "Thumb the deck like a real one: drag the fan sideways and it tilts and slides in your hand, one card passes for each step your thumb takes, and letting go flings it on before it settles. Off keeps the plain swipe.",
+                            AppPreferences.riffleDeckState
+                        ) { wanted -> AppPreferences.setDeckRiffleEnabled(context, wanted) }
+                    }
+                }
+            }
+
             // v3xx45 — SCREEN REVEAL experiment (default OFF): opening any
             // screen plays the same feathered iris as the light/dark flip,
             // centred on your tap, a touch faster than the theme wipe.

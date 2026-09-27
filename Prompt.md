@@ -6,7 +6,7 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §91 + §91b + §92 — the idea agenda, then The Return built off it, and the next round of ideas owed (AGENDA SAVED+PUSHED · THE RETURN BUILT · v489 PUSHED)
+## 0. THE CURRENT REQUEST — §91 + §91b + §92 + §92a — the idea agenda, The Return built off it, then the second (manipulation) round with its first one built (AGENDA SAVED+PUSHED · THE RETURN BUILT (v489) · THE RIFFLE BUILT (v490))
 
 > "tell me do some research, and what can we do about it, like some new feature some interactive stuff, creative, fun app related learning topics, with beautiful interaction etc etc something give some idea, maybe new or maybe repliacing something, i am not sure what i want, where ask questions"
 
@@ -40,6 +40,14 @@ The three rules the member set when asked (the agenda §3.1 open questions, now 
 4. *"you can push the previous chnages without bump"* — the docs-only agenda commit was pushed WITHOUT a version bump, as asked (the bump then landed with this build).
 
 Built: `data/CurioRecall.kt` (own prefs file `curio_recall`, in `CurioBackupManager`; ladder 1/3/7/21/60 then 180 days; `dueState`/`waitingState` Compose state with `refresh()` as the only writer), the `ExploreSession.markCompleted` hook (the one door every finishing path shares), `features/home/RecallSurface.kt` (`RecallCard` + `RecallSheet`), HomeScreen's hero branch + the sheet that makes BOTH writes in one place (`CurioQuests.awardXpOnly` then `CurioRecall.answer`), and a **Memory** section with a **The Return** switch (on by default) in both `ExperimentsScreen.kt` and `UserExperimentsScreen.kt`.
+
+### §92a — THE SECOND ROUND OF IDEAS, AND THE FIRST ONE BUILT
+
+Six ideas were offered on the member's own rule — *"i said interactive thing visually interactive beautiful"* — every one a thing you **manipulate** rather than a screen you read (a riffle, a tear-off save, a draggable sky, a fold, a press stamp, a turned page). The member picked **four**, in order: the riffle, tear-it-off, fold-the-card, press-the-stamp; kept **both** earlier items (the reader pencil margin, time capsules); chose **"Full physical — momentum, springs, overshoot"**; and then added the constraint that settled the shape of all four: **"keep the previous deck look but add these new ones as toggle and default on"**.
+
+**§92a BUILT AND PUSHED — v490 / `1.4.10` / `20260933`: THE RIFFLE.** Spin's fan can be thumbed: drag it sideways and the whole fan slides and leans in the hand, one card passes per **48dp** of travel, and the release's own velocity flings it on (capped at 3 cards — a hard flick through a lane is a SPIN, and the Spin button owns that) before `CurioMotion.Springs.Bouncy` settles it back with an overshoot. Three things make it safe: **the deck's LOOK is untouched** (gesture only), **the step IS the old swipe threshold** so a short swipe still deals exactly one card and the hand's memory survives, and **the switch's OFF path is bit-for-bit the old `pointerInput` detector**, kept in an `else` branch rather than deleted. `AppPreferences.riffleDeckState` (default ON, key `deck_riffle_v1`), under a new **Deck** section in both experiments screens.
+
+**⚠️ OWED (recorded in the agenda's §5):** the **tear-it-off** reveal save (5.2), **fold-the-card** (5.3), **press-the-stamp** on the Passport (5.4), plus the two kept items. **Two of those need an answer before either is built:** 5.2 and 5.3 are BOTH a save verb and cannot both own it on the same surface — the tear belongs to the reveal (taking something out of the page) and the fold to the Cabinet card (having kept it). Also still owed from the first round: **§92's own note that the ideas must be things you manipulate**, which the second round satisfied.
 
 ### ⚠️ THE OTHER ANSWER — §92: MORE IDEAS (the member's feedback is the work)
 
