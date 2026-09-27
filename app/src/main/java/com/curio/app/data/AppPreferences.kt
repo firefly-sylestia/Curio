@@ -1730,6 +1730,14 @@ object AppPreferences {
     var timeCapsuleEnabledState by mutableStateOf(true)
         private set
 
+    // v494 — THE TEAR-OFF SAVE (default ON): the reveal's Completed write can be
+    // done by pulling a perforated strip off the page (see
+    // [com.curio.app.features.reveal.RevealTearStrip]). The Completed STAR is
+    // untouched either way — the tear is a second way to save, never the only
+    // one — so with the switch off the reveal is exactly what it was.
+    var revealTearState by mutableStateOf(true)
+        private set
+
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"* — and, asked how the lines
@@ -2167,6 +2175,7 @@ object AppPreferences {
         passportStampState = isPassportStampEnabled(context)
         readerMarginState = isReaderMarginEnabled(context)
         timeCapsuleEnabledState = isTimeCapsuleEnabled(context)
+        revealTearState = isRevealTearEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2670,6 +2679,7 @@ object AppPreferences {
     private const val KEY_PASSPORT_STAMP = "passport_stamp_v1"
     private const val KEY_READER_MARGIN = "reader_margin_v1"
     private const val KEY_TIME_CAPSULE_ENABLED = "time_capsule_v1"
+    private const val KEY_REVEAL_TEAR = "reveal_tear_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -3034,6 +3044,15 @@ object AppPreferences {
     fun setTimeCapsuleEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_TIME_CAPSULE_ENABLED, enabled).apply()
         timeCapsuleEnabledState = enabled
+    }
+
+    // ── The reveal's tear-off save (v494, default ON) ─────────────────
+    fun isRevealTearEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_REVEAL_TEAR, true)
+
+    fun setRevealTearEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_REVEAL_TEAR, enabled).apply()
+        revealTearState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

@@ -1197,7 +1197,42 @@ fun TopicRevealScreen(
                     )
                 }
 
-                // ── 3. Topic name ───────────────────────────────────────────
+                // ── 2.65 THE TEAR-OFF STRIP (v494, agenda §5.2) ──────────────
+                // The member: *"Tear saves on the reveal; folding closes a
+                // Cabinet card."* A perforated strip hangs below the actions:
+                // pulling it down past the threshold runs EXACTLY the Completed
+                // star's write (the same two calls, in the same order), so the
+                // star and the strip can never disagree about the fact — and the
+                // star pill is untouched, because a gesture may never be the only
+                // route to something. Hidden in browse mode (read-only) and
+                // until the topic resolves.
+                val tearTopic = resolved
+                if (tearTopic != null && !latestBrowseMode && contentUiReady &&
+                    AppPreferences.revealTearState) {
+                    RevealContentEntrance(delayMillis = 100) {
+                        RevealTearStrip(
+                            accent = cat.themedAccent(),
+                            completed = sentiment == AppPreferences.SENTIMENT_LIKE,
+                            onTear = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                AppPreferences.setTopicSentiment(
+                                    context, cat.id, tearTopic.id, AppPreferences.SENTIMENT_LIKE
+                                )
+                                ExploreSessionStore.setCompleted(context, cat.id, tearTopic.name, true)
+                            },
+                            onPutBack = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                AppPreferences.setTopicSentiment(
+                                    context, cat.id, tearTopic.id, AppPreferences.SENTIMENT_NONE
+                                )
+                                ExploreSessionStore.setCompleted(context, cat.id, tearTopic.name, false)
+                            },
+                            modifier = Modifier.padding(top = 14.dp)
+                        )
+                    }
+                }
+
+                // ── 3. Topic name ───────────────────────────────────────────────
                 // v8.25 — the topic name now lives INSIDE the hero card
                 // (see HeroCard above), so it morphs with the card instead
                 // of popping in below as a separate headline: opening a

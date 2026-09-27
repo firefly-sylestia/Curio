@@ -218,27 +218,19 @@ matched to the reel's interval (a spring would be interrupted on every tick) and
 the overshoot is saved for the reel's end. Off = the Spin button exactly as it
 was.
 
-### 5.2 Tear it off the page — the reveal's save (OWED)
+### 5.2 Tear it off the page — the reveal's save (BUILT, v494)
 
-**What.** Saving stops being a button. The reveal is a page with a perforation
-across it; dragging the strip TEARS it along the finger, ragged edge and all, and
-the piece that comes away is the card that lands in the Cabinet.
+**Built as a SECOND way to do the Completed star's write, not a replacement.** The
+removal warning below was held to: the star pill stays exactly what it was, the
+strip's tear makes the star's exact two calls, and "Torn off and kept — tap to
+put it back" is the way back. A perforated strip hangs below the reveal's actions:
+pulling it past the threshold tears it free, the piece falls away with momentum,
+and the ragged edge is drawn on the page in the category accent, seeded (never
+random per frame). Behind **Tear it off** in Settings → Experiments → Memory, on
+by default. Full description and the traps are in `app/AGENTS.md`'s v494 section.
 
-**Why.** The app already owns torn-paper shape language (`SoftTornBottomShape`
-and the hero's tear) — this makes that language the *mechanic* instead of the
-decoration, and it is the most literal "visually interactive" of the four.
-
-**Interaction.** Finger drag along the perforation; the tear line follows with a
-ragged jitter, a per-notch tick of haptics as it advances, and the sheet falling
-away with momentum when it lets go. Full physical (the member's choice:
-momentum, springs, overshoot).
-
-**Where it hooks in.** `TopicRevealScreen`'s save action; `PaperCard`/
-`SoftTornSheetShape` for the paper; the Cabinet entry is already the far end.
-
-**⚠️ Removal warning.** This REPLACES the save control on the reveal, and the
-standing rule is that a removal is asked for — the member has named it, but the
-control it retires must be confirmed before it goes, and a visible fallback must
+**⚠️ Removal warning (held, for any future pass).** Retiring the reveal's save
+control is a REMOVAL and must be confirmed before it goes; a visible fallback must
 survive (a gesture may never be the only way to do something).
 
 ### 5.3 Fold the card — the Cabinet's save/open (OWED)

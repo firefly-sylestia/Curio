@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -372,26 +373,27 @@ private fun TimeDial(
             val radius = size.minDimension / 2f
 
             // The teeth: 48 short radial lines turning slowly behind the dial.
-            drawContext.canvas.save()
-            drawContext.canvas.rotate(spin, centre)
-            repeat(48) { i ->
-                val a = Math.toRadians((i * (360f / 48f)).toDouble())
-                val from = Offset(
-                    centre.x + cos(a).toFloat() * (radius - 7f),
-                    centre.y + sin(a).toFloat() * (radius - 7f)
-                )
-                val to = Offset(
-                    centre.x + cos(a).toFloat() * (radius - 1f),
-                    centre.y + sin(a).toFloat() * (radius - 1f)
-                )
-                drawLine(
-                    color = brass.copy(alpha = 0.30f),
-                    start = from,
-                    end = to,
-                    strokeWidth = 2f
-                )
+            // DrawScope's rotate (pivot overload) — Canvas.rotate itself takes
+            // only the degrees, which is what the first push got wrong.
+            rotate(degrees = spin, pivot = centre) {
+                repeat(48) { i ->
+                    val a = Math.toRadians((i * (360f / 48f)).toDouble())
+                    val from = Offset(
+                        centre.x + cos(a).toFloat() * (radius - 7f),
+                        centre.y + sin(a).toFloat() * (radius - 7f)
+                    )
+                    val to = Offset(
+                        centre.x + cos(a).toFloat() * (radius - 1f),
+                        centre.y + sin(a).toFloat() * (radius - 1f)
+                    )
+                    drawLine(
+                        color = brass.copy(alpha = 0.30f),
+                        start = from,
+                        end = to,
+                        strokeWidth = 2f
+                    )
+                }
             }
-            drawContext.canvas.restore()
 
             // The face, then the travelled arc up to the chosen notch.
             drawCircle(

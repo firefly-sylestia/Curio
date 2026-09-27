@@ -350,6 +350,16 @@ fun ExperimentsScreen(navController: NavController) {
                         // relaunch, and switching it on must show one already due.
                         CurioTimeCapsules.refresh(context)
                     }
+                    CurioSettingsDivider()
+                    // v494 — THE TEAR-OFF SAVE. A second way to do the Completed
+                    // star's write by pulling a perforated strip off the reveal
+                    // page; the star is untouched either way, so off is exactly
+                    // the reveal that was there before.
+                    ExperimentSwitchRow(
+                        "Tear it off",
+                        "The topic page grows a perforated strip: pull it down and it tears free with the piece falling away, and the topic is kept — the same mark the Completed star makes, in a way you can feel. Off takes the strip away; the star stays either way.",
+                        AppPreferences.revealTearState
+                    ) { wanted -> AppPreferences.setRevealTearEnabled(context, wanted) }
                 }
                 }
             }
