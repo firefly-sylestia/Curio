@@ -6,7 +6,42 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §90 — refraction clamped to the pane's corner radius, the frost reaching the panels that cannot blur, and each drawer family its own constellation (v488; version `1.4.8` / `20260931`)
+## 0. THE CURRENT REQUEST — §91 — the idea agenda: researched features, saved before any of them is built (RESEARCH DONE, AGENDA WRITTEN — the build is the remaining work)
+
+> "tell me do some research, and what can we do about it, like some new feature some interactive stuff, creative, fun app related learning topics, with beautiful interaction etc etc something give some idea, maybe new or maybe repliacing something, i am not sure what i want, where ask questions"
+
+### WHAT WAS RESEARCHED (not recalled)
+
+The 2026 evidence on engagement-vs-learning and on interaction patterns was read before any idea was written: the gamification literature's pooled effect (g ≈ 0.82, wide variance) and its motivation-mediated mechanism with Duolingo's own streak analytics; the three named failure modes (metric drift, attention drift, competition drift); and the shipped 2026 patterns (haptic-confirmed compound gestures, contextual gesture discovery, feedback that replaces screens, thumb-first surfaces). Sources are listed in the agenda doc.
+
+### THE GAP IT EXPOSED, READ OFF THE CODE
+
+`CurioQuests` awards XP for **actions only** (spin +2, explore +5, save +10, pin/quote +3) — **nothing is tied to recall**, which is metric drift by the literature's own definition. `CurioPassport` is a real model with no page of its own; `BrainStats.brainProfile()` is a science-mapped six-dimension model with no interaction; the drawer hides three link styles behind an undiscoverable hold; and the app has no sound layer at all.
+
+### WHAT WAS WRITTEN
+
+1. **`docs/plans/curio-idea-agenda.md`** — the durable backlog: the evidence with sources, the gap, **eight ideas** (The Return · gesture + haptic words + discovery · the Passport as an object · the reveal as one continuous paper object · time-capsule notes · an optional sound layer · the pet as a recall partner · **"Your Curiosity" keeping every `BrainStats` fact**), each with *why*, *the interaction*, *where it hooks into the code*, and its open questions; the member's decisions; and a proposed build order. Numbered sub-headings so a later session can cite `agenda 3.1`.
+2. **Root `AGENTS.md`** gained a `🗺 Plans and idea backlogs — docs/plans/` section (read the agenda before proposing or starting a feature; once built, the binding description belongs in the owning AGENTS.md, not the agenda), and **`app/AGENTS.md`**'s Child DOX Index points at it too.
+
+### THE MEMBER'S DECISIONS (recorded in the doc, §4)
+
+- **All** the ideas are wanted; **save them first**, then build in order.
+- **The Return lives in Home's quest hero**: the existing "Today's quest / Shuffle the deck" card **cycles** between the quest and a due recall — both kept, alternating, with the recall leading on the day a recall falls due. ⚠️ **Their wording was "keep it but cycle between it when yk for the first day and something like that" — the cycling rule needs one confirmation before the build.**
+- New measures ship behind a **Settings toggle ON by default** (the project's standing rule), removed once settled.
+- **No leaderboards, no public comparison** — per the research.
+
+### ⚠️ WHAT IS STILL OPEN (the remaining work)
+
+1. Confirm the hero's cycling rule (see above) and the two open rules in agenda §3.1: does a recall earn XP, and can a recall be skipped without penalty.
+2. Then build in the proposed order — **The Return**, then the gesture vocabulary + discovery, then revisit "Your Curiosity" with the member, then the Passport, time capsules, the reveal as one object, the sound layer and the pet.
+
+### CHECKS, IN THIS ENVIRONMENT'S TERMS
+
+- **No code was changed**, so there is nothing to compile and nothing to push: this request produced a plan doc plus two AGENTS.md pointers, and the docs-only commit rides with the first feature's push (root `AGENTS.md` "TEXT-ONLY / DOCS CHANGES").
+
+---
+
+## §90 — refraction clamped to the pane's corner radius, the frost reaching the panels that cannot blur, and each drawer family its own constellation (v488; version `1.4.8` / `20260931`)
 
 > "also when increasing refraction the break in the middle look bad. and the frost should be app wide with the option, and then the drawer pattern its still bad and still theres huge thing connecting wven though ith no particular link, fix it, and also make it more better and scattered look beautiful to look at"
 

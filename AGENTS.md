@@ -411,6 +411,19 @@ Do not create historical design/status documents for routine changes. Keep durab
 - Store changelogs use `versionCode` (integer) — see `fastlane/AGENTS.md`
 - In-app changelog: detailed (unlimited). Store changelog: brief (≤500 chars)
 
+## 🗺 Plans and idea backlogs — `docs/plans/`
+
+Durable multi-step feature plans and researched idea backlogs live under
+[`docs/plans/`](docs/plans/). Currently:
+
+- [`curio-idea-agenda.md`](docs/plans/curio-idea-agenda.md) — the researched
+  feature backlog: the evidence it is built on (why engagement only helps
+  learning when it drives retrieval), every idea with the interaction it should
+  have and the code it hooks into, the decisions taken, and the build order.
+  **Read it before proposing or starting a new feature**, and update it when an
+  idea is built or dropped. Once built, the binding description belongs in the
+  owning `AGENTS.md`, not in the agenda.
+
 ## 🔒 Scope — Android App ONLY (web/ + desktop/ on hold)
 
 **Do NOT edit, build, or touch anything under `web/` or `desktop/` unless
