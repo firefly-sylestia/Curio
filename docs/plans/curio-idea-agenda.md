@@ -209,6 +209,15 @@ velocity flings it on before the spring settles it back with a small overshoot.
 `AppPreferences.riffleDeckState`, **Deck** section in both experiments screens.
 Full description and the traps are in `app/AGENTS.md`'s v490 section.
 
+**The Spin button's riffle (v490, same switch).** The member's follow-up — *"the
+Spin button should riffle the deck visibly when pressed"* — is built: the fan
+pumps once per card the wheel deals, the pump grows as the wheel slows, and it
+comes home with an overshoot. The reel turns `cycleIndex`, which `Carousel`
+already receives, so the pump needed **no new plumbing**; the return is a tween
+matched to the reel's interval (a spring would be interrupted on every tick) and
+the overshoot is saved for the reel's end. Off = the Spin button exactly as it
+was.
+
 ### 5.2 Tear it off the page — the reveal's save (OWED)
 
 **What.** Saving stops being a button. The reveal is a page with a perforation

@@ -2737,6 +2737,16 @@ private const val RiffleFlingSeconds = 0.085f
 private const val RiffleFlingMaxCards = 3
 /** Cards dealt by a single drag event — a jump in the gesture cannot skip half a deck. */
 private const val RiffleMaxCardsPerEvent = 3
+// The SPIN button's own riffle: the fan pumps once per card the reel deals.
+// The pump is small and quick while the wheel is brisk (they read as one
+// motion at speed) and grows as the deck slows — exactly the escalation the
+// ratchet haptic already uses — so the deck visibly floods through the cards
+// and comes to rest with the last, most deliberate lean.
+private const val RifflePumpFast = 0.20f
+private const val RifflePumpSlow = 0.54f
+/** The reel's own cadence, repeated here so the fan is home before the next card. */
+private const val RiffleReelMinMs = 340L
+private const val RiffleReelMaxMs = 520L
 
 /**
  * The fan's travel for a raw drag: tracks the finger 1:1 at rest and gives
@@ -2833,6 +2843,41 @@ private fun Carousel(
             // the finger has already stopped.
             if (dealt >= RiffleMaxCardsPerEvent) riffleSpend = 0f
             riffleScope.launch { fanTravel.snapTo(fanTravel.value + delta) }
+        }
+    }
+    // ── v490 — THE SPIN BUTTON'S OWN RIFFLE ───────────────────────────
+    // Pressing Spin already reels the deck's CONTENT through the fan (the
+    // reel advances `cycleIndex` on its own cadence with an escalating
+    // ratchet haptic). What it never did was move the fan itself. This pumps
+    // it once per card the reel deals, so the deck visibly floods through its
+    // cards instead of swapping under a still frame — and the pump grows as
+    // the deck slows, so the last card is the most deliberate lean.
+    //
+    // `cycleIndex` is the tick signal, and it is already a parameter here: a
+    // reel step changes it, and a manual swipe changes it too — which is why
+    // this is gated on `shuffling` and returns on its own for a swipe.
+    //
+    // The return uses a TWEEN matched to the reel's own interval (recomputed
+    // exactly as the reel computes it) rather than a spring: the fan must be
+    // home before the next card lands, and a spring would be interrupted
+    // mid-flight on every tick and read as a permanent wobble. The overshoot
+    // the member asked for belongs at the END of the reel, which the settle
+    // below gives it.
+    LaunchedEffect(cycleIndex, shuffling) {
+        if (!riffleOn || !shuffling) return@LaunchedEffect
+        val eased = sin(shuffleProgress * Math.PI.toFloat() / 2f)
+        val interval = (RiffleReelMinMs + (180L * eased).toLong())
+            .coerceIn(RiffleReelMinMs, RiffleReelMaxMs)
+        val pump = riffleClampPx *
+            (RifflePumpFast + (RifflePumpSlow - RifflePumpFast) * shuffleProgress)
+        fanTravel.snapTo(pump)
+        fanTravel.animateTo(0f, tween(interval.toInt(), FastOutSlowInEasing))
+    }
+    // The reel has stopped — the fan comes home with the one spring that
+    // overshoots, which is what lets go of a spun deck.
+    LaunchedEffect(shuffling) {
+        if (riffleOn && !shuffling && fanTravel.value != 0f) {
+            fanTravel.animateTo(0f, CurioMotion.Springs.Bouncy)
         }
     }
     Box(
