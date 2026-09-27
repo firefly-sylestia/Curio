@@ -6,7 +6,7 @@ from the state rather than from memory.
 
 ---
 
-## 0. THE CURRENT REQUEST — §91 — the idea agenda: researched features, saved before any of them is built (RESEARCH DONE, AGENDA WRITTEN — the build is the remaining work)
+## 0. THE CURRENT REQUEST — §91 + §91b + §92 — the idea agenda, then The Return built off it, and the next round of ideas owed (AGENDA SAVED+PUSHED · THE RETURN BUILT · v489 PUSHED)
 
 > "tell me do some research, and what can we do about it, like some new feature some interactive stuff, creative, fun app related learning topics, with beautiful interaction etc etc something give some idea, maybe new or maybe repliacing something, i am not sure what i want, where ask questions"
 
@@ -30,14 +30,27 @@ The 2026 evidence on engagement-vs-learning and on interaction patterns was read
 - New measures ship behind a **Settings toggle ON by default** (the project's standing rule), removed once settled.
 - **No leaderboards, no public comparison** — per the research.
 
-### ⚠️ WHAT IS STILL OPEN (the remaining work)
+### THE BUILD — §91b: THE RETURN (BUILT, v489 / `1.4.9` / `20260932`)
 
-1. Confirm the hero's cycling rule (see above) and the two open rules in agenda §3.1: does a recall earn XP, and can a recall be skipped without penalty.
-2. Then build in the proposed order — **The Return**, then the gesture vocabulary + discovery, then revisit "Your Curiosity" with the member, then the Passport, time capsules, the reveal as one object, the sound layer and the pet.
+The three rules the member set when asked (the agenda §3.1 open questions, now closed):
+
+1. *"Recall leads on the day it falls due, then back to the quest"* — the recall is the quest card's **sibling in the same hero seat**, not a replacement; both cards are kept and Home's hero draws the recall only while one is due.
+2. *"Yes — more than a save (+10), because recall is the point"* — `XP_PER_RECALL = 15`.
+3. *"it just waits no skip at all"* — no skip, no snooze, no streak loss; it never gates anything.
+4. *"you can push the previous chnages without bump"* — the docs-only agenda commit was pushed WITHOUT a version bump, as asked (the bump then landed with this build).
+
+Built: `data/CurioRecall.kt` (own prefs file `curio_recall`, in `CurioBackupManager`; ladder 1/3/7/21/60 then 180 days; `dueState`/`waitingState` Compose state with `refresh()` as the only writer), the `ExploreSession.markCompleted` hook (the one door every finishing path shares), `features/home/RecallSurface.kt` (`RecallCard` + `RecallSheet`), HomeScreen's hero branch + the sheet that makes BOTH writes in one place (`CurioQuests.awardXpOnly` then `CurioRecall.answer`), and a **Memory** section with a **The Return** switch (on by default) in both `ExperimentsScreen.kt` and `UserExperimentsScreen.kt`.
+
+### ⚠️ THE OTHER ANSWER — §92: MORE IDEAS (the member's feedback is the work)
+
+The member was asked which of six NEW ideas to build and answered **"bad ones not good the ideas are bad, i said interactive thing visually interactive beautiful"** — picking **the pencil margin (reader scribble)** and **time-capsule notes** out of the list. The feedback is the finding: the six ideas (a broadsheet, a launcher widget, an audio stream, a gyro depth pass, a connect-two-entries thread) were **things you read**, not **things you manipulate**. The next round of ideas must be ones you *push, pull, drag, fold, tear, stamp* — visible mass and travel on screen — with the interaction demonstrated in words before any code.
+
+**Open:** propose that round and confirm which to build (and whether the two they named — the pencil margin, time capsules — stay in it).
 
 ### CHECKS, IN THIS ENVIRONMENT'S TERMS
 
-- **No code was changed**, so there is nothing to compile and nothing to push: this request produced a plan doc plus two AGENTS.md pointers, and the docs-only commit rides with the first feature's push (root `AGENTS.md` "TEXT-ONLY / DOCS CHANGES").
+- **No Gradle build/compile/test/lint may run here** (root `AGENTS.md`): validation is CI on push. Everything was checked by reading — every symbol used (`CurioRecall`, `CurioQuests.awardXpOnly`, `RecallCard`/`RecallSheet` params, `curioSheetContainerColor`, `CurioGlassWindowBlur`, `CurioIcons.Replay`, `CurioIcon(size=…)`) was confirmed present at its definition, and brace balance was verified per edited file.
+- Version bumped `1.4.8 → 1.4.9`, code `20260931 → 20260932`, with `fastlane/.../changelogs/20260932.txt` created as a COPY of the previous file plus this build's bullets — **the old file was not renamed or deleted** (it is the record of the build that code shipped as).
 
 ---
 

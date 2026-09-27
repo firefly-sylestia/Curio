@@ -105,6 +105,7 @@ object CurioBackupManager {
                                   //   CaptureDraftStore — autosaved capture drafts
         "curio_pet",              // CurioPet — mood timestamps (v8.5 pet companion)
         "curio_passport",         // CurioPassport — category stamps + counters (v8.5)
+        "curio_recall",           // CurioRecall — the Return's ladder + answers (v489)
         "curio_onboarding"        // onboarding-completed flag
     )
 

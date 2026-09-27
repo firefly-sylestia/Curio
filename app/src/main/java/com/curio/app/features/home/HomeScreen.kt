@@ -114,6 +114,7 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.CurioRecall
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
@@ -347,6 +348,14 @@ fun HomeScreen(navController: NavController) {
     // Unpin-topic confirmation �� set when the user taps unpin on a pinned
     // topic row; the dialog confirms before the pin is dropped.
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
+    // v489 — THE RETURN's answer sheet. The due recall itself is never copied
+    // into a local: the hero and this sheet both read [CurioRecall.dueState],
+    // which is Compose state, so keeping one answers the other instantly.
+    var recallOpen by remember { mutableStateOf(false) }
+    // Recomputed on every entry to Home: the day may have turned while the app
+    // sat in the background, and a recall that has come due must lead the hero
+    // the moment the member looks. Cheap — one prefs read and a filter.
+    LaunchedEffect(Unit) { CurioRecall.refresh(context) }
     // v387 — the writing sheet behind the floating "+" (a journal page or a
     // book). The button itself hides while the page is scrolled down, so a
     // long read is never covered by it.
@@ -965,6 +974,29 @@ fun HomeScreen(navController: NavController) {
                                     kind = PetLandmarks.Kind.FUN,
                                     screen = "home"
                                 ) { m ->
+                                    // v489 — THE RETURN LEADS ON ITS DUE DAY.
+                                    // The member's own rule: the recall takes the
+                                    // hero on the day it falls due, then the quest
+                                    // comes back — which is exactly what
+                                    // [CurioRecall.dueState] emptying does on its
+                                    // own the moment an answer is kept. The two
+                                    // cards are SIBLINGS: one seat, one geometry,
+                                    // one colour contract, so the hero never
+                                    // changes shape when the day turns.
+                                    val plate = lerp(heroFill, Color.White, 0.88f)
+                                    val dueRecall = CurioRecall.dueState
+                                    if (dueRecall != null) {
+                                        RecallCard(
+                                            plate = plate,
+                                            ink = curioFillInk(plate),
+                                            copyInk = questInk,
+                                            topicName = dueRecall.topicName,
+                                            agoText = CurioRecall.agoText(dueRecall.firstCompletedAt),
+                                            waiting = CurioRecall.waitingState,
+                                            onOpen = { recallOpen = true },
+                                            modifier = m
+                                        )
+                                    } else {
                                     QuestShuffleCard(
                                         // A paper-white disc ON the rose banner:
                                         // the pastel accent would vanish into
@@ -977,13 +1009,14 @@ fun HomeScreen(navController: NavController) {
                                         // disc), so the disc's ink walks the deep
                                         // same-hue ink [curioFillInk] resolves on
                                         // the plate.
-                                        plate = lerp(heroFill, Color.White, 0.88f),
-                                        ink = curioFillInk(lerp(heroFill, Color.White, 0.88f)),
+                                        plate = plate,
+                                        ink = curioFillInk(plate),
                                         copyInk = questInk,
                                         pet = homePetSprite,
                                         onShuffle = onQuestShuffle,
                                         modifier = m
                                     )
+                                    }
                                 }
                         }
                     }
@@ -1774,6 +1807,26 @@ fun HomeScreen(navController: NavController) {
             },
             dismissButton = {
                 TextButton(onClick = { pendingUnpin = null }, colors = curioDialogActionButtonColors()) { Text("Keep") }
+            }
+        )
+    }
+
+    // ── v489 — the Return's answer sheet ──
+    // Driven by the DUE record rather than a captured copy: keeping an answer
+    // moves the ladder on, `dueState` becomes the next waiting topic (or null),
+    // and this sheet closes itself. Two writes happen here and nowhere else —
+    // the XP award and the ladder step — because a composable must never score.
+    val dueRecallForSheet = CurioRecall.dueState
+    if (recallOpen && dueRecallForSheet != null) {
+        RecallSheet(
+            topicName = dueRecallForSheet.topicName,
+            agoText = CurioRecall.agoText(dueRecallForSheet.firstCompletedAt),
+            previousAnswer = dueRecallForSheet.answer,
+            onDismiss = { recallOpen = false },
+            onKeep = { text ->
+                CurioQuests.awardXpOnly(context, CurioRecall.XP_PER_RECALL)
+                CurioRecall.answer(context, dueRecallForSheet, text)
+                recallOpen = false
             }
         )
     }

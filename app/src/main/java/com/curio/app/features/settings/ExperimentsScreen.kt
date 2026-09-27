@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioRecall
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -269,6 +270,26 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
+            // v489 — THE RETURN: the one measure in Curio tied to RECALL rather
+            // than to actions, and the reason it exists is in
+            // docs/plans/curio-idea-agenda.md §3.1. On by default (the project's
+            // rule for a new measure); the toggle comes out once the behaviour
+            // has settled.
+            item { SettingsSectionHeading("Memory") }
+            item {
+                SettingsOptionCard {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("The Return", "A topic you finished comes back on a widening schedule — a day, then three, then a week — as one card on Home asking what you still remember. Answering earns more XP than saving does.", AppPreferences.recallEnabledState) {
+                        AppPreferences.setRecallEnabled(context, it)
+                        // Recompute at once: switching it off must clear a due
+                        // card the member is looking at, not leave it until the
+                        // next launch.
+                        CurioRecall.refresh(context)
+                    }
+                }
+                }
+            }
+
             // v293 — Pet behavior + explore options moved here from Preferences/Recording.
             item { SettingsSectionHeading("Pet & explore") }
             item {

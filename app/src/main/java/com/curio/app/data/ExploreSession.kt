@@ -985,6 +985,13 @@ fun ExploreSession.markCompleted(context: Context) {
     if (topicId.isBlank()) return
     AppPreferences.setTopicSentiment(context, categoryId, topicId, AppPreferences.SENTIMENT_LIKE)
     ExploreSessionStore.setCompleted(context, categoryId, topicName, true)
+    // v489 — AND THE TOPIC GOES ON THE RETURN'S LADDER. This is the one door
+    // every finishing path already shares, so the recall is scheduled wherever
+    // the member completed the topic (the shade's action, the reminder's, the
+    // write-it-down confirm, the back-to-app dialog) with no per-call-site
+    // wiring. [CurioRecall.schedule] leaves an already-scheduled topic alone, so
+    // completing something a second time cannot reset its ladder.
+    CurioRecall.schedule(context, categoryId, topicName)
 }
 
 

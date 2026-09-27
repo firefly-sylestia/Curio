@@ -282,6 +282,12 @@ object AppPreferences {
     // lines. Independent of [KEY_PET_ENABLED]: the pet layer can be on
     // while the learning brain is off.
     private const val KEY_PET_BRAIN_ENABLED = "pet_brain_enabled"
+
+    // v489 — THE RETURN (CurioRecall): a finished topic comes back on a widening
+    // schedule and Home's quest hero leads with it on the day it falls due. ON by
+    // default (the member's answer), so a member who never opens Settings gets it;
+    // off means nothing is ever due and Home is exactly what it was before.
+    private const val KEY_RECALL_ENABLED = "recall_enabled"
     private const val KEY_AUTO_OPEN_REVEAL = "auto_open_reveal"
     private const val KEY_PINNED_TOPICS = "pinned_topics"   // JSON array of PinnedTopic
     private const val KEY_SAVED_QUOTES = "saved_quotes"      // JSON array of SavedQuote
@@ -1872,6 +1878,10 @@ object AppPreferences {
     // own catchphrases. Off = classic rule-based lines only.
     var petBrainEnabledState by mutableStateOf(true)
         private set
+    // v489 — whether completed topics return for a recall (default ON). See
+    // [CurioRecall] for the ladder and the rules.
+    var recallEnabledState by mutableStateOf(true)
+        private set
     // v16 — how talkative the pet is: "talkative" (lines ~1.4x), "cozy"
     // (default, unchanged), "quiet" (lines ~0.35x — mostly motion).
     var petChatterState by mutableStateOf("cozy")
@@ -2148,6 +2158,7 @@ object AppPreferences {
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petOutsideAppState = isPetOutsideAppEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
+        recallEnabledState = isRecallEnabled(context)
         petChatterState = getPetChatter(context)
         petGameFrequencyState = getPetGameFrequency(context)
         autoOpenRevealState = isAutoOpenReveal(context)
@@ -3568,6 +3579,17 @@ object AppPreferences {
     fun setPetBrainEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_BRAIN_ENABLED, enabled).apply()
         petBrainEnabledState = enabled
+    }
+
+    // v489 — the Return toggle (default ON; Experiments → Memory). Turning it off
+    // does not forget the ladder: the record stays in `curio_recall` and comes
+    // back if the member turns it on again.
+    fun isRecallEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_RECALL_ENABLED, true)
+
+    fun setRecallEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_RECALL_ENABLED, enabled).apply()
+        recallEnabledState = enabled
     }
 
     // ── Pet designer recent colors (v8.47 color picker) ────────────────
