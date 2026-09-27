@@ -233,7 +233,17 @@ by default. Full description and the traps are in `app/AGENTS.md`'s v494 section
 control is a REMOVAL and must be confirmed before it goes; a visible fallback must
 survive (a gesture may never be the only way to do something).
 
-### 5.3 Fold the card — the Cabinet's save/open (OWED)
+### 5.3 Fold the card — the Cabinet's save/open (BUILT, v495)
+
+**Built exactly on the member's ruling** — *"folding closes a Cabinet card"* — as
+the Cabinet's KEPT state: drag a saved entry's card down and it folds shut along a
+crease you pull into it (tick per notch, the fold committing at half travel with
+the app's heaviest confirm); the crease stays in the shelf and the card reads
+"Folded — tap to open" until it is tapped open again. Folds live in prefs keyed by
+entry id (no Room migration), so they travel in a backup and agree across the
+cabinet grid, list view and collections. Behind **Fold the cards** in
+Settings → Experiments → Cabinet, on by default. Full description and the traps
+are in `app/AGENTS.md`'s v495 section.
 
 **What.** A card folds in half along a crease you drag; folded means saved, and
 the crease stays visible in the Cabinet afterwards. Unfold to read it again.
@@ -316,12 +326,11 @@ the imperfection is deterministic per lane (seeded), never random per frame.
 5. **The reveal as one object** (3.4), then the **sound layer** (3.6) and the
    **pet** (3.7).
 6. **The second round** (§5), which the member took as its own workstream and
-   which is nearly built: **5.1 the riffle (v490)**, **5.4 the press-stamp
-   (v491)**, **5.5's pencil margin (v492)** and **5.5's time capsule (v493)**.
-   Remaining: **5.2 tear-it-off** and **5.3 fold-the-card**. The surface question
-   is now SETTLED by the member — **the tear saves on the reveal; the fold closes
-   a Cabinet card** — so each owns a different surface and neither is a rival save
-   verb on the other's page.
+   which is **BUILT IN FULL**: **5.1 the riffle (v490)**, **5.4 the press-stamp
+   (v491)**, **5.5's pencil margin (v492)**, **5.5's time capsule (v493)**,
+   **5.2 the tear (v494)** and **5.3 the fold (v495)** — the tear/fold surface
+   question settled by the member's ruling (**"Tear saves on the reveal; folding
+   closes a Cabinet card"**) and held to exactly.
 
 ## Sources
 

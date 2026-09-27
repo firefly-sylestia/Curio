@@ -3,6 +3,7 @@ package com.curio.app.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,7 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.launch
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -70,7 +75,15 @@ fun CurioEntryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    /** v495 — whether this card is FOLDED shut (the Cabinet's fold gesture). */
+    folded: Boolean = false,
+    /** v495 — the fold's haptic toggle: off means the card never folds. */
+    foldEnabled: Boolean = false,
+    /** v495 — runs the fold write when the top edge drag completes. */
+    onFold: () -> Unit = {},
+    /** v495 — runs the unfold write when the folded card's handle is tapped. */
+    onUnfold: () -> Unit = {}
 ) {
     var pressed by remember { mutableStateOf(false) }
     val cat = CurioCategories.byId(entry.topic.categoryId)
@@ -103,13 +116,87 @@ fun CurioEntryCard(
         }
     }
 
+    // ── v495 — THE FOLD ─────────────────────────────────────────────────
+    // One Animatable, `foldProgress`: 0 = open, 1 = folded shut. The card's
+    // whole transform reads it INSIDE one graphicsLayer, so a fold animates a
+    // layer and never recomposes the grid (the same rule the deck's riffle
+    // follows). The crease rides the fold line with the progress, so the paper
+    // tells the state instead of a chip or a toast.
+    val foldProgress = remember { androidx.compose.animation.core.Animatable(if (folded) 1f else 0f) }
+    LaunchedEffect(folded) {
+        // The drag drives the fold live; this effect settles the state changes
+        // (folded flag flips, or the switch's off path unfolds) on a spring.
+        foldProgress.animateTo(
+            if (folded) 1f else 0f,
+            CurioMotion.Springs.Deliberate
+        )
+    }
+
+    // The fold's drag: a vertical drag down the card's face folds it shut
+    // (the top edge pulled to meet the bottom, like paper), and past half
+    // travel on release it commits; short of it, it springs back open.
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val cardHeightPx = with(density) { FoldDragSpan.toPx() }
+    val dragScope = androidx.compose.runtime.rememberCoroutineScope()
+    val foldHaptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    var foldNotch by remember { mutableStateOf(0) }
+
+    val foldDragModifier = if (foldEnabled && !folded && !selected) {
+        Modifier.pointerInput(entry.id) {
+            detectVerticalDragGestures(
+                onVerticalDrag = { change, amount ->
+                    change.consume()
+                    dragScope.launch {
+                        val next = (foldProgress.value + amount / cardHeightPx)
+                            .coerceIn(0f, 1f)
+                        foldProgress.snapTo(next)
+                        val notch = (next / 0.2f).toInt()
+                        if (notch != foldNotch) {
+                            foldNotch = notch
+                            foldHaptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    }
+                },
+                onDragEnd = {
+                    dragScope.launch {
+                        if (foldProgress.value >= FoldCommitFraction) {
+                            foldHaptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            foldProgress.animateTo(1f, CurioMotion.Springs.Snappy)
+                            onFold()
+                        } else {
+                            foldProgress.animateTo(0f, CurioMotion.Springs.Snappy)
+                        }
+                        foldNotch = 0
+                    }
+                }
+            )
+        }
+    } else Modifier
+
     Surface(
         modifier = modifier
             .scale(pressScale)
+            .then(foldDragModifier)
+            .graphicsLayer {
+                // The fold in one transform: the card's top half VISUALLY tips
+                // down over the bottom half (scaleY shrinks toward the crease
+                // while the whole card settles to the folded slab's height via
+                // the alpha of the lower body), and the crease's own shadow
+                // deepens as it closes.
+                val p = foldProgress.value
+                transformOrigin = TransformOrigin(0.5f, 0.5f)
+                scaleY = 1f - p * FoldShrink
+            }
             .combinedClickable(
                 onClick = {
-                    pressed = true
-                    onClick()
+                    if (folded) {
+                        // A folded card's tap UNFOLDS it — the fold is the
+                        // shelf's state, and unfolding is how it is read again.
+                        onUnfold()
+                    } else {
+                        pressed = true
+                        onClick()
+                    }
                 },
                 onLongClick = onLongClick
             )
@@ -236,10 +323,26 @@ fun CurioEntryCard(
             }
 
             // ── Minimal body — title, when-it-was-saved, format symbol.
+            // v495 — the body reads the fold: it fades toward the crease as the
+            // card shuts, so a folded card's lower half reads as paper folded
+            // OVER it rather than as a shorter card.
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier
+                    .padding(12.dp)
+                    .graphicsLayer { alpha = 1f - foldProgress.value * 0.9f },
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                if (folded) {
+                    // The folded card's one line: the crease is the state.
+                    Text(
+                        text = "Folded — tap to open",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
                 Text(
                     text = entry.topic.name,
                     style = MaterialTheme.typography.titleSmall.copy(
@@ -443,6 +546,16 @@ private fun FormatBadgeCircle(glyph: String) {
         }
     }
 }
+
+// ── v495 — THE FOLD'S CONSTANTS ────────────────────────────────────────
+/** The drag length that maps 1:1 onto the fold's progress. */
+private val FoldDragSpan = 120.dp
+
+/** The pull fraction past which a fold commits on release. */
+private const val FoldCommitFraction = 0.5f
+
+/** How much of the card's height folds away when shut (a fold in half). */
+private const val FoldShrink = 0.52f
 
 internal fun formatGlyph(format: CaptureFormat): String = when (format) {
     CaptureFormat.SoundBite -> CurioIcons.Mic

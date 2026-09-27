@@ -811,10 +811,24 @@ fun CabinetScreen(navController: NavController) {
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
                         // page pops up from center instead of expanding out of
                         // the card, so the card carries no shared element.
+                        // v495 — AND THE CARD FOLDS: the member's ruling —
+                        // "folding closes a Cabinet card" — makes the fold the
+                        // shelf's KEPT state, so it lives in prefs (in the backup
+                        // list) keyed by the entry id, NOT in Room (a fold is a
+                        // reading posture, not a property of the capture). A
+                        // vertical drag on the card's top folds it shut; a folded
+                        // card's tap unfolds it. Selection mode never folds.
                         CurioEntryCard(
                             entry = entry,
                             modifier = Modifier,
                             selected = entry.id in selectedEntryIds,
+                            folded = entry.id in AppPreferences.foldedEntriesState,
+                            foldEnabled = AppPreferences.cabinetFoldState,
+                            onFold = { AppPreferences.foldEntry(context, entry.id) },
+                            onUnfold = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                AppPreferences.unfoldEntry(context, entry.id)
+                            },
                             onLongClick = {
                                 selectionMode = true
                                 selectedEntryIds = selectedEntryIds + entry.id
@@ -826,6 +840,11 @@ fun CabinetScreen(navController: NavController) {
                                     } else {
                                         selectedEntryIds + entry.id
                                     }
+                                } else if (entry.id in AppPreferences.foldedEntriesState) {
+                                    // The card handles its own unfold; the grid's
+                                    // tap only navigates when it is open.
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    AppPreferences.unfoldEntry(context, entry.id)
                                 } else {
                                     haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                                     navController.navigate(

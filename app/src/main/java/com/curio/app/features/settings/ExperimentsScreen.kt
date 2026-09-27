@@ -364,6 +364,23 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // v495 — THE FOLD: a Cabinet card can be folded shut along a crease
+            // you drag. The fold is the KEPT state — the fold pattern stays in
+            // prefs even with the switch off, and off only stops the card from
+            // folding (every folded card unfolds and behaves exactly as before).
+            item { SettingsSectionHeading("Cabinet") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Fold the cards",
+                            "A saved entry's card folds shut along a crease you drag down its face — folded means kept, and the crease stays in the shelf until you tap the card open again. Off keeps every card open and the fold never starts.",
+                            AppPreferences.cabinetFoldState
+                        ) { wanted -> AppPreferences.setCabinetFoldEnabled(context, wanted) }
+                    }
+                }
+            }
+
             // v293 — Pet behavior + explore options moved here from Preferences/Recording.
             item { SettingsSectionHeading("Pet & explore") }
             item {

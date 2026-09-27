@@ -1492,9 +1492,16 @@ private fun LazyGridScope.v2DetailItems(
                 val entry = entriesById[m.refName]
                 if (entry != null) {
                     item(key = "d-e|${collection.id}|${m.refName}", contentType = "member") {
+                        // v495 — the fold rides inside collections too, reading
+                        // the same store the grid does (one fact, one shelf).
+                        val foldCtx = LocalContext.current
                         CurioEntryCard(
                             entry = entry,
                             modifier = Modifier,
+                            folded = entry.id in AppPreferences.foldedEntriesState,
+                            foldEnabled = AppPreferences.cabinetFoldState,
+                            onFold = { AppPreferences.foldEntry(foldCtx, entry.id) },
+                            onUnfold = { AppPreferences.unfoldEntry(foldCtx, entry.id) },
                             onLongClick = { onMemberLongPress(index) },
                             onClick = { onOpenEntry(entry.id) }
                         )
@@ -2517,7 +2524,9 @@ private fun V2LikedTileCard(
     }
 }
 
-/** Emits the saved-capture cards in grid (2-col) or list (full-width) mode. */
+/** Emits the saved-capture cards in grid (2-col) or list (full-width) mode.
+ *  v495 — every card here folds: the fold lives in prefs (one fact, one
+ *  shelf), so the grid, the list and the collection detail all agree. */
 private fun LazyGridScope.v2EntryItems(
     entries: List<CurioEntry>,
     fullSpan: Boolean,
@@ -2529,23 +2538,45 @@ private fun LazyGridScope.v2EntryItems(
     if (fullSpan) {
         entries.forEach { e ->
             item(key = "e|${e.id}", span = { GridItemSpan(maxLineSpan) }, contentType = "entry") {
+                val foldCtx = LocalContext.current
                 CurioEntryCard(
                     entry = e,
                     modifier = Modifier,
                     selected = e.id in selectedEntryIds,
+                    folded = e.id in AppPreferences.foldedEntriesState,
+                    foldEnabled = AppPreferences.cabinetFoldState,
+                    onFold = { AppPreferences.foldEntry(foldCtx, e.id) },
+                    onUnfold = { AppPreferences.unfoldEntry(foldCtx, e.id) },
                     onLongClick = { onEntryLongClick(e.id) },
-                    onClick = { onEntryClick(e.id) }
+                    onClick = {
+                        if (e.id in AppPreferences.foldedEntriesState) {
+                            AppPreferences.unfoldEntry(foldCtx, e.id)
+                        } else {
+                            onEntryClick(e.id)
+                        }
+                    }
                 )
             }
         }
     } else {
         items(entries, key = { "e|${it.id}" }) { e ->
+            val foldCtx = LocalContext.current
             CurioEntryCard(
                 entry = e,
                 modifier = Modifier,
                 selected = e.id in selectedEntryIds,
+                folded = e.id in AppPreferences.foldedEntriesState,
+                foldEnabled = AppPreferences.cabinetFoldState,
+                onFold = { AppPreferences.foldEntry(foldCtx, e.id) },
+                onUnfold = { AppPreferences.unfoldEntry(foldCtx, e.id) },
                 onLongClick = { onEntryLongClick(e.id) },
-                onClick = { onEntryClick(e.id) }
+                onClick = {
+                    if (e.id in AppPreferences.foldedEntriesState) {
+                        AppPreferences.unfoldEntry(foldCtx, e.id)
+                    } else {
+                        onEntryClick(e.id)
+                    }
+                }
             )
         }
     }

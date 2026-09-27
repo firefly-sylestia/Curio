@@ -375,6 +375,21 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // v495 — THE FOLD, in a Cabinet section of its own: the fold is the
+            // KEPT state, so off only stops new folds (existing ones still show).
+            item { SettingsSectionHeading("Cabinet") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Fold the cards",
+                            "A saved entry's card folds shut along a crease you drag down its face — folded means kept, and the crease stays in the shelf until you tap the card open again. Off keeps every card open and the fold never starts.",
+                            AppPreferences.cabinetFoldState
+                        ) { wanted -> AppPreferences.setCabinetFoldEnabled(context, wanted) }
+                    }
+                }
+            }
+
             item { SettingsSectionHeading("Pet & explore") }
             item {
                 SettingsOptionCard {
