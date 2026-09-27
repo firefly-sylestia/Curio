@@ -35,7 +35,7 @@ The member's first ask was to read it. `Varun7009/Obsidian-Music` ("Obsidian Mus
 - **No Gradle command was run** (root `AGENTS.md` forbids it here); CI is the validation. Every edited region was read back after the edit: the new `blur(...)` argument in `liquidGlassCapsule` is an `if`-expression of two `Float` consts with `.dp.toPx()`, `blurScale`/`compact` are both in scope where it is spent, `Frost.blurFactor` is a plain function on the object (no composable context needed), and the removed sheen gradient leaves `Brush` still in use by `fauxGlassCapsule`/`curioFauxGlassSheen`.
 - **No annotation was displaced** (root rule 13): the edits are argument edits inside existing composables and the tab bar's new `val pageOnlySample` sits directly under the existing `frostedDark` val, above existing code, with no annotation above it to steal.
 - **The lens call added to the blob** uses the 3-arg `lens(radius, radius, boolean)` overload the same file already calls two lines below.
-- **`gh` is not installed in this workspace**, so no CI run could be read.
+- **`gh` IS installed in this workspace now** (it was not in earlier sessions): the run for this push was `queued` at push time and the two runs before it were `success`, so the fix is green-or-next-session's-business, per the one-quick-check rule.
 - **The frost numbers are judgements** — 21dp taken whole, a 0.18 tint and a 0.12 lift are set from the member's own words ("heavy, a real blurred, thinner tint without the wash"), not measured.
 
 ### ⚠️ OPEN / JUDGEMENTS
