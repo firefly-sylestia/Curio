@@ -226,14 +226,17 @@ fun RevealTearStrip(
                         onVerticalDrag = { change, amount ->
                             change.consume()
                             if (tearing) return@detectVerticalDragGestures
-                            // Snap-to inside the gesture (not per-frame animateTo):
-                            // the strip tracks the finger 1:1 like the deck's fan.
-                            val next = (pull.value + amount / travelPx).coerceIn(0f, 1f)
-                            pull.snapTo(next)
-                            val notch = (next / 0.12f).roundToInt()
-                            if (notch != lastNotch) {
-                                lastNotch = notch
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            // `snapTo` suspends — the gesture callback is NOT a
+                            // suspend context, so the snap rides its own launch
+                            // (per-event, tiny; the strip still tracks 1:1).
+                            scope.launch {
+                                val next = (pull.value + amount / travelPx).coerceIn(0f, 1f)
+                                pull.snapTo(next)
+                                val notch = (next / 0.12f).roundToInt()
+                                if (notch != lastNotch) {
+                                    lastNotch = notch
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                }
                             }
                         },
                         onDragEnd = {
