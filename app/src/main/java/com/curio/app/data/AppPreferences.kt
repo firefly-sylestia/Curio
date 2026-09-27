@@ -1703,6 +1703,17 @@ object AppPreferences {
     var riffleDeckState by mutableStateOf(true)
         private set
 
+    // v491 — THE PASSPORT'S STAMP IS PRESSED (default ON): a lane's MASTERED
+    // stamp is earned by real activity and then physically pressed — a rubber
+    // stamp head comes down, the ink lands squashed and slightly crooked, and
+    // the imprint is imperfect in a way that is stable for that lane's whole
+    // life. **Nothing is lost when it is off**: masteries earned before this
+    // are grandfathered in as already pressed ([CurioPassport.ensurePressSeed]),
+    // and with the switch off a mastered lane stamps itself exactly as it
+    // always did.
+    var passportStampState by mutableStateOf(true)
+        private set
+
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"* — and, asked how the lines
@@ -2137,6 +2148,7 @@ object AppPreferences {
         glassClarityState = isGlassClarityEnabled(context)
         glassFrostedState = isGlassFrostedEnabled(context)
         riffleDeckState = isDeckRiffleEnabled(context)
+        passportStampState = isPassportStampEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2637,6 +2649,7 @@ object AppPreferences {
     // and returns the old clear glass.
     private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
     private const val KEY_DECK_RIFFLE = "deck_riffle_v1"
+    private const val KEY_PASSPORT_STAMP = "passport_stamp_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -2974,6 +2987,15 @@ object AppPreferences {
     fun setDeckRiffleEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_DECK_RIFFLE, enabled).apply()
         riffleDeckState = enabled
+    }
+
+    // ── The passport's pressed stamp (v491, default ON) ──────────────
+    fun isPassportStampEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PASSPORT_STAMP, true)
+
+    fun setPassportStampEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PASSPORT_STAMP, enabled).apply()
+        passportStampState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -93,6 +94,7 @@ import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.components.ConfettiBurst
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.BadgeTier
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeMedal
@@ -1881,8 +1883,29 @@ private fun PassportCard(
 ) {
     val context = LocalContext.current
     val cats = CurioCategories.visible
-    val mastered = cats.count {
-        CurioPassport.progress(context, it.id).stamp == CurioPassport.Stamp.MASTERED
+    // v491 — THE PRESSED STAMPS, read ONCE for the page rather than per cell:
+    // the passport grid redraws whenever this card does, and the pressed set is
+    // the one thing a press changes. State, not a plain read, so the header's
+    // count moves the instant a stamp lands.
+    val stampPress = AppPreferences.passportStampState
+    var pressedLanes by remember(stampPress) {
+        // Typed explicitly: the two branches of this if are Set<String> and
+        // Set<Nothing>, and there is no reason to make the compiler work that
+        // out for a state holder whose type is the whole point.
+        mutableStateOf<Set<String>>(
+            if (stampPress) CurioPassport.pressedStamps(context) else emptySet()
+        )
+    }
+    // ONE sweep for both numbers — the grid already reads every lane's progress
+    // below, and a second pass over 21 lanes for the same data would cost a
+    // full set of JSON reads for nothing.
+    var mastered = 0
+    var awaitingStamp = 0
+    cats.forEach { cat ->
+        if (CurioPassport.progress(context, cat.id).stamp == CurioPassport.Stamp.MASTERED) {
+            mastered++
+            if (stampPress && cat.id.name !in pressedLanes) awaitingStamp++
+        }
     }
     // v8.5 — the passport reads as a 4×3 stamp grid per page (12 lanes); the
     // 21 lanes page into two swipeable pages with a dot indicator.
@@ -1892,7 +1915,12 @@ private fun PassportCard(
         CurioCardHeader(
             CurioIcons.Star,
             "Category passport",
-            "$mastered of ${cats.size} lanes mastered"
+            // v491 — the waiting stamps are named in the header, because a
+            // stamp that has not landed yet is the only thing on this card the
+            // member has to do something about. Never a bare "tap here": the
+            // cell itself says what it is for.
+            if (awaitingStamp > 0) "$mastered of ${cats.size} lanes mastered · $awaitingStamp to stamp"
+            else "$mastered of ${cats.size} lanes mastered"
         )
         Spacer(Modifier.height(4.dp))
         HorizontalPager(
@@ -1911,6 +1939,11 @@ private fun PassportCard(
                         row.forEach { cat ->
                             PassportStamp(
                                 cat = cat,
+                                // v491 — whether this lane's stamp has already
+                                // been pressed, and the press itself: recorded
+                                // here, at the page, in one place.
+                                pressed = cat.id.name in pressedLanes,
+                                onStampPress = { pressedLanes = pressedLanes + cat.id.name },
                                 modifier = Modifier.weight(1f),
                                 onClick = { onSpin(cat.id.routeSlug) }
                             )
@@ -1944,14 +1977,36 @@ private fun PassportCard(
     }
 }
 
+// ── v491 — THE IMPRINT'S IMPERFECTION ─────────────────────────────────────
+// A real stamp never lands square. Every INKED cell on the passport carries a
+// small tilt and nudge, and both are derived from the LANE'S OWN ID — which
+// makes them **stable for that lane for life**: the same lane is always
+// crooked the same way, a fresh install draws the same passport, and nothing
+// here can shimmer or re-roll between frames. (`String.hashCode` is specified
+// by the JDK, so these numbers survive every future update of the app; a
+// per-frame random would be a bug, not a paper texture.)
+private fun stampTiltDeg(laneId: String): Float =
+    ((((laneId.hashCode() % 25) + 25) % 25) - 12) * 0.2f          // −2.4° … +2.4°
+
+private fun stampNudgeX(laneId: String): Float =
+    (((((laneId.hashCode() / 7) % 5) + 5) % 5) - 2) * 0.6f         // −1.2 … +1.2dp
+
+private fun stampNudgeY(laneId: String): Float =
+    (((((laneId.hashCode() / 13) % 5) + 5) % 5) - 2) * 0.5f        // −1.0 … +1.0dp
+
 /** One passport stamp — the lane's glyph, name and state. */
 @Composable
 private fun PassportStamp(
     cat: CurioCategory,
+    /** v491 — whether this lane's mastered stamp has already been pressed. */
+    pressed: Boolean,
+    /** v491 — the press landed; the PAGE records it, in one place, not the cell. */
+    onStampPress: () -> Unit,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val stamp = CurioPassport.progress(context, cat.id).stamp
     // v8.28 — stamp text/glyphs use the READABLE accent ink (deep accent in
     // light, deep hue twin for pale accents + in pastel mode, light twin in
@@ -1960,25 +2015,55 @@ private fun PassportStamp(
     // tinted surfaces.
     val accent = cat.themedAccent()
     val ink = cat.readableAccentInk()
+
+    // ── v491 — THE PRESS ───────────────────────────────────────────────
+    // EARNED, NOT YET INKED. The lane IS mastered — mastery is a fact derived
+    // from real activity ([CurioPassport.CategoryProgress.stamp]) and is never
+    // in question here — but the member has not yet brought the stamp head
+    // down on it. So the cell already wears the mastered fill and misses only
+    // the INK. Masteries earned before this version are grandfathered in as
+    // already pressed (see [CurioPassport.ensurePressSeed]), so an upgrade
+    // never un-inks a passport somebody already filled.
+    val stampPressOn = AppPreferences.passportStampState
+    val awaiting = stampPressOn &&
+        stamp == CurioPassport.Stamp.MASTERED && !pressed
+    // The strike is a one-shot: snap the imprint wide, then let one spring
+    // settle it into the paper. `landing` stays true afterwards, but the
+    // animation ends at rest, so the layer below is a no-op from then on.
+    var landing by remember { mutableStateOf(false) }
+    val strike = remember { Animatable(1f) }
+    LaunchedEffect(landing) {
+        if (landing) {
+            strike.snapTo(1.32f)
+            strike.animateTo(1f, CurioMotion.Springs.Bouncy)
+        }
+    }
+
     val label: String
     val glyph: String
     val tint: Color
-    when (stamp) {
-        CurioPassport.Stamp.MASTERED -> {
-            label = "Mastered"; glyph = CurioIcons.TaskAlt; tint = curioSageInk()
+    when {
+        awaiting -> {
+            // The label IS the action, and the cell is the only place it is
+            // said: nothing hangs over the page that has to be found.
+            label = "Press to stamp"; glyph = CurioIcons.TaskAlt; tint = curioSageInk()
         }
-        CurioPassport.Stamp.EXPLORED -> {
-            label = "Explored"; glyph = CurioIcons.Check; tint = curioSageInk()
-        }
-        CurioPassport.Stamp.PEEKED -> {
-            label = "Peeked"; glyph = CurioIcons.Star; tint = ink
-        }
-        CurioPassport.Stamp.UNSEEN -> {
-            label = "New · spin!"; glyph = CurioIcons.StarOutline; tint = ink
+        else -> when (stamp) {
+            CurioPassport.Stamp.MASTERED -> {
+                label = "Mastered"; glyph = CurioIcons.TaskAlt; tint = curioSageInk()
+            }
+            CurioPassport.Stamp.EXPLORED -> {
+                label = "Explored"; glyph = CurioIcons.Check; tint = curioSageInk()
+            }
+            CurioPassport.Stamp.PEEKED -> {
+                label = "Peeked"; glyph = CurioIcons.Star; tint = ink
+            }
+            CurioPassport.Stamp.UNSEEN -> {
+                label = "New · spin!"; glyph = CurioIcons.StarOutline; tint = ink
+            }
         }
     }
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = when (stamp) {
             // v27n — OPAQUE stamp fills (the old 10–45% alphas let the
@@ -1994,20 +2079,64 @@ private fun PassportStamp(
         },
         border = BorderStroke(
             1.dp,
-            if (stamp == CurioPassport.Stamp.UNSEEN) ink.copy(alpha = 0.45f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            when {
+                // The waiting stamp wears a solid sage ring: it is the one
+                // thing on this page asking to be touched.
+                awaiting -> curioSageInk().copy(alpha = 0.75f)
+                stamp == CurioPassport.Stamp.UNSEEN -> ink.copy(alpha = 0.45f)
+                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            }
         ),
         shadowElevation = 2.dp,
         modifier = modifier
+            // THE PRESS IS THE GESTURE. A deeper squash on a waiting cell (a
+            // stamp head comes down hard) and the shared tick on the way DOWN;
+            // the THUNK is on the LAND, so the two are told apart by feel — a
+            // light tick under the thumb, a heavy arrival when it lifts.
+            // Every other cell keeps exactly the tap it always had, and the
+            // label on the cell is the visible way to do it: no hidden
+            // gesture, and nothing here is the only route to anything.
+            .curioPressClickable(
+                pressedScale = if (awaiting) 0.93f else 0.97f,
+                onClickLabel = if (awaiting) "Press the ${cat.displayName} stamp" else null,
+                onClick = {
+                    if (awaiting) {
+                        // The land: the app's heaviest confirm, because this
+                        // is the one place something physical arrives.
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onStampPress()
+                        landing = true
+                    } else {
+                        onClick()
+                    }
+                }
+            )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 10.dp)
+                // The imprint's imperfection lives on the INK, not the card:
+                // the cell is the paper, and the paper is not crooked.
+                .graphicsLayer {
+                    if (stampPressOn && stamp != CurioPassport.Stamp.UNSEEN) {
+                        rotationZ = stampTiltDeg(cat.id.name)
+                        translationX = stampNudgeX(cat.id.name)
+                        translationY = stampNudgeY(cat.id.name)
+                    }
+                    val scale = if (landing) strike.value else 1f
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = if (landing) {
+                        (1f - ((strike.value - 1f) / 0.32f)).coerceIn(0f, 1f)
+                    } else 1f
+                }
         ) {
             CurioIcon(
                 name = cat.iconGlyph,
                 contentDescription = cat.displayName,
-                tint = ink,
+                // Waiting ink is faint: the hue is there, the impression is not.
+                tint = if (awaiting) ink.copy(alpha = 0.4f) else ink,
                 size = 20.dp
             )
             Spacer(Modifier.height(4.dp))

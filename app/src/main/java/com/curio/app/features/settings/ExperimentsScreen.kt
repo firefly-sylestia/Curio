@@ -271,6 +271,22 @@ fun ExperimentsScreen(navController: NavController) {
             }
 
             // v3xx45 — SCREEN REVEAL experiment (default OFF): opening any
+            // v491 — THE PASSPORT'S STAMP IS PRESSED. Masteries earned before
+            // this version are grandfathered in as already pressed, so off is
+            // exactly the passport that was there before.
+            item { SettingsSectionHeading("Passport") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Press the stamp",
+                            "A lane you master waits for its stamp: bring your thumb down on the cell and the imprint lands with a thunk, squashed and a little crooked. Every stamp on the page is crooked in its own fixed way, like real ink. Off stamps a mastered lane on its own, as before.",
+                            AppPreferences.passportStampState
+                        ) { wanted -> AppPreferences.setPassportStampEnabled(context, wanted) }
+                    }
+                }
+            }
+
             // screen plays the same feathered iris as the light/dark flip,
             // centred on your tap, a touch faster than the theme wipe.
             item { SettingsSectionHeading("Transitions") }

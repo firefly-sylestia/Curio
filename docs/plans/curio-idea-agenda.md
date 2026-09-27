@@ -200,7 +200,7 @@ Six were offered on that rule; **four were picked, in this order.** All four shi
 behind a Settings toggle, ON by default, per the standing rule for a new measure.
 The deck's LOOK is untouched by the first one.
 
-### 5.1 The riffle — BUILT (v490) ★
+### 5.1 The riffle (BUILT, v490) ★
 
 Spin's fan is thumbed like a real deck: drag it sideways and the whole fan slides
 and leans in the hand, one card passes per 48dp of thumb travel (the OLD swipe
@@ -253,9 +253,19 @@ same act on the same surface: the tear belongs to the reveal (the act of taking
 something out of the page) and the fold to the Cabinet card (the state of having
 kept it) — **confirm which surface each owns before building either.**
 
-### 5.4 Press the stamp — the Passport (OWED)
+### 5.4 Press the stamp — the Passport (BUILT, v491)
 
-**What.** The Passport's stamps stop appearing: a rubber stamp head hangs over the
+**Built as designed, plus the one thing the design needed to not break a
+passport:** masteries earned *before* this version are **grandfathered in as
+already pressed**, so an upgrade never un-inks a page somebody already filled —
+only a lane mastered from here on waits for its press. The imprint's
+imperfection (±2.4° tilt, ±1.2dp nudge) is derived from the lane's own id, so it
+is fixed for that lane for life and a fresh install draws the same passport.
+Behind **Press the stamp** in Settings → Experiments → Passport, on by default.
+Full description and the traps are in `app/AGENTS.md`'s v491 section. The rest of
+this entry is the design it was built from, kept so the intent is not lost.
+
+**What (as designed).** The Passport's stamps stop appearing: a rubber stamp head hangs over the
 page, you bring your thumb down, it compresses and lands with a *thunk* — haptic
 plus a squashed ink silhouette that comes out slightly imperfect, like a real one.
 
@@ -288,9 +298,10 @@ the imperfection is deterministic per lane (seeded), never random per frame.
 5. **The reveal as one object** (3.4), then the **sound layer** (3.6) and the
    **pet** (3.7).
 6. **The second round** (§5), which the member took as its own workstream and
-   which is already underway: **5.1 the riffle is built (v490)**; **5.4 the
-   stamp** and **5.5's two kept items** are next, and **5.2/5.3 (tear / fold)**
-   need their surface question answered first — they are both a save verb and
+   which is well underway: **5.1 the riffle is built (v490)** and **5.4 the
+   press-stamp is built (v491)**. Next are **5.5's two kept items** (the reader
+   pencil margin, time capsules); **5.2/5.3 (tear / fold)** are held until the
+   member settles which surface owns which — they are both a save verb and
    cannot both own it.
 
 ## Sources

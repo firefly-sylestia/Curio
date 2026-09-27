@@ -143,6 +143,20 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // v491 — THE PASSPORT'S STAMP IS PRESSED. Masteries earned before
+            // this version are grandfathered in as already pressed, so off is
+            // exactly the passport that was there before.
+            item { SettingsSectionHeading("Passport") }
+            item {
+                SettingsOptionCard {
+                    ExperimentSwitchRow(
+                        "Press the stamp",
+                        "A lane you master waits for its stamp: bring your thumb down on the cell and the imprint lands with a thunk, squashed and a little crooked. Every stamp on the page is crooked in its own fixed way, like real ink. Off stamps a mastered lane on its own, as before.",
+                        AppPreferences.passportStampState
+                    ) { wanted -> AppPreferences.setPassportStampEnabled(context, wanted) }
+                }
+            }
+
             item { SettingsSectionHeading("Liquid glass") }
             item {
                 SettingsOptionCard {

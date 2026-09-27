@@ -28,6 +28,13 @@ object CurioPassport {
     private const val KEY_EXPLORES = "explores"
     private const val KEY_SAVES = "saves"
     private const val KEY_LAST = "last_explored"
+    // v491 — THE PRESSED STAMPS. A lane's MASTERED stamp is EARNED by real
+    // activity (see [CategoryProgress.stamp]) and then PRESSED by the member:
+    // a rubber stamp head comes down, the imprint lands with a thunk, and it
+    // stays. This set records which lanes have had that press, so the ceremony
+    // happens once per lane and the imprint is never taken back.
+    private const val KEY_PRESSED = "pressed_lanes"
+    private const val KEY_PRESS_SEEDED = "pressed_seeded"
 
     enum class Stamp { UNSEEN, PEEKED, EXPLORED, MASTERED }
 
@@ -134,6 +141,62 @@ object CurioPassport {
     /** Number of lanes the user has at least explored (drives discovery). */
     fun exploredLaneCount(context: Context): Int =
         allProgress(context).count { it.value.explores > 0 }
+
+    // ── The press (v491) ────────────────────────────────────────────────
+
+    /** Every lane id whose mastered stamp has been pressed. */
+    fun pressedStamps(context: Context): Set<String> {
+        ensurePressSeed(context)
+        return readPressed(context)
+    }
+
+    /**
+     * Records the press. Once per lane, for ever — an imprint is not a state
+     * that can be un-taken, and pressing again is not offered anywhere.
+     */
+    fun markStampPressed(context: Context, category: CategoryId) {
+        ensurePressSeed(context)
+        val pressed = readPressed(context)
+        if (category.name in pressed) return
+        prefs(context).edit()
+            .putString(KEY_PRESSED, JSONObject(pressed.associateWith { true } + (category.name to true)).toString())
+            .apply()
+    }
+
+    private fun readPressed(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_PRESSED, null) ?: return emptySet()
+        return try {
+            val obj = JSONObject(raw)
+            buildSet { obj.keys().forEach { k -> if (obj.optBoolean(k)) add(k) } }
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    /**
+     * THE ONE-TIME GRANDFATHER — and the reason this feature does not break an
+     * existing passport.
+     *
+     * A member who upgrades already has stamps: they appeared on their own, as
+     * they always had. The moment the press exists, "mastered and not pressed"
+     * would be true for every one of those lanes at once and the whole page
+     * would read as un-inked — losing a record the member earned. So the very
+     * first read marks every ALREADY-mastered lane as pressed: the stamps they
+     * had stay exactly as they were, and only a lane mastered FROM HERE ON
+     * waits for its press. It runs once (`KEY_PRESS_SEEDED`) and never again,
+     * so a lane mastered later can never be silently swept in.
+     */
+    private fun ensurePressSeed(context: Context) {
+        if (prefs(context).getBoolean(KEY_PRESS_SEEDED, false)) return
+        val already = CurioCategories.visible
+            .filter { progress(context, it.id).stamp == Stamp.MASTERED }
+            .associate { it.id.name to true }
+        val merged = readPressed(context).associateWith { true } + already
+        prefs(context).edit()
+            .putString(KEY_PRESSED, JSONObject(merged).toString())
+            .putBoolean(KEY_PRESS_SEEDED, true)
+            .apply()
+    }
 
     /** The stamp for the least-engaged visible category (null when all seen). */
     fun leastEngaged(context: Context): CurioCategory? {

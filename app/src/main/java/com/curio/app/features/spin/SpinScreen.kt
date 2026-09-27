@@ -2871,7 +2871,13 @@ private fun Carousel(
         val pump = riffleClampPx *
             (RifflePumpFast + (RifflePumpSlow - RifflePumpFast) * shuffleProgress)
         fanTravel.snapTo(pump)
-        fanTravel.animateTo(0f, tween(interval.toInt(), FastOutSlowInEasing))
+        fanTravel.animateTo(
+            0f,
+            // NAMED, both of them: tween's second POSITIONAL parameter is
+            // `delayMillis`, not the easing — passing the easing positionally
+            // compiles as "Easing where Int was expected" (v490b's red build).
+            tween(durationMillis = interval.toInt(), easing = FastOutSlowInEasing)
+        )
     }
     // The reel has stopped — the fan comes home with the one spring that
     // overshoots, which is what lets go of a spun deck.
