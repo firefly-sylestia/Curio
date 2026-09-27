@@ -163,6 +163,23 @@ fun CurioLiquidGlassTabBar(
     // glass site (see `LiquidGlassPills`), and drops the lens pass.
     val frosted = AppPreferences.glassFrostedState
     val frostedDark = isCurioDarkTheme()
+    // v487 — THE LABEL GHOST, AND WHY THE FROST DROPS THE HIDDEN TAB ROW.
+    //
+    // The active pill samples a COMBINED backdrop (the page + an invisible copy
+    // of the tab row) so the blob visibly bends the tab content under it — which
+    // is right for the clear refracting look it was built for. But its own
+    // effects used the CLEAR recipe (2dp), so on a FROSTED bar the tab's own
+    // label sat refracted-and-barely-blurred inside the pill while the crisp
+    // copy drew on top of it at a 55%-opaque fill: the member's *"the nav bar's
+    // own labels look smudgy"* — Home / Shuffle / Cabinet ghosted by their own
+    // blurred twin.
+    //
+    // A frosted pane is a window onto the PAGE, so on the frost it samples the
+    // page alone (pageOnlySample). The crisp overlay is then the ONLY source of
+    // the label, and it reads sharp over a softly blurred page — exactly what
+    // the member asked for. `ghostFreeTabs` (Pet Designer) keeps its own
+    // page-only rule, which the v262 notes describe.
+    val pageOnlySample = ghostFreeTabs || frosted
     // v242 — user tuning (Appearance → Liquid glass): multipliers around
     // the tuned defaults, applied to blur / lens / highlight below.
     val blurScale = AppPreferences.glassBlurScaleState
@@ -361,7 +378,14 @@ fun CurioLiquidGlassTabBar(
                         if (isBlurEnabled) {
                             vibrancy()
                             if (frosted) {
-                                blur(21f.dp.toPx() * blurScale)
+                                // v487 — the heavy blur, spent whole: 21dp was
+                                // always the authored radius, but it was multiplied
+                                // by the clear recipe's 0.25 default (a 5.25dp
+                                // smudge). See [CurioGlassPills.Frost.blurFactor].
+                                blur(
+                                    CurioGlassPills.Frost.BlurDp.dp.toPx() *
+                                        CurioGlassPills.Frost.blurFactor(blurScale)
+                                )
                                 // v484 — the smudge refracts again, at half the
                                 // clear recipe's radius (see [CurioGlassPills.Frost.
                                 // LensDp]): the nav bar is the most-seen glass
@@ -513,7 +537,7 @@ fun CurioLiquidGlassTabBar(
                         // v262 — UNCONDITIONAL for ghostFreeTabs (even with
                         // the classic-indicator experiment on): Pet Designer
                         // always samples page-only, home nav always combines.
-                        backdrop = if (ghostFreeTabs) {
+                        backdrop = if (pageOnlySample) {
                             backdrop
                         } else {
                             rememberCombinedBackdrop(backdrop, tabsBackdrop)
@@ -529,7 +553,20 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                if (classicIndicator) {
+                                if (frosted) {
+                                    // v487 — the frost's own heavy blur (see
+                                    // [CurioGlassPills.Frost]): the pill is a
+                                    // window onto the blurred page now that it no
+                                    // longer samples the tab row, and a 2dp blur
+                                    // would have made it a flat plate instead.
+                                    blur(
+                                        CurioGlassPills.Frost.BlurDp.dp.toPx() *
+                                            CurioGlassPills.Frost.blurFactor(blurScale)
+                                    )
+                                    val smudgeR = CurioGlassPills.Frost.LensDp.dp.toPx() *
+                                        refrScale * (0.6f + 0.4f * progress)
+                                    lens(smudgeR, smudgeR, true)
+                                } else if (classicIndicator) {
                                     // v248 — classic style: ALWAYS-ON full
                                     // refraction, exactly like the nav capsule
                                     // (the pre-v247 look).
@@ -643,7 +680,10 @@ fun CurioLiquidGlassTabBar(
         // v292h — always render overlay for ghostFreeTabs (Pet Designer)
         // because the blob samples page-only so the overlay is the ONLY
         // source of tab labels at rest.
-        if (!classicIndicator || ghostFreeTabs) {
+        // v487 — the same is true on the FROST (see [pageOnlySample]): with the
+        // tab row no longer sampled, this overlay is the only place the active
+        // label exists, so it must be drawn even in the classic-indicator style.
+        if (!classicIndicator || pageOnlySample) {
             CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
                 Row(
                     Modifier

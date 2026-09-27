@@ -1665,18 +1665,22 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
-    // v482/v484 — FROSTED (SMUDGED) GLASS (default ON): the member: *"make it
-    // whitish frosty glass not transparent at all more smudged, add a toggle
-    // for the whole smudged look too"*, then, living with it: *"the frosted blur
-    // doesnt refract and its too opaque make it 40 mybe … also for dark mode too,
-    // its just for light mode rn"*. When ON, every glass surface — the floating
-    // pills, the toolbars, the nav bar, and (since v484) the bottom sheets' and
-    // dialogs' own panels — wears a THIN frost wash (`CurioGlassPills.Frost.Wash`
-    // 0.40, breathed toward white in light and lifted in dark) over a heavy blur.
-    // The lens refraction is back everywhere it was dropped except the reader's
-    // chrome (see `LocalCurioGlassFrostRefraction`). Turning it off restores the
-    // clear recipe (and the separate Clear glass option still applies in that
-    // mode). The same switch drives the smudge on sheets and dialogs (see
+    // v482/v484/v487 — FROSTED GLASS (default ON): the member: *"make it whitish
+    // frosty glass not transparent at all more smudged, add a toggle for the whole
+    // smudged look too"*, then *"the frosted blur doesnt refract and its too opaque
+    // make it 40 mybe … also for dark mode too"*, then (v487, with it on) *"the nav
+    // bar's own labels look smudgy … make it heavy, a real blurred, thinner tint
+    // without the wash"*. When ON, every glass surface — the floating pills, the
+    // toolbars, the nav bar, and the bottom sheets' and dialogs' own panels — wears
+    // a HEAVY real blur with a THIN tint of its own colour on top (see
+    // `CurioGlassPills.Frost`): the blurred page is the look, the tint only says
+    // which surface this is, and text drawn on the glass stays crisp. The nav bar
+    // additionally stops sampling its own hidden tab-row copy in this mode, which
+    // is what ghosted its labels (see `CurioLiquidGlassTabBar`). The lens refraction
+    // is back everywhere it was dropped except the reader's chrome (see
+    // `LocalCurioGlassFrostRefraction`). Turning it off restores the clear recipe
+    // (and the separate Clear glass option still applies in that mode). The same
+    // switch drives the frost on sheets and dialogs (see
     // [com.curio.app.ui.theme.curioSheetContainerColor] and
     // [com.curio.app.ui.theme.curioDialogContainerColor]).
     var glassFrostedState by mutableStateOf(true)
@@ -1707,6 +1711,10 @@ object AppPreferences {
     // the effect off; up to 2f doubles it.
     // v243 — the DEFAULT sits at 25% (a much clearer glass than the old
     // full-frost 100%); users can still slide 0–200% in Appearance.
+    // v487 — the FROST no longer reads this as a fraction of its own radius: it
+    // centres on this default, so 0.25 is the frost's FULL heavy blur and the
+    // slider moves it either way (see `CurioGlassPills.Frost.blurFactor`). The
+    // clear recipe still spends it directly, exactly as before.
     var glassBlurScaleState by mutableStateOf(0.25f)
         private set
     var glassRefractionScaleState by mutableStateOf(1f)

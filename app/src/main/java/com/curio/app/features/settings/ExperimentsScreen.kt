@@ -171,10 +171,11 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                     if (AppPreferences.liquidGlassPillsState) {
                         CurioSettingsDivider()
-                        // v482 — the whitish SMUDGED frost (default ON): heavy
-                        // blur, near-opaque white wash, no refraction. Turning
-                        // it off returns the clear refracting glass.
-                        ExperimentSwitchRow("Frosted glass (smudged)", "Blurred, smudged glass instead of a clear refracting pane. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
+                        // v482/v487 — the FROSTED look (default ON): a heavy,
+                        // real blur under a thin tint of the surface's own colour,
+                        // so text on the glass stays crisp. Turning it off returns
+                        // the clear refracting glass.
+                        ExperimentSwitchRow("Frosted glass", "A heavy, real blur with only a thin tint on top — the page behind reads as soft, out-of-focus glass and anything drawn on the glass stays sharp. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
                             AppPreferences.setGlassFrostedEnabled(context, it)
                         }
                         CurioSettingsDivider()

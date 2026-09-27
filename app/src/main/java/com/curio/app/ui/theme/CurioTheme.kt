@@ -624,9 +624,10 @@ val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
  * ([CurioGlassWindowBlur] on the window), and it can be thin enough to let that
  * blur read. That is what makes a sheet or a dialog glass:
  *
- *  - **frosted** (the default): the smudge — a 40% wash of [base] breathed
- *    toward white in light and lifted a little in dark, so a dark pane is dark
- *    glass and not the grey slab a white frost made of it;
+ *  - **frosted** (the default): a heavy, real blur behind the window with only a
+ *    THIN tint of [base] on the pane (a whisper of light lift in light, a
+ *    whisper of dark lift in dark), so the panel reads as a window onto a soft,
+ *    out-of-focus page rather than as a painted slab ([CurioGlassPills.Frost]);
  *  - **Clear glass**: a genuinely clearer pane — less wash, more of the blurred
  *    page showing through;
  *  - **no blur behind it** (Android below 12, cross-window blur off, Lite mode):
@@ -658,7 +659,11 @@ fun curioFrostedPanel(base: Color): Color {
     }
     val alpha = when {
         !blurred -> CurioGlassPills.Frost.OpaquePanel
-        frosted -> CurioGlassPills.Frost.Wash
+        // v487 — the panel's own thin pane (see [CurioGlassPills.Frost.PanelWash]):
+        // a sheet carries more text than a floating pill, so it keeps a little
+        // more of its colour than the pills' [CurioGlassPills.Frost.Wash] — but
+        // the window blur behind it is still what the panel is mostly made of.
+        frosted -> CurioGlassPills.Frost.PanelWash
         else -> CurioGlassPills.Frost.ClearWash
     }
     return pane.copy(alpha = alpha)

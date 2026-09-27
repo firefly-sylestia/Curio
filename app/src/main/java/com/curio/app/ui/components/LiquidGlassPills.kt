@@ -88,23 +88,55 @@ object CurioGlassPills {
     var appContext: android.content.Context? = null
 
     /**
-     * v484 — THE FROST, AS FOUR NUMBERS.
+     * v484/v487 — THE FROST, AS A FEW NUMBERS.
      *
-     * The member, after living with v482's near-opaque white: *"the frosted blur
-     * doesnt refract and its too opaque make it 40 mybe … also for dark mode too,
-     * its just for light mode rn"*. These four numbers are the whole answer, and
-     * they live here so **no surface invents its own** — the floating pills and
-     * the sheets'/dialogs' panels are frosted out of this one recipe.
+     * v484 answered *"the frosted blur doesnt refract and its too opaque make it
+     * 40 mybe"* with a thin 0.40 wash. Living with it, the member's next report
+     * was *"the nav bar's own labels look smudgy … make it heavy, a real blurred,
+     * thinner tint without the wash"* — and reading the recipe explains both
+     * halves:
+     *
+     *  - **the blur was being quartered.** The frost asked for `blur(21dp)` and
+     *    then multiplied it by [AppPreferences.glassBlurScaleState], whose default
+     *    is **0.25** — that slider was tuned for the CLEAR recipe's own 8dp, so
+     *    the frost that shipped was a 5.25dp smudge: enough to make text mush,
+     *    not enough to read as a soft out-of-focus page. The blurred, washer-like
+     *    middle is exactly what the member was looking at. The frost now spends
+     *    [BlurDp] at the slider's own default ([blurFactor] centres on it), so the
+     *    blur is heavy by construction and the slider still moves it.
+     *  - **the pane was painted white.** v482/v484's wash carried a 62% pull toward
+     *    white — that milky paint OVER a weak blur is the "smudge". The frosted
+     *    pane is now a THIN TINT of the surface's own colour ([Wash]) with only a
+     *    whisper of lift ([LightLift]/[DarkLift]): the heavy blur is the look, and
+     *    the tint is what keeps a pane recognisable as the surface it belongs to.
+     *    The manual top-down sheen gradient is gone too — the `drawBackdrop` rim
+     *    highlight already catches the light, and the extra gradient was a second
+     *    wash on top of the first.
+     *
+     * Everything lives here so **no surface invents its own** — the floating
+     * pills, the nav bar and the sheets'/dialogs' panels are frosted out of this
+     * one recipe, and the dropdowns inherit it by using [liquidGlassCapsule].
      */
     object Frost {
         /**
-         * How much of the pane the frost covers at all. 0.40: the heavy BLUR is
-         * what makes it a smudge, not the opacity — 92% was paint.
+         * How much tint the frosted pane carries. Thin on purpose: at 0.18 the
+         * heavy blur behind it is what you see, and the tint only says which
+         * surface this is. (v484's 0.40 over a quarter-strength blur was paint.)
          */
-        const val Wash = 0.40f
+        const val Wash = 0.18f
 
-        /** How far a LIGHT pane breathes toward white. */
-        const val LightLift = 0.62f
+        /**
+         * The same thin pane on a SHEET or a DIALOG, where there is more text to
+         * keep legible and less of the page to show. Still far thinner than the
+         * old wash, and paired with [OpaquePanel] wherever no window blur lands.
+         */
+        const val PanelWash = 0.34f
+
+        /**
+         * How far a LIGHT pane breathes toward white. A whisper now (0.62 was the
+         * milky part of the smudge): the blurred page supplies the brightness.
+         */
+        const val LightLift = 0.12f
 
         /**
          * How far a DARK pane lifts its OWN colour. Deliberately small: the frost
@@ -112,7 +144,35 @@ object CurioGlassPills {
          * `lerp(…, White, 0.62f)` in dark did — and why the smudge only ever read
          * in light mode.
          */
-        const val DarkLift = 0.14f
+        const val DarkLift = 0.05f
+
+        /**
+         * The frost's OWN blur radius — the heavy, real blur that IS the look.
+         * Spent whole at the blur slider's default (see [blurFactor]).
+         */
+        const val BlurDp = 21f
+
+        /**
+         * The frost radius a small COMPACT surface (a chip, a small pill) gets.
+         * A 21dp blur on a 32dp chip is a flat colour, not a pane; 10dp keeps the
+         * blur reading on a surface too small to show much of the page anyway.
+         */
+        const val CompactBlurDp = 10f
+
+        /**
+         * The Appearance "Blur" slider's own default — the value the frost's blur
+         * is centred on, so the DEFAULT is the full [BlurDp] and the slider
+         * reaches ~40% below it and ~2.5× above it.
+         */
+        const val BlurScaleDefault = 0.25f
+
+        /**
+         * The multiplier the frost spends on the blur slider. `1f` at the
+         * slider's default, floored so the frost can never become the weak
+         * smudge this pass exists to remove.
+         */
+        fun blurFactor(scale: Float): Float =
+            (scale / BlurScaleDefault).coerceIn(0.4f, 2.5f)
 
         /**
          * How much more opaque a panel stays when there is NO window blur behind
@@ -128,6 +188,13 @@ object CurioGlassPills {
          * blurred page does most of the work, so barely any colour sits on top.
          */
         const val ClearWash = 0.22f
+
+        /**
+         * The veil the SIMULATED recipe (pre-Android-12, [fauxGlassCapsule]) wears.
+         * It cannot blur anything, so it may NOT use the thin [Wash] — a thin pane
+         * over a sharp page reads as a mistake. Kept at a readable middle.
+         */
+        const val FauxWash = 0.62f
 
         /**
          * The refraction radius a smudge bends with — half the clear recipe's
@@ -452,11 +519,11 @@ fun Modifier.fauxGlassCapsule(
     val frosted = AppPreferences.glassFrostedState
     val veilScale = 0.30f + 0.70f * AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
     val veil = if (frosted) {
-        // v484 — the same thin, theme-own frost the real recipe draws (see
-        // [CurioGlassPills.Frost.Wash]): the simulated pane cannot refract, so
-        // being a WASH rather
-        // than paint is the only thing it can honestly share with it.
-        frostColor(container, dark).copy(alpha = CurioGlassPills.Frost.Wash)
+        // v484/v487 — the same theme-own frost colour the real recipe draws (see
+        // [CurioGlassPills.Frost.Wash]), at [CurioGlassPills.Frost.FauxWash] —
+        // NOT the thin Wash: this recipe has no blur to hide behind, and a
+        // 0.18 pane over a sharp page reads as a mistake rather than as glass.
+        frostColor(container, dark).copy(alpha = CurioGlassPills.Frost.FauxWash)
     } else {
         Color.White.copy(alpha = (if (dark) 0.05f else 0.34f) * veilScale)
     }
@@ -661,7 +728,16 @@ fun Modifier.liquidGlassCapsule(
                     // blur PLUS the bend, and the reader's chrome is the one place
                     // the bend is skipped (see `frostRefracts` below).
                     if (frosted) {
-                        blur(21f.dp.toPx() * blurScale * blurMultiplier)
+                        // v487 — THE HEAVY BLUR, SPENT WHOLE. 21dp was always the
+                        // authored number; multiplying it by the clear recipe's
+                        // 0.25 default is what shipped a 5.25dp smudge (see
+                        // [CurioGlassPills.Frost]). The blur slider still moves it,
+                        // centred on its own default.
+                        blur(
+                            (if (compact) CurioGlassPills.Frost.CompactBlurDp
+                            else CurioGlassPills.Frost.BlurDp).dp.toPx() *
+                                CurioGlassPills.Frost.blurFactor(blurScale) * blurMultiplier
+                        )
                         // v484 — THE SMUDGE REFRACTS AGAIN. The lens is what makes
                         // the pane bend what is behind it at its edges; v482 dropped
                         // it for the reader (whose chrome re-records every frame and
@@ -712,30 +788,17 @@ fun Modifier.liquidGlassCapsule(
                 // properly frosty instead of clear-plastic.
                 onDrawSurface = {
                     if (frosted) {
-                        // v484 — THE FROST IS A WASH AGAIN, NOT PAINT.
+                        // v487 — THE PANE IS A THIN TINT OF ITS OWN COLOUR.
                         //
-                        // v482 laid a near-opaque white at 92% and the member's
-                        // answer was immediate: *"the frosted blur doesnt refract and
-                        // its too opaque make it 40 mybe … also for dark mode too, its
-                        // just for light mode rn"*. So the wash is THIN
-                        // ([CurioGlassPills.Frost.Wash] 0.40), so the blur behind it
-                        // still reads as a blurred page and the refraction at the rim is
-                        // visible at all — LIGHT breathes toward white while DARK lifts
-                        // its own container a little, so a dark pane is dark glass
-                        // instead of the grey slab a white frost made of it. The sheen
-                        // stays as the light lying along the top rim.
+                        // v484's 0.40 wash still carried a 62% pull toward white,
+                        // and over a quarter-strength blur that milky paint WAS the
+                        // smudge the member reported. The heavy blur is the look now;
+                        // the tint only says which surface this is. The manual
+                        // top-down sheen gradient is gone with it — `drawBackdrop`'s
+                        // own rim highlight already catches the light, so the extra
+                        // gradient was a second wash stacked on the first.
                         val frost = frostColor(container, dark)
                         drawRect(frost.copy(alpha = CurioGlassPills.Frost.Wash))
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    Color.White.copy(alpha = if (dark) 0.18f else 0.30f),
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    Color.White.copy(alpha = if (dark) 0.06f else 0.10f)
-                                )
-                            )
-                        )
                     } else {
                         // v292c — wash back to the standard recipe (the v292/
                         // v292b compact multipliers made chips read milky-frosted
