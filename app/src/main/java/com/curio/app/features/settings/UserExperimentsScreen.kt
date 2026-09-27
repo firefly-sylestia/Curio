@@ -202,6 +202,16 @@ fun UserExperimentsScreen(navController: NavController) {
             item {
                 SettingsOptionCard {
                     ExperimentSwitchRow(
+                        // v492 — THE PENCIL MARGIN. Off removes the reader's own
+                        // Margin door from the ⋯ grid, which is then exactly
+                        // the six tiles it was; ink already written is kept and
+                        // comes back the moment it is switched on again.
+                        "Pencil margin",
+                        "Write in a book's margin with your finger — the reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
+                        AppPreferences.readerMarginState
+                    ) { AppPreferences.setReaderMarginEnabled(context, it) }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow(
                         "Pinned title view",
                         "Keep the current Book Review and Journal title visible while scrolling. Experimental.",
                         AppPreferences.pinnedTitleViewState

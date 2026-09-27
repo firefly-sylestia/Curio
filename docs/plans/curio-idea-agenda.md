@@ -277,13 +277,22 @@ the imperfection is deterministic per lane (seeded), never random per frame.
 
 **Where it hooks in.** `features/quests`'s stamp rendering + `CurioPassport`.
 
-### 5.5 Still on the list, not started
+### 5.5 The kept items
 
-- **The reader pencil margin** — drag in from the right edge, scrawl in the
-  margin with the `SignatureSketchbook` ink, anchored to that page. The member
-  said keep it, and it folds naturally into 5.6's surface.
-- **Time-capsule notes** — seal a note (wax seal / envelope) and Curio returns it
-  in three months. Agenda §3.5; `PersonalNotes` + a "sealed until" field.
+- **The reader pencil margin — BUILT (v492).** A strip over the page's edge you
+  scrawl in with a finger, kept per page of the book, opened from a new **Margin**
+  door in the reader's ⋯ menu. Two corrections to the idea as written here:
+  (1) it was offered as *"drag in from the right edge"*, but **the reader's right
+  edge is already a tap zone** (page-forward, with the motion lock freezing
+  gestures over the page), so a hidden drag there would be two gestures fighting
+  for one thumb — the door is visible instead, as the research requires; (2) the
+  ink is **not** `SignatureSketchbook`'s — that component draws a book's
+  PROCEDURAL doodle, it does not take freehand input, so the margin has its own
+  two-pass pencil renderer (`ReaderMargin.kt`). Full description and the traps
+  are in `app/AGENTS.md`'s v492 section.
+- **Time-capsule notes — OWED.** Seal a note (wax seal / envelope) and Curio
+  returns it in three months. Agenda §3.5; `PersonalNotes` + a "sealed until"
+  field and one delivery surface.
 - **5.6 Turn the page for real** was offered but NOT picked; if the pencil margin
   is built, that surface is where its page-turn would live.
 
@@ -298,11 +307,10 @@ the imperfection is deterministic per lane (seeded), never random per frame.
 5. **The reveal as one object** (3.4), then the **sound layer** (3.6) and the
    **pet** (3.7).
 6. **The second round** (§5), which the member took as its own workstream and
-   which is well underway: **5.1 the riffle is built (v490)** and **5.4 the
-   press-stamp is built (v491)**. Next are **5.5's two kept items** (the reader
-   pencil margin, time capsules); **5.2/5.3 (tear / fold)** are held until the
-   member settles which surface owns which — they are both a save verb and
-   cannot both own it.
+   which is mostly built: **5.1 the riffle (v490)**, **5.4 the press-stamp
+   (v491)** and **5.5's pencil margin (v492)**. Remaining: **5.5's time-capsule
+   notes**, and **5.2/5.3 (tear / fold)** — held until the member settles which
+   surface owns which, because they are BOTH a save verb and cannot both own it.
 
 ## Sources
 

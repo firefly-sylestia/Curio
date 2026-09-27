@@ -1714,6 +1714,13 @@ object AppPreferences {
     var passportStampState by mutableStateOf(true)
         private set
 
+    // v492 — THE READER'S PENCIL MARGIN (default ON): a strip over the page's
+    // right edge you scrawl in with your finger, kept per page of the book (see
+    // [com.curio.app.data.ReaderMarginInk]). It is the reader's own door in the
+    // ⋯ menu, so with the switch off that grid is exactly the six tiles it was.
+    var readerMarginState by mutableStateOf(true)
+        private set
+
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
     // The member: *"the drawer pattern and connections are still very much
     // messy and overlapping … make it beautiful"* — and, asked how the lines
@@ -2149,6 +2156,7 @@ object AppPreferences {
         glassFrostedState = isGlassFrostedEnabled(context)
         riffleDeckState = isDeckRiffleEnabled(context)
         passportStampState = isPassportStampEnabled(context)
+        readerMarginState = isReaderMarginEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2650,6 +2658,7 @@ object AppPreferences {
     private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
     private const val KEY_DECK_RIFFLE = "deck_riffle_v1"
     private const val KEY_PASSPORT_STAMP = "passport_stamp_v1"
+    private const val KEY_READER_MARGIN = "reader_margin_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -2996,6 +3005,15 @@ object AppPreferences {
     fun setPassportStampEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PASSPORT_STAMP, enabled).apply()
         passportStampState = enabled
+    }
+
+    // ── The reader's pencil margin (v492, default ON) ────────────────
+    fun isReaderMarginEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_READER_MARGIN, true)
+
+    fun setReaderMarginEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_READER_MARGIN, enabled).apply()
+        readerMarginState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

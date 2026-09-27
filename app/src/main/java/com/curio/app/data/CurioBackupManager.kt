@@ -106,6 +106,7 @@ object CurioBackupManager {
         "curio_pet",              // CurioPet — mood timestamps (v8.5 pet companion)
         "curio_passport",         // CurioPassport — category stamps + counters (v8.5)
         "curio_recall",           // CurioRecall — the Return's ladder + answers (v489)
+        "curio_reader_margin",    // ReaderMarginInk — the pencil margin, per book page (v492)
         "curio_onboarding"        // onboarding-completed flag
     )
 

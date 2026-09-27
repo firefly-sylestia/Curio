@@ -140,6 +140,21 @@ fun ExperimentsScreen(navController: NavController) {
             item { SettingsSectionHeading("Reading") }
             item {
                 SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // v492 — THE PENCIL MARGIN. Off removes the reader's own
+                        // Margin door from the ⋯ grid, which is then exactly
+                        // the six tiles it was; ink already written is kept and
+                        // comes back the moment it is switched on again.
+                        ExperimentSwitchRow(
+                            "Pencil margin",
+                            "Write in a book's margin with your finger — the reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
+                            AppPreferences.readerMarginState
+                        ) { wanted -> AppPreferences.setReaderMarginEnabled(context, wanted) }
+                    }
+                }
+            }
+            item {
+                SettingsOptionCard {
                     SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Reading settings",

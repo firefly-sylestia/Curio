@@ -172,6 +172,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.ReaderMarginInk
 import com.curio.app.data.NeuralSpeaker
 import com.curio.app.data.NeuralVoicePacks
 import com.curio.app.data.PersonalRepositoryHolder
@@ -314,6 +315,12 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
     // ── The reader's own look and its chrome ───────────────────────────
     var chrome by remember { mutableStateOf(true) }
     var sheet by remember { mutableStateOf<ReaderSheet?>(null) }
+    // ── v492 — THE PENCIL MARGIN'S OWN DOOR ────────────────────────────
+    // Not a [ReaderSheet]: a sheet rises from the foot and takes the whole
+    // width, and a margin has to lie OVER the page it belongs to, at the edge
+    // the page's own text ends. It is its own overlay so the reader's sheets
+    // are all still exactly what they were.
+    var marginOpen by remember { mutableStateOf(false) }
     /**
      * v437 — WHETHER THE PAGE SLIDER IS UP (see [ReaderScrubPill]).
      *
@@ -2505,6 +2512,14 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
             notes = keptMarks.count { it.isNote },
             highlights = keptMarks.count { it.markKind == ReaderMarkKind.HIGHLIGHT },
             gesturesOn = ReaderLook.tapZones,
+            // v492 — the margin's mark: whether THIS page carries ink. The dot
+            // is the same language the notes and highlights tiles use, so the
+            // grid stays one object.
+            marginOn = marginOpen || ReaderMarginInk.hasInk(context, bookId, shownPage),
+            onMargin = {
+                sheet = null
+                marginOpen = true
+            },
             onGestures = {
                 sheet = null
                 ReaderLook.zonesEditing = true
@@ -2567,6 +2582,40 @@ fun BookReaderScreen(navController: NavController, bookId: String) {
         )
 
         null -> Unit
+    }
+
+    // ── v492 — THE PENCIL MARGIN, OVER THE PAGE IT BELONGS TO ────────
+    //
+    // Composed AFTER the sheets so it lies over the page, and only while it is
+    // open — a closed margin costs one boolean. It is a sibling overlay rather
+    // than a [ReaderSheet] because a sheet rises from the foot and takes the
+    // whole width, and a margin has to sit at the edge the page's own text ends
+    // at, which is the whole point of a margin.
+    if (marginOpen && AppPreferences.readerMarginState) {
+        // BACK CLOSES THE MARGIN, NOT THE BOOK. This is an open surface on top
+        // of the reader; losing your place in a book because you put the pen
+        // down would be the worst thing this feature could do. It is composed
+        // after the reader's own back chain, so it answers first while it is up.
+        BackHandler(enabled = true) { marginOpen = false }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            // Deliberately NOT a scrim over the page: reading carries on behind
+            // an open margin, the page still turns, and the strip's own door
+            // closes it. Blocking the book to write a note would be a mode, and
+            // this app does not have modes.
+            ReaderMarginStrip(
+                bookId = bookId,
+                // The page the margin belongs to follows the page you are on:
+                // turning the page while it is open loads THAT page's ink, which
+                // is how a real book's margin works.
+                page = shownPage,
+                paper = palette.paper,
+                ink = palette.ink,
+                onClose = { marginOpen = false }
+            )
+        }
     }
 
     marking?.let { paragraph ->
@@ -6222,7 +6271,10 @@ private fun ReaderMenuSheet(
     highlights: Int,
     /** v434 — whether the page's zones answer a tap (the Gestures tile's mark). */
     gesturesOn: Boolean,
+    /** v492 — whether THIS page carries margin ink (the Margin tile's mark). */
+    marginOn: Boolean,
     onGestures: () -> Unit,
+    onMargin: () -> Unit,
     onNotes: () -> Unit,
     onHighlights: () -> Unit,
     onDictionary: () -> Unit,
@@ -6284,6 +6336,23 @@ private fun ReaderMenuSheet(
                     ReaderTile(CurioIcons.Settings, "Settings", 0, false, onSettings)
                 ),
                 palette = palette
+            )
+            // ── v492 — SEVEN DOORS, AND A SHORT ROW BY DESIGN ──────────
+            //
+            // The member kept the pencil margin out of the second round, and
+            // it is the reader's own door here. SEVEN IS THREE ROWS — two full
+            // ones and one alone — which is exactly what [ReaderTileRow]'s
+            // `pad` was built for: an invisible tile-width of air on each side,
+            // so the lone tile keeps the grid's own width and reads as centred
+            // rather than as a stray. The alternative (4 + 3) would have made
+            // every tile narrower than the two rows above it, and the member
+            // has already twice asked for this grid's rhythm to stay even.
+            ReaderTileRow(
+                tiles = listOf(
+                    ReaderTile(CurioIcons.Edit, "Margin", 0, marginOn, onMargin)
+                ),
+                palette = palette,
+                pad = 1
             )
             Spacer(Modifier.height(2.dp))
         }
