@@ -5999,7 +5999,7 @@ private val MenuKeepKeyboardProperties = PopupProperties(focusable = false)
  * from, and only one panel stands at a time because this state belongs to the
  * dock rather than to a door.
  */
-private enum class PersonalDockGroup { FORMAT, ALIGN, EXPORT, HIGHLIGHT, BULLET }
+private enum class PersonalDockGroup { FORMAT, ALIGN, EXPORT, HIGHLIGHT, BULLET, HEADING }
 
 /** The hairline between two halves of a dock panel (v433). */
 @Composable
@@ -6762,11 +6762,20 @@ internal fun PersonalToolDock(
             // end 10dp, top/bottom 9dp), so the arrow the member pressed is the
             // arrow that comes back: collapse and expand are one button in one
             // place, and the bar itself is the only thing that changes.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 6.dp, end = 10.dp, top = 9.dp, bottom = 9.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // ── v502 — AND IT PUTS ITSELF AWAY INTO ONE CIRCLE ───────────
+            //
+            // The member: *"the arrow collapse of journal dock is bad, its not
+            // collapse into one circlular pill"*. v499 filled the bar's width so
+            // the arrow could not drift to the middle — which fixed the drift and
+            // left a 50dp-wide lozenge sitting under the page for one glyph. The
+            // bar had NO width of its own to fill (the Surface wraps its
+            // content), so the fix for the drift was unnecessary as soon as the
+            // arrow stopped being centred by a Row of its own: the button IS the
+            // bar now, the surface wraps it, and 28dp of corner radius on a 52dp
+            // box is a circle.
+            Box(
+                modifier = Modifier.padding(5.dp),
+                contentAlignment = Alignment.Center
             ) {
                 PersonalToolButton(
                     label = "Show the writing tools",
@@ -6922,44 +6931,34 @@ internal fun PersonalToolDock(
                     MarkerPenGlyph(pen = null)
                 }
             }
-            // ── v500 — THE HEADING TOOL IS TWO TOOLS, AND THE NUMERALS ARE
-            //     THE POINT ────────────────────────────────────────────────
+            // ── v502 — ONE HEADING DOOR THAT WEARS WHAT THE LINE IS ──────
             //
-            // The member: *"make it able to make that title as conetnt or
-            // heading by giving it more option"* and, asked how headings should
-            // work, **"heading sizes and numbering"**. So the one "Large bold
-            // text" button is now **I** and **II** — the page's own title, and a
-            // section under it (see [FLAG_TITLE_2]) — and the numeral each
-            // button WEARS is what the line it makes will read as, in the
-            // writing, in the eye view and in the contents list. **Content is
-            // the off state**: pressing the lit numeral again takes the heading
-            // off the line, which is exactly how every other tool in this dock
-            // already switches back.
+            // The member: *"dont show just i ii in tool bar for title give it
+            // expanding option i=with one button, and proper indicator"*. v500
+            // put TWO numerals in the row (I and II), which said what could be
+            // done but not what had been: on a line that was already a section
+            // both buttons looked the same as on body text, and the row paid two
+            // slots for one subject. It is ONE door now, and the door's own face
+            // is the STATE — a circular badge wearing the level the caret's line
+            // is at (**I**, **II**, or a small **i** for content) — which is the
+            // "proper indicator" and the same badge the floating pill shows.
+            // Pressing it expands the choices IN the dock, like every other
+            // subject here (see [PersonalDockGroup]).
+            val focusedHeading = headingLevelOfFocused(state)
             if (showJournalTools) PersonalToolButton(
-                label = "Heading I",
-                active = active and FLAG_TITLE != 0,
+                label = when (focusedHeading) {
+                    1 -> "Heading I"
+                    2 -> "Heading II"
+                    else -> "Heading or content"
+                },
+                active = focusedHeading > 0 || openGroup == PersonalDockGroup.HEADING,
                 accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_TITLE) }
+                onClick = {
+                    openGroup = if (openGroup == PersonalDockGroup.HEADING) null
+                                else PersonalDockGroup.HEADING
+                }
             ) {
-                Text(
-                    "I",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-            if (showJournalTools) PersonalToolButton(
-                label = "Heading II",
-                active = active and FLAG_TITLE_2 != 0,
-                accent = accentInk, ink = ink,
-                onClick = { state.toggle(FLAG_TITLE_2) }
-            ) {
-                Text(
-                    "II",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                HeadingBadge(level = focusedHeading)
             }
             PersonalToolButton(
                 label = "Todo checkbox",
@@ -7174,6 +7173,28 @@ internal fun PersonalToolDock(
                             }
                         }
 
+                        PersonalDockGroup.HEADING -> {
+                            // THE THREE THINGS A LINE CAN BE, each wearing the
+                            // badge it would give that line — so the choice is
+                            // the same shape as the door's own face and as the
+                            // floating pill's.
+                            val current = headingLevelOfFocused(state)
+                            listOf(
+                                1 to "Heading I",
+                                2 to "Heading II",
+                                0 to "Content"
+                            ).forEach { (level, label) ->
+                                PersonalToolButton(
+                                    label = label,
+                                    active = current == level,
+                                    accent = accentInk, ink = ink,
+                                    onClick = { setHeadingLevel(state, level) }
+                                ) {
+                                    HeadingBadge(level = level)
+                                }
+                            }
+                        }
+
                         PersonalDockGroup.ALIGN -> {
                             val focusedAlign = state.alignOfFocused()
                             listOf(
@@ -7298,7 +7319,8 @@ internal fun PersonalToolDock(
                     // tap that last cross to close it"*).
                     val panelNeedsClose = openGroup == PersonalDockGroup.FORMAT ||
                         openGroup == PersonalDockGroup.ALIGN ||
-                        openGroup == PersonalDockGroup.EXPORT
+                        openGroup == PersonalDockGroup.EXPORT ||
+                        openGroup == PersonalDockGroup.HEADING
                     if (panelNeedsClose) {
                         PersonalToolButton(
                             label = "Close",
@@ -7844,6 +7866,72 @@ private fun AlignGlyph(kind: AlignKind) {
  * the theme measured.
  */
 private fun readableOnFill(fill: Color): Color = journalInkOn(fill)
+
+/**
+ * WHAT THE CARET'S LINE WEARS, as a level — 1 for Heading I, 2 for Heading II,
+ * 0 for content.
+ *
+ * The dock's door, its panel and the floating pill all answer with this one
+ * reader, so the badge a member presses and the badge they see on the line can
+ * never disagree.
+ */
+private fun headingLevelOfFocused(state: PersonalEditorState): Int =
+    state.focusedId?.let { titleLevelOf(state.mask(it)) } ?: 0
+
+/**
+ * MAKE THE CARET'S LINE WEAR A LEVEL (0 puts it back to content).
+ *
+ * Written as "take whatever heading is on it off, then put the asked-for one
+ * on" because that is what the member is doing: a line is one thing at a time,
+ * and Heading I is not a second flag stacked on Heading II. It goes through the
+ * state's own [PersonalEditorState.toggle] (which acts on the sentence the caret
+ * is in, and knows how to take a heading back off), so nothing here reaches past
+ * the editor's own rules.
+ */
+private fun setHeadingLevel(state: PersonalEditorState, level: Int) {
+    val id = state.focusedId ?: return
+    val current = titleLevelOf(state.mask(id))
+    if (current == 1) state.toggle(FLAG_TITLE)
+    if (current == 2) state.toggle(FLAG_TITLE_2)
+    if (level == 1) state.toggle(FLAG_TITLE)
+    if (level == 2) state.toggle(FLAG_TITLE_2)
+}
+
+/**
+ * THE HEADING BADGE — a circular badge wearing a level, in the ink of whatever
+ * it is standing on.
+ *
+ * **I** for the page's own heading, **II** for a section under it, and a small
+ * **i** for content: the one glyph that says "this line is an ordinary line".
+ * It is the same badge on the dock's door, in the dock's panel and on the
+ * floating pill (see [PersonalPinnedLine]) — the member asked for it in both
+ * places (*"it should be in floating pill it have circular i visible there it
+ * should show with chnaging with heding and ontent"*), and a mark that means
+ * one thing in one place and another somewhere else means nothing.
+ */
+@Composable
+private fun HeadingBadge(level: Int) {
+    val ink = LocalContentColor.current
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .background(ink.copy(alpha = 0.16f), RoundedCornerShape(50)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = when (level) {
+                1 -> "I"
+                2 -> "II"
+                else -> "i"
+            },
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = ink,
+            maxLines = 1
+        )
+    }
+}
 
 @Composable
 private fun PersonalToolButton(

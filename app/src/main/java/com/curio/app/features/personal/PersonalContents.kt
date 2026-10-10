@@ -1,5 +1,18 @@
 package com.curio.app.features.personal
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,12 +27,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +38,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.PersonalDoc
-import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioSheetContainerColor
@@ -117,11 +126,16 @@ private fun roman(n: Int): String {
 }
 
 /**
- * THE DOOR: a three-dot capsule in the page's own corner.
+ * THE DOOR: a three-LINE capsule in the page's own corner.
  *
  * It wears the page-level capsule the mode switch wears ([JournalCapsule]) so the
  * page's controls stay one family, and an OPAQUE fill (root rule 11) so its lift
  * reads clean against the paper.
+ *
+ * ⚠️ v502 — THREE LINES, NOT THREE DOTS (the member: *"instead of 3 dot make it
+ * 3 line and also a drawer style"*). The dots read as "more options of this
+ * thing"; the list behind this door is the page's STRUCTURE, and three lines is
+ * the mark every app uses for that.
  */
 @Composable
 internal fun PersonalContentsPill(
@@ -136,7 +150,7 @@ internal fun PersonalContentsPill(
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             CurioIcon(
-                CurioIcons.MoreVert,
+                CurioIcons.Menu,
                 "Contents",
                 tint = personalAccentInk(),
                 size = 20.dp
@@ -146,58 +160,82 @@ internal fun PersonalContentsPill(
 }
 
 /**
- * THE LIST ITSELF — a sheet, because it is a place you look at and leave.
+ * THE LIST ITSELF — A DRAWER, from the page's END edge.
+ *
+ * ⚠️ v502 — IT IS A DRAWER, NOT A SHEET (the member: *"also a drawer style not
+ * buttom sheet cnent bar"*). A contents list belongs to the page's SIDE: it is a
+ * way of moving around a document, and a sheet rising from the foot covers the
+ * very part of the page the member was reading while they look for somewhere
+ * else to go. It slides in from the end edge instead, at its own full height,
+ * with the page dimmed behind it and a tap on the dim putting it away.
  *
  * A row says its NUMBER first (that is what makes it a contents list rather than
- * a second copy of the page), then the heading's own words. Tapping one is a
- * jump, so the sheet closes on the same tap: a member who has picked a heading
- * wants the page, not the list.
+ * a second copy of the page), then the heading's own words, and a section sits in
+ * under the heading it belongs to. Tapping one is a jump, so the drawer closes on
+ * the same tap.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PersonalContentsSheet(
     headings: List<PersonalHeading>,
     onGo: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scheme = MaterialTheme.colorScheme
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = curioSheetContainerColor(scheme.surface),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    ) {
-        CurioGlassWindowBlur()
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+    // `MutableTransitionState` with its target flipped on composition is what makes
+    // the very first frame slide rather than appear: a plain `remember { true }`
+    // would mount the drawer already open.
+    val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.45f))
+                .clickable(onClick = onDismiss)
+        )
+        AnimatedVisibility(
+            visibleState = state,
+            enter = slideInHorizontally(tween(230)) { width -> width } + fadeIn(tween(160)),
+            exit = slideOutHorizontally(tween(180)) { width -> width } + fadeOut(tween(120)),
+            modifier = Modifier.align(Alignment.CenterEnd)
         ) {
-            Text(
-                "CONTENTS",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.5.sp
-                ),
-                color = personalAccentInk()
-            )
-            if (headings.isEmpty()) {
-                // The honest empty state, and it teaches the tool in one line:
-                // a page with no heading has nothing to list, and the way to give
-                // it one is one dock button away.
-                Text(
-                    "No headings on this page yet. Select a line and press I or II in the writing tools to give the page its parts.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = scheme.onSurfaceVariant
-                )
-            } else {
+            Surface(
+                color = curioSheetContainerColor(scheme.surface),
+                shape = RoundedCornerShape(topStart = 22.dp, bottomStart = 22.dp),
+                shadowElevation = 12.dp,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.86f)
+                    .widthIn(max = 360.dp)
+            ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.verticalScroll(rememberScrollState())
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 18.dp)
+                        .padding(top = 24.dp, bottom = 20.dp)
                 ) {
+                    Text(
+                        "CONTENTS",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp
+                        ),
+                        color = personalAccentInk()
+                    )
+                    if (headings.isEmpty()) {
+                        // The honest empty state, and it teaches the tool in one
+                        // line: a page with no heading has nothing to list, and the
+                        // way to give it one is one dock button away.
+                        Text(
+                            "No headings on this page yet. Select a line and press I or II in the writing tools to give the page its parts.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scheme.onSurfaceVariant
+                        )
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.verticalScroll(rememberScrollState())
+                        ) {
                     headings.forEach { heading ->
                         Surface(
                             onClick = {
@@ -244,7 +282,8 @@ internal fun PersonalContentsSheet(
                             }
                         }
                     }
-                    Spacer(Modifier.height(2.dp))
+                        }
+                    }
                 }
             }
         }

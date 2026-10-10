@@ -693,6 +693,13 @@ internal fun PersonalWritingPage(
                 .maxByOrNull { it.liveBottom(scrollNow) }
         }
     }
+    // v502 — WHAT LEVEL EACH LINE WEARS, resolved once per page rather than on
+    // every report: a reporter is asked on every frame of every scroll, and
+    // walking the block list in there would be a scan per frame. The reporter
+    // hands in the block's ID, so this is a map lookup by the time it is needed.
+    val headingLevels = remember(doc) {
+        doc.blocks.associate { it.id to titleLevelOf(runsToMask(it.text.length, it.runs)) }
+    }
     val reportSectionLine:
         (String, String, Float, Float, Boolean, Float) -> Unit =
         { id, label, top, bottom, writing, scroll ->
@@ -713,7 +720,9 @@ internal fun PersonalWritingPage(
                     // The writing side's scroll IS the page's, so it is filled in
                     // here; a read view's own scroll arrives with its report,
                     // because nobody else can see it.
-                    scroll = if (writing) pageScroll.value.toFloat() else scroll
+                    scroll = if (writing) pageScroll.value.toFloat() else scroll,
+                    // v502 — and the badge the pill wears (see [headingLevels]).
+                    level = headingLevels[id] ?: 0
                 )
             }
         }
@@ -975,6 +984,8 @@ internal fun PersonalWritingPage(
             // goes back to the heading it names.
             if (AppPreferences.pinnedTitleViewState) PersonalPinnedLine(
                 label = pinnedSection?.label.orEmpty(),
+                // v502 — the badge in the pill follows the heading it names.
+                level = pinnedSection?.level ?: 0,
                 caption = "Heading",
                 accent = personalAccent(),
                 onClick = {
@@ -1271,7 +1282,14 @@ internal data class PersonalSectionLine(
     val top: Float,
     val bottom: Float,
     val writing: Boolean = true,
-    val scroll: Float = 0f
+    val scroll: Float = 0f,
+    /**
+     * v502 — WHICH HEADING THIS IS: 1 for Heading I, 2 for Heading II, 0 when the
+     * page's own reporter did not say (a book review's chapters, say). The
+     * floating pill wears it as a circular badge, which is the member's *"circular
+     * i visible there it should show with chnaging with heding and ontent"*.
+     */
+    val level: Int = 0
 ) {
     /** Where the line's top edge is NOW, in the window. */
     fun liveTop(scrollNow: Float): Float = top - (scrollNow - scroll)
@@ -1319,7 +1337,17 @@ internal fun PersonalPinnedLine(
     modifier: Modifier = Modifier,
     /** What kind of place a heading is on this page — "Heading" for a page's own
      *  titles, "Chapter" for a book review's markers. */
-    caption: String = "Heading"
+    caption: String = "Heading",
+    /**
+     * v502 — WHICH HEADING LEVEL THE BAR IS NAMING: 1 → **I**, 2 → **II**, 0 →
+     * the rail it has always drawn. The member: *"the roman indicator i meant it
+     * should be in floating pill it have circular i visible there it should show
+     * with chnaging with heding and ontent"* — so the pill's medallion wears the
+     * level, in the same badge the dock's door wears (see `HeadingBadge`), and a
+     * caller that has no levels (a book review's chapters) gets exactly the bar it
+     * had before.
+     */
+    level: Int = 0
 ) {
     val ink = MaterialTheme.colorScheme.onBackground
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -1364,11 +1392,26 @@ internal fun PersonalPinnedLine(
                         .background(badge, RoundedCornerShape(50)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 4.dp, height = 15.dp)
-                            .background(badgeInk, RoundedCornerShape(50))
-                    )
+                    if (level == 0) {
+                        // The place's own mark, unchanged for a page with no levels.
+                        Box(
+                            modifier = Modifier
+                                .size(width = 4.dp, height = 15.dp)
+                                .background(badgeInk, RoundedCornerShape(50))
+                        )
+                    } else {
+                        // ⚠️ v502 — THE LEVEL, IN THE PILL (the member asked for the
+                        // circular numeral here, and for it to change as the heading
+                        // does): the same I / II the dock's door and panel wear.
+                        Text(
+                            text = if (level == 1) "I" else "II",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = badgeInk,
+                            maxLines = 1
+                        )
+                    }
                 }
                 Column(
                     verticalArrangement = Arrangement.spacedBy(1.dp),
