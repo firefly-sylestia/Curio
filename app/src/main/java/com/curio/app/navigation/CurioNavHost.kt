@@ -122,6 +122,7 @@ import com.curio.app.features.personal.PersonalPhotoOverlay
 import com.curio.app.features.personal.rememberPersonalPhotoOverlayState
 import com.curio.app.features.profile.ProfileEditScreen
 import com.curio.app.features.profile.ProfileScreen
+import com.curio.app.features.quests.PassportScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
 import com.curio.app.features.settings.BackupToolsScreen
@@ -230,6 +231,9 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.EDIT_ENTRY.substringBefore("/"),
     CurioRoutes.PROFILE,
     CurioRoutes.QUESTS,
+    // v498 — the passport is a push screen like Quests, not a tab: its own
+    // page, its own enter/exit, and the back pill is the way out.
+    CurioRoutes.PASSPORT,
     CurioRoutes.SETTINGS,
     CurioRoutes.EXPERIMENTS,
     CurioRoutes.PET_DESIGNER,
@@ -1261,6 +1265,12 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.QUESTS) {
                 QuestsScreen(navController = navController)
+            }
+            // v498 — the passport's own page: the Quests card's stamps moved
+            // here whole (see PassportScreen's own note), with the press and
+            // every lane's spin on it.
+            composable(CurioRoutes.PASSPORT) {
+                PassportScreen(navController = navController)
             }
             composable(CurioRoutes.STATS) {
                 StatsScreen(navController = navController)

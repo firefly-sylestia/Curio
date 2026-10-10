@@ -6597,8 +6597,21 @@ internal fun PersonalToolDock(
             // the way back is exactly where the tools were. It is a branch of its
             // own rather than an empty row so the put-away bar cannot be mistaken
             // for a tool that vanished.
+            // ── v499 — AND THE WAY BACK SITS WHERE THE WAY OUT WAS ───────
+            //
+            // The member: *"the collapse arrow for journal editor the bottom dock
+            // when collapse it shows in middle which is bad"*. The put-away bar
+            // was a Row of its own width, so the dock's own alignment centred it
+            // — the arrow drifted to the middle of the page while the arrow that
+            // put the tools away lives at the bar's LEADING EDGE. It fills the
+            // bar now and wears the SAME padding as the expanded row (start 6dp,
+            // end 10dp, top/bottom 9dp), so the arrow the member pressed is the
+            // arrow that comes back: collapse and expand are one button in one
+            // place, and the bar itself is the only thing that changes.
             Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 6.dp, end = 10.dp, top = 9.dp, bottom = 9.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PersonalToolButton(

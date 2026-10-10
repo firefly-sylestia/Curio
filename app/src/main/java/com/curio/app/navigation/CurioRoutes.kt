@@ -289,6 +289,15 @@ object CurioRoutes {
      *  profile page; it is its own full screen now (see [ProfileEditScreen]). */
     const val PROFILE_EDIT = "profile/edit"
     const val QUESTS = "quests"
+    /**
+     * v498 — the Category passport's own page ([com.curio.app.features.quests.PassportScreen]).
+     *
+     * It used to be a 4×3 grid of stamps inside a card on [QUESTS], where a
+     * mastered lane was one tile among twelve; the member asked for a real
+     * passport screen, so the passport is a destination now and the Quests card
+     * is its door.
+     */
+    const val PASSPORT = "passport"
     // v174c — the Curiosity Stats page (observatory constellation + all
     // lifetime stats), reachable from the drawer and Profile.
     const val STATS = "stats"

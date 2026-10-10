@@ -224,7 +224,7 @@ android {
         // pane in two), the frosted frost reaches the panels that have no window
         // blur behind them and the dropdown menus, and the drawer sky drops its
         // cross-family lines so each family is its own constellation.
-        versionCode = 20260942
+        versionCode = 20260943
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
@@ -235,7 +235,13 @@ android {
         // capsules that always show. The member asked for the major number, and
         // it is the honest one: three shipped features left the app, and a
         // surface that only existed on a due day never existed at all.
-        versionName = envReleaseVersion ?: "5.0.0"
+        // ⚠️ corrected: the member's "bump the version to 5.0" meant 1.5.x
+        // (the series this app is actually on) — the v497 push went out as
+        // 5.0.0 by mistake and the very next build states 1.5.0.
+        // v498 — the passport has a page of its own (agenda §5.4),
+        // and the grid of stamps it used to be inside a Quests card moved
+        // there whole, with the press and every lane's spin on it.
+        versionName = envReleaseVersion ?: "1.5.0"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
