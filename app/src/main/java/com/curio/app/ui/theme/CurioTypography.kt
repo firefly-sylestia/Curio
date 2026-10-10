@@ -37,6 +37,25 @@ val MaterialSymbolsFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * VT323 — THE PIXEL FACE (SIL Open Font License 1.1; the licence text ships in
+ * `res/raw/vt323_license.txt`).
+ *
+ * A terminal face: every glyph is built on the same pixel grid, so it reads as a
+ * CRT or a split-flap sign rather than as type. It is the time capsule's own
+ * face — the member asked for *"digital that clocl tyle font for the whole
+ * page"* — and it belongs to that page and to nothing else.
+ *
+ * ⚠️ ONE FACE, DELIBERATELY (see [PatrickHandFontFamily]'s note): VT323 ships a
+ * single regular file, so declaring Bold/SemiBold entries pointing at it would
+ * make every weight request match an "exact" descriptor whose glyphs are the
+ * regular face, and the synthesis that gives the page its heavy phosphor weight
+ * would never happen.
+ */
+val PixelFontFamily: FontFamily = FontFamily(
+    Font(R.font.vt323)
+)
+
+/**
  * Patrick Hand — the handwritten note font for the paper text fields
  * (journal, quotes, review, notes, captions, field notes). Google Fonts
  * ships Patrick Hand as a SINGLE regular file (there is no bold or italic

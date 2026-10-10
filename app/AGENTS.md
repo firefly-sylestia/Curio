@@ -10849,9 +10849,21 @@ The rest of §95, built on the member's own answers (each question was asked bef
 ### v501 — THE TIME CAPSULE'S CLOCK IS ITS OWN EDITOR, AND TWO REAL BUGS IN IT ARE FIXED
 
 The member's list on the capsule page and Home's Return. **Two of their items turned out to be
-actual defects, and both are fixed at the cause.** Nothing here is pushed yet (the standing hold
-on the previous task), so **none of it has been compiled** — CI is the only check.
+actual defects, and both are fixed at the cause** (the 20260943 push came back RED on lint, and the
+one error was this batch's own bad indentation in `PersonalCanvas.kt` — the inserted `isTitle2` /
+`headingLabel` lines sat four spaces deep inside a twelve-space block, which lint reads as a
+continuation of the previous expression; fixed by indenting them to their block, never by a
+suppression). Pushed as **1.5.1 / `20260944`**.
 
+- **THE PAGE WEARS A PIXEL FACE (`PixelFontFamily`, VT323).** The member: *"i want digital that
+  clocl tyle font for the whole page"*. `res/font/vt323.ttf` (`res/raw/vt323_license.txt` carries
+  its SIL OFL text, the same pattern `blobatar_license.txt` set) is a terminal face, declared in
+  `CurioTypography.kt` as a **single regular face on purpose** (the `PatrickHandFontFamily` note:
+  duplicate entries pointing at one file kill Compose's fake-bold synthesis, which is what gives
+  this page its heavy phosphor weight). `TimeCapsuleScreen` applies it through ONE nested
+  `MaterialTheme(typography = pixelTypography())` around the whole page, so every style wears it
+  and anything added later inherits it without being told. The clock cards stop forcing
+  `FontFamily.Monospace`.
 - **⚠️ THE SEAL'S FLOOR WAS MINUTES, AND IT MOVED (`CurioTimeCapsules.MIN_LEAD_MS`).** The member:
   *"seal it wasnt working when the time duration as like 1 min or 2 min"*. The store refused any
   capsule landing inside five minutes of the seal, and the PAGE clamped its clock up to

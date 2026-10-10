@@ -5518,12 +5518,12 @@ internal fun PersonalDocView(
             val mask = runsToMask(text.length, block.runs)
             val isQuote = personalBlockIsQuote(text, mask)
             val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
-    // v500 — and its smaller sibling: Heading II is a section under
-    // the page's own title (see FLAG_TITLE_2).
-    val isTitle2 = personalBlockCarries(text, mask, FLAG_TITLE_2)
-    // v500 — the words the pinned bar and the contents list name this line by
-    // ("" when the block carries no heading).
-    val headingLabel = personalHeadingLabel(text, mask)
+            // v500 — and its smaller sibling: Heading II is a section under
+            // the page's own title (see FLAG_TITLE_2).
+            val isTitle2 = personalBlockCarries(text, mask, FLAG_TITLE_2)
+            // v500 — the words the pinned bar and the contents list name this line
+            // by ("" when the block carries no heading).
+            val headingLabel = personalHeadingLabel(text, mask)
             // v402 — A LINE THAT STOPS BEING A TITLE STOPS BEING A PLACE (see
             // LocalPersonalTitleReport). Taking the flag off a line — or losing
             // the line itself — clears its entry, so the pinned bar can never go

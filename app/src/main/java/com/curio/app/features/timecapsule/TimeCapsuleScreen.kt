@@ -35,6 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,6 +71,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.PixelFontFamily
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -264,226 +266,233 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(scheme.background)) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .imePadding()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .widthIn(max = 680.dp)
-        ) {
-            Spacer(Modifier.height(10.dp))
-            // v501 — THE HEADER WEARS THE PAGE'S OWN LANGUAGE: one soft rectangle
-            // holding the way back, the name of the page and the count of letters
-            // already waiting, rather than a floating arrow beside a bare title.
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = scheme.surfaceContainer,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                ) {
-                    CapsuleCircleButton(
-                        glyph = CurioIcons.ArrowBack,
-                        label = "Back",
-                        accent = accent,
-                        onClick = onBack
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Time capsule",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.ExtraBold
-                            ),
-                            color = scheme.onSurface
-                        )
-                        Text(
-                            if (CurioTimeCapsules.sealedCountState > 0) {
-                                "${CurioTimeCapsules.sealedCountState} letters waiting"
-                            } else {
-                                "A letter for your own future self"
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = scheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(18.dp))
-
-            CapsuleHero(accent = accent, until = until, promise = promise)
-            Spacer(Modifier.height(20.dp))
-
-            // ── THE CLOCK ─────────────────────────────────────────────────
-            CapsuleClock(
-                cal = cal,
-                hours24 = hours24,
-                accent = accent,
-                onEditDay = { dateOpen = true },
-                onEditTime = { timeOpen = true },
-                onStepDays = { shift(it.toLong() * DAY_MS) },
-                onStepMinutes = { shift(it.toLong() * MINUTE_MS) }
-            )
-            Spacer(Modifier.height(16.dp))
-
-            // ── AND THE USUAL DISTANCES, AS ONE TAP ───────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf("A month" to 1, "3 months" to 3, "6 months" to 6, "A year" to 12)
-                    .forEach { (label, months) ->
-                        CapsulePresetChip(
-                            label = label,
-                            accent = accent,
-                            modifier = Modifier.weight(1f)
-                        ) { setFromNow(months) }
-                    }
-            }
-            Spacer(Modifier.height(22.dp))
-
-            // ── THE LETTER ────────────────────────────────────────────────
-            Text(
-                "Your letter",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = scheme.onBackground
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = message,
-                onValueChange = { message = it },
-                placeholder = {
-                    Text(
-                        "Write what you want to read on that day…",
-                        color = scheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                },
-                minLines = 6,
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(20.dp))
-
-            Button(
-                onClick = {
-                    val sealed = CurioTimeCapsules.sealAt(
-                        context = context,
-                        message = message,
-                        openAt = target,
-                        label = promise
-                    )
-                    if (sealed != null) {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        sealNote = ""
-                        sealedCapsule = sealed
-                    } else {
-                        // The store said no, so the page says why. A button that
-                        // silently does nothing is the bug the member reported.
-                        sealNote = if (message.isBlank()) {
-                            "Write a line first. A capsule needs something to carry."
-                        } else {
-                            "That moment has already passed. Set the clock a little further on."
-                        }
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
-                },
-                enabled = message.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = accent),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                CurioIcon(CurioIcons.Lock, null, tint = scheme.onPrimary, size = 20.dp)
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "Seal it",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                )
-            }
-            // WHY THE BUTTON IS NOT LIT, and why a seal was refused: one line,
-            // drawn only when it has something to say.
-            val note = sealNote.ifBlank {
-                if (message.isBlank()) "Write a line and the seal lights up." else ""
-            }
-            if (note.isNotBlank()) {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    note,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = scheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            Spacer(Modifier.height(28.dp))
-        }
-
-        // ── THE SEALED STATE ──────────────────────────────────────────────
-        val done = sealedCapsule
-        if (done != null) {
-            // The page has nothing left to say once the letter is sealed: this is
-            // the one thing on screen, and it says when it comes back.
-            Box(
+    // v502 — THE WHOLE PAGE WEARS THE PIXEL FACE (the member: "i want digital
+    // that clocl tyle font for the whole page"). VT323 ships one weight, so Compose
+    // synthesises the bold requests, which is exactly the heavy phosphor look a
+    // split-flap page wants. The dialogs above stay in Material's own face on
+    // purpose: the pickers are Android's, not the page's.
+    MaterialTheme(colorScheme = scheme, typography = pixelTypography()) {
+        Box(modifier = Modifier.fillMaxSize().background(scheme.background)) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(scheme.background)
-                    .padding(28.dp),
-                contentAlignment = Alignment.Center
+                    .statusBarsPadding()
+                    .imePadding()
+                    .navigationBarsPadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .widthIn(max = 680.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                Spacer(Modifier.height(10.dp))
+                // v501 — THE HEADER WEARS THE PAGE'S OWN LANGUAGE: one soft rectangle
+                // holding the way back, the name of the page and the count of letters
+                // already waiting, rather than a floating arrow beside a bare title.
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = scheme.surfaceContainer,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = accent,
-                        modifier = Modifier.size(88.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            CurioIcon(
-                                CurioIcons.Lock,
-                                null,
-                                tint = scheme.onPrimary,
-                                size = 40.dp
+                        CapsuleCircleButton(
+                            glyph = CurioIcons.ArrowBack,
+                            label = "Back",
+                            accent = accent,
+                            onClick = onBack
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Time capsule",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold
+                                ),
+                                color = scheme.onSurface
+                            )
+                            Text(
+                                if (CurioTimeCapsules.sealedCountState > 0) {
+                                    "${CurioTimeCapsules.sealedCountState} letters waiting"
+                                } else {
+                                    "A letter for your own future self"
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                                color = scheme.onSurfaceVariant
                             )
                         }
                     }
+                }
+                Spacer(Modifier.height(18.dp))
+
+                CapsuleHero(accent = accent, until = until, promise = promise)
+                Spacer(Modifier.height(20.dp))
+
+                // ── THE CLOCK ─────────────────────────────────────────────────
+                CapsuleClock(
+                    cal = cal,
+                    hours24 = hours24,
+                    accent = accent,
+                    onEditDay = { dateOpen = true },
+                    onEditTime = { timeOpen = true },
+                    onStepDays = { shift(it.toLong() * DAY_MS) },
+                    onStepMinutes = { shift(it.toLong() * MINUTE_MS) }
+                )
+                Spacer(Modifier.height(16.dp))
+
+                // ── AND THE USUAL DISTANCES, AS ONE TAP ───────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf("A month" to 1, "3 months" to 3, "6 months" to 6, "A year" to 12)
+                        .forEach { (label, months) ->
+                            CapsulePresetChip(
+                                label = label,
+                                accent = accent,
+                                modifier = Modifier.weight(1f)
+                            ) { setFromNow(months) }
+                        }
+                }
+                Spacer(Modifier.height(22.dp))
+
+                // ── THE LETTER ────────────────────────────────────────────────
+                Text(
+                    "Your letter",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = scheme.onBackground
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = message,
+                    onValueChange = { message = it },
+                    placeholder = {
+                        Text(
+                            "Write what you want to read on that day…",
+                            color = scheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    },
+                    minLines = 6,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        val sealed = CurioTimeCapsules.sealAt(
+                            context = context,
+                            message = message,
+                            openAt = target,
+                            label = promise
+                        )
+                        if (sealed != null) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            sealNote = ""
+                            sealedCapsule = sealed
+                        } else {
+                            // The store said no, so the page says why. A button that
+                            // silently does nothing is the bug the member reported.
+                            sealNote = if (message.isBlank()) {
+                                "Write a line first. A capsule needs something to carry."
+                            } else {
+                                "That moment has already passed. Set the clock a little further on."
+                            }
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    },
+                    enabled = message.isNotBlank(),
+                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    CurioIcon(CurioIcons.Lock, null, tint = scheme.onPrimary, size = 20.dp)
+                    Spacer(Modifier.width(10.dp))
                     Text(
-                        "Sealed",
-                        style = MaterialTheme.typography.headlineSmall.copy(
+                        text = "Seal it",
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = scheme.onBackground
+                        )
                     )
+                }
+                // WHY THE BUTTON IS NOT LIT, and why a seal was refused: one line,
+                // drawn only when it has something to say.
+                val note = sealNote.ifBlank {
+                    if (message.isBlank()) "Write a line and the seal lights up." else ""
+                }
+                if (note.isNotBlank()) {
+                    Spacer(Modifier.height(10.dp))
                     Text(
-                        // v497 — the promise label is the member's own date AND
-                        // time now, so it is named as a day here rather than as
-                        // an interval: "in 3 days — on 13 October 2026 at 09:30".
-                        "Back to you ${CurioTimeCapsules.untilText(done.openAt)}, on ${done.spanLabel}.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        note,
+                        style = MaterialTheme.typography.labelLarge,
                         color = scheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Button(
-                        onClick = onBack,
-                        colors = ButtonDefaults.buttonColors(containerColor = accent),
-                        shape = RoundedCornerShape(12.dp)
+                }
+                Spacer(Modifier.height(28.dp))
+            }
+
+            // ── THE SEALED STATE ──────────────────────────────────────────────
+            val done = sealedCapsule
+            if (done != null) {
+                // The page has nothing left to say once the letter is sealed: this is
+                // the one thing on screen, and it says when it comes back.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(scheme.background)
+                        .padding(28.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        Text("Done")
+                        Surface(
+                            shape = CircleShape,
+                            color = accent,
+                            modifier = Modifier.size(88.dp)
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                CurioIcon(
+                                    CurioIcons.Lock,
+                                    null,
+                                    tint = scheme.onPrimary,
+                                    size = 40.dp
+                                )
+                            }
+                        }
+                        Text(
+                            "Sealed",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = scheme.onBackground
+                        )
+                        Text(
+                            // v497 — the promise label is the member's own date AND
+                            // time now, so it is named as a day here rather than as
+                            // an interval: "in 3 days — on 13 October 2026 at 09:30".
+                            "Back to you ${CurioTimeCapsules.untilText(done.openAt)}, on ${done.spanLabel}.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        Button(
+                            onClick = onBack,
+                            colors = ButtonDefaults.buttonColors(containerColor = accent),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Done")
+                        }
                     }
                 }
             }
@@ -936,7 +945,7 @@ private fun CardGlyph(value: String, ink: Color) {
         Text(
             value,
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = FontFamily.Monospace,
+                fontFamily = PixelFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.sp
             ),
@@ -945,6 +954,35 @@ private fun CardGlyph(value: String, ink: Color) {
             textAlign = TextAlign.Center
         )
     }
+}
+
+/**
+ * EVERY STYLE ON THIS PAGE, IN THE PIXEL FACE.
+ *
+ * One nested theme rather than a `fontFamily` argument on forty `Text` calls:
+ * the page's whole voice changes in one place, a style added later inherits it,
+ * and the Material type scale's own sizes and weights are untouched.
+ */
+@Composable
+private fun pixelTypography(): Typography {
+    val base = MaterialTheme.typography
+    return base.copy(
+        displayLarge = base.displayLarge.copy(fontFamily = PixelFontFamily),
+        displayMedium = base.displayMedium.copy(fontFamily = PixelFontFamily),
+        displaySmall = base.displaySmall.copy(fontFamily = PixelFontFamily),
+        headlineLarge = base.headlineLarge.copy(fontFamily = PixelFontFamily),
+        headlineMedium = base.headlineMedium.copy(fontFamily = PixelFontFamily),
+        headlineSmall = base.headlineSmall.copy(fontFamily = PixelFontFamily),
+        titleLarge = base.titleLarge.copy(fontFamily = PixelFontFamily),
+        titleMedium = base.titleMedium.copy(fontFamily = PixelFontFamily),
+        titleSmall = base.titleSmall.copy(fontFamily = PixelFontFamily),
+        bodyLarge = base.bodyLarge.copy(fontFamily = PixelFontFamily),
+        bodyMedium = base.bodyMedium.copy(fontFamily = PixelFontFamily),
+        bodySmall = base.bodySmall.copy(fontFamily = PixelFontFamily),
+        labelLarge = base.labelLarge.copy(fontFamily = PixelFontFamily),
+        labelMedium = base.labelMedium.copy(fontFamily = PixelFontFamily),
+        labelSmall = base.labelSmall.copy(fontFamily = PixelFontFamily)
+    )
 }
 
 @Composable
