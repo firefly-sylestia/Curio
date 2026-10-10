@@ -131,6 +131,32 @@ import kotlinx.coroutines.withContext
  * core can key its debounce on it (a changed title, mood or topic saves on the
  * same clock as a typed word) without owning any of those fields.
  */
+/**
+ * v499 — THE PAGE'S OWN NAME, WHEN THE MEMBER NEVER GAVE IT ONE.
+ *
+ * The member, asked what should name a journal they never titled, chose **"First
+ * line, and it becomes the real title"**. So this reads the page's first written
+ * line and nothing else: the first block that actually carries words (a photo or
+ * a voice note is not a line), its first line only, trimmed, and capped at
+ * [DERIVED_TITLE_MAX] characters so a paragraph of prose cannot become a title
+ * bar that runs off the screen.
+ *
+ * ⚠️ IT IS A DERIVATION, NOT A GUESS AT MEANING: no case is changed, no word is
+ * dropped, and nothing is invented when the page is empty — an empty page has no
+ * name and the row falls back to its date, which is the honest answer.
+ */
+private fun derivedTitle(body: PersonalDoc): String =
+    body.blocks
+        .firstOrNull { !it.isPhoto && it.audio == null && it.text.isNotBlank() }
+        ?.text
+        ?.substringBefore('\n')
+        ?.trim()
+        .orEmpty()
+        .take(DERIVED_TITLE_MAX)
+
+/** How much of a page's first line can become its name. */
+private const val DERIVED_TITLE_MAX = 80
+
 internal data class PersonalPageMeta(
     val title: String = "",
     val mood: String = "",
@@ -406,7 +432,22 @@ internal fun PersonalWritingPage(
                     id = liveId.value,
                     bookId = null,
                     chapterIndex = null,
-                    title = page.title.trim(),
+                    // v499 — THE MEMBER'S OWN TITLE, OR THE PAGE'S FIRST LINE.
+                    // The rule they chose when asked: *"First line, and it
+                    // becomes the real title"* — so a journal the member never
+                    // titled is named after the first line they wrote, in the
+                    // STORED title (the shelf, the search, an export and the
+                    // reminder all read the same field, which a display-only
+                    // derivation could never reach). It is written here, in the
+                    // ONE writer, so every save path gets it; a title the member
+                    // DID set always wins; and a journal emptied back to nothing
+                    // derives nothing, so a page they clear stops claiming a
+                    // name. Journals only: a book review or a chapter note has a
+                    // title of its own from elsewhere (the book, the chapter) and
+                    // must never have one invented from a line of prose.
+                    title = page.title.trim().ifBlank {
+                        if (page.kind == PAGE_KIND_JOURNAL) derivedTitle(body) else ""
+                    },
                     bodyJson = com.curio.app.data.PersonalDocCodec.encode(body),
                     preview = "",
                     dateMillis = page.dateMillis,

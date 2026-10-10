@@ -2572,8 +2572,25 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 return
             }
             val lineMask = mask(target)
-            val on = !maskCovers(lineMask, 0, lineText.length, flag)
-            masks[target] = maskApply(lineMask, 0, lineText.length, flag, on)
+            // ── v499 — A HEADING IS A SENTENCE, NOT A PARAGRAPH ──────────
+            //
+            // The member: *"fix its text being fully becoming the title,
+            // sometimes the whole paragraph becomes the title so fix that"* —
+            // asked what should happen instead, they chose **only the
+            // sentence**. The whole line used to be stamped, so a line the
+            // member had typed without ever pressing Enter (i.e. a whole
+            // paragraph) arrived as a paragraph-sized heading. A TITLE now
+            // covers the sentence the caret is in — back to the previous full
+            // stop, forward to the next one, and the full stop stays with its
+            // own sentence — and a SMALL note still covers the whole line,
+            // because that tool never had this complaint and it is not a
+            // heading. The toggle check uses the same range, so a second press
+            // on a sentence-heading takes it off again.
+            val caretAt = caretIn(target).coerceIn(0, lineText.length)
+            val from = if (flag == FLAG_TITLE) sentenceStart(lineText, caretAt) else 0
+            val to = if (flag == FLAG_TITLE) sentenceEnd(lineText, caretAt) else lineText.length
+            val on = !maskCovers(lineMask, from, to, flag)
+            masks[target] = maskApply(lineMask, from, to, flag, on)
             armed = armed and flag.inv()
             armedOff = armedOff and flag.inv()
             publish()
@@ -3064,6 +3081,33 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * the range a line-level tool points at: from the newline before the caret
      * to the newline after it. An EMPTY line answers an empty range.
      */
+    /**
+     * v499 — THE SENTENCE A CARET SITS IN (see the title tool's own note in
+     * [toggle]). Backwards to the previous full stop, exclamation, question mark,
+     * semicolon or line break; leading spaces are skipped so the heading starts
+     * on its first word.
+     */
+    private fun sentenceStart(text: String, at: Int): Int {
+        var i = at.coerceIn(0, text.length)
+        while (i > 0 && !isSentenceBreak(text[i - 1])) i--
+        while (i < text.length && text[i] == ' ') i++
+        return i
+    }
+
+    /**
+     * …and forwards to the end of it, the full stop INCLUDED — a heading that
+     * ends without its own full stop reads as a truncated line.
+     */
+    private fun sentenceEnd(text: String, at: Int): Int {
+        var i = at.coerceIn(0, text.length)
+        while (i < text.length && !isSentenceBreak(text[i])) i++
+        if (i < text.length && text[i] != '\n') i++
+        return i
+    }
+
+    private fun isSentenceBreak(c: Char): Boolean =
+        c == '.' || c == '!' || c == '?' || c == ';' || c == '\n'
+
     private fun lineRange(text: String, caret: Int): IntRange {
         val at = caret.coerceIn(0, text.length)
         var start = at
