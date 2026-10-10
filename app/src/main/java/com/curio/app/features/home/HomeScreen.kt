@@ -3493,49 +3493,33 @@ private fun DrawerLaneStarMap(
     // the top of the drawer blank. The single centre wash ([centreGlow]) is the
     // sky's light again, and the canvas clips to its own box now, so nothing can
     // bleed over the panel.
-    val starHalos: List<Pair<Float, Brush>?> = remember(
-        lanesKey, starPoints, selected, page, ink, dark, density
-    ) {
-        lanes.mapIndexed { index, lane ->
+    val starTints: List<Color?> = remember(lanesKey, selected, page, ink, dark) {
+        lanes.map { lane ->
             val picked = lane.id == selected
-            // The point a star is drawn at: the SAME list the canvas and the tap
-            // test use, so a halo can never be built around a place the star is not.
-            val centre = starPoints.getOrNull(index) ?: return@mapIndexed null
-            if (!lane.explored && !picked) return@mapIndexed null
-            // ── v477 — EVERY DOT IS THE SAME SIZE ─────────────────────────
-            // The core used to grow with the lane's knowledge (2.2dp for a fresh
-            // lane → 5.6dp for a full one), which is exactly what the member
-            // called out: *"dont make the dots glow too much or grow bigger when
-            // too much knowledge dont let them grow at all"*. Knowledge shows as
-            // COLOUR AND LIGHT only now — a lit lane wears its accent and its
-            // halo, an untouched one is a dim point — and the DISC stays
-            // [StarCoreDp] whatever the archive holds. The tap still opens the
-            // star it answered (the picked bump), which is feedback, not a
-            // measure.
-            val core = StarCoreDp * (if (picked) 1.18f else 1f)
-            val corePx = with(density) { core.dp.toPx() }
+            // ── v477 — EVERY STAR IS THE SAME SIZE, AND v507 KEEPS IT THAT WAY ──
+            // Knowledge decides this lane's COLOUR and nothing else: no lane grows,
+            // no lane wears a glint, and an untouched one is the dim mix below. The
+            // picked bump is feedback rather than a measure — it is the star that
+            // answered the tap.
+            if (!lane.explored && !picked) return@map null
             // v476 — the star's own colour, deepened a touch on the light page
             // so a lit dot reads as a dot rather than as a slightly coloured
             // smudge (the member: *"the lines and the dots make it more
             // noticable, in light mode darker shade and similar"*).
             val accent = if (dark) lane.accent else lerp(lane.accent, ink, LightDotDarken)
-            // v460 — the same eased falloff the sky's own wash uses, at the
-            // star's strength: a star's aura was four stops too, so on the dark
-            // page it carried the same visible rings the centre wash did (see
-            // [glowStops]). The exponent is gentler here — a star keeps a solid
-            // core and only its tail softens, which is what the four steps were
-            // standing in for.
-            corePx to Brush.radialGradient(
-                colors = glowStops(
-                    page = page,
-                    tint = accent,
-                    strength = if (picked) 0.99f else 0.95f,
-                    power = 1.5f
-                ),
-                center = centre,
-                radius = corePx * HALO_REACH
-            )
+            accent
         }
+    }
+    // ── v507 — AND ONE SMALL STAR SHAPE PER LANE (see [starPath]) ────────────
+    //
+    // The star's own outline, built ONCE per layout: a Path per star per frame is the
+    // cost the cached aura existed to avoid, so the shapes are cached exactly as the
+    // points are, around each lane's own point, and the draw pass is a fill inside the
+    // same transform the twinkle and the birth already share.
+    val starOuterPx = with(density) { StarOuterDp.dp.toPx() }
+    val starInnerPx = starOuterPx * StarInnerRatio
+    val starShapes: List<Path> = remember(starPoints, starOuterPx) {
+        starPoints.map { point -> starPath(point, starOuterPx, starInnerPx) }
     }
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
@@ -3857,36 +3841,34 @@ private fun DrawerLaneStarMap(
             }
             // ── The stars. ──
             //
-            // v422 — THE PICK MAKES THE STAR COME ON. It grows and its aura
-            // brightens toward the lane's own accent; there is no ring any more,
-            // because a circle drawn around a star read as furniture rather than
-            // as the star answering.
+            // v422 — THE PICK MAKES THE STAR COME ON, and there is no ring drawn
+            // round it (a circle round a star read as furniture rather than as the
+            // star answering).
             //
-            // v457 — AND EACH STAR IS ONE DRAW OP. The aura is the cached gradient
-            // in [starHalos] (a falloff, not rings — see its note), the twinkle and
-            // the birth are one translate+scale over it, and an unexplored lane is
-            // still the solid dim point v422 asked for.
+            // ⚠️ v507 — EVERY LANE IS ONE SMALL STAR, THE SAME SHAPE AND SIZE.
+            // The member: *"the knowleg makes some star to grow and also that weird
+            // star look is bad fi xit, and use star shape small not circle or nythung
+            // else"*. So the aura, the hot core and the knowledge glint are GONE, and
+            // each lane is a four-point star ([starPath]) filled in one colour: its
+            // own accent when the lane is explored or picked, the dim page mix when it
+            // is not. One `drawPath` a star inside the transform the twinkle and the
+            // birth already shared — cheaper than the three draw ops v503 spent on the
+            // same star, and it cannot grow with knowledge because nothing about the
+            // path depends on it.
             lanes.forEachIndexed { index, lane ->
                 // The staggered light-up: each star waits its own turn, so the sky
                 // fills in as a sweep rather than blinking on.
                 val born = bornOf(index)
                 if (born <= 0f) return@forEachIndexed
                 val settled = starPoints.getOrNull(index) ?: return@forEachIndexed
-                val halo = starHalos.getOrNull(index)
-                if (halo == null) {
-                    // v476 — an untouched lane is still the solid dim point v422
-                    // settled on, only DEEPER now (the member asked for the dots
-                    // to be more noticeable, darker in light mode).
+                val shape = starShapes.getOrNull(index) ?: return@forEachIndexed
+                val tint = starTints.getOrNull(index)
+                // An untouched lane: the solid dim mix v422 settled on, deeper than it
+                // was, and the same SIZE as every other star.
+                val colour = tint ?: run {
                     val dim = lerp(page, muted, (0.34f + 0.40f * born).coerceIn(0f, 1f))
-                    drawCircle(
-                        color = if (dark) dim else lerp(dim, ink, 0.16f * born),
-                        // v477 — the same one size every other dot is drawn at.
-                        radius = corePxOf(index),
-                        center = settled
-                    )
-                    return@forEachIndexed
+                    if (dark) dim else lerp(dim, ink, 0.16f * born)
                 }
-                val (corePx, brush) = halo
                 // ── v457 — THE STAR COMES OUT OF THE HUB ────────────────
                 //
                 // A newborn star sits a tenth of its own distance closer to the
@@ -3902,65 +3884,15 @@ private fun DrawerLaneStarMap(
                 // The twinkle moves the RADIUS only — a star breathes, it does not
                 // change colour.
                 val flick = 1f + 0.07f * sin(beat + index * 1.9f)
-                val sizeNow = born * flick
+                // The picked star breathes a touch larger — feedback for the tap,
+                // never a measure of anything (see [starTints]).
+                val bump = if (lane.id == selected) StarPickGrow else 1f
+                val sizeNow = born * flick * bump
                 withTransform({
                     translate(centre.x - settled.x, centre.y - settled.y)
                     scale(sizeNow, sizeNow, pivot = settled)
                 }) {
-                    // The falloff: the star's own light, wide and soft (see
-                    // [starHalos]).
-                    drawCircle(brush = brush, radius = corePx * HALO_REACH, center = settled)
-                    // ── v503 — A STAR, NOT A SMEAR (the member: *"more visual
-                    // upgrade to stars"*) ────────────────────────────────────
-                    // The aura alone is a soft smudge with its brightest part
-                    // spread over the whole halo. A HOT CORE now sits in the
-                    // middle of it, so the eye has a point to land on, and a lane
-                    // that has earned its knowledge ([SparkleKnowledge]) or is the
-                    // one being answered wears a four-point sparkle over it —
-                    // long thin arms with a fainter diagonal pair between them,
-                    // which is the mark a night sky draws for its brightest
-                    // stars. Both are drawn inside the same transform, so they
-                    // twinkle and are born with the star they belong to; the
-                    // count of sparkles is the count of grown lanes, never thirty.
-                    val hot = if (dark) lerp(page, lane.accent, 0.94f) else lane.accent
-                    drawCircle(color = hot, radius = corePx * 0.66f, center = settled)
-                    if (lane.id == selected || lane.knowledge >= SparkleKnowledge) {
-                        val arm = corePx * 3.4f
-                        val thin = (corePx * 0.26f).coerceAtLeast(0.6f)
-                        val spark = if (dark) lerp(hot, Color.White, 0.45f)
-                                    else lerp(hot, ink, 0.35f)
-                        drawLine(
-                            color = spark,
-                            start = Offset(settled.x - arm, settled.y),
-                            end = Offset(settled.x + arm, settled.y),
-                            strokeWidth = thin,
-                            cap = StrokeCap.Round
-                        )
-                        drawLine(
-                            color = spark,
-                            start = Offset(settled.x, settled.y - arm),
-                            end = Offset(settled.x, settled.y + arm),
-                            strokeWidth = thin,
-                            cap = StrokeCap.Round
-                        )
-                        val diag = arm * 0.34f
-                        val faint = lerp(page, spark, 0.55f)
-                        val hair = (thin * 0.7f).coerceAtLeast(0.5f)
-                        drawLine(
-                            color = faint,
-                            start = Offset(settled.x - diag, settled.y - diag),
-                            end = Offset(settled.x + diag, settled.y + diag),
-                            strokeWidth = hair,
-                            cap = StrokeCap.Round
-                        )
-                        drawLine(
-                            color = faint,
-                            start = Offset(settled.x - diag, settled.y + diag),
-                            end = Offset(settled.x + diag, settled.y - diag),
-                            strokeWidth = hair,
-                            cap = StrokeCap.Round
-                        )
-                    }
+                    drawPath(shape, color = colour)
                 }
             }
         }
@@ -3991,9 +3923,9 @@ private data class StarSlot(val angle: Float, val radius: Float)
  * SHORTER side on BOTH axes, which kept the scatter perfectly round but also
  * meant a taller sky could not hold a single extra star's worth of reach: the
  * drawer is a fixed 336dp wide (its map 304dp across), so the shorter side was
- * the WIDTH and the height above it went to waste. Each axis is used now — the
- * sky reads longer, and the points themselves are drawn in dp (see the bloom in
- * [DrawerLaneStarMap]), so a lit star is still a perfect circle.
+ * the WIDTH and the height above it went to waste. Each axis is used now — the sky
+ * reads longer, and the mark at each point is drawn in dp (see [starPath]), so a star
+ * is the same size wherever in the sky it lands.
  */
 private fun starPoint(slot: StarSlot, hub: Offset, width: Float, height: Float): Offset =
     Offset(
@@ -4002,19 +3934,59 @@ private fun starPoint(slot: StarSlot, hub: Offset, width: Float, height: Float):
     )
 
 /**
- * How far past a star's own core its glow is worth stopping a line at: the
- * painter's mid ring sits at 1.35 of the core (see the bloom), and a line that
- * starts there meets the halo's edge instead of vanishing under it.
+ * ── v507 — A STAR, DRAWN AS ONE ─────────────────────────────────────────────
+ *
+ * The member: *"use star shape small not circle or nythung else"*. Four points, eight
+ * vertices: the first at twelve o'clock, then alternating [outer] and [inner] every
+ * 45°, closed back to the first — the mark a night sky has always drawn for a star,
+ * and the whole of what replaced the aura, the hot core and the glint in this pass.
+ *
+ * It is built ONCE per layout (see the cached `starShapes` in [DrawerLaneStarMap]): a
+ * Path per star per frame is the cost the cached aura existed to avoid, and the draw
+ * pass only ever fills this one. [centre] is the lane's own point, so the path needs
+ * no transform of its own — the twinkle and the birth scale it about that point.
  */
-private const val HaloTrimFactor = 1.35f
+private fun starPath(centre: Offset, outer: Float, inner: Float): Path {
+    val path = Path()
+    for (i in 0 until 8) {
+        val reach = if (i % 2 == 0) outer else inner
+        val angle = (-90f + i * 45f) * (Math.PI.toFloat() / 180f)
+        val x = centre.x + cos(angle) * reach
+        val y = centre.y + sin(angle) * reach
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    return path
+}
 
 /**
- * How far a lit star's glow reaches, as a multiple of its core (v457).
+ * How far past a star's centre a hairline stops, as a multiple of the star's own
+ * core.
  *
- * The gradient's radius, the circle that bounds it and the halo the joins stop at
- * all read from this one number, so the three can never drift apart.
+ * v507 — 1.35 of the core was sized for a glow's mid ring; the star is now a
+ * [StarOuterDp]-reach shape of its own (see [starPath]), so a line is trimmed to
+ * slightly past that reach instead and the two never overlap. The name is kept
+ * because the joins have always asked this one number.
  */
-private const val HALO_REACH = 2.7f
+private const val HaloTrimFactor = 2.2f
+
+/**
+ * ── v507 — HOW BIG A STAR IS, AND WHAT SHAPE IT IS ─────────────────────────
+ *
+ * The member: *"use star shape small not circle or nythung else"*. [StarOuterDp] is
+ * the point's reach, [StarInnerRatio] is how far the arms' waist sits between the
+ * point and the middle — a four-point star drawn from eight alternating vertices (see
+ * [starPath]) — and [StarPickGrow] is the whole of the picked star's answer, which is
+ * feedback and never a measure.
+ *
+ * ONE SIZE, for every lane, at every knowledge level: a star that grew as an archive
+ * filled was refused twice by the member (see [StarCoreDp]), and the v503 glint added
+ * it back by making a grown lane's mark reach 3.4× its own core. Nothing here reads a
+ * lane's knowledge — only its colour does (see [starTints]).
+ */
+private const val StarOuterDp = 6.4f
+private const val StarInnerRatio = 0.42f
+private const val StarPickGrow = 1.14f
 
 // ── v476 — THE CONSTELLATION'S OWN NUMBERS ────────────────────────────────
 //
@@ -4069,7 +4041,7 @@ private const val LightLineDarken = 0.30f
  *
  * The member's own report on v476: the dots had been growing with knowledge. Every
  * star's core is [StarCoreDp]; the lane's knowledge decides its colour and whether
- * it carries a lit halo, never how fat it is (see [starHalos] and [corePxOf]).
+ * it carries a lit colour, never how fat it is (see [starTints] and [corePxOf]).
  */
 private const val StarCoreDp = 3.0f
 
@@ -4083,13 +4055,16 @@ private const val StarCoreDp = 3.0f
  * the arcs never did). A branch is at most [MaxBranchStars] stars now, and a
  * family with more becomes SEVERAL short constellations (see [branchRuns]).
  *
- * [SparkleKnowledge] is the score at which a lane has earned the four-point
- * sparkle in the drawer's sky (the member: *"more visual upgrade to stars"*), so
- * a grown map carries a few bright marks rather than thirty equal glows. The
- * picked lane always sparkles — that is feedback, not a measure.
+ * v507 — AND THE GLINT IS GONE WITH IT (the member: *"the knowleg makes some
+ * star to grow and also that weird star look is bad fi xit, and use star shape
+ * small not circle or nythung else"*). v503 had given a grown lane a hot core and a
+ * four-point glint whose arms reached 3.4× the core, which is what made a
+ * knowledgeable star look BIGGER than its neighbours — the very thing v477 had
+ * already been told to stop. There is no sparkle threshold any more: every lane is
+ * ONE SMALL STAR, the same shape and the same size, and knowledge shows as its
+ * colour alone. See [starPath].
  */
 private const val MaxBranchStars = 6
-private const val SparkleKnowledge = 70
 
 // ── v483 — THE TERRITORIES (see [starScatterByFamily]) ────────────────────
 // A family's anchor is spread round the sky between these radii by the golden
@@ -4114,8 +4089,9 @@ private const val TerritoryFitRadius = 0.92f
  * The member, of the sky: *"the drawer patterns are overlapping each other some
  * lines etc"* — and, asked what overlapped, **both** the lines and the clusters.
  *
- * Two lit stars show a 2.7× halo each ([HALO_REACH]) around a [StarCoreDp] core,
- * so their centre-to-centre distance must clear ~16dp or the glows touch. v483
+ * Two stars are [StarOuterDp]-reach marks ([starPath]) whose trimmed joins stop a
+ * little beyond that, so their centre-to-centre distance must clear the two marks
+ * and the hairline between them or the sky's marks touch. v483
  * raises [MinStarGap] to just past that (unit space is the ellipse [starPoint]
  * scales; 0.115 × the 152dp half-width is 17.5dp, the tightest axis) so NO two
  * dots or halos overlap, and the deterministic relaxation is a few passes longer

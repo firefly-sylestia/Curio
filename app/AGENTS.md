@@ -11123,3 +11123,52 @@ too"*). Pushed as **1.5.8 / `20260951`** — see `Prompt.md` §99.
 - **THE SEALED SCREEN HAS TWO DOORS.** "Done" was the only way off it; **Write another** clears the
   letter and its attachments, keeps the clock, clears the draft state and returns the page to writing —
   and the letter just sealed is in the archive beneath it.
+
+### v507 — THE DRAWER'S STARS ARE STARS, AND NOTHING ON THE CAPSULE PAGE IS SEE-THROUGH
+
+The member's two reports on the drawer and the capsule page (*"the knowleg makes some star to grow and
+also that weird star look is bad fi xit, and use star shape small not circle or nythung else"*, and
+*"in capsle page and more colorful buttom and use solid filled colors no transparent colors anywhere"*),
+with the clock fault behind them (*"the clock number colors is bad"*). Pushed as **1.5.9 / `20260952`** —
+see `Prompt.md` §99.
+
+- **A DRAWER STAR IS A STAR (`starPath`, `StarOuterDp`, `StarInnerRatio`, `StarPickGrow`).** Every lane is
+  ONE four-point star — eight vertices, alternating outer and inner every 45° from twelve o'clock — built
+  ONCE per layout and cached beside the points (`starShapes`), then filled inside the transform the
+  twinkle and the birth already share. The aura, the hot core, the v503 glint and the per-lane glow are
+  all gone: the mark is the same SHAPE and the same SIZE at every knowledge level, and knowledge shows as
+  its colour alone (`starTints`). `StarPickGrow` (1.14) is the picked star's whole answer. A hairline is
+  trimmed to `HaloTrimFactor` (2.2) of the core, which is now sized to the star's own reach.
+  **The general rule: a measure the member cannot see is not feedback — it is a size, and it will be read
+  as one.**
+- **⚠️ AND THE v506 PUSH WAS RED — ONE FORWARD-REFERENCED LOCAL.** `hasUnsealedWork` sat at the TOP of
+  `TimeCapsuleScreen` and read `photo` and `voicePath`, which are declared forty lines below it: a Kotlin
+  LOCAL is visible only from its own declaration onward, so both were unresolved references and the page
+  failed to compile (`TimeCapsuleScreen.kt:196:34 Unresolved reference 'photo'` / `:196:56 'voicePath'`,
+  reported by all four jobs). The declaration moved below the three states it reads. **Root shape: state
+  hoisted for tidiness is still a declaration order, and the compiler reads the page in order.**
+- **EVERY DOOR ON THE CAPSULE PAGE IS A SOLID ACCENT FILL (`capsuleWash` / `capsuleOn`).** `capsuleWash`
+  returns the accent ITSELF (it used to be `lerp(surface, accent, 0.18)`, which is the page with a
+  rumour of a tint on it — the member's *"the time capsule button colors etc is bad"*, and then *"more
+  colorful buttom"*), and `capsuleOn` answers the fill's own contrasting content colour (solid ink or
+  solid white off the fill's `luminance()`; never `White.copy(alpha = …)`). The seal track is the one
+  exception in KIND and not in rule: it starts at a real 45% mix of the accent and deepens into the
+  accent itself as the slug travels, with its words stepping aside by MIXING into the track's colour, and
+  the slug is `capsuleOn` so it can never vanish into the fill it lands on.
+- **⚠️ THE CLOCK'S PLATE WAS NEVER PAINTED — WHICH IS WHAT "the clock number colors is bad" WAS.**
+  `FlipCard` has always taken a `plate` colour and never drew it, so the hand-set palette (a deep plate
+  with bright digits) was painting pale digits straight onto the page's own near-white `surfaceContainer`
+  row. `CardHalf` paints the plate now as a FULL card shape and its own clip cuts it — outer corners
+  rounded, crease edge square, and a turning leaf carries its own half of the plate with it. **The
+  general rule: a parameter that is passed and never read is a silent no-op; grep every new colour
+  argument for its use before trusting a palette that was "set".**
+- **THE CLOCK'S DRAG IS ANY-DIRECTION AT 22dp A NOTCH (`ClockRow`, `NOTCH`).** The v504 detector was
+  horizontal-only, so a thumb that set off even slightly uphill was not recognised at all and the page
+  scrolled instead (the member's *"the gesture to chnage isnt working"*), and one notch cost 34dp — more
+  travel than a short flick covers. `detectDragGestures` reads whichever axis is doing the work (left or
+  up turns the unit on, right or down takes it back) and only consumes what it turned.
+- **NOTHING ON THE PAGE IS SEE-THROUGH.** The arrival's quiet lines, the letter's `sealed` watermark, the
+  hold ring's track and the arrival's own footer line were `color.copy(alpha = …)`; each is now a mix
+  into what is behind it (`scrimTop`, `paper`), which is the same picture with no hole in it. The hero
+  drops its black-to-transparent scrim for a SOLID deep-accent plaque (55% toward black) that the promise
+  and the distance sit on, and its lock disc is solid white with the accent's glyph in it.

@@ -189,11 +189,6 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     // at the tail of this composable).
     var draftReturned by remember { mutableStateOf(false) }
     var askDraft by remember { mutableStateOf(false) }
-    // A letter on the page that the store has not taken yet: the page's way back
-    // asks about it (see the dialog at the tail of this composable). Blank once the
-    // letter is sealed, so the sealed screen's own back is a plain back.
-    val hasUnsealedWork = sealedCapsule == null &&
-        (message.isNotBlank() || photo.isNotBlank() || voicePath.isNotBlank())
 
     // ── v502 — WHAT THE LETTER CARRIES BESIDES WORDS ─────────────────────────
     //
@@ -206,6 +201,20 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     var voicePath by remember { mutableStateOf("") }
     var voiceSeconds by remember { mutableIntStateOf(0) }
     var voiceBars by remember { mutableStateOf("") }
+    // ── v507 — AND THIS IS READ BELOW ITS OWN DECLARATIONS, NOT ABOVE THEM ────
+    //
+    // A letter on the page that the store has not taken yet: the page's way back
+    // asks about it (see the dialog at the tail of this composable). Blank once the
+    // letter is sealed, so the sealed screen's own back is a plain back.
+    //
+    // ⚠️ It used to sit at the top of this block and read `photo` and `voicePath`:
+    // a Kotlin LOCAL is visible only from its own declaration onward, so both were
+    // unresolved references and the whole page did not COMPILE — which is exactly
+    // what the CI run on the v506 push reported (two errors, all four jobs). Every
+    // local it reads (`message`, `photo`, `voicePath`, `sealedCapsule`) is declared
+    // above this line now.
+    val hasUnsealedWork = sealedCapsule == null &&
+        (message.isNotBlank() || photo.isNotBlank() || voicePath.isNotBlank())
     // The live recording is owned HERE rather than through the journal's app-wide
     // recording singleton: a capsule is not a journal note, and taking that state
     // over would put a "still recording" pill on every other screen offering to
@@ -879,7 +888,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                                     sealedCapsule = null
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                color = lerp(scheme.surfaceContainerHighest, accent, 0.20f),
+                                color = capsuleWash(accent),
                                 modifier = Modifier.weight(1f).height(50.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -888,7 +897,10 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.ExtraBold
                                         ),
-                                        color = scheme.onSurface
+                                        // v507 — the door is a solid accent fill now, so
+                                        // its word is [capsuleOn] rather than the page's
+                                        // ink (which was dark-on-dark on a dark accent).
+                                        color = capsuleOn(accent)
                                     )
                                 }
                             }
@@ -1032,52 +1044,63 @@ private fun CapsuleHero(accent: Color, until: String, promise: String) {
                 )
             )
     ) {
-        // A soft floor under the words, so white stays readable on every palette:
-        // the gradient is allowed to be pale because the text is not sitting on it
-        // bare any more.
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.30f))
-                    )
-                )
-        )
+        // ── v507 — THE WORDS SIT ON A SOLID PLAQUE, NOT A TRANSLUCENT SCRIM ────
+        //
+        // The member: *"use solid filled colors no transparent colors anywhere"*.
+        // The hero used to darken its own bottom with a black-to-transparent
+        // gradient — a scrim, which is a colour with alpha in it, and one that made
+        // the card's lower third look fogged rather than lit.
+        //
+        // The promise now sits on its own DEEP ACCENT PLAQUE instead: a solid slab
+        // mixed 55% toward black from the page's own accent, so white on it is
+        // readable whatever the palette's primary happens to be, and the moving
+        // gradient stays exactly as it is everywhere the plaque is not.
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(22.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
+            // The disc is a SOLID white mark with the accent's own glyph in it —
+            // the hero's badge, not a 22% white ghost of one.
             Surface(
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.22f),
+                color = Color.White,
                 modifier = Modifier.size(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(CurioIcons.Lock, null, tint = Color.White, size = 22.dp)
+                    CurioIcon(CurioIcons.Lock, null, tint = accent, size = 22.dp)
                 }
             }
             Spacer(Modifier.height(12.dp))
-            // v501 — THE PROMISE LEADS AND THE DISTANCE FOLLOWS: the date and
-            // time the letter is written for is the fact, and "in 7 days" is how
-            // far away it is. It used to read the other way round ("Lands in 2
-            // months" over the date), which is the member's "that option is bad
-            // make it like ... use better english".
-            Text(
-                promise,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = Color.White
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                "Back to you $until",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.White.copy(alpha = 0.86f)
-            )
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = lerp(accent, Color.Black, 0.55f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    // v501 — THE PROMISE LEADS AND THE DISTANCE FOLLOWS: the date
+                    // and time the letter is written for is the fact, and "in 7
+                    // days" is how far away it is. It used to read the other way
+                    // round ("Lands in 2 months" over the date), which is the
+                    // member's "that option is bad make it like ... use better
+                    // english".
+                    Text(
+                        promise,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color.White
+                    )
+                    Text(
+                        "Back to you $until",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = lerp(Color.White, lerp(accent, Color.Black, 0.55f), 0.18f)
+                    )
+                }
+            }
         }
     }
 }
@@ -1101,8 +1124,39 @@ private fun CapsuleClock(
     onStepMinutes: (Int) -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
-    val plate = lerp(scheme.surface, scheme.onSurface, 0.86f)
-    val ink = lerp(scheme.onSurface, scheme.surface, 0.96f)
+    // ── v507 — THE CLOCK HAS ITS OWN PALETTE, AND IT NO LONGER INVERTS ───────────
+    //
+    // The member: *"still the time capsule button colors etc is bad and sepeiclaly the
+    // clock number colors"*. The old pair was a single inversion of the page in both
+    // themes — `plate = lerp(surface, onSurface, 0.86)` — which happens to read as a
+    // black deck with white digits on a LIGHT page and as a WHITE deck with black
+    // digits on a DARK one. A flip clock is not whichever way the page happens to
+    // lean; it is a dark plate with bright digits, always, which is what makes it read
+    // as a machine on paper and as a machine in the dark.
+    //
+    // So both themes draw a DEEP plate (`0.86` of the way to the page's ink on a light
+    // page, and the page's own surface lifted a touch on a dark one, because a page
+    // that is already black needs a plate it can still be seen against) with BRIGHT
+    // digits, and both carry a whisper of the page's accent: the plate a 6% tint, the
+    // digits 18% — enough that the clock belongs to the page it sits on, nowhere near
+    // enough to cost the contrast a number being read across a room needs.
+    val dark = scheme.surface.luminance() <= 0.5f
+    // The plate's own colour, before the accent is mixed in: the LIGHT page's ink on
+    // a light page, and the dark page's own surface lifted just enough to be seen
+    // against it on a dark one.
+    val plateBase = if (dark) {
+        lerp(scheme.surface, scheme.onSurface, 0.14f)
+    } else {
+        lerp(scheme.surface, scheme.onSurface, 0.86f)
+    }
+    val plate = lerp(plateBase, accent, 0.06f)
+    // The digits: bright in both themes, toward the accent by a fifth.
+    val digitBase = if (dark) {
+        lerp(scheme.onSurface, scheme.surface, 0.04f)
+    } else {
+        lerp(scheme.onSurface, scheme.surface, 0.96f)
+    }
+    val ink = lerp(digitBase, accent, 0.18f)
     // ⚠️ v501 — THE CLOCK IS ITS OWN EDITOR (the member's "remove the plus and
     // arro sign, tapping it should let me edit it and with gesture edit with
     // scrolling", and "the pick a date pick a time feels duplicat).
@@ -1267,25 +1321,45 @@ private fun ClockRow(
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         var travel = 0f
-                        // v504 — SIDEWAYS, so the page's own vertical scroll can
-                        // never take the gesture (see the note on this function),
-                        // and the ONE tick per notch is the deck's feel.
-                        detectHorizontalDragGestures(
+                        // ⚠️ v507 — ANY DIRECTION, AND A SHORTER NOTCH (the member,
+                        // twice: *"the time adjust gesture is bad too"*, then *"the
+                        // gesture to chnage isnt working"*). Two causes, both here:
+                        //
+                        //  · **the detector was HORIZONTAL-ONLY** — a thumb that set
+                        //    off even slightly uphill was not recognised at all and
+                        //    the page scrolled instead, which is exactly what "isnt
+                        //    working" looks like from the outside. A plain drag
+                        //    detector is what a deck wants: any direction counts, and
+                        //    the row still lets a MOSTLY VERTICAL drag through to the
+                        //    page (it only consumes what it turned).
+                        //  · **one notch cost 34dp** of travel, more than a short
+                        //    flick covers, so a small drag did nothing and felt
+                        //    broken. It is 22dp now (see [NOTCH]).
+                        //
+                        // A drag is read on whichever axis is doing the work: left or
+                        // up takes the unit on, right or down takes it back — the deck
+                        // travels the way the thumb pushes it, in either direction.
+                        detectDragGestures(
                             onDragStart = {
                                 travel = 0f
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             },
                             onDragEnd = { travel = 0f },
                             onDragCancel = { travel = 0f }
-                        ) { _, dx ->
-                            travel += dx
+                        ) { change, drag ->
+                            travel += if (kotlin.math.abs(drag.x) >= kotlin.math.abs(drag.y)) {
+                                drag.x
+                            } else {
+                                -drag.y
+                            }
                             val notches = (travel / notch).toInt()
                             if (notches != 0) {
                                 travel -= notches * notch
-                                // Left takes the unit on, right takes it back: the
-                                // deck travels the way the thumb pushes it.
                                 onStep(notches)
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                // The movement is spent, so nothing downstream (the
+                                // page's own scroll) acts on it as well.
+                                change.consume()
                             }
                         }
                     }
@@ -1300,8 +1374,49 @@ private fun ClockRow(
     }
 }
 
-/** How far the thumb travels to turn one notch of the clock's deck (v504). */
-private val NOTCH = 34.dp
+/**
+ * ── v507 — THE ONE FILL EVERY DOOR ON THIS PAGE WEARS, AND IT IS SOLID ───────
+ *
+ * A function, not a plain colour, because it is read inside a composable and the
+ * number lives in one place. The doors used to be `lerp(surface, accent, 0.18)` at
+ * five different strengths — the member's *"still the time capsule button colors
+ * etc is bad"*, and then, plainly, *"more colorful buttom and use solid filled
+ * colors no transparent colors anywhere"*: an accent mixed 14–24% into the page's
+ * own surface is not a colour at all, it is the page with a rumour of a tint, so
+ * every door on the page read as a grey shape rather than as a button.
+ *
+ * So every secondary door now wears THE ACCENT ITSELF — fully opaque and fully
+ * saturated — with its own content in [capsuleOn]. The page's single primary action
+ * is told apart by SHAPE and WEIGHT rather than by being the only coloured thing on
+ * the page: the seal is a full-width travelling track, the doors are circles and
+ * chips.
+ */
+@Composable
+private fun capsuleWash(accent: Color): Color = accent
+
+/**
+ * What sits ON a [capsuleWash] fill: solid ink or solid white, whichever the fill
+ * can carry, chosen from the fill's own brightness.
+ *
+ * The member's rule on this page is that nothing is translucent (*"use solid filled
+ * colors no transparent colors anywhere"*), so a content colour is a REAL colour and
+ * never `Color.White.copy(alpha = …)` over the fill. Reading the fill's luminance is
+ * also what keeps the rule safe for a pale accent — a light primary gets dark ink on
+ * it rather than white on white.
+ */
+private fun capsuleOn(fill: Color): Color =
+    if (fill.luminance() > 0.60f) Color(0xFF15120F) else Color.White
+
+/**
+ * How far the thumb travels to turn one notch of the clock's deck.
+ *
+ * v504 — 34dp, when the deck's drag became sideways. v507 — 22dp, because 34dp is
+ * more travel than a short flick covers: a member adjusting a clock taps and nudges,
+ * they do not swipe across the page, so a notch they cannot reach in one gesture
+ * reads as a dead control (the member's *"the gesture to chnage isnt working"*). One
+ * notch is about a thumb's own width of travel, which is what a dial should be.
+ */
+private val NOTCH = 22.dp
 
 /**
  * ONE CARD OF THE DECK, AND ONLY HALF OF IT TURNS.
@@ -1353,16 +1468,19 @@ private fun FlipCard(
             // what was covering it.
             CardHalf(
                 top = false,
+                plate = plate,
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) { CardGlyph(value, ink) }
             // The top half holds the glyph it had until the leaf lands.
             CardHalf(
                 top = true,
+                plate = plate,
                 modifier = Modifier.align(Alignment.TopCenter)
             ) { CardGlyph(shown, ink) }
             // The leaf that drops away — the OLD bottom half.
             CardHalf(
                 top = false,
+                plate = plate,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .graphicsLayer {
@@ -1374,6 +1492,7 @@ private fun FlipCard(
             // The leaf that lands — the NEW top half.
             CardHalf(
                 top = true,
+                plate = plate,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .graphicsLayer {
@@ -1383,13 +1502,15 @@ private fun FlipCard(
                     }
             ) { CardGlyph(leafFace, ink) }
             // The crease itself, over every layer: one hairline that all four
-            // faces are cut by, and the line the whole illusion hangs on.
+            // faces are cut by, and the line the whole illusion hangs on. It is a
+            // SOLID mix of the plate and the digit's ink (v507 — no alpha on this
+            // page), so on a near-black plate it is a whisper of the digit colour.
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(ink.copy(alpha = 0.24f))
+                    .background(lerp(ink, plate, 0.76f))
             )
         }
         if (caption.isNotBlank()) {
@@ -1425,10 +1546,21 @@ private val CARD_HALF = 40.dp
  * The caller has to hand in the alignment (it is the one inside the card's
  * `BoxScope`): a `Modifier.align` here would not resolve, because this function
  * is not in the box it is being drawn into.
+ *
+ * ⚠️ v507 — AND IT PAINTS THE PLATE, WHICH FOR A WHILE NOBODY DID. [FlipCard] has
+ * always taken a `plate` colour — and never drew it, so the digits stood on the page's
+ * own `surfaceContainer` with nothing behind them. On a LIGHT page that is the
+ * member's *"the clock number colors is bad"*: the palette below had already been
+ * set for a dark plate with bright digits (see [CapsuleClock]), so pale digits were
+ * being painted directly onto a near-white row — a clock you cannot read. Each half
+ * paints the plate as a FULL card shape and its own clip cuts it: the two outer
+ * corners stay rounded, the crease edge stays square, and a turning leaf carries its
+ * own half of the plate with it, which is the whole illusion.
  */
 @Composable
 private fun CardHalf(
     top: Boolean,
+    plate: Color,
     modifier: Modifier = Modifier,
     glyph: @Composable () -> Unit
 ) {
@@ -1447,11 +1579,15 @@ private fun CardHalf(
                 .fillMaxWidth()
                 .height(CARD_HEIGHT)
                 .offset(y = if (top) 0.dp else -CARD_HALF)
+                .background(plate, RoundedCornerShape(CARD_RADIUS))
         ) {
             glyph()
         }
     }
 }
+
+/** The card's own corner radius, shared by the plate the halves paint. */
+private val CARD_RADIUS = 12.dp
 
 /** A glyph cut to a half — the digits are the same everywhere the deck is used. */
 @Composable
@@ -1531,15 +1667,17 @@ private fun CapsuleCircleButton(
     accent: Color,
     onClick: () -> Unit
 ) {
-    val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = scheme.surfaceContainerHigh,
+        // v507 — THE ACCENT ITSELF (see [capsuleWash]): a solid coloured disc with
+        // its glyph in [capsuleOn], rather than a faint tint with a coloured glyph
+        // on it. A coloured circle is a button; a pale circle is a hole.
+        color = capsuleWash(accent),
         modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            CurioIcon(glyph, label, tint = accent, size = 20.dp)
+            CurioIcon(glyph, label, tint = capsuleOn(accent), size = 20.dp)
         }
     }
 }
@@ -1590,9 +1728,23 @@ private fun CapsuleSealSwipe(
         label = "capsuleSealSwipe"
     )
     val progress = (settled / travel).coerceIn(0f, 1f)
+    // ── v507 — A SOLID TRACK, STARTING AT THE ACCENT AND DEEPENING INTO IT ──────
+    //
+    // The member: *"more colorful buttom and use solid filled colors no transparent
+    // colors anywhere"*. The track used to be `lerp(surface, accent, 0.16…0.60)`,
+    // which began as the page's own surface with a rumour of accent on it — the
+    // faintest control on a page that had four other strengths of the same mix. It
+    // starts at a REAL mix of the accent now (still opaque, still coloured) and
+    // travels the rest of the way into the accent itself as the seal approaches, so
+    // the track's own colour is the progress bar. The knob is the accent's own
+    // opposite ([capsuleOn]) — a solid white slug on a rose track, a solid ink one
+    // on a pale accent — so it can never disappear into the fill it lands on.
+    val restFill = lerp(accent, scheme.surfaceContainerHighest, 0.45f)
+    val trackFill = lerp(restFill, accent, progress)
+    val onTrack = capsuleOn(accent)
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = lerp(scheme.surfaceContainerHighest, accent, 0.16f + progress * 0.44f),
+        color = trackFill,
         modifier = Modifier
             .fillMaxWidth()
             .height(58.dp)
@@ -1606,10 +1758,12 @@ private fun CapsuleSealSwipe(
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.ExtraBold
                 ),
-                // v504 — solid ink that FADES as the slug travels (it used to fade
-                // from the muted variant, which is already the quietest text on the
-                // page, so the track's words were nearly invisible at rest).
-                color = lerp(scheme.onSurface, Color.Transparent, progress * 0.9f),
+                // v504 — solid ink that steps aside as the slug travels (it used to
+                // fade from the muted variant, which is already the quietest text on
+                // the page, so the track's words were nearly invisible at rest).
+                // v507 — and it steps aside by MIXING INTO THE TRACK'S OWN COLOUR,
+                // not by fading to transparent: the same look, no alpha anywhere.
+                color = lerp(onTrack, trackFill, progress * 0.92f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -1624,7 +1778,7 @@ private fun CapsuleSealSwipe(
                     .offset(x = with(density) { settled.toDp() })
                     .size(knob)
                     .background(
-                        color = if (enabled) accent else scheme.surfaceContainerHigh,
+                        color = if (enabled) onTrack else scheme.surfaceContainerHigh,
                         shape = RoundedCornerShape(11.dp)
                     )
                     .pointerInput(enabled, travel) {
@@ -1666,7 +1820,9 @@ private fun CapsuleSealSwipe(
                 CurioIcon(
                     CurioIcons.Lock,
                     "Slide to seal",
-                    tint = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant,
+                    // The slug's glyph is the TRACK'S colour: the two are always the
+                    // same fill and its opposite, whichever way round they are.
+                    tint = if (enabled) accent else scheme.onSurfaceVariant,
                     size = 20.dp
                 )
             }
@@ -1696,11 +1852,18 @@ private fun CapsulePresetChip(
     // colors are bad and blending"*: two accent-tinged layers a shade apart, so the
     // word did not read as a word. The fill carries the accent; the label carries
     // the page's own ink, at full strength.
-    val scheme = MaterialTheme.colorScheme
+    //
+    // v507 — AND EVERY DOOR ON THIS PAGE WEARS THE SAME SOLID ACCENT FILL
+    // ([capsuleWash]) WITH ITS LABEL IN [capsuleOn]. The member's second report —
+    // *"still the time capsule button colors etc is bad"* — was a page with five
+    // different accent strengths on it (0.10, 0.16, 0.18, 0.20, 0.24), and then
+    // their own correction: *"more colorful buttom and use solid filled colors no
+    // transparent colors anywhere"*. One solid accent for every door on the page,
+    // and the label is a real colour on it — never a translucent white.
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = lerp(scheme.surfaceContainerHighest, accent, 0.24f),
+        color = capsuleWash(accent),
         modifier = modifier.height(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -1709,7 +1872,7 @@ private fun CapsulePresetChip(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = scheme.onSurface,
+                color = capsuleOn(accent),
                 maxLines = 1
             )
         }
@@ -1830,9 +1993,17 @@ fun TimeCapsuleArrival(
     // "Sealed 4 August 2026", "Hold the seal to open it" and "Let go and nothing
     // happens" were, in practice, invisible — the member's *"its view is bad really
     // bad too textx etc isnt looking good color etc"*. Anything on the SCRIM is white
-    // now (`onScrim`), anything on the letter's PAPER keeps the page's own ink, and
-    // the alphas are set per line rather than picked out of the ink.
+    // now (`onScrim`), and anything on the letter's PAPER keeps the page's own ink.
+    //
+    // ⚠️ v507 — AND A QUIET LINE IS A MIX, NOT AN ALPHA (the member: *"use solid
+    // filled colors no transparent colors anywhere"*). Every softened line on this
+    // screen used to be `color.copy(alpha = …)`, which is the same picture as mixing
+    // it into what is behind it — but a mix is a real colour the theme can reason
+    // about, and an alpha is a hole. `onScrimQuiet` is the scrim's own top of the
+    // gradient, `scrim` the bottom, and the letter's two quiet lines mix into the
+    // paper they sit on.
     val onScrim = Color.White
+    val scrimTop = lerp(scheme.scrim, brass, 0.20f)
 
     // `broken` is the whole state machine: false = sealed, true = the letter is out.
     var broken by remember(capsule.id) { mutableStateOf(false) }
@@ -1870,9 +2041,7 @@ fun TimeCapsuleArrival(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(lerp(scheme.scrim, brass, 0.20f), scheme.scrim)
-                    )
+                    Brush.verticalGradient(listOf(scrimTop, scheme.scrim))
                 )
                 .statusBarsPadding()
                 .navigationBarsPadding(),
@@ -1899,7 +2068,7 @@ fun TimeCapsuleArrival(
                     Text(
                         text = "Sealed ${dayLabel(capsule.sealedAt)} · for ${capsule.spanLabel}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = onScrim.copy(alpha = 0.78f),
+                        color = lerp(onScrim, scrimTop, 0.22f),
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(28.dp))
@@ -1921,7 +2090,7 @@ fun TimeCapsuleArrival(
                                 ),
                                 // On the letter's own paper, so it keeps the page's
                                 // ink — a watermark, deep enough to read as a word.
-                                color = ink.copy(alpha = 0.28f)
+                                color = lerp(ink, paper, 0.72f)
                             )
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -1944,7 +2113,7 @@ fun TimeCapsuleArrival(
                                 // as an arc that closes on the disc.
                                 Canvas(modifier = Modifier.fillMaxSize()) {
                                     drawArc(
-                                        color = brass.copy(alpha = 0.30f),
+                                        color = lerp(brass, paper, 0.70f),
                                         startAngle = -90f,
                                         sweepAngle = 360f,
                                         useCenter = false,
@@ -1996,7 +2165,7 @@ fun TimeCapsuleArrival(
                     Text(
                         text = "Let go and nothing happens",
                         style = MaterialTheme.typography.labelMedium,
-                        color = onScrim.copy(alpha = 0.68f)
+                        color = lerp(onScrim, scheme.scrim, 0.32f)
                     )
                 }
             } else {
@@ -2076,7 +2245,7 @@ fun TimeCapsuleArrival(
                             Text(
                                 text = "written ${dayLabel(capsule.sealedAt)}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = ink.copy(alpha = 0.62f)
+                                color = lerp(ink, paper, 0.38f)
                             )
                         }
                     }
@@ -2143,11 +2312,13 @@ private fun CapsuleAttachmentDoor(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = lerp(scheme.surfaceContainerHigh, accent, 0.10f),
+        // v507 — the same SOLID accent fill as every other door on the page, with
+        // its glyph and word in [capsuleOn]: the coloured glyph these two doors used
+        // to carry sat on the accent itself (see [capsuleWash]), which is invisible.
+        color = capsuleWash(accent),
         modifier = modifier.height(46.dp)
     ) {
         Row(
@@ -2155,13 +2326,13 @@ private fun CapsuleAttachmentDoor(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(horizontal = 12.dp)
         ) {
-            CurioIcon(glyph, null, tint = accent, size = 18.dp)
+            CurioIcon(glyph, null, tint = capsuleOn(accent), size = 18.dp)
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = scheme.onSurface,
+                color = capsuleOn(accent),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2177,16 +2348,17 @@ private fun CapsuleAttachmentRemove(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = lerp(scheme.surface, accent, 0.18f),
+        // v507 — a SOLID accent disc with the close mark in [capsuleOn], rather than
+        // an 18% tint of the accent with near-black ink on it (see [capsuleWash]).
+        color = capsuleWash(accent),
         shadowElevation = 4.dp,
         modifier = modifier.size(34.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            CurioIcon(CurioIcons.Close, label, tint = scheme.onSurface, size = 18.dp)
+            CurioIcon(CurioIcons.Close, label, tint = capsuleOn(accent), size = 18.dp)
         }
     }
 }
@@ -2228,6 +2400,13 @@ private fun CapsuleArchive(
 ) {
     if (capsules.isEmpty()) return
     val scheme = MaterialTheme.colorScheme
+    // v507 — what sits on a READY row's own fill. The ready row is the one row on
+    // this page asking for something, and "solid filled colors no transparent colors
+    // anywhere" (the member) means the row is the accent itself — so every word on it
+    // is [capsuleOn], and the quiet step under the title is a MIX toward the accent
+    // rather than an alpha (see [capsuleOn]).
+    val onAccent = capsuleOn(accent)
+    val onAccentQuiet = lerp(onAccent, accent, 0.24f)
     val haptics = LocalHapticFeedback.current
     var expandedId by remember { mutableStateOf("") }
     Column(
@@ -2253,9 +2432,9 @@ private fun CapsuleArchive(
                 },
                 shape = RoundedCornerShape(14.dp),
                 // A letter whose day has come is the one row on this page that is
-                // asking for something, so it is the one wearing the accent.
-                color = if (ready) lerp(scheme.surfaceContainer, accent, 0.20f)
-                else scheme.surfaceContainer,
+                // asking for something, so it is the one wearing the accent — the
+                // accent ITSELF, solid, rather than a 20% tint of it.
+                color = if (ready) accent else scheme.surfaceContainer,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -2266,7 +2445,11 @@ private fun CapsuleArchive(
                         CurioIcon(
                             CurioIcons.Lock,
                             null,
-                            tint = if (waiting) scheme.onSurfaceVariant else accent,
+                            tint = when {
+                                ready -> onAccent
+                                waiting -> scheme.onSurfaceVariant
+                                else -> accent
+                            },
                             size = 17.dp
                         )
                         Spacer(Modifier.width(10.dp))
@@ -2282,20 +2465,20 @@ private fun CapsuleArchive(
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontWeight = FontWeight.SemiBold
                                 ),
-                                color = scheme.onSurface
+                                color = if (ready) onAccent else scheme.onSurface
                             )
                             // The moment it was written for, always: it is the one
                             // fact that makes a letter a letter.
                             Text(
                                 if (waiting) "For ${capsule.spanLabel}" else capsule.spanLabel,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = scheme.onSurfaceVariant
+                                color = if (ready) onAccentQuiet else scheme.onSurfaceVariant
                             )
                         }
                         CurioIcon(
                             if (expanded) CurioIcons.Close else CurioIcons.ChevronRight,
                             null,
-                            tint = scheme.onSurfaceVariant,
+                            tint = if (ready) onAccentQuiet else scheme.onSurfaceVariant,
                             size = 18.dp
                         )
                     }
@@ -2305,7 +2488,7 @@ private fun CapsuleArchive(
                             Text(
                                 capsule.message,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = scheme.onSurface
+                                color = if (ready) onAccent else scheme.onSurface
                             )
                         }
                         if (capsule.photo.isNotBlank()) {
@@ -2324,8 +2507,12 @@ private fun CapsuleArchive(
                                 path = capsule.voice,
                                 seconds = capsule.voiceSeconds,
                                 bars = capsule.voiceBars,
-                                ink = scheme.onSurface,
-                                accent = accent,
+                                ink = if (ready) onAccent else scheme.onSurface,
+                                // On a ready row the row's own fill IS the accent, so the
+                                // bar's highlight is the light contrast colour instead —
+                                // otherwise its wave and its controls would be drawn in
+                                // the colour they are sitting on.
+                                accent = if (ready) onAccentQuiet else accent,
                                 onRemove = null
                             )
                         }
