@@ -46,23 +46,23 @@ object CurioTimeCapsules {
     private const val DAY_MS = 24L * 60L * 60L * 1000L
 
     /**
-     * The spans the machine's dial can be set to, in the dial's own order.
+     * ⚠️ v496 — THE FIVE-SPAN DIAL IS GONE, AND THE MOMENT IS EXACT.
      *
-     * A fixed ladder rather than a date picker on purpose: the choice a time
-     * capsule asks is *"how far ahead"*, not *"which Tuesday"*, and five named
-     * spans are a thing a thumb can turn. [months] is what the arithmetic uses;
-     * [label] is what the dial says.
+     * The first version asked *"how far ahead"* and answered it with a brass dial
+     * of five named spans (`Span`, 1 / 3 / 6 / 12 / 60 months). The member has
+     * since judged the whole writing page out and named what it should have been
+     * instead — *"no way to customise the date by day time hour minutes etc"* — so
+     * a capsule is now sealed for **an exact instant** ([sealAt]), chosen on the
+     * new page's own clock, and the label that rides with it is the member's own
+     * date and time in words. Do not bring the ladder back: thirty-day months were
+     * a convenience of the dial and are nobody's idea of a promised day.
      */
-    enum class Span(val label: String, val months: Int) {
-        ONE_MONTH("1 month", 1),
-        THREE_MONTHS("3 months", 3),
-        SIX_MONTHS("6 months", 6),
-        ONE_YEAR("1 year", 12),
-        FIVE_YEARS("5 years", 60);
-
-        /** The day this span lands on, from [from]. */
-        fun openAt(from: Long): Long = from + months * 30L * DAY_MS
-    }
+    /**
+     * The shortest lead a capsule may have. A letter that arrives the moment it is
+     * sealed is a note to yourself, not a capsule — and a target a minute away is
+     * almost always a mis-set clock rather than an intention.
+     */
+    const val MIN_LEAD_MS = 5L * 60L * 1000L
 
     /** One sealed letter. */
     data class Capsule(
@@ -71,7 +71,12 @@ object CurioTimeCapsules {
         val message: String,
         val sealedAt: Long,
         val openAt: Long,
-        /** Which rung of [Span] it was sealed on, for the arrival's own line. */
+        /**
+         * The promise in the MEMBER'S OWN WORDS — since v497 the date and time
+         * the page's own clock was set to ("12 March 2027 at 09:30"), which is
+         * what the arrival reads back. It is NOT an interval any more: the
+         * five-span dial that used to write "a month" here is deleted.
+         */
         val spanLabel: String,
         /** When it was opened (0 = still sealed). */
         val openedAt: Long = 0L
@@ -90,6 +95,21 @@ object CurioTimeCapsules {
 
     /** How many are waiting in total — the arrival's quiet count. */
     var waitingState by mutableStateOf(0)
+        private set
+
+    /**
+     * v496 — THE ONE STILL SEALED NEAREST, and how many are sealed at all.
+     *
+     * The arrival only ever cares about what is DUE, so a member sealing a letter
+     * a year out used to have no evidence anywhere that it existed until the year
+     * was up. Home's capsule (see `TimeCapsuleCapsule`) says how many letters are
+     * waiting and when the next one lands, which needs these two — both Compose
+     * state, written by [refresh] like everything else here.
+     */
+    var nextAtState by mutableStateOf(0L)
+        private set
+
+    var sealedCountState by mutableStateOf(0)
         private set
 
     private fun prefs(context: Context) =
@@ -138,23 +158,30 @@ object CurioTimeCapsules {
         read(context).sortedByDescending { it.sealedAt }
 
     /**
-     * Seal a message for [span] from now. Returns the capsule it wrote, so the
-     * caller can show the member the day it will land without re-reading.
+     * v496 — SEAL A MESSAGE FOR AN EXACT MOMENT ([openAt]).
      *
-     * A blank message seals nothing and returns null: an empty letter is not a
-     * letter, and a capsule with no words in it would arrive as a disappointment
-     * three months later with nothing anywhere to explain it.
+     * Returns the capsule it wrote, so the caller can show the member the day it
+     * will land without re-reading. [label] is the promise in the member's own
+     * words (the new page passes its clock's date and time), and it is what the
+     * arrival reads back.
+     *
+     * Nothing is sealed for null: a blank message is not a letter (a capsule with
+     * no words in it would arrive as a disappointment with nothing anywhere to
+     * explain it), and a moment inside [MIN_LEAD_MS] is refused rather than nudged
+     * — silently moving the day the member chose would be worse than saying no, so
+     * the PAGE is what keeps its clock legal (see `TimeCapsuleScreen`).
      */
-    fun seal(context: Context, message: String, span: Span): Capsule? {
+    fun sealAt(context: Context, message: String, openAt: Long, label: String): Capsule? {
         val text = message.trim()
         if (text.isBlank()) return null
         val now = System.currentTimeMillis()
+        if (openAt <= now + MIN_LEAD_MS) return null
         val capsule = Capsule(
             id = "cap-$now",
             message = text,
             sealedAt = now,
-            openAt = span.openAt(now),
-            spanLabel = span.label
+            openAt = openAt,
+            spanLabel = label
         )
         val list = read(context)
         list.add(capsule)
@@ -174,14 +201,20 @@ object CurioTimeCapsules {
         if (!AppPreferences.timeCapsuleEnabledState) {
             dueState = null
             waitingState = 0
+            nextAtState = 0L
+            sealedCountState = 0
             return
         }
         val now = System.currentTimeMillis()
-        val waiting = read(context).filter { it.sealed && it.openAt <= now }
+        val sealed = read(context).filter { it.sealed }
+        val waiting = sealed.filter { it.openAt <= now }
         waitingState = waiting.size
         // The OLDEST first: a member who was away gets their letters in the order
         // they were written, which is the order they meant them in.
         dueState = waiting.minByOrNull { it.openAt }
+        // v496 — and the ones still ahead of the clock, for Home's capsule.
+        sealedCountState = sealed.size
+        nextAtState = sealed.filter { it.openAt > now }.minOfOrNull { it.openAt } ?: 0L
     }
 
     /** The seal is broken. The words are the member's for good from here. */
@@ -195,14 +228,31 @@ object CurioTimeCapsules {
         refresh(context)
     }
 
-    /** How long until [capsule] lands, phrased — for the writing page's promise. */
+    /**
+     * How long until a capsule lands, phrased — for the writing page's promise.
+     *
+     * v496 — IT COUNTED IN DAYS ONLY, which was right for a dial that could not be
+     * set finer than a month and wrong for a clock that can be set to the minute
+     * ("in 0 days" was what a letter sealed for this evening used to say). It now
+     * walks minutes → hours → days → months → years.
+     */
     fun untilText(openAt: Long, now: Long = System.currentTimeMillis()): String {
-        val days = ((openAt - now).coerceAtLeast(0L) / DAY_MS).toInt()
+        val left = openAt - now
+        if (left <= 0L) return "now"
+        val minutes = left / 60_000L
+        val hours = left / 3_600_000L
+        val days = left / DAY_MS
         return when {
+            minutes < 1 -> "in under a minute"
+            minutes < 60 -> "in $minutes ${if (minutes == 1L) "minute" else "minutes"}"
+            hours < 24 -> "in $hours ${if (hours == 1L) "hour" else "hours"}"
             days <= 1 -> "tomorrow"
             days < 60 -> "in $days days"
             days < 365 -> "in ${days / 30} months"
-            else -> "in ${days / 365} years"
+            else -> {
+                val years = days / 365
+                "in $years ${if (years == 1L) "year" else "years"}"
+            }
         }
     }
 }

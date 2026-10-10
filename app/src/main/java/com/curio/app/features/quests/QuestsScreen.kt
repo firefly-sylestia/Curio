@@ -1943,7 +1943,19 @@ private fun PassportCard(
                                 // been pressed, and the press itself: recorded
                                 // here, at the page, in one place.
                                 pressed = cat.id.name in pressedLanes,
-                                onStampPress = { pressedLanes = pressedLanes + cat.id.name },
+                                // v496 — THE PRESS IS WRITTEN DOWN. v491 recorded
+                                // it only in this page's own state, so the ink
+                                // landed on screen and was gone the moment the
+                                // page was left — a stamp the member pressed came
+                                // back as "Press to stamp" forever. The store is
+                                // the record ([CurioPassport.markStampPressed],
+                                // the same prefs `pressedStamps` reads), and the
+                                // local set moves with it so the cell re-inks on
+                                // the same frame.
+                                onStampPress = {
+                                    CurioPassport.markStampPressed(context, cat.id)
+                                    pressedLanes = pressedLanes + cat.id.name
+                                },
                                 modifier = Modifier.weight(1f),
                                 onClick = { onSpin(cat.id.routeSlug) }
                             )

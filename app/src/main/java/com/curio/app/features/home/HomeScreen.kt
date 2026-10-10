@@ -354,6 +354,9 @@ fun HomeScreen(navController: NavController) {
     // into a local: the hero and this sheet both read [CurioRecall.dueState],
     // which is Compose state, so keeping one answers the other instantly.
     var recallOpen by remember { mutableStateOf(false) }
+    // v496 — and the ladder's own sheet, for the days nothing is due: the
+    // capsule's quiet state is a door, not a dead pill.
+    var recallAheadOpen by remember { mutableStateOf(false) }
     // v493 — the capsule that is covering the screen right now. It is a LOCAL,
     // not a live read of [CurioTimeCapsules.dueState]: breaking the seal writes
     // `openedAt`, the next letter becomes due in that same instant, and reading
@@ -988,29 +991,18 @@ fun HomeScreen(navController: NavController) {
                                     kind = PetLandmarks.Kind.FUN,
                                     screen = "home"
                                 ) { m ->
-                                    // v489 — THE RETURN LEADS ON ITS DUE DAY.
-                                    // The member's own rule: the recall takes the
-                                    // hero on the day it falls due, then the quest
-                                    // comes back — which is exactly what
-                                    // [CurioRecall.dueState] emptying does on its
-                                    // own the moment an answer is kept. The two
-                                    // cards are SIBLINGS: one seat, one geometry,
-                                    // one colour contract, so the hero never
-                                    // changes shape when the day turns.
+                                    // v496 — THE HERO IS THE QUEST AGAIN, ALWAYS.
+                                    // v489 put the Return here on its due day, and
+                                    // the member could never see it: the card
+                                    // existed only between a topic falling due and
+                                    // it being answered, so on every other day the
+                                    // feature had no surface anywhere. The Return
+                                    // is the small capsule under this banner now
+                                    // (see [ReturnCapsule]) — always drawn, counts
+                                    // what is waiting and knows what is next — so
+                                    // the hero has ONE identity and never changes
+                                    // shape on the day turning.
                                     val plate = lerp(heroFill, Color.White, 0.88f)
-                                    val dueRecall = CurioRecall.dueState
-                                    if (dueRecall != null) {
-                                        RecallCard(
-                                            plate = plate,
-                                            ink = curioFillInk(plate),
-                                            copyInk = questInk,
-                                            topicName = dueRecall.topicName,
-                                            agoText = CurioRecall.agoText(dueRecall.firstCompletedAt),
-                                            waiting = CurioRecall.waitingState,
-                                            onOpen = { recallOpen = true },
-                                            modifier = m
-                                        )
-                                    } else {
                                     QuestShuffleCard(
                                         // A paper-white disc ON the rose banner:
                                         // the pastel accent would vanish into
@@ -1030,7 +1022,6 @@ fun HomeScreen(navController: NavController) {
                                         onShuffle = onQuestShuffle,
                                         modifier = m
                                     )
-                                    }
                                 }
                         }
                     }
@@ -1040,6 +1031,66 @@ fun HomeScreen(navController: NavController) {
                 // out of the coral into frosted floating pills on scroll).
             }
             } // v3xx — end of the torn-hero branch (glass toolbar else)
+
+            // ── v496 — THE RETURN AND THE LETTERS, AS CAPSULES THAT ARE ALWAYS
+            // THERE ─────────────────────────────────────────────────────────
+            // The member: *"the return doesn't show up — make it a small capsule
+            // which shows always"*. Two one-line capsules under the hero, and
+            // both are drawn on every visit rather than on the day something
+            // falls due: the Return counts what is waiting and, when nothing is,
+            // says when the next one comes round (the sheet behind it reads the
+            // whole ladder); the Letters says how many are sealed and when the
+            // next one lands. The Letters only appears once there IS one — a
+            // capsule that said "0 letters" would be furniture — and both are
+            // gone entirely with their features switched off.
+            val sealedLetters = if (AppPreferences.timeCapsuleEnabledState) {
+                CurioTimeCapsules.sealedCountState
+            } else 0
+            if (AppPreferences.recallEnabledState || sealedLetters > 0) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .widthIn(
+                            max = if (windowWidthSizeClass().isWide) WideContentMaxWidth
+                            else Dp.Infinity
+                        )
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    if (AppPreferences.recallEnabledState) {
+                        val dueNow = CurioRecall.waitingState
+                        ReturnCapsule(
+                            due = dueNow,
+                            aheadText = if (dueNow > 0) null else CurioRecall.upcomingState
+                                .firstOrNull()
+                                ?.let { CurioRecall.aheadText(it.dueAt) },
+                            onOpen = {
+                                // Due → the answering sheet. Not due → the ladder
+                                // itself, because a member who presses this wants
+                                // to know WHEN, and only one of the two states
+                                // has an answer to give them.
+                                if (CurioRecall.dueState != null) recallOpen = true
+                                else recallAheadOpen = true
+                            }
+                        )
+                    }
+                    if (sealedLetters > 0) {
+                        val nextAt = if (CurioTimeCapsules.nextAtState > 0L) {
+                            CurioTimeCapsules.nextAtState
+                        } else CurioTimeCapsules.dueState?.openAt ?: 0L
+                        LettersCapsule(
+                            sealed = sealedLetters,
+                            nextText = CurioTimeCapsules.untilText(nextAt),
+                            onOpen = {
+                                navController.navigate(CurioRoutes.TIME_CAPSULE) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+            }
 
             // v411 — THE DAILY QUEST IS NOT HERE ANY MORE: it moved up INTO
             // the torn banner (see the hero's own QuestShuffleCard call), so
@@ -1850,6 +1901,17 @@ fun HomeScreen(navController: NavController) {
                 CurioRecall.answer(context, dueRecallForSheet, text)
                 recallOpen = false
             }
+        )
+    }
+
+    // ── v496 — the Return's ladder, for the days nothing is due ──
+    // The capsule's quiet state opens this instead of doing nothing: it is where
+    // a member can SEE that the topic they finished yesterday is queued for
+    // tomorrow, which is the whole answer to "it doesn't show up".
+    if (recallAheadOpen) {
+        RecallAheadSheet(
+            upcoming = CurioRecall.upcomingState,
+            onDismiss = { recallAheadOpen = false }
         )
     }
 

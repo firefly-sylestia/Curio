@@ -1,0 +1,292 @@
+package com.curio.app.features.home
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.curio.app.data.CurioRecall
+import com.curio.app.ui.components.liquidglass.CurioGlassWindowBlur
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioSheetContainerColor
+
+/**
+ * v496 — HOME'S TWO SMALL CAPSULES: THE RETURN, AND THE LETTERS.
+ *
+ * The member, on the Return: *"the return doesn't show up — make it a small
+ * capsule which shows always"*. They were right about the cause: the Return was a
+ * CARD IN THE HERO that existed only between the moment a topic fell due and the
+ * moment it was answered, so a member with a fresh ladder — or one who had just
+ * answered — saw nothing at all and had no way to know the feature was there. A
+ * feature whose only surface is a due day is invisible on every other day.
+ *
+ * So the Return is a CAPSULE under the hero, and it is ALWAYS drawn while the
+ * feature is on:
+ *
+ *  · **Something due** — the capsule wears the accent, counts what is waiting
+ *    ("3 waiting") and opens the answering sheet. It is the loudest thing it ever
+ *    needs to be, and it is still one line tall.
+ *  · **Nothing due yet** — it says when the next one comes round ("next in 3
+ *    days") and opens the ladder behind it ([RecallAheadSheet]), so the schedule
+ *    the member is walking is a thing they can READ rather than only wait for.
+ *  · **Nothing on the ladder at all** — it says so in four words ("nothing
+ *    waiting yet"). It is not a dead pill: the sheet behind it explains what
+ *    starts a return (finishing a topic).
+ *
+ * The hero itself is the QUESTS card again, always: a hero that changes identity
+ * on a due day is the thing the member could not see, and the capsule says the
+ * same fact without moving anything.
+ *
+ * The LETTERS capsule is the same shape for the other kind of later-mail, and it
+ * is drawn only once there is at least one sealed letter — a capsule that said
+ * "0 letters" would be furniture. It says how many are sealed and when the next
+ * lands, and it opens the writing page (see `TimeCapsuleScreen`).
+ */
+@Composable
+fun ReturnCapsule(
+    /** How many returns are waiting to be answered right now. */
+    due: Int,
+    /** When the next one comes round, phrased ([CurioRecall.aheadText]); null if none. */
+    aheadText: String?,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scheme = MaterialTheme.colorScheme
+    val accent = scheme.primary
+    val live = due > 0
+    val label = when {
+        live -> "The Return · $due waiting"
+        aheadText != null -> "The Return · next $aheadText"
+        else -> "The Return · nothing waiting yet"
+    }
+    HomeCapsule(
+        glyph = CurioIcons.Replay,
+        label = label,
+        // A waiting return is the one thing on Home that has to be acted on, so
+        // it is the accent pill; the quiet states are the plain surface.
+        fill = if (live) accent else scheme.surfaceContainerHigh,
+        ink = if (live) scheme.onPrimary else scheme.onSurface,
+        accent = accent,
+        onClick = onOpen,
+        modifier = modifier
+    )
+}
+
+/** How many letters are sealed and when the next one lands, for [ReturnCapsule]'s sibling. */
+@Composable
+fun LettersCapsule(
+    sealed: Int,
+    /** When the next letter lands, phrased ([com.curio.app.data.CurioTimeCapsules.untilText]). */
+    nextText: String?,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scheme = MaterialTheme.colorScheme
+    val accent = scheme.tertiary
+    HomeCapsule(
+        glyph = CurioIcons.Lock,
+        label = when {
+            sealed == 1 -> "1 letter sealed · lands $nextText"
+            else -> "$sealed letters sealed · next lands $nextText"
+        },
+        fill = scheme.surfaceContainerHigh,
+        ink = scheme.onSurface,
+        accent = accent,
+        onClick = onOpen,
+        modifier = modifier
+    )
+}
+
+/**
+ * The capsule itself: one line, one glyph, one chevron.
+ *
+ * Deliberately NOT a card — no eyebrow, no second line, no shadow. It is a
+ * status line the member can press, and it has to be cheap enough to sit under
+ * the hero on every visit to Home.
+ */
+@Composable
+private fun HomeCapsule(
+    glyph: String,
+    label: String,
+    fill: Color,
+    ink: Color,
+    accent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = fill,
+        modifier = modifier.height(46.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CurioIcon(
+                glyph,
+                null,
+                // On an accent fill the glyph is the on-accent ink; on a plain
+                // surface it is the accent, so the pill still shows its family.
+                tint = if (fill == accent) ink else accent,
+                size = 18.dp
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            CurioIcon(
+                CurioIcons.ChevronRight,
+                null,
+                tint = ink.copy(alpha = 0.55f),
+                size = 18.dp
+            )
+        }
+    }
+}
+
+/**
+ * THE LADDER, READABLE: what is coming back, and when.
+ *
+ * The capsule's own page for the days nothing is due. Rolling through the whole
+ * ladder is the answer to *"why does The Return not show up"* — the member can
+ * see the topic they finished yesterday queued for tomorrow instead of trusting
+ * that something is scheduled somewhere.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecallAheadSheet(
+    upcoming: List<CurioRecall.Recall>,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scheme = MaterialTheme.colorScheme
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = curioSheetContainerColor(scheme.surface),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        CurioGlassWindowBlur()
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Text(
+                "THE RETURN",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.5.sp
+                ),
+                color = scheme.primary
+            )
+            Text(
+                "A finished topic comes back on a widening ladder — a day, then three, then a week.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurfaceVariant
+            )
+            if (upcoming.isEmpty()) {
+                Text(
+                    "Nothing is on the ladder yet. Finish a topic and it comes back tomorrow.",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = scheme.onSurface
+                )
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    upcoming.forEach { recall ->
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = scheme.surfaceContainerHigh,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CurioIcon(
+                                    CurioIcons.Replay,
+                                    null,
+                                    tint = scheme.primary,
+                                    size = 18.dp
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        recall.topicName,
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.SemiBold
+                                        ),
+                                        color = scheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        "finished ${CurioRecall.agoText(recall.firstCompletedAt)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = scheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Text(
+                                    CurioRecall.aheadText(recall.dueAt),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = scheme.primary,
+                                    textAlign = TextAlign.End
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

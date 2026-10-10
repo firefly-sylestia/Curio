@@ -271,20 +271,10 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
-            // v490 — THE RIFFLE. The deck's LOOK is untouched: this is purely
-            // how the fan answers a hand, so off is exactly the old behaviour.
-            item { SettingsSectionHeading("Deck") }
-            item {
-                SettingsOptionCard {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        ExperimentSwitchRow(
-                            "Riffle the deck",
-                            "Thumb the deck like a real one: drag the fan sideways and it tilts and slides in your hand, one card passes for each step your thumb takes, and letting go flings it on before it settles. Off keeps the plain swipe.",
-                            AppPreferences.riffleDeckState
-                        ) { wanted -> AppPreferences.setDeckRiffleEnabled(context, wanted) }
-                    }
-                }
-            }
+            // ── v496 — NO DECK SECTION: THE RIFFLE IS DELETED ─────────────
+            //
+            // The deck's thumb-drag and the Spin button's pump are gone with the
+            // switch that gated them (the member: *"remove riffle the deck"*).
 
             // v3xx45 — SCREEN REVEAL experiment (default OFF): opening any
             // v491 — THE PASSPORT'S STAMP IS PRESSED. Masteries earned before
@@ -350,34 +340,7 @@ fun ExperimentsScreen(navController: NavController) {
                         // relaunch, and switching it on must show one already due.
                         CurioTimeCapsules.refresh(context)
                     }
-                    CurioSettingsDivider()
-                    // v494 — THE TEAR-OFF SAVE. A second way to do the Completed
-                    // star's write by pulling a perforated strip off the reveal
-                    // page; the star is untouched either way, so off is exactly
-                    // the reveal that was there before.
-                    ExperimentSwitchRow(
-                        "Tear it off",
-                        "The topic page grows a perforated strip: pull it down and it tears free with the piece falling away, and the topic is kept — the same mark the Completed star makes, in a way you can feel. Off takes the strip away; the star stays either way.",
-                        AppPreferences.revealTearState
-                    ) { wanted -> AppPreferences.setRevealTearEnabled(context, wanted) }
                 }
-                }
-            }
-
-            // v495 — THE FOLD: a Cabinet card can be folded shut along a crease
-            // you drag. The fold is the KEPT state — the fold pattern stays in
-            // prefs even with the switch off, and off only stops the card from
-            // folding (every folded card unfolds and behaves exactly as before).
-            item { SettingsSectionHeading("Cabinet") }
-            item {
-                SettingsOptionCard {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        ExperimentSwitchRow(
-                            "Fold the cards",
-                            "A saved entry's card folds shut along a crease you drag down its face — folded means kept, and the crease stays in the shelf until you tap the card open again. Off keeps every card open and the fold never starts.",
-                            AppPreferences.cabinetFoldState
-                        ) { wanted -> AppPreferences.setCabinetFoldEnabled(context, wanted) }
-                    }
                 }
             }
 

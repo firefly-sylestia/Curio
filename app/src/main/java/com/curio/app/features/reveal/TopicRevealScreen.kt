@@ -1197,40 +1197,14 @@ fun TopicRevealScreen(
                     )
                 }
 
-                // ── 2.65 THE TEAR-OFF STRIP (v494, agenda §5.2) ──────────────
-                // The member: *"Tear saves on the reveal; folding closes a
-                // Cabinet card."* A perforated strip hangs below the actions:
-                // pulling it down past the threshold runs EXACTLY the Completed
-                // star's write (the same two calls, in the same order), so the
-                // star and the strip can never disagree about the fact — and the
-                // star pill is untouched, because a gesture may never be the only
-                // route to something. Hidden in browse mode (read-only) and
-                // until the topic resolves.
-                val tearTopic = resolved
-                if (tearTopic != null && !latestBrowseMode && contentUiReady &&
-                    AppPreferences.revealTearState) {
-                    RevealContentEntrance(delayMillis = 100) {
-                        RevealTearStrip(
-                            accent = cat.themedAccent(),
-                            completed = sentiment == AppPreferences.SENTIMENT_LIKE,
-                            onTear = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                AppPreferences.setTopicSentiment(
-                                    context, cat.id, tearTopic.id, AppPreferences.SENTIMENT_LIKE
-                                )
-                                ExploreSessionStore.setCompleted(context, cat.id, tearTopic.name, true)
-                            },
-                            onPutBack = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                AppPreferences.setTopicSentiment(
-                                    context, cat.id, tearTopic.id, AppPreferences.SENTIMENT_NONE
-                                )
-                                ExploreSessionStore.setCompleted(context, cat.id, tearTopic.name, false)
-                            },
-                            modifier = Modifier.padding(top = 14.dp)
-                        )
-                    }
-                }
+                // ── v496 — THE TEAR-OFF STRIP IS GONE ────────────────────────
+                //
+                // v494 hung a perforated strip below these actions and made
+                // pulling it off run the Completed star's own write. The member
+                // has judged it out ("remove … tear it off"), so the strip and its
+                // file are deleted rather than switched off. **The star is the
+                // save on this page and always was** — the tear only ever ran the
+                // same two calls, so nothing the member could do is lost.
 
                 // ── 3. Topic name ───────────────────────────────────────────────
                 // v8.25 — the topic name now lives INSIDE the hero card

@@ -1698,16 +1698,17 @@ object AppPreferences {
     var glassFrostedState by mutableStateOf(true)
         private set
 
-    // v490 — THE RIFFLE (default ON): Spin's fan can be THUMBED like a real
-    // deck. Dragging it sideways tilts and slides the whole fan in the hand,
-    // each card's own travel deals the next one as the thumb crosses it, and
-    // letting go flings it on with momentum before the spring settles it back.
-    // **The deck's LOOK is untouched** — this is entirely gesture, so with the
-    // switch off the fan behaves exactly as it did before (a swipe past the
-    // threshold still cycles one card, which stays the honest fallback: a
-    // gesture must never be the only way to do something).
-    var riffleDeckState by mutableStateOf(true)
-        private set
+    // ── v496 — THREE EXPERIMENTS ARE GONE, NOT SWITCHED OFF ──────────────
+    //
+    // The member judged three of the second-round experiments out (*"remove
+    // riffle the deck"*, *"the fold the entry remove it"*, and the tear with
+    // them), so the riffle (`deck_riffle_v1`), the reveal's tear-off
+    // (`reveal_tear_v1`) and the Cabinet's folded cards (`cabinet_fold_v1` +
+    // the `folded_entries` set) have no state, no switch and no code path any
+    // more — root rule 3 of the experimental-changes section: when the answer
+    // is in, the switch goes with it. The ripple is one behaviour again: Spin's
+    // swipe past 48dp deals one card; the reveal's Completed star is the only
+    // save write; a Cabinet card is never folded.
 
     // v491 — THE PASSPORT'S STAMP IS PRESSED (default ON): a lane's MASTERED
     // stamp is earned by real activity and then physically pressed — a rubber
@@ -1734,27 +1735,6 @@ object AppPreferences {
     // what Home shows and nothing else: with it off the letters stay sealed in
     // `curio_time_capsules` and arrive the moment it is switched back on.
     var timeCapsuleEnabledState by mutableStateOf(true)
-        private set
-
-    // v494 — THE TEAR-OFF SAVE (default ON): the reveal's Completed write can be
-    // done by pulling a perforated strip off the page (see
-    // [com.curio.app.features.reveal.RevealTearStrip]). The Completed STAR is
-    // untouched either way — the tear is a second way to save, never the only
-    // one — so with the switch off the reveal is exactly what it was.
-    var revealTearState by mutableStateOf(true)
-        private set
-
-    // v495 — THE CABINET'S FOLDED CARDS (the state store, not the switch):
-    // which saved entries are folded shut. A fold is a SHELF state — the card
-    // stays in its place, folded, until it is unfolded — so it is an id set
-    // keyed by the entry's own id, kept in THIS prefs file (which is already
-    // in CurioBackupManager's list, so the folds ship with a backup). No Room
-    // migration: a fold is a reading posture, not a property of the capture.
-    var foldedEntriesState by mutableStateOf<Set<String>>(emptySet())
-        private set
-
-    // v495 — whether the fold gesture is on at all (default ON).
-    var cabinetFoldState by mutableStateOf(true)
         private set
 
     // v483 — THE DRAWER'S CONSTELLATION WEARS ONE OF THREE CONNECTION STYLES.
@@ -2190,13 +2170,9 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassFrostedState = isGlassFrostedEnabled(context)
-        riffleDeckState = isDeckRiffleEnabled(context)
         passportStampState = isPassportStampEnabled(context)
         readerMarginState = isReaderMarginEnabled(context)
         timeCapsuleEnabledState = isTimeCapsuleEnabled(context)
-        revealTearState = isRevealTearEnabled(context)
-        foldedEntriesState = getFoldedEntries(context)
-        cabinetFoldState = isCabinetFoldEnabled(context)
         drawerLinkStyleState = getDrawerLinkStyle(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
         screenRevealEnabledState = isScreenRevealEnabled(context)
@@ -2696,13 +2672,9 @@ object AppPreferences {
     // clear refraction. Default ON (the member's ask); the toggle turns it off
     // and returns the old clear glass.
     private const val KEY_GLASS_FROSTED = "glass_frosted_smudge"
-    private const val KEY_DECK_RIFFLE = "deck_riffle_v1"
     private const val KEY_PASSPORT_STAMP = "passport_stamp_v1"
     private const val KEY_READER_MARGIN = "reader_margin_v1"
     private const val KEY_TIME_CAPSULE_ENABLED = "time_capsule_v1"
-    private const val KEY_REVEAL_TEAR = "reveal_tear_v1"
-    private const val KEY_FOLDED_ENTRIES = "folded_entries"
-    private const val KEY_CABINET_FOLD = "cabinet_fold_v1"
     // v483 — the drawer sky's connection style (0 threads / 1 bones / 2 arcs).
     private const val KEY_DRAWER_LINK_STYLE = "drawer_link_style_v1"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -3035,15 +3007,6 @@ object AppPreferences {
         glassFrostedState = enabled
     }
 
-    // ── The deck riffle (v490, default ON) ───────────────────────────
-    fun isDeckRiffleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DECK_RIFFLE, true)
-
-    fun setDeckRiffleEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_DECK_RIFFLE, enabled).apply()
-        riffleDeckState = enabled
-    }
-
     // ── The passport's pressed stamp (v491, default ON) ──────────────
     fun isPassportStampEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PASSPORT_STAMP, true)
@@ -3069,56 +3032,6 @@ object AppPreferences {
     fun setTimeCapsuleEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_TIME_CAPSULE_ENABLED, enabled).apply()
         timeCapsuleEnabledState = enabled
-    }
-
-    // ── The reveal's tear-off save (v494, default ON) ─────────────────
-    fun isRevealTearEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_REVEAL_TEAR, true)
-
-    fun setRevealTearEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_REVEAL_TEAR, enabled).apply()
-        revealTearState = enabled
-    }
-
-    // ── The Cabinet's folded cards (v495) ─────────────────────────────
-    /** Every folded entry id. Persisted as a JSON array of ids. */
-    fun getFoldedEntries(context: Context): Set<String> {
-        val raw = prefs(context).getString(KEY_FOLDED_ENTRIES, null) ?: return emptySet()
-        return try {
-            val arr = JSONArray(raw)
-            List(arr.length()) { arr.optString(it) }.filter { it.isNotBlank() }.toSet()
-        } catch (_: Exception) {
-            emptySet()
-        }
-    }
-
-    fun isEntryFolded(context: Context, entryId: String): Boolean =
-        getFoldedEntries(context).contains(entryId)
-
-    fun foldEntry(context: Context, entryId: String) {
-        if (entryId.isBlank()) return
-        val updated = getFoldedEntries(context) + entryId
-        val arr = JSONArray()
-        updated.forEach { arr.put(it) }
-        prefs(context).edit().putString(KEY_FOLDED_ENTRIES, arr.toString()).apply()
-        foldedEntriesState = updated
-    }
-
-    fun unfoldEntry(context: Context, entryId: String) {
-        val updated = getFoldedEntries(context) - entryId
-        val arr = JSONArray()
-        updated.forEach { arr.put(it) }
-        prefs(context).edit().putString(KEY_FOLDED_ENTRIES, arr.toString()).apply()
-        foldedEntriesState = updated
-    }
-
-    // ── The Cabinet's fold switch (v495, default ON) ──────────────────
-    fun isCabinetFoldEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CABINET_FOLD, true)
-
-    fun setCabinetFoldEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CABINET_FOLD, enabled).apply()
-        cabinetFoldState = enabled
     }
 
     // ── The drawer sky's connection style (v483) ─────────────────────

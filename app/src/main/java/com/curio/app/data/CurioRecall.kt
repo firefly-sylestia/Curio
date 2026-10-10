@@ -103,6 +103,18 @@ object CurioRecall {
     var waitingState by mutableStateOf(0)
         private set
 
+    /**
+     * v496 — WHAT IS STILL AHEAD, soonest first.
+     *
+     * The member's complaint was that The Return *"doesn't show up"*: the ladder
+     * only ever spoke on a due day, so every other day a member had no evidence
+     * that anything was scheduled at all. Home's capsule says when the next one
+     * comes round, and the sheet behind it reads this list — same Compose state,
+     * same single writer, so it is as live as [dueState].
+     */
+    var upcomingState by mutableStateOf<List<Recall>>(emptyList())
+        private set
+
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -191,6 +203,7 @@ object CurioRecall {
         if (!AppPreferences.recallEnabledState) {
             dueState = null
             waitingState = 0
+            upcomingState = emptyList()
             return
         }
         val now = System.currentTimeMillis()
@@ -198,6 +211,7 @@ object CurioRecall {
         val waiting = list.filter { it.dueAt <= now }
         waitingState = waiting.size
         dueState = waiting.minByOrNull { it.dueAt }
+        upcomingState = list.filter { it.dueAt > now }.sortedBy { it.dueAt }
     }
 
     /**
@@ -239,6 +253,28 @@ object CurioRecall {
             ?.takeIf { it.answer.isNotBlank() }
             ?.let { listOf(it.answer) }
             ?: emptyList()
+
+    /**
+     * v496 — "in 3 days" — how long until a return comes round — Home's capsule.
+     *
+     * Same shape as the capsule's own promise line: minutes and hours exist
+     * because a return can fall due later TODAY (a topic finished yesterday at
+     * 9pm comes back at 9pm), so "in 0 days" was never a sentence.
+     */
+    fun aheadText(dueAt: Long, now: Long = System.currentTimeMillis()): String {
+        val left = (dueAt - now).coerceAtLeast(0L)
+        val minutes = left / 60_000L
+        val hours = left / 3_600_000L
+        val days = left / DAY_MS
+        return when {
+            minutes < 1 -> "any moment now"
+            minutes < 60 -> "in $minutes ${if (minutes == 1L) "minute" else "minutes"}"
+            hours < 24 -> "in $hours ${if (hours == 1L) "hour" else "hours"}"
+            days == 1L -> "tomorrow"
+            days < 60 -> "in $days days"
+            else -> "in ${days / 30} months"
+        }
+    }
 
     /**
      * "three weeks ago" — the phrase the card's prompt is built from. Rounded

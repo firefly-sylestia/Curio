@@ -224,11 +224,18 @@ android {
         // pane in two), the frosted frost reaches the panels that have no window
         // blur behind them and the dropdown menus, and the drawer sky drops its
         // cross-family lines so each family is its own constellation.
-        versionCode = 20260941
+        versionCode = 20260942
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
-        versionName = envReleaseVersion ?: "1.4.18"
+        // v497 — 5.0: the four experiments the member judged out are DELETED
+        // (the riffle, the tear, the fold) rather than left switched off, the
+        // time capsule's writing page is rebuilt as a flip clock with Android's
+        // own date and time pickers, and Home's Return and Letters are the
+        // capsules that always show. The member asked for the major number, and
+        // it is the honest one: three shipped features left the app, and a
+        // surface that only existed on a due day never existed at all.
+        versionName = envReleaseVersion ?: "5.0.0"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
