@@ -3878,7 +3878,7 @@ private fun DrawerLaneStarMap(
             // in [starHalos] (a falloff, not rings — see its note), the twinkle and
             // the birth are one translate+scale over it, and an unexplored lane is
             // still the solid dim point v422 asked for.
-            lanes.forEachIndexed { index, _ ->
+            lanes.forEachIndexed { index, lane ->
                 // The staggered light-up: each star waits its own turn, so the sky
                 // fills in as a sweep rather than blinking on.
                 val born = bornOf(index)
@@ -3919,7 +3919,60 @@ private fun DrawerLaneStarMap(
                     translate(centre.x - settled.x, centre.y - settled.y)
                     scale(sizeNow, sizeNow, pivot = settled)
                 }) {
+                    // The falloff: the star's own light, wide and soft (see
+                    // [starHalos]).
                     drawCircle(brush = brush, radius = corePx * HALO_REACH, center = settled)
+                    // ── v503 — A STAR, NOT A SMEAR (the member: *"more visual
+                    // upgrade to stars"*) ────────────────────────────────────
+                    // The aura alone is a soft smudge with its brightest part
+                    // spread over the whole halo. A HOT CORE now sits in the
+                    // middle of it, so the eye has a point to land on, and a lane
+                    // that has earned its knowledge ([SparkleKnowledge]) or is the
+                    // one being answered wears a four-point sparkle over it —
+                    // long thin arms with a fainter diagonal pair between them,
+                    // which is the mark a night sky draws for its brightest
+                    // stars. Both are drawn inside the same transform, so they
+                    // twinkle and are born with the star they belong to; the
+                    // count of sparkles is the count of grown lanes, never thirty.
+                    val hot = if (dark) lerp(page, lane.accent, 0.94f) else lane.accent
+                    drawCircle(color = hot, radius = corePx * 0.66f, center = settled)
+                    if (lane.id == selected || lane.knowledge >= SparkleKnowledge) {
+                        val arm = corePx * 3.4f
+                        val thin = (corePx * 0.26f).coerceAtLeast(0.6f)
+                        val spark = if (dark) lerp(hot, Color.White, 0.45f)
+                                    else lerp(hot, ink, 0.35f)
+                        drawLine(
+                            color = spark,
+                            start = Offset(settled.x - arm, settled.y),
+                            end = Offset(settled.x + arm, settled.y),
+                            strokeWidth = thin,
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = spark,
+                            start = Offset(settled.x, settled.y - arm),
+                            end = Offset(settled.x, settled.y + arm),
+                            strokeWidth = thin,
+                            cap = StrokeCap.Round
+                        )
+                        val diag = arm * 0.34f
+                        val faint = lerp(page, spark, 0.55f)
+                        val hair = (thin * 0.7f).coerceAtLeast(0.5f)
+                        drawLine(
+                            color = faint,
+                            start = Offset(settled.x - diag, settled.y - diag),
+                            end = Offset(settled.x + diag, settled.y + diag),
+                            strokeWidth = hair,
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = faint,
+                            start = Offset(settled.x - diag, settled.y + diag),
+                            end = Offset(settled.x + diag, settled.y - diag),
+                            strokeWidth = hair,
+                            cap = StrokeCap.Round
+                        )
+                    }
                 }
             }
         }
@@ -4032,6 +4085,24 @@ private const val LightLineDarken = 0.30f
  */
 private const val StarCoreDp = 3.0f
 
+/**
+ * v503 — HOW MANY STARS ONE BRANCH MAY JOIN, AND WHAT EARNS A SPARKLE.
+ *
+ * The member: *"fix the long branches i dont like it, max 6 can be branched"*. A
+ * family used to be ONE chain whatever its size, so a fourteen-lane family drew as
+ * a single line running all the way round its own territory (and, in the ARC
+ * style, across the sky — the straight styles drop a segment past `joinReach`,
+ * the arcs never did). A branch is at most [MaxBranchStars] stars now, and a
+ * family with more becomes SEVERAL short constellations (see [branchRuns]).
+ *
+ * [SparkleKnowledge] is the score at which a lane has earned the four-point
+ * sparkle in the drawer's sky (the member: *"more visual upgrade to stars"*), so
+ * a grown map carries a few bright marks rather than thirty equal glows. The
+ * picked lane always sparkles — that is feedback, not a measure.
+ */
+private const val MaxBranchStars = 6
+private const val SparkleKnowledge = 70
+
 // ── v483 — THE TERRITORIES (see [starScatterByFamily]) ────────────────────
 // A family's anchor is spread round the sky between these radii by the golden
 // angle, and its own patch grows with its lane count (a square root, so the big
@@ -4043,10 +4114,10 @@ private const val StarCoreDp = 3.0f
 // the hub air and spreads the constellations round the rim, without touching the
 // patch sizes (a patch is what makes a branch read as a constellation rather than
 // as a blob, and widening it would put two territories back on top of each other).
-private const val TerritoryAnchorInner = 0.32f
-private const val TerritoryAnchorOuter = 0.52f
-private const val TerritorySpreadBase = 0.070f
-private const val TerritorySpreadPerLane = 0.046f
+private const val TerritoryAnchorInner = 0.38f
+private const val TerritoryAnchorOuter = 0.30f
+private const val TerritorySpreadBase = 0.086f
+private const val TerritorySpreadPerLane = 0.048f
 private const val TerritoryFitRadius = 0.92f
 
 /**
@@ -4125,20 +4196,60 @@ private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> 
     // one-lane SPORTS.
     val families = familyOf.distinct()
     val familyCount = families.size
+    // ── v503 — THE RINGS ARE DEALT BY SIZE, NOT BY TURN ───────────────────
+    // The anchor radius used to follow the family's index in the catalog, which
+    // put a fourteen-lane family on the rim as often as a one-lane one — and a
+    // wide patch out there has no room to the edge, so the fit below pulled the
+    // whole sky in toward the middle. The anchors are dealt from the INSIDE out
+    // in order of how much room a family's patch wants instead: the big families
+    // take the middle (where there is room for them) and the small ones take the
+    // rim, which is also what makes the sky read as scattered rather than as one
+    // ring of equally-sized clumps.
+    val need = families.map { family ->
+        TerritorySpreadBase + TerritorySpreadPerLane *
+            kotlin.math.sqrt(familyOf.count { it == family }.toFloat())
+    }
+    val ringRank = families.indices
+        .sortedByDescending { need[it] }
+        .withIndex()
+        .associate { (rank, fi) -> fi to rank }
     val gathered = MutableList(count) { Offset.Zero }
     families.forEachIndexed { fi, family ->
         val ids = familyOf.indices.filter { familyOf[it] == family }
         val n = ids.size
-        val anchorAngle = fi * goldenAngle
-        val anchorRadius = TerritoryAnchorInner +
-            TerritoryAnchorOuter * kotlin.math.sqrt((fi + 0.5f) / familyCount)
+        // ── v503 — SCATTERED, NOT ARRANGED (the member: *"make it more
+        // scattered look"*). Every anchor and every lane carries a small
+        // deterministic wobble now: without it the anchors sat on one perfect
+        // golden-angle ring at one spacing, which is a machine's arrangement and
+        // reads as one however hard the constellations inside it are jittered.
+        val rank = ringRank[fi] ?: fi
+        val anchorAngle = fi * goldenAngle + 0.34f * scatterWobble(fi * 17 + 5)
+        val anchorRadius = (TerritoryAnchorInner +
+            TerritoryAnchorOuter * kotlin.math.sqrt((rank + 0.5f) / familyCount)) *
+            (1f + 0.17f * scatterWobble(fi * 31 + 11))
         val anchor = Offset(cos(anchorAngle) * anchorRadius, sin(anchorAngle) * anchorRadius)
         // Each family's lanes sit on a small Vogel spiral inside its own patch, so
         // a branch reads as a constellation rather than as a blob.
-        val spread = TerritorySpreadBase + TerritorySpreadPerLane * kotlin.math.sqrt(n.toFloat())
+        // v503 — the patch is WIDER than it was (a family read as one tight
+        // blob at the old numbers, which is the opposite of a scatter), and each
+        // lane inside it wobbles off the spiral so the constellation looks found
+        // rather than plotted.
+        //
+        // ⚠️ AND A PATCH MAY NOT REACH PAST THE FIELD. The old code let a big
+        // family run past the rim and then scaled the WHOLE layout back to fit
+        // ([TerritoryFitRadius]) — which is the opposite of what the member asked
+        // for: one wide family pulled every other family in toward the middle and
+        // left the rim empty. The room left between a family's anchor and the rim
+        // is the most its patch may spend instead, so the anchors keep their new
+        // outward spread and the sky stays scattered to its edge; the global fit
+        // remains only as a last resort.
+        val room = (TerritoryFitRadius - anchor.getDistance()).coerceAtLeast(0.10f)
+        val spread = (TerritorySpreadBase + TerritorySpreadPerLane * kotlin.math.sqrt(n.toFloat()))
+            .coerceAtMost(room)
         ids.forEachIndexed { k, index ->
-            val localAngle = k * goldenAngle + fi * 0.9f
-            val localRadius = spread * kotlin.math.sqrt((k + 0.5f) / n)
+            val localAngle = k * goldenAngle + fi * 0.9f + 0.46f * scatterWobble(index * 7 + 3)
+            val localRadius = spread * kotlin.math.sqrt((k + 0.5f) / n) *
+                (1f + 0.32f * scatterWobble(index * 13 + 5))
             gathered[index] = Offset(
                 anchor.x + cos(localAngle) * localRadius,
                 anchor.y + sin(localAngle) * localRadius
@@ -4327,11 +4438,18 @@ private fun starConstellation(
         val ids = members.getValue(family)
         if (ids.size < 2) return@forEach
         val centre = centreOf(ids)
-        chains.add(
-            ids.sortedBy { id ->
-                kotlin.math.atan2(points[id].y - centre.y, points[id].x - centre.x)
-            }
-        )
+        val ordered = ids.sortedBy { id ->
+            kotlin.math.atan2(points[id].y - centre.y, points[id].x - centre.x)
+        }
+        // ── v503 — ONE FAMILY, SEVERAL SHORT BRANCHES ─────────────────────
+        // The member: *"fix the long branches i dont like it, max 6 can be
+        // branched"*. The angular order is kept — it is what stops a branch
+        // crossing itself — and the run is CUT into pieces of at most
+        // [MaxBranchStars], so a big family reads as a small constellation of
+        // constellations instead of one line sweeping its whole territory.
+        branchRuns(ordered.size, MaxBranchStars).forEach { run ->
+            chains.add(ordered.subList(run.first, run.last + 1))
+        }
     }
 
     // ── 2) AND THAT IS ALL (v488 — the MST between families is gone) ───────
@@ -4339,6 +4457,41 @@ private fun starConstellation(
     // territories any more, so there is no line on the sky that is not a family's
     // own edge (see [StarConstellation]).
     return StarConstellation(chains)
+}
+
+/**
+ * v503 — HOW A FAMILY'S STARS ARE CUT INTO BRANCHES.
+ *
+ * Runs of at most [max], cut AS EVENLY as the count allows: seven stars become
+ * 4 + 3 rather than 6 + 1. That is the whole reason this is a function — a
+ * one-star leftover is not a constellation (it draws no line at all), so an
+ * uneven cut would quietly throw a lane's branch away and leave it a lone dot
+ * among constellations.
+ */
+private fun branchRuns(count: Int, max: Int): List<IntRange> {
+    if (count <= 0) return emptyList()
+    if (count <= max) return listOf(0 until count)
+    val parts = (count + max - 1) / max
+    val base = count / parts
+    val extra = count % parts
+    val out = ArrayList<IntRange>(parts)
+    var start = 0
+    repeat(parts) { i ->
+        val size = base + if (i < extra) 1 else 0
+        out.add(start until (start + size))
+        start += size
+    }
+    return out
+}
+
+/** A deterministic −1…1 wobble for an index, so a layout can be scattered
+ *  WITHOUT being random: the same lane always lands in the same place, which is
+ *  what makes the sky a landmark the member can learn. */
+private fun scatterWobble(seed: Int): Float {
+    var x = seed * 1103515245 + 12345
+    x = x xor (x ushr 13)
+    x *= 1274126177
+    return (((x ushr 8) and 0xFFFF).toFloat() / 65535f) * 2f - 1f
 }
 
 /**

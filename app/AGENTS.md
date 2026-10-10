@@ -11001,3 +11001,40 @@ the text comes closer if that exist fix it."* Pushed as **1.5.2 / `20260945`** (
   Fix them inside the same `str_replace` as the code that needs them, and read the failing run's
   `e: file://` lines rather than its last message — the compile errors and the lint ones are the same
   list, and a run's first error is rarely its only one.
+
+### v503 — THE DRAWER'S SKY IS SCATTERED, A BRANCH IS SIX STARS, AND A STAR IS A STAR
+
+The member's first three asks (*"fix the darwer stars make it more scattered look, and also fix the
+long branches i dont like it, max 6 can be branched and more visual upgrade to stars"*), pushed as
+**1.5.5 / `20260948`** — see `Prompt.md` §99. All of it lives in `features/home/HomeScreen.kt`'s
+`DrawerLaneStarMap` and the two pure helpers under it.
+
+- **THE ANCHORS ARE DEALT BY SIZE, NOT BY CATALOG TURN (`starScatterByFamily`).** The anchor radius
+  used to follow the family's index, which put a fourteen-lane family on the rim as often as a
+  one-lane one — and a wide patch out there has no room to the edge, so the fit at the end pulled the
+  WHOLE sky in toward the middle (a big family could not be both wide and far out). The families are
+  now ranked by **how much room their patch wants** (`TerritorySpreadBase + TerritorySpreadPerLane ×
+  √n`) and the anchors are dealt from the INSIDE out in that order: the busiest lanes take the middle
+  and the small ones take the rim. The per-family `room` clamp stays as a belt-and-braces (a patch may
+  never spend more than the distance from its anchor to `TerritoryFitRadius`), and the global fit
+  remains only as the last resort.
+- **EVERY ANCHOR AND EVERY STAR CARRIES A WOBBLE (`scatterWobble`).** One perfect golden-angle ring at
+  one spacing read as a machine's arrangement however hard the constellations inside it were jittered,
+  so the anchor angle gets ±0.34 rad, the anchor radius ±17%, a lane's local angle ±0.46 rad and its
+  local radius ±32% — all from a **deterministic** hash (`scatterWobble(seed)`), never `Random`, so the
+  same lanes land in the same places and the map stays the landmark the member learns.
+- **A BRANCH IS AT MOST `MaxBranchStars` (6) STARS (`branchRuns`).** A family used to be ONE chain
+  whatever its size, so a big one drew as a single line sweeping its whole territory — and the ARCS
+  style leaned on the whole chain, so it could run right across the sky while the straight styles were
+  dropping their too-long segments. A family with more than six lanes is now SEVERAL short
+  constellations, cut **as evenly as the count allows** (seven becomes 4 + 3, never 6 + 1): a one-star
+  leftover draws no line at all, which would have quietly left a lane a lone dot among constellations.
+- **A STAR IS A STAR (`SparkleKnowledge`).** The aura alone is a soft smudge with its brightest part
+  spread over the whole halo, so a lit star now wears a **hot core** (`corePx × 0.66`, the accent
+  mixed toward white on the dark page) and a lane whose knowledge has reached the sparkle mark — or
+  the lane being answered — wears a **four-point glint**: long thin cardinal arms with a fainter
+  diagonal pair between them. Both are drawn INSIDE the star's own `withTransform`, so the glint is
+  born and breathes with the star it belongs to, and the number of glints is the number of grown
+  lanes, never thirty.
+- **Not measured, judged:** the wobble amplitudes, the ring order and the sparkle threshold are look,
+  not science — the layout is deterministic so a report is reproducible.
