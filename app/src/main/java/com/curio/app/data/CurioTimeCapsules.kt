@@ -42,6 +42,7 @@ object CurioTimeCapsules {
 
     private const val PREFS = "curio_time_capsules"
     private const val KEY_ITEMS = "capsules"
+    private const val KEY_DRAFT = "draft"
 
     private const val DAY_MS = 24L * 60L * 60L * 1000L
 
@@ -114,6 +115,76 @@ object CurioTimeCapsules {
         val voiceBars: String = ""
     ) {
         val sealed: Boolean get() = openedAt == 0L
+    }
+
+    /**
+     * ── v506 — THE LETTER BEING WRITTEN, KEPT WHEN THE PAGE IS LEFT ────────────
+     *
+     * The member: *"and also it doesnt have draft dalog too"*. A capsule page is a
+     * page you write a letter on, and backing out of it — or being interrupted by
+     * the phone — used to throw the words away with nothing said. So a half-written
+     * letter is a DRAFT: the writing page asks before it lets one go (see
+     * `CapsuleDraftDialog`), and "Keep as draft" writes it here.
+     *
+     * Not Compose state, unlike the capsule lists: no other screen shows a draft, and
+     * the page reads it once as it opens, so a `refresh()` read would be a wasted
+     * read on every Home visit.
+     */
+    data class Draft(
+        val message: String = "",
+        val photo: String = "",
+        val voice: String = "",
+        val voiceSeconds: Int = 0,
+        val voiceBars: String = "",
+        /** The clock the member had set. 0 = the page's own default. */
+        val openAt: Long = 0L
+    ) {
+        val isEmpty: Boolean
+            get() = message.isBlank() && photo.isBlank() && voice.isBlank()
+    }
+
+    /** The draft on this device, or null. Read once, as the writing page opens. */
+    fun draft(context: Context): Draft? {
+        val raw = prefs(context).getString(KEY_DRAFT, null) ?: return null
+        return try {
+            val o = JSONObject(raw)
+            Draft(
+                message = o.optString("message"),
+                photo = o.optString("photo"),
+                voice = o.optString("voice"),
+                voiceSeconds = o.optInt("voiceSeconds"),
+                voiceBars = o.optString("voiceBars"),
+                openAt = o.optLong("openAt")
+            ).takeUnless { it.isEmpty }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Keep a half-written letter. An empty draft CLEARS it, so the page has one door. */
+    fun saveDraft(context: Context, draft: Draft) {
+        if (draft.isEmpty) {
+            clearDraft(context)
+            return
+        }
+        val json = JSONObject()
+            .put("message", draft.message)
+            .put("photo", draft.photo)
+            .put("voice", draft.voice)
+            .put("voiceSeconds", draft.voiceSeconds)
+            .put("voiceBars", draft.voiceBars)
+            .put("openAt", draft.openAt)
+            .toString()
+        prefs(context).edit().putString(KEY_DRAFT, json).apply()
+    }
+
+    /**
+     * The draft is gone — the letter was sealed, or the member threw it away. Called
+     * by the page after [sealAt] succeeds, so a sealed letter can never come back as a
+     * draft of itself.
+     */
+    fun clearDraft(context: Context) {
+        prefs(context).edit().remove(KEY_DRAFT).apply()
     }
 
     /**

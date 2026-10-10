@@ -11096,3 +11096,30 @@ The member's second message of the session (ten items) plus one that arrived mid
   title, grey caption, chevron) among the Quests page's own cards: it now carries a **mastery bar**
   under its counts, the waiting stamps as a **badge in the passport's sage**, and its own sage disc as
   the way in.
+
+### v506 — THE SEAL TRACK CANNOT GET STUCK, AND A LETTER CAN BE KEPT AS A DRAFT
+
+The member's two reports on the capsule page (*"the slide to seal is bugged when it fails with wrong
+time it stucks in that end position with no way to save again and also it doesnt have draft dalog
+too"*). Pushed as **1.5.8 / `20260951`** — see `Prompt.md` §99.
+
+- **A REFUSED SEAL SPRINGS THE SLUG HOME (`CapsuleSealSwipe`).** `onSeal` now answers `Boolean`. The
+  latch (`sealed = true`, `travelled = travel`) used to happen BEFORE the store was asked, so a refusal
+  — a moment already passed, an empty letter — left a full track with the slug parked at its end, no
+  way to drag it and nothing left to do: the page's own `sealNote` explaining the refusal was drawn
+  under a control that had given up. On a refusal the track resets to 0 in the same drag callback (two
+  plain float writes — a gesture lambda is not a suspend context, see the function's own note) and the
+  haptic is the light tick instead of the success thump; on success it is unchanged.
+  **The general rule: a gesture that ends in a write must be told whether the write happened.**
+- **A DRAFT (`CurioTimeCapsules.Draft` + `saveDraft` / `draft` / `clearDraft`).** A half-written letter
+  used to be thrown away in silence when the page was left. It is a draft now: the dialog
+  (`CapsuleDraftDialog`, inline at the tail of the page, wearing `CapsuleDialogTheme` like the two
+  pickers) offers **Keep as draft**, **Throw it away** and **Keep writing**, and the system back and
+  the header's arrow both go through it (`BackHandler(enabled = hasUnsealedWork)`). The page opens on
+  the draft — words, picture, voice and the clock, the clock only if it is still legal — and says so in
+  one line. **Sealing clears the draft in the very branch that seals it**, so a sealed letter can never
+  come back as a draft of itself. It is deliberately NOT Compose state: no other screen shows a draft,
+  so a `refresh()` read would be a wasted read on every Home visit, and only this page writes one.
+- **THE SEALED SCREEN HAS TWO DOORS.** "Done" was the only way off it; **Write another** clears the
+  letter and its attachments, keeps the clock, clears the draft state and returns the page to writing —
+  and the letter just sealed is in the archive beneath it.

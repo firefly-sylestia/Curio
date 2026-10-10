@@ -1,6 +1,7 @@
 package com.curio.app.features.timecapsule
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
@@ -181,6 +182,18 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     // working"). The refusal is written here and drawn under the button.
     var sealNote by remember { mutableStateOf("") }
     var nowTick by remember { mutableIntStateOf(0) }
+    // ── v506 — THE DRAFT DOOR ────────────────────────────────────────────────
+    // The member: *"and also it doesnt have draft dalog too"*. Leaving this page
+    // used to throw a half-written letter away in silence, so: the page opens on the
+    // draft if there is one, and it asks before it lets a letter go (see the dialog
+    // at the tail of this composable).
+    var draftReturned by remember { mutableStateOf(false) }
+    var askDraft by remember { mutableStateOf(false) }
+    // A letter on the page that the store has not taken yet: the page's way back
+    // asks about it (see the dialog at the tail of this composable). Blank once the
+    // letter is sealed, so the sealed screen's own back is a plain back.
+    val hasUnsealedWork = sealedCapsule == null &&
+        (message.isNotBlank() || photo.isNotBlank() || voicePath.isNotBlank())
 
     // ── v502 — WHAT THE LETTER CARRIES BESIDES WORDS ─────────────────────────
     //
@@ -314,6 +327,22 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     // The head's own count, and the app's one place that recomputes what is
     // waiting: the page can be the first thing opened after a return.
     LaunchedEffect(Unit) { CurioTimeCapsules.refresh(context) }
+    // v506 — AND THE PAGE OPENS ON THE DRAFT, if there is one. Read ONCE, as the
+    // page comes up: the draft is not Compose state (no other screen shows one), so
+    // there is nothing to observe — and a draft is only ever written by this page.
+    LaunchedEffect(Unit) {
+        val draft = CurioTimeCapsules.draft(context) ?: return@LaunchedEffect
+        message = draft.message
+        photo = draft.photo
+        voicePath = draft.voice
+        voiceSeconds = draft.voiceSeconds
+        voiceBars = draft.voiceBars
+        // The clock only comes back if it is still legal — a draft kept for a week
+        // can carry a moment that has since passed, and the page's own floor is what
+        // the seal is checked against.
+        if (draft.openAt > System.currentTimeMillis() + floor) target = draft.openAt
+        draftReturned = true
+    }
     // A live clock, so "lands in 3 hours" stays honest while the member sits on
     // the page. One tick a second is all the promise line needs.
     LaunchedEffect(Unit) {
@@ -458,6 +487,8 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                 // v501 — THE HEADER WEARS THE PAGE'S OWN LANGUAGE: one soft rectangle
                 // holding the way back, the name of the page and the count of letters
                 // already waiting, rather than a floating arrow beside a bare title.
+                // v506 — and the way back ASKS first when a letter is on the page (see
+                // [CapsuleDraftDialog]), which is what makes this arrow safe to press.
                 Surface(
                     shape = RoundedCornerShape(14.dp),
                     color = scheme.surfaceContainer,
@@ -472,7 +503,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                             glyph = CurioIcons.ArrowBack,
                             label = "Back",
                             accent = accent,
-                            onClick = onBack
+                            onClick = { if (hasUnsealedWork) askDraft = true else onBack() }
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -495,6 +526,19 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(18.dp))
+
+                // v506 — a draft that came back says so, in one quiet line: a page
+                // that had silently filled itself with yesterday's words would read
+                // as a bug rather than as a kindness.
+                if (draftReturned) {
+                    Text(
+                        "Your draft came back. It is still yours to change.",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = scheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(10.dp))
+                }
 
                 CapsuleHero(accent = accent, until = until, promise = promise)
                 Spacer(Modifier.height(20.dp))
@@ -677,19 +721,28 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                             voiceBars = voiceBars
                         )
                         if (sealed != null) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // ⚠️ v506 — AND THE DRAFT GOES WITH IT. A sealed letter
+                            // must never come back as a draft of itself, so the draft
+                            // is cleared in the SAME branch that sealed it (the "Keep
+                            // as draft" door writes, this one removes — one of them
+                            // always wins, and neither can be forgotten).
+                            CurioTimeCapsules.clearDraft(context)
+                            draftReturned = false
                             sealNote = ""
                             sealedCapsule = sealed
+                            true
                         } else {
-                            // The store said no, so the page says why. A control
-                            // that silently does nothing is the bug the member
-                            // reported.
+                            // The store said no, so the page says why — and the track
+                            // springs home so the member can fix the clock and slide
+                            // again (a control that silently does nothing is the bug
+                            // the member reported; a control that STAYS at the end of
+                            // its travel having done nothing was the second one).
                             sealNote = if (!carriesSomething) {
                                 "A capsule needs something to carry. A line, a picture, or your voice."
                             } else {
                                 "That moment has already passed. Set the clock a little further on."
                             }
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            false
                         }
                     }
                 )
@@ -750,10 +803,13 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
+                        // v506 — the disc wears the pixel face's own mark at a size
+                        // worth looking at: this is the one screen in the app that
+                        // says a thing is DONE, and it was the plainest.
                         Surface(
                             shape = CircleShape,
                             color = accent,
-                            modifier = Modifier.size(88.dp)
+                            modifier = Modifier.size(104.dp)
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -783,16 +839,126 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                             color = scheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
-                        Button(
-                            onClick = onBack,
-                            colors = ButtonDefaults.buttonColors(containerColor = accent),
-                            shape = RoundedCornerShape(12.dp)
+                        // ── v506 — TWO DOORS, BECAUSE THERE ARE TWO THINGS TO DO ──
+                        // "Done" used to be the only way off this screen. A capsule
+                        // page is somewhere a member writes one letter and often
+                        // writes another, so the second door clears the letter (and
+                        // its attachments) and leaves the clock where it was: the
+                        // next letter is a fresh page, not a copy of the last one.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text("Done")
+                            Surface(
+                                onClick = onBack,
+                                shape = RoundedCornerShape(12.dp),
+                                color = accent,
+                                modifier = Modifier.weight(1f).height(50.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        "Done",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold
+                                        ),
+                                        color = scheme.onPrimary
+                                    )
+                                }
+                            }
+                            Surface(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    message = ""
+                                    photo = ""
+                                    voicePath = ""
+                                    voiceSeconds = 0
+                                    voiceBars = ""
+                                    sealNote = ""
+                                    recordIssue = ""
+                                    draftReturned = false
+                                    sealedCapsule = null
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = lerp(scheme.surfaceContainerHighest, accent, 0.20f),
+                                modifier = Modifier.weight(1f).height(50.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        "Write another",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold
+                                        ),
+                                        color = scheme.onSurface
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    // ── v506 — THE DRAFT DOOR ITSELF ────────────────────────────────────────
+    //
+    // The system back and the header's arrow both ask here when a letter is on the
+    // page (the member: *"and also it doesnt have draft dalog too"*). Three answers,
+    // and only one of them can lose the letter: "Keep as draft" writes it through
+    // `CurioTimeCapsules.saveDraft`, "Throw it away" clears it, and "Keep writing"
+    // closes the dialog and leaves the page exactly as it was. The dialog wears the
+    // page's own face like the two pickers (see [CapsuleDialogTheme]).
+    BackHandler(enabled = hasUnsealedWork) { askDraft = true }
+    if (askDraft) {
+        CapsuleDialogTheme {
+            AlertDialog(
+                onDismissRequest = { askDraft = false },
+                containerColor = curioDialogContainerColor(),
+                title = { Text("Keep this letter?", color = scheme.onSurface) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            "It is written but not sealed. A draft stays on this " +
+                                "device and comes back the next time you open this page.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scheme.onSurfaceVariant
+                        )
+                        TextButton(
+                            onClick = {
+                                CurioTimeCapsules.clearDraft(context)
+                                askDraft = false
+                                onBack()
+                            }
+                        ) {
+                            Text("Throw it away", color = scheme.error)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            CurioTimeCapsules.saveDraft(
+                                context,
+                                CurioTimeCapsules.Draft(
+                                    message = message,
+                                    photo = photo,
+                                    voice = voicePath,
+                                    voiceSeconds = voiceSeconds,
+                                    voiceBars = voiceBars,
+                                    openAt = target
+                                )
+                            )
+                            askDraft = false
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onBack()
+                        }
+                    ) { Text("Keep as draft", color = scheme.primary) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { askDraft = false }) {
+                        Text("Keep writing", color = scheme.onSurfaceVariant)
+                    }
+                }
+            )
         }
     }
 }
@@ -1391,12 +1557,23 @@ private fun CapsuleCircleButton(
  * `animateFloatAsState`: no `snapTo`/`animateTo` is ever called from the gesture
  * callback (a gesture lambda is not a suspend context — the rule the tear-strip
  * went red on once), so a released slug is the animation doing its own job.
+ *
+ * ⚠️ v506 — AND A REFUSED SEAL PUTS THE SLUG BACK (a real bug the member hit:
+ * *"the slide to seal is bugged when it fails with wrong time it stucks in that end
+ * position with no way to save again"*). [onSeal] answers whether the store took the
+ * letter, and the slug springs home when it did not: it used to be latched at the
+ * far end (`sealed = true`, `travelled = travel`) BEFORE the store was asked, so a
+ * refusal left a full track with a lock at the end of it that could no longer be
+ * dragged — the page's own note explaining the refusal was drawn under a control that
+ * had already given up. The reset happens in the drag callback as two plain float
+ * writes (no suspend call — see the note above).
  */
 @Composable
 private fun CapsuleSealSwipe(
     enabled: Boolean,
     accent: Color,
-    onSeal: () -> Unit
+    /** True when the letter was actually sealed; a refusal springs the slug home. */
+    onSeal: () -> Boolean
 ) {
     val scheme = MaterialTheme.colorScheme
     val haptics = LocalHapticFeedback.current
@@ -1469,8 +1646,19 @@ private fun CapsuleSealSwipe(
                             if (travelled / travel >= SEAL_REACH) {
                                 sealed = true
                                 travelled = travel
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onSeal()
+                                // The store decides. It takes the letter (the page
+                                // shows its own sealed state and the slug has done
+                                // its job) or it refuses for a real reason — a
+                                // moment that has passed, an empty letter — and
+                                // then the track has to be usable again, which is
+                                // exactly what the member could not do before v506.
+                                if (onSeal()) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                } else {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    sealed = false
+                                    travelled = 0f
+                                }
                             }
                         }
                     }
