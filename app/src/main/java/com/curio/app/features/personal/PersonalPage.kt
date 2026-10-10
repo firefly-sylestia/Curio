@@ -698,7 +698,12 @@ internal fun PersonalWritingPage(
     // walking the block list in there would be a scan per frame. The reporter
     // hands in the block's ID, so this is a map lookup by the time it is needed.
     val headingLevels = remember(doc) {
-        doc.blocks.associate { it.id to titleLevelOf(runsToMask(it.text.length, it.runs)) }
+        // `personalHeadingLevel` reads a BLOCK's level ([personalHeadingLevel]
+        // walks the block's own heading stretch); `titleLevelOf` reads ONE
+        // character's mask, which is a different question and a different type.
+        doc.blocks.associate {
+            it.id to personalHeadingLevel(it.text, runsToMask(it.text.length, it.runs))
+        }
     }
     val reportSectionLine:
         (String, String, Float, Float, Boolean, Float) -> Unit =

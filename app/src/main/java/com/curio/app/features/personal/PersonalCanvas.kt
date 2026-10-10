@@ -7991,8 +7991,13 @@ private fun readableOnFill(fill: Color): Color = journalInkOn(fill)
  * reader, so the badge a member presses and the badge they see on the line can
  * never disagree.
  */
-private fun headingLevelOfFocused(state: PersonalEditorState): Int =
-    state.focusedId?.let { titleLevelOf(state.mask(it)) } ?: 0
+private fun headingLevelOfFocused(state: PersonalEditorState): Int {
+    val id = state.focusedId ?: return 0
+    // The BLOCK's level, from the block's own words and its per-character mask
+    // ([personalHeadingLevel]) — `titleLevelOf` takes one character's mask, not
+    // a line's.
+    return personalHeadingLevel(state.text(id), state.mask(id))
+}
 
 /**
  * MAKE THE CARET'S LINE WEAR A LEVEL (0 puts it back to content).
@@ -8006,7 +8011,7 @@ private fun headingLevelOfFocused(state: PersonalEditorState): Int =
  */
 private fun setHeadingLevel(state: PersonalEditorState, level: Int) {
     val id = state.focusedId ?: return
-    val current = titleLevelOf(state.mask(id))
+    val current = personalHeadingLevel(state.text(id), state.mask(id))
     if (current == 1) state.toggle(FLAG_TITLE)
     if (current == 2) state.toggle(FLAG_TITLE_2)
     if (level == 1) state.toggle(FLAG_TITLE)

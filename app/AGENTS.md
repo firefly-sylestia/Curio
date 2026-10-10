@@ -10983,11 +10983,21 @@ the text comes closer if that exist fix it."* Pushed as **1.5.2 / `20260945`** (
   on `\n`). The row now takes a `heightIn(min = eyeLine)` floor — its own style's line height — in
   journals and book reviews alike. **The general rule: any read-view change must be measured against
   the pen, because the two passes are the same page.**
-- **⚠️ TWO RED BUILDS, BOTH ONE MISSING IMPORT — read this before inserting a helper.** `0866e206`
-  (the previous push) failed all four jobs on `TimeCapsuleScreen.kt:934:18 Unresolved reference
+- **⚠️ THREE RED BUILDS, ALL FROM INSERTED HELPERS — read this before inserting one.** (1) `0866e206`
+  (the push before this one) failed all four jobs on `TimeCapsuleScreen.kt:934:18 Unresolved reference
   'offset'`: the split-flap's `CardHalf` calls `Modifier.offset(y = …)` and the file's import list
-  never got `androidx.compose.foundation.layout.offset`. This push's own first build was red the same
-  way in reverse: `PersonalCanvas.kt`'s blank-row floor calls `LocalDensity.current` with
-  `androidx.compose.ui.platform.LocalDensity` not imported. **Both are the root rule 13 shape — an
-  insertion written without reading the import block (or the two lines above it).** Fix inside the
-  same `str_replace` as the code that needs it.
+  never got `androidx.compose.foundation.layout.offset`. (2) This push's first build went red the same
+  way in reverse — `PersonalCanvas.kt`'s blank-row floor calls `LocalDensity.current` with
+  `androidx.compose.ui.platform.LocalDensity` never imported (the same line also reported
+  `Unresolved reference 'toDp'`, which is that same missing receiver cascading, not a second cause).
+  (3) **And the same run showed a THREE-SITE TYPE MISTAKE worth knowing about**: `titleLevelOf(mask:
+  Int)` reads **one character's** mask, while the editor state's `mask(id)` and `runsToMask(...)` are
+  **`IntArray`s** — so the v502 heading level reads in `PersonalPage`'s `headingLevels` map,
+  `headingLevelOfFocused` and `setHeadingLevel` all passed an `IntArray` where an `Int` was expected.
+  The right reader for a BLOCK is **`personalHeadingLevel(text, mask)`** (it walks the block's own
+  heading stretch), and the two are one line apart in `PersonalCanvas.kt` — three call sites were
+  written from the wrong one. **All three are the root rule 13 shape: an insertion written without
+  reading what it is standing on (the import block, or the signature of the helper one line above).**
+  Fix them inside the same `str_replace` as the code that needs them, and read the failing run's
+  `e: file://` lines rather than its last message — the compile errors and the lint ones are the same
+  list, and a run's first error is rarely its only one.
