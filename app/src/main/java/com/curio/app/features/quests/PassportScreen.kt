@@ -512,6 +512,23 @@ internal fun PassportStampCell(
  * The grid moved to [PassportScreen], and the Quests card is what it should be on
  * a page about quests: a summary and a way in. Nothing is lost — every stamp, the
  * press and the lane's own spin are on the screen, one tap away.
+ *
+ * ⚠️ v504 — IT IS A STUB OF THE PASSPORT, NOT A PLAIN LIST ROW. The member's
+ * report: *"and aterogoy passport optoon pill is bad too in quest page"*. As
+ * written it was a generic row — a circle, a title, a line of small grey text and
+ * a chevron — which is to say it read as a settings entry sitting among the Quests
+ * page's own cards. Three things make it the passport's door instead:
+ *
+ *  · **a mastery BAR under the counts**, so the row STATES the progress rather
+ *    than only spelling it out in a caption (the page's other cards all carry a
+ *    progress read, and this one now speaks the same language);
+ *  · **the waiting stamps as a chip**, in the passport's own sage with the stamp
+ *    colour on it — the one thing on the row that asks for something;
+ *  · **the way in as its own sage disc** rather than a bare chevron, so the row
+ *    has a stated action at its end instead of a hint.
+ *
+ * The stamp face and the sage are unchanged: this is the passport's own furniture,
+ * laid out as a stub of the document it opens.
  */
 @Composable
 internal fun PassportDoor(
@@ -522,6 +539,7 @@ internal fun PassportDoor(
 ) {
     val scheme = MaterialTheme.colorScheme
     val sage = curioSageInk()
+    val share = if (total <= 0) 0f else (mastered.toFloat() / total.toFloat()).coerceIn(0f, 1f)
     Surface(
         onClick = onOpen,
         shape = RoundedCornerShape(18.dp),
@@ -535,32 +553,84 @@ internal fun PassportDoor(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Surface(shape = CircleShape, color = lerp(scheme.surfaceContainerLow, sage, 0.16f)) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = lerp(scheme.surfaceContainerLow, sage, 0.16f)
+            ) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(42.dp)
                 ) {
-                    CurioIcon(CurioIcons.Star, null, tint = sage, size = 20.dp)
+                    CurioIcon(CurioIcons.Star, null, tint = sage, size = 21.dp)
                 }
             }
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Category passport",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = scheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    // The waiting stamps, as the row's own badge: a stamp that has
+                    // not landed is the only thing here that asks for anything.
+                    if (awaitingStamp > 0) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = lerp(scheme.surfaceContainerLow, sage, 0.22f)
+                        ) {
+                            Text(
+                                "$awaitingStamp to stamp",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = sage,
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+                }
+                // The progress, as a bar — the same read the page's other cards
+                // give, in the passport's own colour.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .background(
+                            lerp(scheme.surfaceContainerLow, sage, 0.14f),
+                            RoundedCornerShape(50)
+                        )
+                ) {
+                    if (share > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(share)
+                                .fillMaxHeight()
+                                .background(sage, RoundedCornerShape(50))
+                        )
+                    }
+                }
                 Text(
-                    "Category passport",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = scheme.onSurface
-                )
-                Text(
-                    // The waiting stamps are named, because a stamp that has not
-                    // landed is the only thing on this row that asks for anything.
-                    if (awaitingStamp > 0) "$mastered of $total mastered · $awaitingStamp to stamp"
-                    else "$mastered of $total lanes mastered",
+                    "$mastered of $total lanes mastered",
                     style = MaterialTheme.typography.labelMedium,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            CurioForwardArrow()
+            Surface(shape = CircleShape, color = lerp(scheme.surfaceContainerLow, sage, 0.16f)) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
+                    CurioIcon(CurioIcons.ChevronRight, "Open the passport", tint = sage, size = 18.dp)
+                }
+            }
         }
     }
 }

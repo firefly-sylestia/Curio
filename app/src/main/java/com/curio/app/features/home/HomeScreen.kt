@@ -1029,21 +1029,23 @@ fun HomeScreen(navController: NavController) {
             }
             } // v3xx — end of the torn-hero branch (glass toolbar else)
 
-            // ── v496 — THE RETURN AND THE LETTERS, AS CAPSULES THAT ARE ALWAYS
-            // THERE ─────────────────────────────────────────────────────────
+            // ── v496/v504 — THE RETURN, AS A CAPSULE THAT IS ALWAYS THERE ────
             // The member: *"the return doesn't show up — make it a small capsule
-            // which shows always"*. Two one-line capsules under the hero, and
-            // both are drawn on every visit rather than on the day something
-            // falls due: the Return counts what is waiting and, when nothing is,
-            // says when the next one comes round (the sheet behind it reads the
-            // whole ladder); the Letters says how many are sealed and when the
-            // next one lands. The Letters only appears once there IS one — a
-            // capsule that said "0 letters" would be furniture — and both are
-            // gone entirely with their features switched off.
-            val sealedLetters = if (AppPreferences.timeCapsuleEnabledState) {
-                CurioTimeCapsules.sealedCountState
-            } else 0
-            if (AppPreferences.recallEnabledState || sealedLetters > 0) {
+            // which shows always"*. One one-line capsule under the hero, drawn on
+            // every visit rather than on the day something falls due: it counts
+            // what is waiting and, when nothing is, says when the next one comes
+            // round, and it is gone entirely with the feature switched off.
+            //
+            // ⚠️ v504 — AND ITS SIBLING IS GONE (the member: *"the time capsule
+            // sealed shows in home screen in a row pill which is bad so remove it
+            // and place it somewhere else"*). The Letters pill was the same
+            // `HomeCapsule` row with the count and the next landing date on it; the
+            // asking member chose **the capsule's own page** as where that lives
+            // now (see `TimeCapsuleScreen`'s archive section, which is also where
+            // the letters already OPENED are read back). Home keeps exactly one
+            // door to the page — the `+` sheet's own row — and nothing else, so the
+            // hero's under-row is the Return's own line and stays quiet.
+            if (AppPreferences.recallEnabledState) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
@@ -1067,20 +1069,6 @@ fun HomeScreen(navController: NavController) {
                                 // or not something is due (and a member who
                                 // presses it gets the ladder either way).
                                 navController.navigate(CurioRoutes.RECALL) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        )
-                    }
-                    if (sealedLetters > 0) {
-                        val nextAt = if (CurioTimeCapsules.nextAtState > 0L) {
-                            CurioTimeCapsules.nextAtState
-                        } else CurioTimeCapsules.dueState?.openAt ?: 0L
-                        LettersCapsule(
-                            sealed = sealedLetters,
-                            nextText = CurioTimeCapsules.untilText(nextAt),
-                            onOpen = {
-                                navController.navigate(CurioRoutes.TIME_CAPSULE) {
                                     launchSingleTop = true
                                 }
                             }

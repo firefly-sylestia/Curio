@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import com.curio.app.data.PersonalDoc
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioSheetContainerColor
 
 /**
  * v500 — THE PAGE'S CONTENTS, AS A BRANCHING LIST.
@@ -173,6 +172,17 @@ internal fun PersonalContentsPill(
  * a second copy of the page), then the heading's own words, and a section sits in
  * under the heading it belongs to. Tapping one is a jump, so the drawer closes on
  * the same tap.
+ *
+ * ⚠️ v504 — ITS PANEL IS OPAQUE, AND THAT IS A FIX, NOT A PREFERENCE. It used to
+ * take `curioSheetContainerColor(surface)`, and with Liquid glass on that colour
+ * comes back as a **thin tint with alpha** (see `curioFrostedPanel`'s PanelWash):
+ * a sheet is a slab over a blurred page, so a translucent pane is exactly right
+ * there — but a DRAWER has the page's own words directly behind it, and the
+ * member's report was *"the drawer background of drawer over the journal page
+ * texts"*, i.e. the page showing through the drawer they were reading. A drawer
+ * needs its own fill, so it wears the journal's own paper ([journalPaper], opaque
+ * in every theme and at every glass setting) — the same answer the Home drawer's
+ * own panel gives, and the reason its lift reads clean against the page.
  */
 @Composable
 internal fun PersonalContentsSheet(
@@ -199,7 +209,9 @@ internal fun PersonalContentsSheet(
             modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Surface(
-                color = curioSheetContainerColor(scheme.surface),
+                // v504 — OPAQUE, never a frosted pane: the page's own words sit
+                // right behind this drawer (see the note above).
+                color = journalPaper(),
                 shape = RoundedCornerShape(topStart = 22.dp, bottomStart = 22.dp),
                 shadowElevation = 12.dp,
                 modifier = Modifier

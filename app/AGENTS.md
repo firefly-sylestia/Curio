@@ -11038,3 +11038,61 @@ long branches i dont like it, max 6 can be branched and more visual upgrade to s
   lanes, never thirty.
 - **Not measured, judged:** the wobble amplitudes, the ring order and the sparkle threshold are look,
   not science — the layout is deterministic so a report is reproducible.
+
+### v504 — THE UNDERLINE BECOMES COLOUR, THE DRAWER STOPS SHOWING THE PAGE, THE CAPSULE PAGE IS REBUILT AROUND ITS OWN CLOCK, AND FORCE GLASS IS WIRED
+
+The member's second message of the session (ten items) plus one that arrived mid-work. Pushed as
+**1.5.6 / `20260949`** — see `Prompt.md` §99, which also carries what the full-app sweep found.
+
+- **A HEADING IS COLOUR, NOT AN UNDERLINE (`headingInk`; `drawHeadingRule` + `TITLE_RULE` DELETED).**
+  v502's rule under a heading was judged out (*"the title underline is bad realy bad … do something
+  else underline gives bad look"*). The reason it could never look right is structural: since v499 a
+  heading may be ONE SENTENCE inside a paragraph, so a rule under the block's width starts under
+  prose and stops mid-paragraph. `headingInk(level, accent, ink)` now colours the heading's own words
+  — 0.82 of the accent for level 1, 0.48 for level 2, plain `ink` for prose — and **both passes call
+  it** (`lineInk` in the pen, `eyeInk` in the read view, fed to the field's `TextStyle`, the
+  `personalAnnotated` base colour and the read view's own `Text` styles). The air above a heading
+  stays.
+- **THE JOURNAL'S CONTENTS DRAWER IS OPAQUE.** It took `curioSheetContainerColor(surface)`, which with
+  Liquid glass on comes back with **alpha** (`curioFrostedPanel`'s PanelWash) — right for a sheet over
+  a blurred page, exactly wrong for a drawer with the page's own words behind it: *"the drawer
+  background of drawer over the journal page texts"*. It wears `journalPaper()` now. **The rule: a
+  DRAWER is a surface you read on, a SHEET is a slab over the page — they cannot share one recipe.**
+- **HOME LOSES THE SEALED-LETTERS PILL (`LettersCapsule` DELETED).** The member: *"the time capusle
+  sealed shows in home screen in a row pill whih is bad so remove it and place it soemwhere else"*,
+  and, asked where, chose **the capsule's own page**. Home keeps one door to the page (the `+` sheet)
+  and its under-hero row is the Return's line alone.
+- **THE CAPSULE PAGE, FIXED AT THE CAUSES.** (1) **Type** — `pixelTypography()` changed the family and
+  NOTHING else, and VT323 is a coarse face, so every style came out smaller and lighter than its point
+  size (`"the text font size etc isnt good"`): the whole scale is now set for THIS face, a couple of
+  points larger per style with the leading a bitmap face needs and a little tracking on the small ones.
+  (2) **Colours** — the preset chips' labels and the seal track's words were accent MIXES on accent
+  WASHES (`lerp(onSurface, accent, 0.55f)` over `lerp(surfaceContainerHighest, accent, 0.24f)`), the
+  member's *"all the text elemet colors are bad and blending"*; every label is solid ink now and the
+  wash stays in the fill. The letter field's hint is the page's own muted ink at full strength.
+  (3) **The clock's gesture was LOSING to the page** — a vertical drag on a `verticalScroll` column
+  gives the gesture to the ancestor scroll, so the deck barely turned; it is a SIDEWAYS drag now
+  (`detectHorizontalDragGestures`), left on and right back, with a tick on the thumb's landing and one
+  per notch. (4) **The deck shares its row by weight** — the three fixed card widths came to more than
+  a 360dp phone's content width, which is why it could not just be made bigger; the cards are 80dp
+  tall (was 62) with `headlineMedium` glyphs and every card is a share of the screen. (5) **The
+  pickers** open inside `CapsuleDialogTheme` (the page's own pixel scale, `curioDialogContainerColor`).
+  (6) **THE ARRIVAL WAS UNREADABLE IN LIGHT MODE** — it is drawn over `scheme.scrim` (black in both
+  themes) and its non-paper lines used `scheme.onSurface`, which is near-black in a light theme: the
+  seal's own instructions were invisible. Anything on the SCRIM is white (`onScrim`) and anything on
+  the letter's PAPER keeps the page's ink.
+- **AND THE LETTERS LIVE ON THE PAGE (`CapsuleArchive`).** Every capsule ever sealed, in three states —
+  waiting (when it lands), ready (its day has come: expanding it makes the SAME `open()` write the
+  arrival makes, so a letter is never read twice) and read — each tapping open IN PLACE with the
+  message, the picture and the voice. It is the first caller of `CurioTimeCapsules.all()`, which has
+  been in the store since v496.
+- **FORCE GLASS IS WIRED (`isLiquidGlassPillsActive`).** The one genuinely dead switch the app sweep
+  found (its copy promised to bypass the capability check; nothing read it). It now bypasses
+  `canUseLiquidGlass` and the Android 12 floor — below 12 the surfaces serve their own simulated
+  recipe (`fauxGlassCapsule`) — while `isInScreenGlassActive` keeps the platform floor, because
+  in-screen glass needs a real backdrop CAPTURE and there is nothing to capture with. It never
+  overrides the member's own Liquid glass toggle.
+- **THE QUESTS PASSPORT DOOR IS A STUB OF THE PASSPORT (`PassportDoor`).** It was a generic row (circle,
+  title, grey caption, chevron) among the Quests page's own cards: it now carries a **mastery bar**
+  under its counts, the waiting stamps as a **badge in the passport's sage**, and its own sage disc as
+  the way in.

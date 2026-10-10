@@ -123,30 +123,19 @@ fun ReturnCapsule(
     }
 }
 
-/** How many letters are sealed and when the next one lands, for [ReturnCapsule]'s sibling. */
-@Composable
-fun LettersCapsule(
-    sealed: Int,
-    /** When the next letter lands, phrased ([com.curio.app.data.CurioTimeCapsules.untilText]). */
-    nextText: String?,
-    onOpen: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scheme = MaterialTheme.colorScheme
-    val accent = scheme.tertiary
-    HomeCapsule(
-        glyph = CurioIcons.Lock,
-        label = when {
-            sealed == 1 -> "1 letter sealed · lands $nextText"
-            else -> "$sealed letters sealed · next lands $nextText"
-        },
-        fill = scheme.surfaceContainerHigh,
-        ink = scheme.onSurface,
-        accent = accent,
-        onClick = onOpen,
-        modifier = modifier
-    )
-}
+/**
+ * ⚠️ v504 — [LettersCapsule] IS DELETED, AND IT IS NOT COMING BACK ON ITS OWN.
+ *
+ * It was the sealed-letters row pill under Home's hero — a `HomeCapsule` line
+ * reading *"2 letters sealed · next lands in 9 days"* that opened the capsule
+ * page. The member judged it out (*"the time capsule sealed shows in home screen
+ * in a row pill which is bad so remove it and place it somewhere else"*) and, asked
+ * where the letters should live instead, chose **the capsule's own page** — so Home
+ * keeps its one door to the page (the `+` sheet's row) and the count, the next
+ * landing and every letter already opened are all on the page itself (see
+ * `TimeCapsuleScreen`). A pill was the wrong shape for a thing you look at four
+ * times a year; do not restore it as "just a small row".
+ */
 
 /**
  * The capsule itself: one line, one glyph, one chevron.

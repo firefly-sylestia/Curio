@@ -329,9 +329,30 @@ private val isLiteGlassAllowed: Boolean
  *
  * v292i — non-composable: uses [CurioGlassPills.appContext] which is set
  * once by CurioNavHost. Falls back to SDK check only if context unavailable.
+ *
+ * ── v503 — AND THE "FORCE GLASS" SWITCH BYPASSES BOTH CHECKS ────────────────
+ *
+ * The member chose *"wire it up"* for `AppPreferences.forceGlassEnabled`, whose
+ * own copy promises *"Bypass device capability checks and always enable glass"* —
+ * and until now nothing read it at all, so the switch did nothing. This is the one
+ * question every glass surface asks, so it is where the bypass belongs.
+ *
+ * It skips the CAPABILITY PROBE ([canUseLiquidGlass], the guard against a driver
+ * that would SIGKILL the RenderThread) and the Android 12 floor. It does NOT
+ * override the member's own **Liquid glass** toggle — a switch that turns glass
+ * back ON after someone turned it off would be a setting fighting a setting — so
+ * the request still has to be there.
+ *
+ * Below Android 12 the floor is no longer a wall once forced: no surface can
+ * REFRACT there (there is no `RenderEffect`), but every one of them already has a
+ * simulated recipe in its own modifier (`fauxGlassCapsule`, the same one the nav
+ * bar serves), so the forced look is the simulated glass rather than the solid
+ * fallback. [isInScreenGlassActive] keeps the platform floor, because in-screen
+ * glass needs a real backdrop CAPTURE and there is nothing to capture with.
  */
 fun isLiquidGlassPillsActive(): Boolean {
     if (!isLiquidGlassRequested()) return false
+    if (AppPreferences.forceGlassEnabled) return true
     if (android.os.Build.VERSION.SDK_INT < 31) return false
     val ctx = CurioGlassPills.appContext
     return if (ctx != null) canUseLiquidGlass(ctx) else true

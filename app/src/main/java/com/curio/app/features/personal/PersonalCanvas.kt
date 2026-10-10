@@ -266,32 +266,39 @@ internal val VIEW_ROW_GAP = 8.dp
  *
  *  · **AIR** — a title stands off the words above it by [TITLE_LEAD], a section by
  *    [TITLE2_LEAD]. Structure is a thing you can see at a glance down the page.
- *  · **A RULE** — a hairline under the line, in the page's own accent: firm and
- *    half-strength for the page's title, a whisper (a third of the thickness and
- *    of the ink) for a section, so the two levels never read as the same mark.
+ *  · **COLOUR** — [headingInk]: the heading's own words are set in the page's
+ *    accent (a strong mix for the page's title, a quieter one for a section),
+ *    where content stays in the page's ink. See that function for why the rule
+ *    that used to live here was replaced.
  *
- * The rule is drawn INSIDE the line's own box at its foot, so it grows and moves
- * with the writing, and the read view and the PDF-beside-it measure the same
- * numbers wherever they ask for them.
+ * ⚠️ v504 — THE RULE WAS TRIED AND REJECTED. v502 also drew a hairline under a
+ * heading ([drawHeadingRule], now deleted, with [TITLE_RULE]), and the member's
+ * report on it was *"the title underline is bad realy bad … do something else
+ * underline gives bad look"*. Read against the page, the reasons are plain: a
+ * heading can be one SENTENCE inside a paragraph (v499), so a rule under the
+ * block's full width drew a line that started under prose and stopped in the
+ * middle of a paragraph — and on a page of several headings it turned the paper
+ * into a form to be filled in. Colour says the same thing without drawing
+ * anything: it travels with the words the flag is actually on, it reads at any
+ * width, and it cannot disagree with the sentence it belongs to.
  */
 internal val TITLE_LEAD = 22.dp
 internal val TITLE2_LEAD = 14.dp
-internal val TITLE_RULE = 2.dp
 
 /**
- * THE RULE UNDER A HEADING — drawn at the foot of the heading's own box, so it
- * sits under the last line of a heading that wraps, and a level-1 heading is
- * always a firmer mark than a level-2 one. A level of 0 (prose) draws nothing.
+ * THE INK A HEADING'S OWN WORDS WEAR (v504) — the page's accent mixed toward the
+ * page's ink, so it is a colour code and never a highlight: a level-1 heading is
+ * unmistakeably the accent, a level-2 one is the same hue further back, and the
+ * page's own readable ink stays the base so a light page and a dark one both pass.
+ *
+ * 0 (prose) answers the plain [ink], so a caller can pass the result through
+ * without asking the level itself — and both passes of the page (the pen and the
+ * eye) ask THIS function, so the two can never colour a heading differently.
  */
-private fun DrawScope.drawHeadingRule(level: Int, accent: Color) {
-    if (level <= 0) return
-    val thickness = if (level == 1) TITLE_RULE.toPx() else TITLE_RULE.toPx() * 0.6f
-    drawRoundRect(
-        color = if (level == 1) accent.copy(alpha = 0.55f) else accent.copy(alpha = 0.22f),
-        topLeft = Offset(0f, size.height - thickness),
-        size = Size(size.width, thickness),
-        cornerRadius = CornerRadius(thickness / 2f)
-    )
+internal fun headingInk(level: Int, accent: Color, ink: Color): Color = when (level) {
+    1 -> lerp(ink, accent, 0.82f)
+    2 -> lerp(ink, accent, 0.48f)
+    else -> ink
 }
 
 /**
@@ -4521,6 +4528,11 @@ private fun PersonalTextBlock(
         else -> 0
     }
     val headingAccent = personalAccentInk()
+    // v504 — the ink this line's own words wear (see [headingInk]): the page's
+    // ink for prose, the accent for a heading. One value, used by the field's
+    // style AND by the annotated string under it, so the pen cannot draw a
+    // heading in two colours.
+    val lineInk = headingInk(headingLevel, headingAccent, ink)
     // v393 — a row with no words on the list page still draws its box: the row's
     // flag lives on its characters, and an emptied row has none — but a to-do row
     // without a box reads as a row that lost its place in the list, not as a row
@@ -4566,7 +4578,7 @@ private fun PersonalTextBlock(
     }
     val value = TextFieldValue(
         annotatedString = personalAnnotated(
-            text, mask, ink, quoteInk, QUOTE_BODY_SIZE,
+            text, mask, lineInk, quoteInk, QUOTE_BODY_SIZE,
             titleSize = if (isTitle) TextUnit.Unspecified else TITLE_BODY_SIZE,
             title2Size = if (isTitle2) TextUnit.Unspecified else TITLE2_BODY_SIZE,
             smallSize = if (isSmall) TextUnit.Unspecified else SMALL_BODY_SIZE,
@@ -4591,16 +4603,18 @@ private fun PersonalTextBlock(
             fontSize = TITLE_BODY_SIZE,
             lineHeight = TITLE_BODY_LINE,
             fontWeight = FontWeight.SemiBold,
-            color = ink,
+            // v504 — the accent, at its strongest (see [headingInk]).
+            color = lineInk,
             textAlign = alignOf
         )
         // v500 — a section heading: the same face and weight, one step down.
+        // v504 — and the same colour code, further back (see [headingInk]).
         isTitle2 -> TextStyle(
             fontFamily = FrauncesFontFamily,
             fontSize = TITLE2_BODY_SIZE,
             lineHeight = TITLE2_BODY_LINE,
             fontWeight = FontWeight.SemiBold,
-            color = ink,
+            color = lineInk,
             textAlign = alignOf
         )
         isSmall -> TextStyle(
@@ -4625,20 +4639,16 @@ private fun PersonalTextBlock(
         modifier = Modifier
             .fillMaxWidth()
             // v502 — AND A HEADING IS SET APART HERE TOO (see [TITLE_LEAD]): the
-            // pen and the eye draw one page, so the air above a heading and the
-            // rule under it belong to both. The heading's own level is what the
-            // rule is drawn from, so the two levels are never one mark.
+            // pen and the eye draw one page, so the air above a heading belongs
+            // to both. v504 — the mark itself is the heading's COLOUR (see
+            // [headingInk]), drawn with the words rather than under them, so
+            // there is nothing to draw here any more.
             .padding(
                 top = when {
                     headingLevel == 1 -> TITLE_LEAD
                     headingLevel == 2 -> TITLE2_LEAD
                     else -> 0.dp
                 }
-            )
-            .then(
-                if (headingLevel > 0) {
-                    Modifier.drawBehind { drawHeadingRule(headingLevel, headingAccent) }
-                } else Modifier
             )
             .then(
                 // A TITLE line reports where it is, so a page whose head names
@@ -5636,9 +5646,9 @@ internal fun PersonalDocView(
             val markerOutline = ink.copy(alpha = 0.42f)
             val alignOf = block.align.toTextAlign()
             // A blank row keeps its line's own height in the eye (see below), and
-            // a heading draws the air and the rule it does in the pen — the same
-            // numbers, from the same constants, because a page read back has to
-            // look like the page that was written.
+            // a heading keeps the air the pen gave it — the same numbers, from the
+            // same constants, because a page read back has to look like the page
+            // that was written.
             val eyeLine = when {
                 isTitle2 -> TITLE2_VIEW_LINE
                 isTitle -> TITLE_VIEW_LINE
@@ -5650,6 +5660,11 @@ internal fun PersonalDocView(
                 isTitle2 -> 2
                 else -> 0
             }
+            // v504 — the ink this line's own words wear: the page's ink for prose,
+            // the accent for a heading, at the strength its level asks for (see
+            // [headingInk]). The pen asks the same function with the same level, so
+            // a heading cannot be one colour while writing and another while read.
+            val eyeInk = headingInk(headingLevel, markerFill, ink)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -5659,11 +5674,6 @@ internal fun PersonalDocView(
                             2 -> TITLE2_LEAD
                             else -> 0.dp
                         }
-                    )
-                    .then(
-                        if (headingLevel > 0) {
-                            Modifier.drawBehind { drawHeadingRule(headingLevel, markerFill) }
-                        } else Modifier
                     )
                     .then(
                         when {
@@ -5751,7 +5761,7 @@ internal fun PersonalDocView(
                     )
             ) {
                 val baseText = personalAnnotated(
-                    text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
+                    text, mask, eyeInk, quoteInk, QUOTE_VIEW_SIZE,
                     titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
                     title2Size = if (isTitle2) TextUnit.Unspecified else TITLE2_VIEW_SIZE,
                     smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
@@ -5773,7 +5783,9 @@ internal fun PersonalDocView(
                             fontSize = TITLE2_VIEW_SIZE,
                             lineHeight = TITLE2_VIEW_LINE,
                             fontWeight = FontWeight.SemiBold,
-                            color = ink,
+                            // v504 — the same colour code the pen draws, from the
+                            // same function; see [headingInk].
+                            color = eyeInk,
                             textAlign = alignOf
                         )
                         isTitle -> TextStyle(
@@ -5786,7 +5798,7 @@ internal fun PersonalDocView(
                             // word to `LocalContentColor`, which is Compose's
                             // black outside a `Surface` — the eye view's own
                             // "dark black texts" (see [personalAnnotated]).
-                            color = ink,
+                            color = eyeInk,
                             textAlign = alignOf
                         )
                         isSmall -> TextStyle(

@@ -89,6 +89,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.PixelFontFamily
@@ -340,10 +341,20 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     val until = remember(target, nowTick) { CurioTimeCapsules.untilText(target) }
     val hours24 = remember { android.text.format.DateFormat.is24HourFormat(context) }
 
+    // ⚠️ v504 — THE PICKERS WEAR THE PAGE'S OWN FACE TOO. They are Android's own
+    // `DatePicker` / `TimePicker` (the member asked to set the day on a calendar
+    // they already know), but they used to open in Material's default type over a
+    // default container while the page behind them was a split-flap — the member's
+    // *"the dialog screen doesnt have similiar stle too fix all"*. Each dialog is
+    // wrapped in the page's own nested theme (the same `pixelTypography()` the page
+    // body uses) and takes the app's own dialog container, so the picker reads as
+    // part of the capsule rather than as a different app's window.
+
     if (dateOpen) {
         // Android's own Material calendar: the member asked to set the DAY, so
         // the day is set on the picker they already know.
         val picker = rememberDatePickerState(initialSelectedDateMillis = target)
+        CapsuleDialogTheme {
         DatePickerDialog(
             onDismissRequest = { dateOpen = false },
             confirmButton = {
@@ -386,6 +397,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
         ) {
             DatePicker(state = picker, showModeToggle = true)
         }
+        }
     }
 
     if (timeOpen) {
@@ -395,8 +407,10 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
             initialMinute = cal.get(Calendar.MINUTE),
             is24Hour = hours24
         )
+        CapsuleDialogTheme {
         AlertDialog(
             onDismissRequest = { timeOpen = false },
+            containerColor = curioDialogContainerColor(),
             confirmButton = {
                 TextButton(onClick = {
                     val keep = Calendar.getInstance().apply { timeInMillis = target }
@@ -409,21 +423,24 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     sealNote = ""
                     timeOpen = false
-                }) { Text("Use this time") }
+                }) { Text("Use this time", color = scheme.primary) }
             },
             dismissButton = {
-                TextButton(onClick = { timeOpen = false }) { Text("Cancel") }
+                TextButton(onClick = { timeOpen = false }) {
+                    Text("Cancel", color = scheme.onSurfaceVariant)
+                }
             },
-            title = { Text("What time?") },
+            title = { Text("What time?", color = scheme.onSurface) },
             text = { TimePicker(state = picker) }
         )
+        }
     }
 
     // v502 — THE WHOLE PAGE WEARS THE PIXEL FACE (the member: "i want digital
     // that clocl tyle font for the whole page"). VT323 ships one weight, so Compose
     // synthesises the bold requests, which is exactly the heavy phosphor look a
-    // split-flap page wants. The dialogs above stay in Material's own face on
-    // purpose: the pickers are Android's, not the page's.
+    // split-flap page wants. v504 — and the two pickers above wear it as well (see
+    // `dialogTheme`), because they are part of this page rather than a second app.
     MaterialTheme(colorScheme = scheme, typography = pixelTypography()) {
         Box(modifier = Modifier.fillMaxSize().background(scheme.background)) {
             Column(
@@ -524,9 +541,12 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     placeholder = {
                         Text(
                             "Write what you want to read on that day…",
-                            color = scheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            // v504 — a placeholder is still writing: the page's own
+                            // muted ink at full strength, not a washed copy of it.
+                            color = scheme.onSurfaceVariant
                         )
                     },
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     minLines = 6,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -689,6 +709,27 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                // ── v504 — AND YOUR LETTERS, ON THE PAGE THEY BELONG TO ────────
+                // Home's sealed-letters row pill is deleted (the member: *"remove
+                // it and place it somewhere else"*, and their answer to where was
+                // this page), and *"a way to see previous capsules"* is the same
+                // surface: every letter ever sealed, waiting or already opened,
+                // each one tapping open in place. The list is re-read on the
+                // page's own second (it is cheap, and a letter written to yourself
+                // yesterday should be here the moment you look).
+                val archive = remember(nowTick, sealedCapsule) {
+                    CurioTimeCapsules.all(context)
+                }
+                if (archive.isNotEmpty()) {
+                    Spacer(Modifier.height(26.dp))
+                    CapsuleArchive(
+                        capsules = archive,
+                        accent = accent,
+                        now = System.currentTimeMillis(),
+                        onOpened = { CurioTimeCapsules.open(context, it) }
+                    )
+                }
                 Spacer(Modifier.height(28.dp))
             }
 
@@ -758,6 +799,24 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
 private const val DAY_MS = 24L * 60L * 60L * 1000L
 private const val HOUR_MS = 60L * 60L * 1000L
 private const val MINUTE_MS = 60L * 1000L
+
+/**
+ * v504 — THE PAGE'S OWN THEME, WRAPPED AROUND ITS TWO PICKERS.
+ *
+ * The writing page applies its pixel face with a nested `MaterialTheme` (see
+ * [pixelTypography]), and the date and time dialogs sit ABOVE that in the
+ * composition, so they used to open in Material's default type over the page that
+ * had a split-flap on it — the member's *"the dialog screen doesnt have similiar
+ * stle too fix all"*. A named composable rather than a lambda-typed value: this is a
+ * theme wrapper, and it reads that way at both call sites.
+ */
+@Composable
+private fun CapsuleDialogTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme,
+        typography = pixelTypography()
+    ) { content() }
+}
 
 /**
  * WHERE THE LETTER IS GOING, AS A CARD OF LIGHT.
@@ -904,6 +963,14 @@ private fun CapsuleClock(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // v504 — THE CARDS SHARE THE ROW BY WEIGHT, NOT BY A FIXED WIDTH.
+            //
+            // Three fixed widths (84 + 132 + 112dp plus the gaps) came to more than
+            // the page's own content width on a 360dp phone, so the deck ran past
+            // its panel — which is what "some isnt properly aligned" was about, and
+            // why the cards could not simply be made bigger. Weights give every card
+            // a share of whatever the screen actually has, so the deck is as wide as
+            // its panel on every size, and the cards are bigger for free.
             ClockRow(
                 label = "The day it comes back",
                 accent = accent,
@@ -915,21 +982,21 @@ private fun CapsuleClock(
                     caption = "DAY",
                     plate = plate,
                     ink = ink,
-                    modifier = Modifier.width(84.dp)
+                    modifier = Modifier.weight(1f)
                 )
                 FlipCard(
                     value = flipMonth(cal),
                     caption = "MONTH",
                     plate = plate,
                     ink = ink,
-                    modifier = Modifier.width(132.dp)
+                    modifier = Modifier.weight(1.45f)
                 )
                 FlipCard(
                     value = flipYear(cal),
                     caption = "YEAR",
                     plate = plate,
                     ink = ink,
-                    modifier = Modifier.width(112.dp)
+                    modifier = Modifier.weight(1.25f)
                 )
             }
 
@@ -944,14 +1011,14 @@ private fun CapsuleClock(
                     caption = "HOUR",
                     plate = plate,
                     ink = ink,
-                    modifier = Modifier.width(96.dp)
+                    modifier = Modifier.weight(1f)
                 )
                 Text(
                     ":",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.ExtraBold
                     ),
-                    color = scheme.onSurfaceVariant,
+                    color = scheme.onSurface,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
                 FlipCard(
@@ -959,7 +1026,7 @@ private fun CapsuleClock(
                     caption = "MIN",
                     plate = plate,
                     ink = ink,
-                    modifier = Modifier.width(96.dp)
+                    modifier = Modifier.weight(1f)
                 )
                 if (!hours24) {
                     FlipCard(
@@ -967,7 +1034,7 @@ private fun CapsuleClock(
                         caption = "",
                         plate = plate,
                         ink = ink,
-                        modifier = Modifier.width(64.dp)
+                        modifier = Modifier.weight(0.8f)
                     )
                 }
             }
@@ -978,11 +1045,17 @@ private fun CapsuleClock(
 /**
  * ONE DECK OF THE CLOCK, AND THE GESTURES THAT TURN IT.
  *
- * A tap opens the picker that owns this row's unit; a vertical drag turns the
- * deck under the thumb, one notch each [NOTCH] of travel. The drag is where the
- * movement lives now that the step buttons are gone, and it is the nicer gesture
- * of the two: a member can feel their way along a dial instead of tapping a
- * button and watching a card turn.
+ * A tap opens the picker that owns this row's unit; a SIDEWAYS drag turns the deck
+ * under the thumb, one notch each [NOTCH] of travel, with a tick at every notch and
+ * a tick when the thumb lands.
+ *
+ * ⚠️ v504 — THE DRAG IS HORIZONTAL, AND THAT IS THE FIX FOR A REAL FAULT: this page
+ * is a `verticalScroll` column, so a VERTICAL drag on the clock was fighting the
+ * page's own scroll for the same gesture — and the scroll, being the ancestor, won
+ * most of it: the member's *"the time adjust gesture is bad too"*. A sideways drag
+ * on a deck is not a scroll the page wants, so there is nothing to lose it to. Left
+ * takes the unit on, right takes it back — the deck travels the way the thumb pushes
+ * it, which is the same rule the vertical version used, rotated.
  *
  * The press-detection pointer input sits BEFORE the click in the chain (see the
  * project's modifier-order rule): the drag consumes its own movement, so a real
@@ -1006,16 +1079,19 @@ private fun ClockRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            // v504 — the row is a bigger target: a deck you drag has to be tall
+            // enough to put a thumb on without covering the card you are watching.
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 label,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.sp
                 ),
-                color = scheme.onSurfaceVariant
+                color = scheme.onSurface
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1024,19 +1100,24 @@ private fun ClockRow(
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         var travel = 0f
-                        detectVerticalDragGestures(
-                            onDragStart = { travel = 0f },
+                        // v504 — SIDEWAYS, so the page's own vertical scroll can
+                        // never take the gesture (see the note on this function),
+                        // and the ONE tick per notch is the deck's feel.
+                        detectHorizontalDragGestures(
+                            onDragStart = {
+                                travel = 0f
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            },
                             onDragEnd = { travel = 0f },
                             onDragCancel = { travel = 0f }
-                        ) { _, dy ->
-                            travel += dy
+                        ) { _, dx ->
+                            travel += dx
                             val notches = (travel / notch).toInt()
                             if (notches != 0) {
                                 travel -= notches * notch
-                                // Down a row moves the unit the way the thumb
-                                // goes: pulling the deck down takes the clock
-                                // back, pushing it up takes it on.
-                                onStep(-notches)
+                                // Left takes the unit on, right takes it back: the
+                                // deck travels the way the thumb pushes it.
+                                onStep(notches)
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             }
                         }
@@ -1052,7 +1133,8 @@ private fun ClockRow(
     }
 }
 
-private val NOTCH = 30.dp
+/** How far the thumb travels to turn one notch of the clock's deck (v504). */
+private val NOTCH = 34.dp
 
 /**
  * ONE CARD OF THE DECK, AND ONLY HALF OF IT TURNS.
@@ -1156,8 +1238,19 @@ private fun FlipCard(
     }
 }
 
-private val CARD_HEIGHT = 62.dp
-private val CARD_HALF = 31.dp
+/**
+ * v504 — THE CARDS ARE THE PAGE'S OWN SIZE NOW (80dp tall, was 62).
+ *
+ * A split-flap is the one thing on this page you are meant to read from across
+ * the room; at 62dp with `headlineSmall` digits it read as a row of small tiles,
+ * which is the member's *"tey are not big"* (see also their "the time adjust
+ * gesture is bad too", which is the vertical-drag fault noted on [ClockRow]). The
+ * deck grew, the digits went up a step ([CardGlyph]) and the row that holds them
+ * got taller in the same pass, so the whole clock is a control rather than a
+ * detail.
+ */
+private val CARD_HEIGHT = 80.dp
+private val CARD_HALF = 40.dp
 
 /**
  * The opaque plate of one half of a card, clipped to its own side of the crease.
@@ -1199,7 +1292,7 @@ private fun CardGlyph(value: String, ink: Color) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         Text(
             value,
-            style = MaterialTheme.typography.headlineSmall.copy(
+            style = MaterialTheme.typography.headlineMedium.copy(
                 fontFamily = PixelFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.sp
@@ -1212,31 +1305,55 @@ private fun CardGlyph(value: String, ink: Color) {
 }
 
 /**
- * EVERY STYLE ON THIS PAGE, IN THE PIXEL FACE.
+ * EVERY STYLE ON THIS PAGE, IN THE PIXEL FACE — AND AT SIZES THE PIXEL FACE
+ * ACTUALLY WANTS.
  *
  * One nested theme rather than a `fontFamily` argument on forty `Text` calls:
- * the page's whole voice changes in one place, a style added later inherits it,
- * and the Material type scale's own sizes and weights are untouched.
+ * the page's whole voice changes in one place and a style added later inherits it.
+ *
+ * ⚠️ v504 — IT USED TO CHANGE THE FAMILY AND NOTHING ELSE, which is the member's
+ * *"the text font size etc isnt good"*: VT323 is a bitmap-derived face drawn on a
+ * coarse grid, so at Material's sizes it comes out visibly SMALLER and much lighter
+ * than the same point size in a text face — a `bodyMedium` (14sp) paragraph read as
+ * a caption and a `labelSmall` (11sp) caption read as a speck. The whole scale is
+ * set here for THIS face: each style is a couple of points larger than Material's
+ * with its line height opened to match (a pixel face needs the extra leading or the
+ * ascenders of one line sit on the descenders of the last), and the small styles
+ * carry a little tracking because a bitmap face's glyphs touch at small sizes.
+ *
+ * Nothing here changes a LAYOUT: only sizes, line heights and tracking, so every
+ * padding and every panel on the page keeps the rhythm it had.
  */
 @Composable
 private fun pixelTypography(): Typography {
     val base = MaterialTheme.typography
+    fun pixel(
+        style: TextStyle,
+        size: Float,
+        line: Float,
+        tracking: Float = 0.0f
+    ): TextStyle = style.copy(
+        fontFamily = PixelFontFamily,
+        fontSize = size.sp,
+        lineHeight = line.sp,
+        letterSpacing = tracking.sp
+    )
     return base.copy(
-        displayLarge = base.displayLarge.copy(fontFamily = PixelFontFamily),
-        displayMedium = base.displayMedium.copy(fontFamily = PixelFontFamily),
-        displaySmall = base.displaySmall.copy(fontFamily = PixelFontFamily),
-        headlineLarge = base.headlineLarge.copy(fontFamily = PixelFontFamily),
-        headlineMedium = base.headlineMedium.copy(fontFamily = PixelFontFamily),
-        headlineSmall = base.headlineSmall.copy(fontFamily = PixelFontFamily),
-        titleLarge = base.titleLarge.copy(fontFamily = PixelFontFamily),
-        titleMedium = base.titleMedium.copy(fontFamily = PixelFontFamily),
-        titleSmall = base.titleSmall.copy(fontFamily = PixelFontFamily),
-        bodyLarge = base.bodyLarge.copy(fontFamily = PixelFontFamily),
-        bodyMedium = base.bodyMedium.copy(fontFamily = PixelFontFamily),
-        bodySmall = base.bodySmall.copy(fontFamily = PixelFontFamily),
-        labelLarge = base.labelLarge.copy(fontFamily = PixelFontFamily),
-        labelMedium = base.labelMedium.copy(fontFamily = PixelFontFamily),
-        labelSmall = base.labelSmall.copy(fontFamily = PixelFontFamily)
+        displayLarge = pixel(base.displayLarge, 40f, 46f),
+        displayMedium = pixel(base.displayMedium, 34f, 40f),
+        displaySmall = pixel(base.displaySmall, 29f, 35f),
+        headlineLarge = pixel(base.headlineLarge, 27f, 33f),
+        headlineMedium = pixel(base.headlineMedium, 24f, 29f),
+        headlineSmall = pixel(base.headlineSmall, 21f, 26f),
+        titleLarge = pixel(base.titleLarge, 19f, 25f, 0.2f),
+        titleMedium = pixel(base.titleMedium, 17.5f, 23f, 0.2f),
+        titleSmall = pixel(base.titleSmall, 16f, 21f, 0.3f),
+        bodyLarge = pixel(base.bodyLarge, 16.5f, 23f, 0.2f),
+        bodyMedium = pixel(base.bodyMedium, 15f, 21f, 0.2f),
+        bodySmall = pixel(base.bodySmall, 13.5f, 19f, 0.3f),
+        labelLarge = pixel(base.labelLarge, 14.5f, 19f, 0.6f),
+        labelMedium = pixel(base.labelMedium, 13f, 17f, 0.8f),
+        labelSmall = pixel(base.labelSmall, 12f, 16f, 1.0f)
     )
 }
 
@@ -1311,7 +1428,10 @@ private fun CapsuleSealSwipe(
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.ExtraBold
                 ),
-                color = lerp(scheme.onSurfaceVariant, Color.Transparent, progress * 0.9f),
+                // v504 — solid ink that FADES as the slug travels (it used to fade
+                // from the muted variant, which is already the quietest text on the
+                // page, so the track's words were nearly invisible at rest).
+                color = lerp(scheme.onSurface, Color.Transparent, progress * 0.9f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -1379,14 +1499,20 @@ private fun CapsulePresetChip(
 ) {
     // v501 — A SOFT RECTANGLE: the presets were accent-coloured pills on a page
     // that now uses rounded RECTANGLES and a washed accent, so they are the same
-    // soft fill as everything else, squared off to match, and they take their ink
-    // from the accent rather than wearing it whole.
+    // soft fill as everything else, squared off to match.
+    //
+    // ⚠️ v504 — AND THE LABEL IS SOLID INK. It was `lerp(onSurface, accent, 0.55f)`
+    // — a colour half way between the page's ink and the accent, on a fill that is
+    // ALREADY a wash of that accent, which is the member's *"all the text elemet
+    // colors are bad and blending"*: two accent-tinged layers a shade apart, so the
+    // word did not read as a word. The fill carries the accent; the label carries
+    // the page's own ink, at full strength.
     val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         color = lerp(scheme.surfaceContainerHighest, accent, 0.24f),
-        modifier = modifier.height(40.dp)
+        modifier = modifier.height(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Text(
@@ -1394,7 +1520,7 @@ private fun CapsulePresetChip(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = lerp(scheme.onSurface, accent, 0.55f),
+                color = scheme.onSurface,
                 maxLines = 1
             )
         }
@@ -1507,6 +1633,17 @@ fun TimeCapsuleArrival(
     val brass = lerp(scheme.tertiary, Color(0xFFB08D4F), if (scheme.surface.luminance() > 0.5f) 0.45f else 0.55f)
     val ink = scheme.onSurface
     val paper = lerp(scheme.surface, Color.White, if (scheme.surface.luminance() > 0.5f) 0.5f else 0.06f)
+    // ⚠️ v504 — THE ARRIVAL STANDS ON THE SCRIM, SO ITS OWN INK IS LIGHT.
+    //
+    // This screen is drawn over `scheme.scrim` — which is BLACK in both themes —
+    // but every word on it that is not on the letter's paper was drawn in
+    // `scheme.onSurface`. In LIGHT mode that is near-black ink on a black scrim:
+    // "Sealed 4 August 2026", "Hold the seal to open it" and "Let go and nothing
+    // happens" were, in practice, invisible — the member's *"its view is bad really
+    // bad too textx etc isnt looking good color etc"*. Anything on the SCRIM is white
+    // now (`onScrim`), anything on the letter's PAPER keeps the page's own ink, and
+    // the alphas are set per line rather than picked out of the ink.
+    val onScrim = Color.White
 
     // `broken` is the whole state machine: false = sealed, true = the letter is out.
     var broken by remember(capsule.id) { mutableStateOf(false) }
@@ -1573,7 +1710,7 @@ fun TimeCapsuleArrival(
                     Text(
                         text = "Sealed ${dayLabel(capsule.sealedAt)} · for ${capsule.spanLabel}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = ink.copy(alpha = 0.65f),
+                        color = onScrim.copy(alpha = 0.78f),
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(28.dp))
@@ -1593,7 +1730,9 @@ fun TimeCapsuleArrival(
                                 style = MaterialTheme.typography.headlineSmall.copy(
                                     fontWeight = FontWeight.SemiBold
                                 ),
-                                color = ink.copy(alpha = 0.22f)
+                                // On the letter's own paper, so it keeps the page's
+                                // ink — a watermark, deep enough to read as a word.
+                                color = ink.copy(alpha = 0.28f)
                             )
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -1659,14 +1798,16 @@ fun TimeCapsuleArrival(
                     Spacer(Modifier.height(18.dp))
                     Text(
                         text = if (holding) "Keep holding" else "Hold the seal to open it",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = ink.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = onScrim
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = "Let go and nothing happens",
                         style = MaterialTheme.typography.labelMedium,
-                        color = ink.copy(alpha = 0.45f)
+                        color = onScrim.copy(alpha = 0.68f)
                     )
                 }
             } else {
@@ -1746,7 +1887,7 @@ fun TimeCapsuleArrival(
                             Text(
                                 text = "written ${dayLabel(capsule.sealedAt)}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = ink.copy(alpha = 0.5f)
+                                color = ink.copy(alpha = 0.62f)
                             )
                         }
                     }
@@ -1865,3 +2006,143 @@ private fun CapsuleAttachmentRemove(
  *  enough that it cannot be a tap by accident, short enough that it is not a
  *  chore. */
 private const val HOLD_TO_OPEN_MS = 1000
+
+/**
+ * ── v504 — YOUR LETTERS: EVERY CAPSULE, ON THE PAGE IT BELONGS TO ────────────
+ *
+ * The member's two asks in one place: *\"the time capusle sealed shows in home
+ * screen in a row pill whih is bad so remove it and place it soemwhere else\"* and
+ * *\"a way to see previous capsules etc\"*. Home's row pill is deleted (see
+ * `HomeCapsules.kt`), and the count, the next landing AND the letters already
+ * written live here — the page the letters are about, which is where the home
+ * pill was asked to move to.
+ *
+ * What a row says depends on what the letter IS:
+ *  * **waiting** — still sealed, its day ahead: when it comes back, and the moment
+ *    it was written for;
+ *  * **ready** — sealed, its day has come: the arrival has not been opened yet, and
+ *    opening it here is the SAME write the arrival makes (see [CurioTimeCapsules.open]),
+ *    so a letter read on this page is never read twice;
+ *  * **read** — already opened: the opened letter, tapped open again in place.
+ *
+ * One row expands at a time and expands IN PLACE rather than on a screen of its
+ * own: this is a list of your own letters, not a reader. `all()` is the store's own
+ * door for it (it has existed since v496 and had no caller until now).
+ */
+@Composable
+private fun CapsuleArchive(
+    capsules: List<CurioTimeCapsules.Capsule>,
+    accent: Color,
+    now: Long,
+    onOpened: (CurioTimeCapsules.Capsule) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (capsules.isEmpty()) return
+    val scheme = MaterialTheme.colorScheme
+    val haptics = LocalHapticFeedback.current
+    var expandedId by remember { mutableStateOf("") }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            "Your letters",
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+            color = scheme.onSurface
+        )
+        capsules.forEach { capsule ->
+            val ready = capsule.sealed && capsule.openAt <= now
+            val waiting = capsule.sealed && !ready
+            val expanded = expandedId == capsule.id
+            Surface(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    expandedId = if (expanded) "" else capsule.id
+                    // Opening a READY letter retires it — the same single write the
+                    // full-screen arrival makes, so the two can never disagree.
+                    if (ready && !expanded) onOpened(capsule)
+                },
+                shape = RoundedCornerShape(14.dp),
+                // A letter whose day has come is the one row on this page that is
+                // asking for something, so it is the one wearing the accent.
+                color = if (ready) lerp(scheme.surfaceContainer, accent, 0.20f)
+                else scheme.surfaceContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CurioIcon(
+                            CurioIcons.Lock,
+                            null,
+                            tint = if (waiting) scheme.onSurfaceVariant else accent,
+                            size = 17.dp
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                when {
+                                    ready -> "Ready to read"
+                                    waiting -> "Back to you ${
+                                        CurioTimeCapsules.untilText(capsule.openAt, now)
+                                    }"
+                                    else -> "Opened ${capsule.spanLabel}"
+                                },
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = scheme.onSurface
+                            )
+                            // The moment it was written for, always: it is the one
+                            // fact that makes a letter a letter.
+                            Text(
+                                if (waiting) "For ${capsule.spanLabel}" else capsule.spanLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = scheme.onSurfaceVariant
+                            )
+                        }
+                        CurioIcon(
+                            if (expanded) CurioIcons.Close else CurioIcons.ChevronRight,
+                            null,
+                            tint = scheme.onSurfaceVariant,
+                            size = 18.dp
+                        )
+                    }
+                    if (expanded) {
+                        Spacer(Modifier.height(10.dp))
+                        if (capsule.message.isNotBlank()) {
+                            Text(
+                                capsule.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = scheme.onSurface
+                            )
+                        }
+                        if (capsule.photo.isNotBlank()) {
+                            Spacer(Modifier.height(10.dp))
+                            PersonalPagePhoto(
+                                uri = capsule.photo,
+                                height = 170.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+                        }
+                        if (capsule.voice.isNotBlank()) {
+                            Spacer(Modifier.height(10.dp))
+                            PersonalVoiceBar(
+                                path = capsule.voice,
+                                seconds = capsule.voiceSeconds,
+                                bars = capsule.voiceBars,
+                                ink = scheme.onSurface,
+                                accent = accent,
+                                onRemove = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
