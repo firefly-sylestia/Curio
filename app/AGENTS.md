@@ -10846,6 +10846,61 @@ The rest of §95, built on the member's own answers (each question was asked bef
 - **THE CONTENTS LIST (`PersonalContents.kt` + `PersonalContentsPill` + `PersonalContentsSheet`).** The member: *"add a 3 dot menu style to browse though contents of the journal in eye view, with branching view properly"*, and asked where it should live: **both views** — so the door is the page's, a three-dot capsule in the top-end corner wearing `JournalCapsule`'s shape and height (the same capsule family as the mode switch), beside the pinned heading in the opposite corner. The list numbers the page the member's own way: **Heading I takes I, II, III in order; Heading II takes its parent's numeral and its own index (I.1, I.2)** and is INDENTED under it — the branch is the nesting. A section written before any level-I heading is numbered on its own rather than "0.1". **Every row carries its block's own ID**, so two headings that read the same words are still two different jumps (`goToHeading` resolves the same window arithmetic the pinned bar's own tap uses, and only the id can do that).
 - **AND AN UNTITLED JOURNAL NAMES ITSELF FROM ITS FIRST LINE (v499's `derivedTitle`, unchanged here)** — see that section's own note in `Prompt.md`: the member chose *"First line, and it becomes the real title"*, so the stored title is filled by the ONE writer and the shelf, search and export all read it.
 
+### v501 — THE TIME CAPSULE'S CLOCK IS ITS OWN EDITOR, AND TWO REAL BUGS IN IT ARE FIXED
+
+The member's list on the capsule page and Home's Return. **Two of their items turned out to be
+actual defects, and both are fixed at the cause.** Nothing here is pushed yet (the standing hold
+on the previous task), so **none of it has been compiled** — CI is the only check.
+
+- **⚠️ THE SEAL'S FLOOR WAS MINUTES, AND IT MOVED (`CurioTimeCapsules.MIN_LEAD_MS`).** The member:
+  *"seal it wasnt working when the time duration as like 1 min or 2 min"*. The store refused any
+  capsule landing inside five minutes of the seal, and the PAGE clamped its clock up to
+  `now + floor` when a moment was chosen. Every second that then passed while the letter was
+  written put that same instant back inside the floor — so the seal was refused while the page
+  still showed a legal, future time, and nothing said why. The floor is **five seconds** now (its
+  only real meaning: a capsule is sealed for a moment strictly ahead of the seal), and a refusal
+  is DRAWN (`sealNote` under the button) instead of dropped. **A rolling floor is the trap:** a
+  clamp computed once cannot stay true against a clock that keeps moving.
+- **⚠️ A PICKED DAY LANDED THE DAY BEFORE (`TimeCapsuleScreen`'s date picker).** `selectedDateMillis`
+  is **UTC midnight** of the day tapped; reading that instant straight into a local `Calendar` puts
+  it on the previous evening anywhere west of Greenwich, so a capsule set for the 12th was promised
+  as the 11th — the member's *"also lands in isnt accurate sometimes"*. The three date fields are
+  read from a UTC calendar and written onto the local one; the chosen hour and minute are kept.
+- **THE CLOCK IS ITS OWN EDITOR.** The six circular step buttons, the "15 min earlier / later" pair
+  and the two "Pick a date" / "Pick a time" doors are **deleted** (root rule 3 — the member named
+  every one of them). `ClockRow` is the new control: **tap** the day row for Android's calendar,
+  **tap** the time row for its clock picker, **drag** either row up or down to turn that unit one
+  notch (`NOTCH` = 30dp) with a tick a notch. Pointer input sits **before** the click (rule 6).
+  The rows are centred with fixed card widths, which is what fixes the alignment.
+- **ONLY A HALF TURNS (`FlipCard` + `CardHalf`).** The old card rotated its whole face about its own
+  middle, so a digit going edge-on dragged the plate's edges with it — the member's *"the whole
+  number flips instead of it flipping only half here its visble as break"*. It is a real split-flap
+  now: the top half HOLDS, the old bottom leaf drops away around the crease (`lower`), the glyph
+  changes behind the crease where nothing is on screen, then the new top leaf falls into place
+  (`upper`), each half rendering the glyph at the card's FULL height and clipping it — that is what
+  makes two halves of one digit. **`Modifier.align` needs a `BoxScope` receiver**, so the alignment
+  is passed IN by the callers, which are inside the card's box.
+- **THE HERO NEVER RESETS.** Its gradient used to slide from shift 0 to 1 and jump back. The
+  gradient's ends now travel a full circle (`cos`/`sin` of the loop angle), so the last frame and
+  the first are the same picture and there is nothing to snap home. A bottom scrim keeps white
+  copy readable on the paler spread.
+- **SOFTER AND SQUARER, AND THE WORDS.** Preset chips are washed accents on 12dp rectangles, the
+  letter field / seal / done buttons lost their lozenges (14dp / 12dp), the header is one soft
+  rectangle holding the way back, the page's name and the count, and the promise now LEADS with the
+  date and time with the distance under it ("Back to you in 7 days") instead of the old "Lands in 2
+  months". **Seven days out is the new default** (it was thirty). No em dashes in any user-visible
+  string, and no "it lands in" phrasing.
+- **HOME'S RETURN IS WORDS, NOT A BUTTON (`HomeCapsules.kt`).** It was a filled capsule with a glyph
+  and a chevron whose quiet state read "The Return · nothing waiting yet" — a button whose whole
+  message was that there was nothing to press. It is a line of text in the welcome-back block now
+  ("3 topics to remember" / "Next return in 3 days"), and **the empty state is not drawn at all**.
+
+**OWED (the rest of the same list, none of it started):** a real digital-clock font asset for the
+whole page; the letter area with **image and voice-note** attachments (a real feature — it needs a
+storage decision); **swipe to seal** instead of the button; the Return's own **screen** instead of
+the bottom sheet; the capsule's **arrival** as a nostalgia moment and a matching **read/view**
+screen.
+
 ## Child DOX Index
 
 - [`../docs/plans/curio-idea-agenda.md`](../docs/plans/curio-idea-agenda.md) — **the idea agenda** (outside the module, but every entry is a feature of it): the researched evidence, the member's picked features with the interaction each should have and the code each hooks into, the decisions taken, and the build order. **Read it before starting a new feature**; once an idea is built, its binding description belongs HERE and the agenda entry becomes a pointer.

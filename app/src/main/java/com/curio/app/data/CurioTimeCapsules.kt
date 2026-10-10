@@ -58,11 +58,23 @@ object CurioTimeCapsules {
      * a convenience of the dial and are nobody's idea of a promised day.
      */
     /**
-     * The shortest lead a capsule may have. A letter that arrives the moment it is
-     * sealed is a note to yourself, not a capsule — and a target a minute away is
-     * almost always a mis-set clock rather than an intention.
+     * ⚠️ v501 — THE FLOOR IS SECONDS, NOT MINUTES (a real bug the member hit).
+     *
+     * It was FIVE MINUTES, on the reasoning that a capsule a minute out is a
+     * mis-set clock. That reasoning was wrong twice over. A letter written for
+     * *"in one minute"* is a perfectly good capsule — that is exactly what the
+     * member was trying to seal when they reported that the seal *"wasnt working
+     * when the time duration as like 1 min or 2 min"* — and a ROLLING five-minute
+     * floor is worse than a fixed one: the page clamped the clock up to `now + 5
+     * min` when the moment was chosen, and every second that passed while the
+     * member wrote their letter put that same instant back INSIDE the floor, so
+     * the seal was refused by a clock that still read a legal, future time and
+     * said nothing about why.
+     *
+     * Five SECONDS keeps the one real meaning of a floor: a capsule is sealed for
+     * a moment strictly ahead of the seal, never for an instant already gone.
      */
-    const val MIN_LEAD_MS = 5L * 60L * 1000L
+    const val MIN_LEAD_MS = 5L * 1000L
 
     /** One sealed letter. */
     data class Capsule(

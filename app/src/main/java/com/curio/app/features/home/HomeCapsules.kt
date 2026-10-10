@@ -1,5 +1,6 @@
 package com.curio.app.features.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,22 +81,45 @@ fun ReturnCapsule(
     val scheme = MaterialTheme.colorScheme
     val accent = scheme.primary
     val live = due > 0
+    // ⚠️ v501 — WORDS, NOT A BUTTON (the member: "make it small capsule in the
+    // welcome back with no backgroud just text and dont say nothing aiting").
+    //
+    // This was a filled capsule with a glyph and a chevron, and in its quiet
+    // state it said "The Return · nothing waiting yet" — a button on the member's
+    // Home whose whole message was that there was nothing to press. It is a line
+    // of text now, in the welcome-back block where the rest of Home's greeting
+    // lives, and the empty state is simply NOT DRAWN: a line that has nothing to
+    // say says nothing.
     val label = when {
-        live -> "The Return · $due waiting"
-        aheadText != null -> "The Return · next $aheadText"
-        else -> "The Return · nothing waiting yet"
+        due > 1 -> "$due topics to remember"
+        live -> "1 topic to remember"
+        aheadText != null -> "Next return $aheadText"
+        else -> null
     }
-    HomeCapsule(
-        glyph = CurioIcons.Replay,
-        label = label,
-        // A waiting return is the one thing on Home that has to be acted on, so
-        // it is the accent pill; the quiet states are the plain surface.
-        fill = if (live) accent else scheme.surfaceContainerHigh,
-        ink = if (live) scheme.onPrimary else scheme.onSurface,
-        accent = accent,
-        onClick = onOpen,
+    if (label == null) return
+    Row(
         modifier = modifier
-    )
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onOpen)
+            .padding(horizontal = 2.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = if (live) accent else scheme.onSurfaceVariant
+        )
+        Text(
+            "›",
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = if (live) accent.copy(alpha = 0.8f) else scheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+    }
 }
 
 /** How many letters are sealed and when the next one lands, for [ReturnCapsule]'s sibling. */

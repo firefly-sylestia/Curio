@@ -7,8 +7,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -45,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -55,6 +59,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -88,9 +93,11 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.font.FontFamily
 import kotlinx.coroutines.delay
 import java.util.Calendar
+import java.util.TimeZone
 
 /**
  * v496 — THE TIME CAPSULE'S WRITING PAGE, REBUILT (agenda §5.5).
@@ -132,11 +139,19 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val accent = scheme.primary
     val floor = remember { CurioTimeCapsules.MIN_LEAD_MS }
-    var target by rememberSaveable { mutableStateOf(System.currentTimeMillis() + 30L * DAY_MS) }
+    // v501 — SEVEN DAYS OUT BY DEFAULT, the member's own number (it was thirty,
+    // which is a month of waiting for a note that was usually meant for next
+    // week). A default is a STARTING POINT: the clock below is the member's.
+    var target by rememberSaveable { mutableStateOf(System.currentTimeMillis() + 7L * DAY_MS) }
     var message by rememberSaveable { mutableStateOf("") }
     var dateOpen by remember { mutableStateOf(false) }
     var timeOpen by remember { mutableStateOf(false) }
     var sealedCapsule by remember { mutableStateOf<CurioTimeCapsules.Capsule?>(null) }
+    // ⚠️ v501 — A REFUSED SEAL HAS TO SAY SO. The store refuses a blank letter and
+    // a moment inside its floor, and this page used to drop that answer on the
+    // floor: the button looked dead (the member's "the seal it option wasnt
+    // working"). The refusal is written here and drawn under the button.
+    var sealNote by remember { mutableStateOf("") }
     var nowTick by remember { mutableIntStateOf(0) }
 
     // The head's own count, and the app's one place that recomputes what is
@@ -180,23 +195,35 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                 TextButton(onClick = {
                     val picked = picker.selectedDateMillis
                     if (picked != null) {
-                        // The picker answers a DAY (midnight UTC); the page keeps
-                        // the hour and minute the member already set, so picking a
-                        // date never silently moves the time they chose.
-                        val keep = Calendar.getInstance().apply { timeInMillis = target }
-                        val day = Calendar.getInstance().apply {
+                        // ⚠️ v501 — THE PICKED DAY IS READ IN UTC AND WRITTEN IN
+                        // THE MEMBER'S OWN ZONE (a real accuracy bug).
+                        //
+                        // `selectedDateMillis` is UTC MIDNIGHT of the day that was
+                        // tapped. Reading that instant straight into a local
+                        // calendar puts it on the evening of the day BEFORE
+                        // wherever the member is west of Greenwich, so a capsule
+                        // set for "the 12th" was promised the 11th, and the landing
+                        // line was a day out — the member's "also lands in isnt
+                        // accurate sometimes". The three date fields are taken from
+                        // a UTC calendar and set on the local one; the hour and
+                        // minute the member already chose are kept, so picking a
+                        // day still never moves their time.
+                        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                             timeInMillis = picked
-                            set(Calendar.HOUR_OF_DAY, keep.get(Calendar.HOUR_OF_DAY))
-                            set(Calendar.MINUTE, keep.get(Calendar.MINUTE))
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
                         }
+                        val keep = Calendar.getInstance().apply { timeInMillis = target }
+                        keep.set(Calendar.YEAR, utc.get(Calendar.YEAR))
+                        keep.set(Calendar.MONTH, utc.get(Calendar.MONTH))
+                        keep.set(Calendar.DAY_OF_MONTH, utc.get(Calendar.DAY_OF_MONTH))
+                        keep.set(Calendar.SECOND, 0)
+                        keep.set(Calendar.MILLISECOND, 0)
                         val minAt = System.currentTimeMillis() + floor
-                        target = maxOf(day.timeInMillis, minAt)
+                        target = maxOf(keep.timeInMillis, minAt)
                     }
+                    sealNote = ""
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     dateOpen = false
-                }) { Text("Set the day") }
+                }) { Text("Use this day") }
             },
             dismissButton = {
                 TextButton(onClick = { dateOpen = false }) { Text("Cancel") }
@@ -225,13 +252,14 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     val minAt = System.currentTimeMillis() + floor
                     target = maxOf(keep.timeInMillis, minAt)
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    sealNote = ""
                     timeOpen = false
-                }) { Text("Set the time") }
+                }) { Text("Use this time") }
             },
             dismissButton = {
                 TextButton(onClick = { timeOpen = false }) { Text("Cancel") }
             },
-            title = { Text("At what time?") },
+            title = { Text("What time?") },
             text = { TimePicker(state = picker) }
         )
     }
@@ -248,33 +276,41 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                 .widthIn(max = 680.dp)
         ) {
             Spacer(Modifier.height(10.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // v501 — THE HEADER WEARS THE PAGE'S OWN LANGUAGE: one soft rectangle
+            // holding the way back, the name of the page and the count of letters
+            // already waiting, rather than a floating arrow beside a bare title.
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = scheme.surfaceContainer,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                CapsuleCircleButton(
-                    glyph = CurioIcons.ArrowBack,
-                    label = "Back",
-                    accent = accent,
-                    onClick = onBack
-                )
-                Text(
-                    "Time capsule",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = scheme.onBackground,
-                    modifier = Modifier.weight(1f)
-                )
-                if (CurioTimeCapsules.sealedCountState > 0) {
-                    Surface(shape = RoundedCornerShape(50), color = accent.copy(alpha = 0.14f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                ) {
+                    CapsuleCircleButton(
+                        glyph = CurioIcons.ArrowBack,
+                        label = "Back",
+                        accent = accent,
+                        onClick = onBack
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "${CurioTimeCapsules.sealedCountState} sealed",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.SemiBold
+                            "Time capsule",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
                             ),
-                            color = accent,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            color = scheme.onSurface
+                        )
+                        Text(
+                            if (CurioTimeCapsules.sealedCountState > 0) {
+                                "${CurioTimeCapsules.sealedCountState} letters waiting"
+                            } else {
+                                "A letter for your own future self"
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = scheme.onSurfaceVariant
                         )
                     }
                 }
@@ -289,33 +325,11 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                 cal = cal,
                 hours24 = hours24,
                 accent = accent,
-                onPreviousDay = { shift(-DAY_MS) },
-                onNextDay = { shift(DAY_MS) },
-                onPreviousHour = { shift(-HOUR_MS) },
-                onNextHour = { shift(HOUR_MS) },
-                onPreviousQuarter = { shift(-QUARTER_MS) },
-                onNextQuarter = { shift(QUARTER_MS) }
+                onEditDay = { dateOpen = true },
+                onEditTime = { timeOpen = true },
+                onStepDays = { shift(it.toLong() * DAY_MS) },
+                onStepMinutes = { shift(it.toLong() * MINUTE_MS) }
             )
-            Spacer(Modifier.height(16.dp))
-
-            // ── THE DOORS TO ANDROID'S OWN PICKERS ────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                CapsuleDoor(
-                    glyph = CurioIcons.Schedule,
-                    label = "Pick a date",
-                    accent = accent,
-                    modifier = Modifier.weight(1f)
-                ) { dateOpen = true }
-                CapsuleDoor(
-                    glyph = CurioIcons.AutoAwesome,
-                    label = "Pick a time",
-                    accent = accent,
-                    modifier = Modifier.weight(1f)
-                ) { timeOpen = true }
-            }
             Spacer(Modifier.height(16.dp))
 
             // ── AND THE USUAL DISTANCES, AS ONE TAP ───────────────────────
@@ -353,7 +367,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     )
                 },
                 minLines = 6,
-                shape = RoundedCornerShape(22.dp),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(20.dp))
@@ -368,12 +382,22 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     )
                     if (sealed != null) {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        sealNote = ""
                         sealedCapsule = sealed
+                    } else {
+                        // The store said no, so the page says why. A button that
+                        // silently does nothing is the bug the member reported.
+                        sealNote = if (message.isBlank()) {
+                            "Write a line first. A capsule needs something to carry."
+                        } else {
+                            "That moment has already passed. Set the clock a little further on."
+                        }
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     }
                 },
                 enabled = message.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = accent),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -381,10 +405,25 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                 CurioIcon(CurioIcons.Lock, null, tint = scheme.onPrimary, size = 20.dp)
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    "Seal it — it lands $until",
+                    text = "Seal it",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.ExtraBold
                     )
+                )
+            }
+            // WHY THE BUTTON IS NOT LIT, and why a seal was refused: one line,
+            // drawn only when it has something to say.
+            val note = sealNote.ifBlank {
+                if (message.isBlank()) "Write a line and the seal lights up." else ""
+            }
+            if (note.isNotBlank()) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    note,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = scheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             Spacer(Modifier.height(28.dp))
@@ -434,7 +473,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                         // v497 — the promise label is the member's own date AND
                         // time now, so it is named as a day here rather than as
                         // an interval: "in 3 days — on 13 October 2026 at 09:30".
-                        "It comes back ${CurioTimeCapsules.untilText(done.openAt)} — on ${done.spanLabel}.",
+                        "Back to you ${CurioTimeCapsules.untilText(done.openAt)}, on ${done.spanLabel}.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = scheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -442,7 +481,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     Button(
                         onClick = onBack,
                         colors = ButtonDefaults.buttonColors(containerColor = accent),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("Done")
                     }
@@ -454,7 +493,7 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
 
 private const val DAY_MS = 24L * 60L * 60L * 1000L
 private const val HOUR_MS = 60L * 60L * 1000L
-private const val QUARTER_MS = 15L * 60L * 1000L
+private const val MINUTE_MS = 60L * 1000L
 
 /**
  * WHERE THE LETTER IS GOING, AS A CARD OF LIGHT.
@@ -467,27 +506,54 @@ private const val QUARTER_MS = 15L * 60L * 1000L
 private fun CapsuleHero(accent: Color, until: String, promise: String) {
     val scheme = MaterialTheme.colorScheme
     val drift = rememberInfiniteTransition(label = "capsuleHero")
-    val shift by drift.animateFloat(
+    val spin by drift.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(11000, easing = LinearEasing)),
-        label = "capsuleDrift"
+        animationSpec = infiniteRepeatable(tween(16000, easing = LinearEasing)),
+        label = "capsuleSpin"
     )
-    val far = lerp(accent, scheme.tertiary, 0.55f)
-    val near = lerp(accent, scheme.secondary, 0.85f)
+    // ⚠️ v501 — THE LIGHT GOES ROUND, SO IT NEVER SNAPS HOME (the member: "the
+    // gradient animation isnt infinite like a dynamic abstract as it resets and
+    // doesnt feel continuis").
+    //
+    // The hero used to slide its gradient sideways from shift 0 to shift 1 and
+    // then JUMP back to 0 — every eleven seconds the light visibly started again.
+    // The gradient's two ends now travel a full circle around the card's centre
+    // instead: at the end of the loop they are exactly where they started, so the
+    // last frame and the first frame are the same picture and there is nothing to
+    // reset. The colours are also pulled toward each other (a softer, fluffier
+    // spread) so the motion reads as one surface breathing rather than four
+    // stripes swapping places.
+    val angle = spin * 2f * Math.PI.toFloat()
+    val dx = cos(angle) * 900f
+    val dy = sin(angle) * 900f
+    val far = lerp(accent, scheme.tertiary, 0.42f)
+    val near = lerp(accent, scheme.secondary, 0.60f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(176.dp)
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(accent, far, near, accent),
-                    start = Offset(-600f + shift * 1200f, -200f),
-                    end = Offset(600f + shift * 1200f, 700f)
+                    start = Offset(-dx, -dy),
+                    end = Offset(dx, dy)
                 )
             )
     ) {
+        // A soft floor under the words, so white stays readable on every palette:
+        // the gradient is allowed to be pale because the text is not sitting on it
+        // bare any more.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.30f))
+                    )
+                )
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -504,8 +570,13 @@ private fun CapsuleHero(accent: Color, until: String, promise: String) {
                 }
             }
             Spacer(Modifier.height(12.dp))
+            // v501 — THE PROMISE LEADS AND THE DISTANCE FOLLOWS: the date and
+            // time the letter is written for is the fact, and "in 7 days" is how
+            // far away it is. It used to read the other way round ("Lands in 2
+            // months" over the date), which is the member's "that option is bad
+            // make it like ... use better english".
             Text(
-                "Lands $until",
+                promise,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.ExtraBold
                 ),
@@ -513,7 +584,7 @@ private fun CapsuleHero(accent: Color, until: String, promise: String) {
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                promise,
+                "Back to you $until",
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.White.copy(alpha = 0.86f)
             )
@@ -534,152 +605,202 @@ private fun CapsuleClock(
     cal: Calendar,
     hours24: Boolean,
     accent: Color,
-    onPreviousDay: () -> Unit,
-    onNextDay: () -> Unit,
-    onPreviousHour: () -> Unit,
-    onNextHour: () -> Unit,
-    onPreviousQuarter: () -> Unit,
-    onNextQuarter: () -> Unit
+    onEditDay: () -> Unit,
+    onEditTime: () -> Unit,
+    onStepDays: (Int) -> Unit,
+    onStepMinutes: (Int) -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
     val plate = lerp(scheme.surface, scheme.onSurface, 0.86f)
     val ink = lerp(scheme.onSurface, scheme.surface, 0.96f)
+    // ⚠️ v501 — THE CLOCK IS ITS OWN EDITOR (the member's "remove the plus and
+    // arro sign, tapping it should let me edit it and with gesture edit with
+    // scrolling", and "the pick a date pick a time feels duplicat).
+    //
+    // It used to be a deck of cards flanked by six circular step buttons with a
+    // pair of "15 min earlier / 15 min later" bars below them and TWO separate
+    // "Pick a date" / "Pick a time" doors underneath all of that. Three ways to
+    // move one clock, none of them the thing a member's thumb goes to first. The
+    // steppers and the doors are gone; the deck IS the control:
+    //
+    //   • tap the day row    → Android's own calendar
+    //   • tap the time row   → Android's own time picker
+    //   • drag either row up or down → that row's unit turns, one notch per
+    //     thumb's width of travel, with a tick each notch
+    //
+    // The rows are centred with fixed card widths, so the two decks line up with
+    // each other instead of being pushed off centre by a button either side.
     Surface(
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(20.dp),
         color = scheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier.padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ── the day ───────────────────────────────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ClockRow(
+                label = "The day it comes back",
+                accent = accent,
+                onTap = onEditDay,
+                onStep = onStepDays
             ) {
-                CapsuleStepButton(
-                    glyph = CurioIcons.ChevronLeft,
-                    label = "A day earlier",
-                    accent = accent
-                ) { onPreviousDay() }
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    FlipCard(
-                        value = flipDay(cal),
-                        caption = "DAY",
-                        plate = plate,
-                        ink = ink,
-                        modifier = Modifier.weight(1f)
-                    )
-                    FlipCard(
-                        value = flipMonth(cal),
-                        caption = "MONTH",
-                        plate = plate,
-                        ink = ink,
-                        modifier = Modifier.weight(1.4f)
-                    )
-                    FlipCard(
-                        value = flipYear(cal),
-                        caption = "YEAR",
-                        plate = plate,
-                        ink = ink,
-                        modifier = Modifier.weight(1.6f)
-                    )
-                }
-                CapsuleStepButton(
-                    glyph = CurioIcons.Add,
-                    label = "A day later",
-                    accent = accent
-                ) { onNextDay() }
+                FlipCard(
+                    value = flipDay(cal),
+                    caption = "DAY",
+                    plate = plate,
+                    ink = ink,
+                    modifier = Modifier.width(84.dp)
+                )
+                FlipCard(
+                    value = flipMonth(cal),
+                    caption = "MONTH",
+                    plate = plate,
+                    ink = ink,
+                    modifier = Modifier.width(132.dp)
+                )
+                FlipCard(
+                    value = flipYear(cal),
+                    caption = "YEAR",
+                    plate = plate,
+                    ink = ink,
+                    modifier = Modifier.width(112.dp)
+                )
             }
 
-            // ── the time ──────────────────────────────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ClockRow(
+                label = "The hour it opens",
+                accent = accent,
+                onTap = onEditTime,
+                onStep = onStepMinutes
             ) {
-                CapsuleStepButton(
-                    glyph = CurioIcons.Remove,
-                    label = "An hour earlier",
-                    accent = accent
-                ) { onPreviousHour() }
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                FlipCard(
+                    value = flipHour(cal, hours24),
+                    caption = "HOUR",
+                    plate = plate,
+                    ink = ink,
+                    modifier = Modifier.width(96.dp)
+                )
+                Text(
+                    ":",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = scheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                FlipCard(
+                    value = flipMinute(cal),
+                    caption = "MIN",
+                    plate = plate,
+                    ink = ink,
+                    modifier = Modifier.width(96.dp)
+                )
+                if (!hours24) {
                     FlipCard(
-                        value = flipHour(cal, hours24),
-                        caption = "HOUR",
+                        value = flipMarker(cal),
+                        caption = "",
                         plate = plate,
                         ink = ink,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(64.dp)
                     )
-                    Text(
-                        ":",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = scheme.onSurfaceVariant
-                    )
-                    FlipCard(
-                        value = flipMinute(cal),
-                        caption = "MIN",
-                        plate = plate,
-                        ink = ink,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (!hours24) {
-                        FlipCard(
-                            value = flipMarker(cal),
-                            caption = "",
-                            plate = plate,
-                            ink = ink,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
                 }
-                CapsuleStepButton(
-                    glyph = CurioIcons.Add,
-                    label = "An hour later",
-                    accent = accent
-                ) { onNextHour() }
-            }
-
-            // ── a quarter of an hour, the finest step a thumb needs ───────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CapsuleWideStep(
-                    label = "15 min earlier",
-                    accent = accent,
-                    modifier = Modifier.weight(1f)
-                ) { onPreviousQuarter() }
-                CapsuleWideStep(
-                    label = "15 min later",
-                    accent = accent,
-                    modifier = Modifier.weight(1f)
-                ) { onNextQuarter() }
             }
         }
     }
 }
 
 /**
- * ONE CARD OF THE DECK, AND IT TURNS.
+ * ONE DECK OF THE CLOCK, AND THE GESTURES THAT TURN IT.
  *
- * The plate is opaque with a crease across its middle, and the card rotates about
- * that crease when its value changes: edge-on at the halfway point, then back
- * face-on with the new value — the one flip a split-flap makes. `cameraDistance`
- * is what keeps a rotating card from looking like a squashed rectangle.
+ * A tap opens the picker that owns this row's unit; a vertical drag turns the
+ * deck under the thumb, one notch each [NOTCH] of travel. The drag is where the
+ * movement lives now that the step buttons are gone, and it is the nicer gesture
+ * of the two: a member can feel their way along a dial instead of tapping a
+ * button and watching a card turn.
+ *
+ * The press-detection pointer input sits BEFORE the click in the chain (see the
+ * project's modifier-order rule): the drag consumes its own movement, so a real
+ * drag never fires the tap, and a tap with no travel never turns a card.
+ */
+@Composable
+private fun ClockRow(
+    label: String,
+    accent: Color,
+    onTap: () -> Unit,
+    onStep: (Int) -> Unit,
+    content: @Composable RowScope.() -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    val haptics = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    val notch = with(density) { NOTCH.toPx() }
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = scheme.surfaceContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = scheme.onSurfaceVariant
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pointerInput(Unit) {
+                        var travel = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = { travel = 0f },
+                            onDragEnd = { travel = 0f },
+                            onDragCancel = { travel = 0f }
+                        ) { _, dy ->
+                            travel += dy
+                            val notches = (travel / notch).toInt()
+                            if (notches != 0) {
+                                travel -= notches * notch
+                                // Down a row moves the unit the way the thumb
+                                // goes: pulling the deck down takes the clock
+                                // back, pushing it up takes it on.
+                                onStep(-notches)
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                        }
+                    }
+                    .clickable(
+                        onClickLabel = if (label.startsWith("The day")) "Set the day"
+                        else "Set the hour and minute",
+                        onClick = onTap
+                    ),
+                content = content
+            )
+        }
+    }
+}
+
+private val NOTCH = 30.dp
+
+/**
+ * ONE CARD OF THE DECK, AND ONLY HALF OF IT TURNS.
+ *
+ * ⚠️ v501 — A REAL SPLIT-FLAP (the member's "the whole number flips instead of it
+ * flipping only half here its visble as break"). The old card rotated its WHOLE
+ * face about its own middle, so a digit going edge-on pulled the plate's top and
+ * bottom edges in with it and the card visibly broke in half on the way through.
+ * A split-flap never does that: the top half HOLDS, the bottom leaf drops away
+ * around the crease, the glyph changes behind the crease where nothing is on
+ * screen, and then the new top leaf falls into place over it. Two leaves, one
+ * each side of the crease, and the card is never less than a card.
  */
 @Composable
 private fun FlipCard(
@@ -690,15 +811,20 @@ private fun FlipCard(
     modifier: Modifier = Modifier
 ) {
     var shown by remember { mutableStateOf(value) }
-    var away by remember { mutableStateOf(true) }
-    val turn = remember { Animatable(0f) }
+    // The bottom leaf falls first, then the top leaf lands: one after the other,
+    // never together, which is what makes a flip read as two halves of one motion.
+    val lower = remember { Animatable(0f) }
+    val upper = remember { Animatable(0f) }
+    var leafFace by remember { mutableStateOf(value) }
     LaunchedEffect(value) {
         if (value == shown) return@LaunchedEffect
-        away = true
-        turn.animateTo(1f, tween(130, easing = FastOutLinearInEasing))
+        lower.snapTo(0f)
+        lower.animateTo(1f, tween(150, easing = FastOutLinearInEasing))
+        // Behind the crease, edge-on, the card changes its mind.
         shown = value
-        away = false
-        turn.animateTo(0f, tween(190, easing = FastOutSlowInEasing))
+        upper.snapTo(1f)
+        leafFace = value
+        upper.animateTo(0f, tween(170, easing = FastOutSlowInEasing))
     }
     Column(
         modifier = modifier,
@@ -708,40 +834,50 @@ private fun FlipCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(62.dp)
-                .graphicsLayer {
-                    rotationX = if (away) -(turn.value * 90f) else turn.value * 90f
-                    cameraDistance = 16f * density
-                },
-            contentAlignment = Alignment.Center
+                .height(CARD_HEIGHT)
         ) {
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = plate,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        shown,
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp
-                        ),
-                        color = ink,
-                        maxLines = 1,
-                        textAlign = TextAlign.Center
-                    )
-                    // The crease: what makes a plate a FLAP rather than a tile.
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(ink.copy(alpha = 0.22f))
-                    )
-                }
-            }
+            // The bottom half already wears the NEW glyph: the falling leaf is
+            // what was covering it.
+            CardHalf(
+                top = false,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) { CardGlyph(value, ink) }
+            // The top half holds the glyph it had until the leaf lands.
+            CardHalf(
+                top = true,
+                modifier = Modifier.align(Alignment.TopCenter)
+            ) { CardGlyph(shown, ink) }
+            // The leaf that drops away — the OLD bottom half.
+            CardHalf(
+                top = false,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .graphicsLayer {
+                        rotationX = -lower.value * 90f
+                        transformOrigin = TransformOrigin(0.5f, 0f)
+                        cameraDistance = 16f * density
+                    }
+            ) { CardGlyph(shown, ink) }
+            // The leaf that lands — the NEW top half.
+            CardHalf(
+                top = true,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .graphicsLayer {
+                        rotationX = upper.value * 90f
+                        transformOrigin = TransformOrigin(0.5f, 1f)
+                        cameraDistance = 16f * density
+                    }
+            ) { CardGlyph(leafFace, ink) }
+            // The crease itself, over every layer: one hairline that all four
+            // faces are cut by, and the line the whole illusion hangs on.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(ink.copy(alpha = 0.24f))
+            )
         }
         if (caption.isNotBlank()) {
             Text(
@@ -753,6 +889,61 @@ private fun FlipCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+private val CARD_HEIGHT = 62.dp
+private val CARD_HALF = 31.dp
+
+/**
+ * The opaque plate of one half of a card, clipped to its own side of the crease.
+ *
+ * The caller has to hand in the alignment (it is the one inside the card's
+ * `BoxScope`): a `Modifier.align` here would not resolve, because this function
+ * is not in the box it is being drawn into.
+ */
+@Composable
+private fun CardHalf(
+    top: Boolean,
+    modifier: Modifier = Modifier,
+    glyph: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(CARD_HALF)
+            .clipToBounds()
+            .then(modifier)
+    ) {
+        // The glyph is drawn once at the card's FULL height and pushed so that its
+        // centre sits on the crease, then the half's own clip cuts it: that is
+        // what makes two halves of one digit rather than two small digits.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(CARD_HEIGHT)
+                .offset(y = if (top) 0.dp else -CARD_HALF)
+        ) {
+            glyph()
+        }
+    }
+}
+
+/** A glyph cut to a half — the digits are the same everywhere the deck is used. */
+@Composable
+private fun CardGlyph(value: String, ink: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Text(
+            value,
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp
+            ),
+            color = ink,
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -777,97 +968,22 @@ private fun CapsuleCircleButton(
 }
 
 @Composable
-private fun CapsuleStepButton(
-    glyph: String,
-    label: String,
-    accent: Color,
-    onClick: () -> Unit
-) {
-    val scheme = MaterialTheme.colorScheme
-    Surface(
-        onClick = onClick,
-        shape = CircleShape,
-        color = lerp(scheme.surfaceContainerHigh, accent, 0.16f),
-        modifier = Modifier.size(40.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            CurioIcon(glyph, label, tint = accent, size = 18.dp)
-        }
-    }
-}
-
-@Composable
-private fun CapsuleWideStep(
-    label: String,
-    accent: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val scheme = MaterialTheme.colorScheme
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = lerp(scheme.surfaceContainerHigh, accent, 0.10f),
-        modifier = modifier.height(38.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = scheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun CapsuleDoor(
-    glyph: String,
-    label: String,
-    accent: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val scheme = MaterialTheme.colorScheme
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        color = scheme.surfaceContainerHigh,
-        modifier = modifier.height(52.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
-            CurioIcon(glyph, null, tint = accent, size = 18.dp)
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = scheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
 private fun CapsulePresetChip(
     label: String,
     accent: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    // v501 — A SOFT RECTANGLE: the presets were accent-coloured pills on a page
+    // that now uses rounded RECTANGLES and a washed accent, so they are the same
+    // soft fill as everything else, squared off to match, and they take their ink
+    // from the accent rather than wearing it whole.
+    val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = accent.copy(alpha = 0.15f),
-        modifier = modifier.height(36.dp)
+        shape = RoundedCornerShape(12.dp),
+        color = lerp(scheme.surfaceContainerHighest, accent, 0.24f),
+        modifier = modifier.height(40.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Text(
@@ -875,7 +991,7 @@ private fun CapsulePresetChip(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = accent,
+                color = lerp(scheme.onSurface, accent, 0.55f),
                 maxLines = 1
             )
         }
