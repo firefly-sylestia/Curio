@@ -646,6 +646,10 @@ internal fun PersonalWritingPage(
     // [LocalPersonalTitleReport] — the writing column's own scroll turns that
     // into "gone by", and the bar holds the top edge and goes back when tapped.
     val sectionLines = remember { mutableStateMapOf<String, PersonalSectionLine>() }
+    // v500 — the contents list (the member: "a 3 dot menu style to browse though
+    // contents of the journal in eye view" — asked where it should live, **both
+    // views**, so the door is the page's and not the eye's).
+    var contentsOpen by remember { mutableStateOf(false) }
     // v402 — THE PIN IS JUDGED IN THE WINDOW.
     //
     // Every earlier version of this tried to translate a heading's place into the
@@ -718,6 +722,26 @@ internal fun PersonalWritingPage(
     LaunchedEffect(doc) {
         val alive = doc.blocks.map { it.id }.toSet()
         sectionLines.keys.retainAll { key -> key.substringAfter(':') in alive }
+    }
+
+    // ── v500 — GOING TO A HEADING, BY THE HEADING'S OWN ID ──────────────
+    //
+    // The pinned bar's own tap resolves its distance in the window (see the note
+    // on [pinnedSection]); the contents list needs the same jump for a heading
+    // that may be far below the fold, so the same arithmetic lives here once and
+    // is asked with an id rather than with a label — two headings on one page can
+    // read the same words, and only the id is unique.
+    val goToHeading: (String) -> Unit = { headingId ->
+        val section = sectionLines[(if (editing) "w:" else "r:") + headingId]
+        val scroll = (if (editing) pageScroll else pinHolder.scroll)
+        if (section != null && scroll != null) {
+            val delta = section.liveTop(scroll.value.toFloat()) - areaTop
+            scope.launch {
+                scroll.animateScrollTo(
+                    (scroll.value + delta).toInt().coerceIn(0, scroll.maxValue)
+                )
+            }
+        }
     }
 
     Column(
@@ -974,7 +998,25 @@ internal fun PersonalWritingPage(
                     .align(Alignment.TopStart)
                     .padding(start = 16.dp, top = 10.dp)
             )
+
+            // v500 — AND THE CONTENTS DOOR, in the page's other corner: the same
+            // rank as the pinned heading (both are facts about the page's shape),
+            // one tap from the list in either mode.
+            PersonalContentsPill(
+                onClick = { contentsOpen = true },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp, top = 10.dp)
+            )
         }
+        }
+
+        if (contentsOpen) {
+            PersonalContentsSheet(
+                headings = personalHeadingsOf(doc),
+                onGo = goToHeading,
+                onDismiss = { contentsOpen = false }
+            )
         }
 
         // The dock rides with the page while it is being WRITTEN and steps

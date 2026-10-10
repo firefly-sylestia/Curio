@@ -55,6 +55,16 @@ data class PersonalRun(
     /** A TITLE: the line is set bigger (and in the display serif), so a page
      *  of writing can carry its own headings. */
     val title: Boolean = false,
+    /**
+     * v500 — HEADING II: the SECOND heading size, a section under the page's own
+     * title (see [title]).
+     *
+     * Stored as its own boolean with its own key ("h2") rather than as a number,
+     * because that is how the other flags are stored and an older build reading a
+     * note written with one simply shows that line as ordinary content — no
+     * migration, no reader that has to know about levels to open a page.
+     */
+    val title2: Boolean = false,
     /** A footnote-sized line. */
     val small: Boolean = false,
     /** A bulleted line (the dot is drawn, never typed). */
@@ -366,6 +376,7 @@ object PersonalDocCodec {
                 if (run.strike) r.addProperty("k", true)
                 if (run.quote) r.addProperty("q", true)
                 if (run.title) r.addProperty("h", true)
+                if (run.title2) r.addProperty("h2", true)
                 if (run.small) r.addProperty("m", true)
                 if (run.bullet) r.addProperty("l", true)
                 if (run.checkbox) r.addProperty("c", true)
@@ -404,6 +415,7 @@ object PersonalDocCodec {
                     strike = r.flag("k"),
                     quote = r.flag("q"),
                     title = r.flag("h"),
+                    title2 = r.flag("h2"),
                     small = r.flag("m"),
                     bullet = r.flag("l"),
                     checkbox = r.flag("c"),

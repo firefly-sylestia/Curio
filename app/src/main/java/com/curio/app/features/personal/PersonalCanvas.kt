@@ -203,6 +203,18 @@ internal val QUOTE_VIEW_SIZE = 15.sp
 private val TITLE_BODY_SIZE = 24.sp
 private val TITLE_BODY_LINE = 34.sp
 internal val TITLE_VIEW_SIZE = 22.sp
+/**
+ * v500 — HEADING II'S OWN SIZES, on both sides (see [FLAG_TITLE_2]).
+ *
+ * 24 / 22 is the page's title; a section under it is a step down and still
+ * plainly a heading (19 in the writing, 17.5 on the read page), so a page can
+ * say "this is the entry, these are its parts" without a second face or a
+ * weight that has to be compared to be seen.
+ */
+private val TITLE2_BODY_SIZE = 19.sp
+private val TITLE2_BODY_LINE = 26.sp
+internal val TITLE2_VIEW_SIZE = 17.5.sp
+internal val TITLE2_VIEW_LINE = 25.sp
 internal val TITLE_VIEW_LINE = 31.sp
 
 /**
@@ -382,7 +394,7 @@ internal fun personalFontFamilyOf(flags: Int): FontFamily? = when (fontKeyOf(fla
     "sans" -> GeomFontFamily
     "mono" -> SpaceMonoFontFamily
     "display" -> FrauncesFontFamily
-    else -> if (flags and FLAG_TITLE != 0) FrauncesFontFamily else null
+    else -> if (flags and (FLAG_TITLE or FLAG_TITLE_2) != 0) FrauncesFontFamily else null
 }
 
 // ── v392 ── CLICKABLE LINKS ──────────────────────────────────────────────
@@ -482,6 +494,43 @@ internal fun personalBlockCarries(text: String, mask: IntArray, flag: Int): Bool
 /** Kept as the quote's own name — everything else calls the general one. */
 internal fun personalBlockIsQuote(text: String, mask: IntArray): Boolean =
     personalBlockCarries(text, mask, FLAG_QUOTE)
+
+/**
+ * v500 — THE HEADING A BLOCK CARRIES, if any.
+ *
+ * [personalBlockCarries] asks whether the WHOLE block is a heading, which is the
+ * right question for "is this line set as a title" — and the wrong one for "does
+ * this page carry a heading here". Since v499 a heading can be one SENTENCE
+ * inside a paragraph, so a page could be full of headings the pinned bar never
+ * saw. This answers the second question: the first stretching of heading
+ * characters in the block, at whatever level (see [FLAG_TITLE_2]).
+ */
+internal fun personalHeadingRange(text: String, mask: IntArray): IntRange? {
+    var from = -1
+    for (i in text.indices) {
+        if (titleLevelOf(mask.getOrElse(i) { 0 }) != 0) {
+            from = i
+            break
+        }
+    }
+    if (from < 0) return null
+    val level = titleLevelOf(mask.getOrElse(from) { 0 })
+    var to = from
+    while (to < text.length && titleLevelOf(mask.getOrElse(to) { 0 }) == level) to++
+    return from until to
+}
+
+/** The heading's own words, or "" when the block carries no heading at all. */
+internal fun personalHeadingLabel(text: String, mask: IntArray): String =
+    personalHeadingRange(text, mask)
+        ?.let { text.substring(it.first, it.last + 1).trim() }
+        .orEmpty()
+
+/** Its level: 1 for Heading I, 2 for Heading II, 0 for content (see [FLAG_TITLE_2]). */
+internal fun personalHeadingLevel(text: String, mask: IntArray): Int =
+    personalHeadingRange(text, mask)
+        ?.let { titleLevelOf(mask.getOrElse(it.first) { 0 }) }
+        ?: 0
 
 /**
  * v389 — how far along a checklist is: `done to total`, counting only rows with
@@ -760,6 +809,8 @@ internal fun personalAnnotated(
     quoteInk: Color,
     quoteSize: TextUnit,
     titleSize: TextUnit = TextUnit.Unspecified,
+    /** v500 — Heading II's size, on the same terms as [titleSize]. */
+    title2Size: TextUnit = TextUnit.Unspecified,
     smallSize: TextUnit = TextUnit.Unspecified,
     /**
      * v427 — THE BAR'S LETTER REACH, WASHED UNDER THE WORDS.
@@ -801,13 +852,16 @@ internal fun personalAnnotated(
                     fontSize = when {
                         flags and FLAG_QUOTE != 0 -> quoteSize
                         flags and FLAG_TITLE != 0 -> titleSize
+                        // v500 — the section heading, a step under the page's
+                        // own title and still the display serif.
+                        flags and FLAG_TITLE_2 != 0 -> title2Size
                         flags and FLAG_SMALL != 0 -> smallSize
                         else -> TextUnit.Unspecified
                     },
                     fontFamily = personalFontFamilyOf(flags),
                     fontWeight = when {
                         flags and FLAG_BOLD != 0 -> FontWeight.Bold
-                        flags and FLAG_TITLE != 0 -> FontWeight.SemiBold
+                        flags and (FLAG_TITLE or FLAG_TITLE_2) != 0 -> FontWeight.SemiBold
                         else -> null
                     },
                     fontStyle = if (flags and FLAG_ITALIC != 0) FontStyle.Italic else null,
@@ -2543,7 +2597,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // The line goes on its own block first: a heading is ONE line of the
         // page, and the block is the unit every view reads a heading from (the
         // read-only page's display serif, the book review's pinned chapter).
-        if (flag == FLAG_TITLE || flag == FLAG_SMALL) {
+        if (flag == FLAG_TITLE || flag == FLAG_TITLE_2 || flag == FLAG_SMALL) {
             if (held != null && !held.collapsed) {
                 // The words the member actually chose: exactly those, as ever.
                 val chosen = mask(id)
@@ -2587,8 +2641,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // heading. The toggle check uses the same range, so a second press
             // on a sentence-heading takes it off again.
             val caretAt = caretIn(target).coerceIn(0, lineText.length)
-            val from = if (flag == FLAG_TITLE) sentenceStart(lineText, caretAt) else 0
-            val to = if (flag == FLAG_TITLE) sentenceEnd(lineText, caretAt) else lineText.length
+            // v500 — both heading levels are sentences; a small note still
+            // covers its whole line.
+            val isHeading = flag == FLAG_TITLE || flag == FLAG_TITLE_2
+            val from = if (isHeading) sentenceStart(lineText, caretAt) else 0
+            val to = if (isHeading) sentenceEnd(lineText, caretAt) else lineText.length
             val on = !maskCovers(lineMask, from, to, flag)
             masks[target] = maskApply(lineMask, from, to, flag, on)
             armed = armed and flag.inv()
@@ -4383,6 +4440,12 @@ private fun PersonalTextBlock(
     // A line that IS a title (or a small note) is set by the BLOCK, so a
     // heading really is bigger writing and not just a bolder word.
     val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+    // v500 — and its smaller sibling: Heading II is a section under
+    // the page's own title (see FLAG_TITLE_2).
+    val isTitle2 = personalBlockCarries(text, mask, FLAG_TITLE_2)
+    // v500 — the words the pinned bar and the contents list name this line by
+    // ("" when the block carries no heading).
+    val headingLabel = personalHeadingLabel(text, mask)
     // v402 — A LINE THAT STOPS BEING A TITLE STOPS BEING A PLACE.
     //
     // Taking the title flag off a line (or deleting the line) used to leave its
@@ -4391,11 +4454,18 @@ private fun PersonalTextBlock(
     // something random will show even when i deselect the title or remove it").
     // A blank label means "not a place anymore" — see LocalPersonalTitleReport.
     if (onTitlePosition != null) {
-        // Keyed on the ID as well as the flag: a line that leaves the page (or
-        // stops being a title) clears its OWN entry, and never the one a
-        // neighbour has since reported.
-        DisposableEffect(isTitle, id) {
-            onDispose { onTitlePosition?.invoke(id, "", 0f, 0f, true, 0f) }
+        // ⚠️ v500 — CLEARED BY FACTS, NEVER BY LEAVING THE SCREEN (a real bug).
+        //
+        // This was a DisposableEffect, so the entry was wiped the moment the
+        // block left composition — and a block in a recycled list leaves
+        // composition the instant it scrolls off the viewport, which is EXACTLY
+        // the moment a heading becomes pinnable (it has just passed the writing
+        // area's top edge). The entry was deleted before the pin could read it:
+        // the member's *"the floating heading it dont show many times"*. It is
+        // cleared when the LINE STOPS BEING A HEADING now, and the page clears
+        // the ids that leave it (PersonalPage's `retainAll` on `doc.blocks`).
+        LaunchedEffect(headingLabel) {
+            if (headingLabel.isBlank()) onTitlePosition(id, "", 0f, 0f, true, 0f)
         }
     }
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
@@ -4419,6 +4489,7 @@ private fun PersonalTextBlock(
         (text.isBlank() && state.keepsChecklistRows && state.checklistRowWaits(id))
     val lineHeight = when {
         isTitle -> TITLE_BODY_LINE
+        isTitle2 -> TITLE2_BODY_LINE
         isSmall -> SMALL_BODY_LINE
         else -> rowBody.sp
     }
@@ -4446,6 +4517,7 @@ private fun PersonalTextBlock(
         annotatedString = personalAnnotated(
             text, mask, ink, quoteInk, QUOTE_BODY_SIZE,
             titleSize = if (isTitle) TextUnit.Unspecified else TITLE_BODY_SIZE,
+            title2Size = if (isTitle2) TextUnit.Unspecified else TITLE2_BODY_SIZE,
             smallSize = if (isSmall) TextUnit.Unspecified else SMALL_BODY_SIZE,
             // The bar's own reach — the letters it is holding, washed in the
             // same colour the page washes a whole picked row with (null on every
@@ -4467,6 +4539,15 @@ private fun PersonalTextBlock(
             fontFamily = FrauncesFontFamily,
             fontSize = TITLE_BODY_SIZE,
             lineHeight = TITLE_BODY_LINE,
+            fontWeight = FontWeight.SemiBold,
+            color = ink,
+            textAlign = alignOf
+        )
+        // v500 — a section heading: the same face and weight, one step down.
+        isTitle2 -> TextStyle(
+            fontFamily = FrauncesFontFamily,
+            fontSize = TITLE2_BODY_SIZE,
+            lineHeight = TITLE2_BODY_LINE,
             fontWeight = FontWeight.SemiBold,
             color = ink,
             textAlign = alignOf
@@ -4495,7 +4576,7 @@ private fun PersonalTextBlock(
             .then(
                 // A TITLE line reports where it is, so a page whose head names
                 // the chapter can follow the writing (see onTitlePosition).
-                if (isTitle && onTitlePosition != null) {
+                if (headingLabel.isNotBlank() && onTitlePosition != null) {
                     Modifier.onGloballyPositioned { coordinates ->
                         val bounds = coordinates.boundsInWindow()
                         // The scroll sent here is 0 on purpose: the WRITING
@@ -4503,7 +4584,12 @@ private fun PersonalTextBlock(
                         // reporter reads it (see LocalPersonalTitleReport). Only
                         // a read view, whose scroll nobody else can see, sends
                         // one across.
-                        onTitlePosition(id, text, bounds.top, bounds.bottom, true, 0f)
+                        // v500 — and the LABEL is the heading's own words, not
+                        // the whole block: a sentence-heading inside a paragraph
+                        // names the sentence, which is what the bar should say.
+                        onTitlePosition(
+                            id, headingLabel, bounds.top, bounds.bottom, true, 0f
+                        )
                     }
                 } else Modifier
             )
@@ -5432,14 +5518,26 @@ internal fun PersonalDocView(
             val mask = runsToMask(text.length, block.runs)
             val isQuote = personalBlockIsQuote(text, mask)
             val isTitle = personalBlockCarries(text, mask, FLAG_TITLE)
+    // v500 — and its smaller sibling: Heading II is a section under
+    // the page's own title (see FLAG_TITLE_2).
+    val isTitle2 = personalBlockCarries(text, mask, FLAG_TITLE_2)
+    // v500 — the words the pinned bar and the contents list name this line by
+    // ("" when the block carries no heading).
+    val headingLabel = personalHeadingLabel(text, mask)
             // v402 — A LINE THAT STOPS BEING A TITLE STOPS BEING A PLACE (see
             // LocalPersonalTitleReport). Taking the flag off a line — or losing
             // the line itself — clears its entry, so the pinned bar can never go
             // on naming a heading that is not there. The side is FALSE: this is
             // the reading half of the page.
             if (titleReport != null) {
-                DisposableEffect(isTitle, block.id) {
-                    onDispose { titleReport?.invoke(block.id, "", 0f, 0f, false, 0f) }
+                // v500 — cleared by facts, never by leaving the screen: see the
+                // editor block's own note (a recycled block used to wipe its
+                // entry the moment it scrolled out of the viewport, which is the
+                // moment it became pinnable).
+                LaunchedEffect(headingLabel) {
+                    if (headingLabel.isBlank()) {
+                        titleReport(block.id, "", 0f, 0f, false, 0f)
+                    }
                 }
             }
             val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
@@ -5543,12 +5641,12 @@ internal fun PersonalDocView(
                     // page: it reports its own place so the head can say
                     // which chapter is being read (see onTitlePosition).
                     .then(
-                        if (isTitle && titleReport != null) {
+                        if (headingLabel.isNotBlank() && titleReport != null) {
                             Modifier.onGloballyPositioned { coordinates ->
                                 val bounds = coordinates.boundsInWindow()
                                 titleReport(
                                     block.id,
-                                    text,
+                                    headingLabel,
                                     bounds.top,
                                     bounds.bottom,
                                     false,
@@ -5561,6 +5659,7 @@ internal fun PersonalDocView(
                 val baseText = personalAnnotated(
                     text, mask, ink, quoteInk, QUOTE_VIEW_SIZE,
                     titleSize = if (isTitle) TextUnit.Unspecified else TITLE_VIEW_SIZE,
+                    title2Size = if (isTitle2) TextUnit.Unspecified else TITLE2_VIEW_SIZE,
                     smallSize = if (isSmall) TextUnit.Unspecified else SMALL_VIEW_SIZE
                 )
                 // v392 — CLICKABLE LINKS: URLs in the read-only view
@@ -5575,6 +5674,14 @@ internal fun PersonalDocView(
                     text = linkText,
                     onTextLayout = { linkLayout = it },
                     style = when {
+                        isTitle2 -> TextStyle(
+                            fontFamily = FrauncesFontFamily,
+                            fontSize = TITLE2_VIEW_SIZE,
+                            lineHeight = TITLE2_VIEW_LINE,
+                            fontWeight = FontWeight.SemiBold,
+                            color = ink,
+                            textAlign = alignOf
+                        )
                         isTitle -> TextStyle(
                             fontFamily = FrauncesFontFamily,
                             fontSize = TITLE_VIEW_SIZE,
@@ -6032,6 +6139,9 @@ private fun clipHtmlFor(parts: List<Pair<String, IntArray>>): String {
 private fun clipOpenTags(bits: Int): String {
     val out = StringBuilder()
     if (bits and FLAG_TITLE != 0) out.append("<span style=\"font-size:1.3em\">")
+    // v500 — a section heading leaves a little smaller, so an exported page keeps
+    // the difference between the entry's own title and its parts.
+    else if (bits and FLAG_TITLE_2 != 0) out.append("<span style=\"font-size:1.15em\">")
     if (bits and FLAG_BOLD != 0) out.append("<b>")
     if (bits and FLAG_ITALIC != 0) out.append("<i>")
     if (bits and FLAG_UNDERLINE != 0) out.append("<u>")
@@ -6046,7 +6156,7 @@ private fun clipCloseTags(bits: Int): String {
     if (bits and FLAG_UNDERLINE != 0) out.append("</u>")
     if (bits and FLAG_ITALIC != 0) out.append("</i>")
     if (bits and FLAG_BOLD != 0) out.append("</b>")
-    if (bits and FLAG_TITLE != 0) out.append("</span>")
+    if (bits and (FLAG_TITLE or FLAG_TITLE_2) != 0) out.append("</span>")
     return out.toString()
 }
 
@@ -6812,13 +6922,44 @@ internal fun PersonalToolDock(
                     MarkerPenGlyph(pen = null)
                 }
             }
-  if (showJournalTools) PersonalToolButton(
-  label = "Large bold text",
+            // ── v500 — THE HEADING TOOL IS TWO TOOLS, AND THE NUMERALS ARE
+            //     THE POINT ────────────────────────────────────────────────
+            //
+            // The member: *"make it able to make that title as conetnt or
+            // heading by giving it more option"* and, asked how headings should
+            // work, **"heading sizes and numbering"**. So the one "Large bold
+            // text" button is now **I** and **II** — the page's own title, and a
+            // section under it (see [FLAG_TITLE_2]) — and the numeral each
+            // button WEARS is what the line it makes will read as, in the
+            // writing, in the eye view and in the contents list. **Content is
+            // the off state**: pressing the lit numeral again takes the heading
+            // off the line, which is exactly how every other tool in this dock
+            // already switches back.
+            if (showJournalTools) PersonalToolButton(
+                label = "Heading I",
                 active = active and FLAG_TITLE != 0,
                 accent = accentInk, ink = ink,
                 onClick = { state.toggle(FLAG_TITLE) }
             ) {
-                CurioIcon(CurioIcons.FormatText, null, size = 20.dp)
+                Text(
+                    "I",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+            if (showJournalTools) PersonalToolButton(
+                label = "Heading II",
+                active = active and FLAG_TITLE_2 != 0,
+                accent = accentInk, ink = ink,
+                onClick = { state.toggle(FLAG_TITLE_2) }
+            ) {
+                Text(
+                    "II",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
             PersonalToolButton(
                 label = "Todo checkbox",

@@ -35,11 +35,28 @@ internal const val FLAG_TITLE = 32
 internal const val FLAG_SMALL = 64
 internal const val FLAG_BULLET = 128
 internal const val FLAG_CHECKBOX = 256
+/**
+ * v500 — THE SECOND HEADING SIZE ([FLAG_TITLE] is the first).
+ *
+ * The member: *"for title format tool make it able to make that title as conetnt
+ * or heading by giving it more option"* and, asked how headings should work,
+ * **"heading sizes and numbering"**. So a line can be **Heading I** (the entry's
+ * own title, what [FLAG_TITLE] has always meant), **Heading II** (a section under
+ * it, this bit) or **Content** (neither).
+ *
+ * ⚠️ THE BIT IS 0x4000 AND THAT IS NOT ARBITRARY: the plain flags stop at 256
+ * (bit 8), the marker pen owns bits 9–11 (`HIGHLIGHT_BITS`) and the face owns
+ * bits 12–13 (`FONT_BITS`), so bit 14 is the first free one. A bit inside those
+ * masks would be read as a pen colour or a font by [maskToRuns] and would
+ * corrupt a member's note; anything above needs a new field on [PersonalRun]
+ * anyway, so the next free bit is the whole budget.
+ */
+internal const val FLAG_TITLE_2 = 0x4000
 
 /** Every style bit, in toolbar order. */
 internal val ALL_FLAGS = intArrayOf(
     FLAG_BOLD, FLAG_ITALIC, FLAG_UNDERLINE, FLAG_STRIKE, FLAG_QUOTE,
-    FLAG_TITLE, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX
+    FLAG_TITLE, FLAG_TITLE_2, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX
 )
 
 /**
@@ -63,7 +80,27 @@ internal val ALL_FLAGS_MASK = ALL_FLAGS.fold(0) { mask, flag -> mask or flag }
  * than carrying on inside it — a heading is one line, and a list item is one
  * row.
  */
-internal val LINE_FLAGS = intArrayOf(FLAG_TITLE, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX)
+internal val LINE_FLAGS = intArrayOf(FLAG_TITLE, FLAG_TITLE_2, FLAG_SMALL, FLAG_BULLET, FLAG_CHECKBOX)
+
+/**
+ * v500 — WHAT HEADING THIS MASK WEARS: 1 for Heading I, 2 for Heading II, 0 for
+ * content.
+ *
+ * ONE reader for the whole app (the renderers, the numbering, the contents list)
+ * so the two bits can never disagree about what a line is.
+ */
+internal fun titleLevelOf(mask: Int): Int = when {
+    mask and FLAG_TITLE != 0 -> 1
+    mask and FLAG_TITLE_2 != 0 -> 2
+    else -> 0
+}
+
+/** The flag a heading LEVEL is stored as (0 for content). */
+internal fun titleFlagFor(level: Int): Int = when (level) {
+    1 -> FLAG_TITLE
+    2 -> FLAG_TITLE_2
+    else -> 0
+}
 
 /** The same bits as a mask — what a line with nothing written on it can still
  *  be ARMED as. */
@@ -184,6 +221,8 @@ internal fun runsToMask(textLength: Int, runs: List<PersonalRun>): IntArray {
         if (run.small) flags = flags or FLAG_SMALL
         if (run.bullet) flags = flags or FLAG_BULLET
         if (run.checkbox) flags = flags or FLAG_CHECKBOX
+        // v500 — the second heading size rides the same bridge as the first.
+        if (run.title2) flags = flags or FLAG_TITLE_2
         if (flags == 0) return@forEach
         for (i in start until end) mask[i] = mask[i] or flags
     }
@@ -213,6 +252,7 @@ internal fun maskToRuns(mask: IntArray): List<PersonalRun> {
                 strike = flags and FLAG_STRIKE != 0,
                 quote = flags and FLAG_QUOTE != 0,
                 title = flags and FLAG_TITLE != 0,
+                title2 = flags and FLAG_TITLE_2 != 0,
                 small = flags and FLAG_SMALL != 0,
                 bullet = flags and FLAG_BULLET != 0,
                 checkbox = flags and FLAG_CHECKBOX != 0,
