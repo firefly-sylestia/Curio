@@ -350,13 +350,10 @@ fun HomeScreen(navController: NavController) {
     // Unpin-topic confirmation �� set when the user taps unpin on a pinned
     // topic row; the dialog confirms before the pin is dropped.
     var pendingUnpin by remember { mutableStateOf<PinnedTopic?>(null) }
-    // v489 — THE RETURN's answer sheet. The due recall itself is never copied
-    // into a local: the hero and this sheet both read [CurioRecall.dueState],
-    // which is Compose state, so keeping one answers the other instantly.
-    var recallOpen by remember { mutableStateOf(false) }
-    // v496 — and the ladder's own sheet, for the days nothing is due: the
-    // capsule's quiet state is a door, not a dead pill.
-    var recallAheadOpen by remember { mutableStateOf(false) }
+    // v502 — AND THE RETURN HAS NO SHEET ANY MORE: its own screen holds the
+    // answer AND the whole ladder (see RecallScreen), so Home keeps no state for
+    // it at all — the line under the hero is a navigation, and the page reads
+    // [CurioRecall.dueState] for itself.
     // v493 — the capsule that is covering the screen right now. It is a LOCAL,
     // not a live read of [CurioTimeCapsules.dueState]: breaking the seal writes
     // `openedAt`, the next letter becomes due in that same instant, and reading
@@ -1065,12 +1062,13 @@ fun HomeScreen(navController: NavController) {
                                 .firstOrNull()
                                 ?.let { CurioRecall.aheadText(it.dueAt) },
                             onOpen = {
-                                // Due → the answering sheet. Not due → the ladder
-                                // itself, because a member who presses this wants
-                                // to know WHEN, and only one of the two states
-                                // has an answer to give them.
-                                if (CurioRecall.dueState != null) recallOpen = true
-                                else recallAheadOpen = true
+                                // v502 — ONE DOOR: the Return's screen holds both
+                                // halves, so this goes to the same place whether
+                                // or not something is due (and a member who
+                                // presses it gets the ladder either way).
+                                navController.navigate(CurioRoutes.RECALL) {
+                                    launchSingleTop = true
+                                }
                             }
                         )
                     }
@@ -1884,36 +1882,13 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
-    // ── v489 — the Return's answer sheet ──
-    // Driven by the DUE record rather than a captured copy: keeping an answer
-    // moves the ladder on, `dueState` becomes the next waiting topic (or null),
-    // and this sheet closes itself. Two writes happen here and nowhere else —
-    // the XP award and the ladder step — because a composable must never score.
-    val dueRecallForSheet = CurioRecall.dueState
-    if (recallOpen && dueRecallForSheet != null) {
-        RecallSheet(
-            topicName = dueRecallForSheet.topicName,
-            agoText = CurioRecall.agoText(dueRecallForSheet.firstCompletedAt),
-            previousAnswer = dueRecallForSheet.answer,
-            onDismiss = { recallOpen = false },
-            onKeep = { text ->
-                CurioQuests.awardXpOnly(context, CurioRecall.XP_PER_RECALL)
-                CurioRecall.answer(context, dueRecallForSheet, text)
-                recallOpen = false
-            }
-        )
-    }
-
-    // ── v496 — the Return's ladder, for the days nothing is due ──
-    // The capsule's quiet state opens this instead of doing nothing: it is where
-    // a member can SEE that the topic they finished yesterday is queued for
-    // tomorrow, which is the whole answer to "it doesn't show up".
-    if (recallAheadOpen) {
-        RecallAheadSheet(
-            upcoming = CurioRecall.upcomingState,
-            onDismiss = { recallAheadOpen = false }
-        )
-    }
+    // ── v502 — THE RETURN'S SHEETS ARE GONE, REPLACED BY ITS SCREEN ──
+    // `RecallSheet` and `RecallAheadSheet` (and the file the first one lived in)
+    // are deleted: two sheets for one subject, with the ladder behind a different
+    // door from the answer, are one page now — see [com.curio.app.features.home
+    // .RecallScreen], which Home opens through [CurioRoutes.RECALL]. The two
+    // writes a return needs (the award and the ladder step) live in that screen,
+    // exactly as they lived here, because a composable must never score.
 
     // ── v493 — the time capsule's arrival ──
     //

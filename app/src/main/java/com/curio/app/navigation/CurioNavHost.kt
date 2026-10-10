@@ -501,7 +501,8 @@ fun CurioNavHost(
     // shares, and that page has its own (different) bottom treatment. So the
     // dictionary is named by its full route, and it clears the gesture bar
     // itself — its own `navigationBarsPadding` (see ReaderDictionaryPage).
-    val fullBleedBottomRoutes = setOf(CurioRoutes.READER_DICTIONARY, CurioRoutes.TIME_CAPSULE)
+    val fullBleedBottomRoutes =
+        setOf(CurioRoutes.READER_DICTIONARY, CurioRoutes.TIME_CAPSULE, CurioRoutes.RECALL)
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -1434,6 +1435,15 @@ composable(CurioRoutes.COMMUNITY) {
             // edge and clears the gesture bar itself (see [fullBleedBottomRoutes]).
             composable(CurioRoutes.TIME_CAPSULE) {
                 com.curio.app.features.timecapsule.TimeCapsuleScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            // v502 — the Return's own screen: the topic to remember, the words
+            // from last time, and the whole ladder under them. It paints its own
+            // background edge to edge and clears the gesture bar itself (see
+            // [fullBleedBottomRoutes]).
+            composable(CurioRoutes.RECALL) {
+                com.curio.app.features.home.RecallScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

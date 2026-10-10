@@ -424,6 +424,15 @@ object CurioRoutes {
      * `TimeCapsuleScreen`.
      */
     const val TIME_CAPSULE = "time-capsule"
+
+    /**
+     * v502 — THE RETURN'S OWN SCREEN (`RecallScreen`).
+     *
+     * The Return was answered in a bottom sheet and the days with nothing due
+     * opened a second sheet for the ladder (see [RecallScreen]); the member asked
+     * for a screen instead, and one page now holds both halves.
+     */
+    const val RECALL = "recall"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).

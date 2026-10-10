@@ -253,6 +253,47 @@ internal val CAPTION_VIEW_SIZE = 13.sp
 internal val VIEW_ROW_GAP = 8.dp
 
 /**
+ * HOW A HEADING ANNOUNCES ITSELF (v502).
+ *
+ * The member: *"title and conetnt in journal page should have their own
+ * distintion with maybe line s space with color code or indicator something"*.
+ * The page already knew a heading from prose (see [FLAG_TITLE], [FLAG_TITLE_2]) —
+ * and then drew the two the same size as each other and one size away from the
+ * words under them, which is a distinction only its author can see. So a heading
+ * now carries two facts about itself, in BOTH halves of the page (the pen and
+ * the eye must agree — see the drawing passes):
+ *
+ *  · **AIR** — a title stands off the words above it by [TITLE_LEAD], a section by
+ *    [TITLE2_LEAD]. Structure is a thing you can see at a glance down the page.
+ *  · **A RULE** — a hairline under the line, in the page's own accent: firm and
+ *    half-strength for the page's title, a whisper (a third of the thickness and
+ *    of the ink) for a section, so the two levels never read as the same mark.
+ *
+ * The rule is drawn INSIDE the line's own box at its foot, so it grows and moves
+ * with the writing, and the read view and the PDF-beside-it measure the same
+ * numbers wherever they ask for them.
+ */
+internal val TITLE_LEAD = 22.dp
+internal val TITLE2_LEAD = 14.dp
+internal val TITLE_RULE = 2.dp
+
+/**
+ * THE RULE UNDER A HEADING — drawn at the foot of the heading's own box, so it
+ * sits under the last line of a heading that wraps, and a level-1 heading is
+ * always a firmer mark than a level-2 one. A level of 0 (prose) draws nothing.
+ */
+private fun DrawScope.drawHeadingRule(level: Int, accent: Color) {
+    if (level <= 0) return
+    val thickness = if (level == 1) TITLE_RULE.toPx() else TITLE_RULE.toPx() * 0.6f
+    drawRoundRect(
+        color = if (level == 1) accent.copy(alpha = 0.55f) else accent.copy(alpha = 0.22f),
+        topLeft = Offset(0f, size.height - thickness),
+        size = Size(size.width, thickness),
+        cornerRadius = CornerRadius(thickness / 2f)
+    )
+}
+
+/**
  * THE QUOTE'S OWN FRAME — the rule down its side, and how far past the rule the
  * quoted words begin (the panel the editor draws and the panel the read view
  * draws are ONE drawing, and they ask for both numbers here).
@@ -4470,6 +4511,15 @@ private fun PersonalTextBlock(
     }
     val isSmall = personalBlockCarries(text, mask, FLAG_SMALL)
     val isBullet = personalBlockCarries(text, mask, FLAG_BULLET)
+    // v502 — WHICH LEVEL THIS LINE IS, and the ink a heading's rule is drawn in
+    // (see [TITLE_LEAD]): the pen draws the same air above a heading and the same
+    // rule under it as the eye does, from these two facts.
+    val headingLevel = when {
+        isTitle -> 1
+        isTitle2 -> 2
+        else -> 0
+    }
+    val headingAccent = personalAccentInk()
     // v393 — a row with no words on the list page still draws its box: the row's
     // flag lives on its characters, and an emptied row has none — but a to-do row
     // without a box reads as a row that lost its place in the list, not as a row
@@ -4573,6 +4623,22 @@ private fun PersonalTextBlock(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            // v502 — AND A HEADING IS SET APART HERE TOO (see [TITLE_LEAD]): the
+            // pen and the eye draw one page, so the air above a heading and the
+            // rule under it belong to both. The heading's own level is what the
+            // rule is drawn from, so the two levels are never one mark.
+            .padding(
+                top = when {
+                    headingLevel == 1 -> TITLE_LEAD
+                    headingLevel == 2 -> TITLE2_LEAD
+                    else -> 0.dp
+                }
+            )
+            .then(
+                if (headingLevel > 0) {
+                    Modifier.drawBehind { drawHeadingRule(headingLevel, headingAccent) }
+                } else Modifier
+            )
             .then(
                 // A TITLE line reports where it is, so a page whose head names
                 // the chapter can follow the writing (see onTitlePosition).
@@ -5568,9 +5634,36 @@ internal fun PersonalDocView(
             val markerOnFill = MaterialTheme.colorScheme.surface
             val markerOutline = ink.copy(alpha = 0.42f)
             val alignOf = block.align.toTextAlign()
+            // A blank row keeps its line's own height in the eye (see below), and
+            // a heading draws the air and the rule it does in the pen — the same
+            // numbers, from the same constants, because a page read back has to
+            // look like the page that was written.
+            val eyeLine = when {
+                isTitle2 -> TITLE2_VIEW_LINE
+                isTitle -> TITLE_VIEW_LINE
+                isSmall -> SMALL_VIEW_LINE
+                else -> lineHeight
+            }
+            val headingLevel = when {
+                isTitle -> 1
+                isTitle2 -> 2
+                else -> 0
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(
+                        top = when (headingLevel) {
+                            1 -> TITLE_LEAD
+                            2 -> TITLE2_LEAD
+                            else -> 0.dp
+                        }
+                    )
+                    .then(
+                        if (headingLevel > 0) {
+                            Modifier.drawBehind { drawHeadingRule(headingLevel, markerFill) }
+                        } else Modifier
+                    )
                     .then(
                         when {
                             isQuote -> Modifier
@@ -5716,6 +5809,28 @@ internal fun PersonalDocView(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
+                        // ── v502 — A BLANK ROW KEEPS ITS OWN LINE ─────────────
+                        //
+                        // An EMPTY string draws NO line box of its own, so a row
+                        // the member left blank (the air between two paragraphs, a
+                        // gap they made on purpose) was drawn at nothing but the
+                        // column's 8dp gap — the page read back came out TIGHTER
+                        // than the page written, and two paragraphs that were a
+                        // line apart in the pen sat almost touching in the eye.
+                        // (Fixed text pasted or split into its own empty rows is
+                        // where it is most visible: a paste cuts blank lines into
+                        // blocks, and every one of them collapsed.)
+                        //
+                        // The floor is the same line height the style below asks
+                        // for, so an empty row measures exactly what a written row
+                        // of the same kind measures.
+                        .then(
+                            if (text.isEmpty()) {
+                                Modifier.heightIn(
+                                    min = with(LocalDensity.current) { eyeLine.toDp() }
+                                )
+                            } else Modifier
+                        )
                         .pointerInput(linkText, tapToEdit) {
                             // v389g — the detector that owns the words also owns the
                             // double tap, so the pen answers over text exactly as it

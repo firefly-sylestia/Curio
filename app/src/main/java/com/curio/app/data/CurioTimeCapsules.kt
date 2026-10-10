@@ -91,7 +91,27 @@ object CurioTimeCapsules {
          */
         val spanLabel: String,
         /** When it was opened (0 = still sealed). */
-        val openedAt: Long = 0L
+        val openedAt: Long = 0L,
+        /**
+         * v502 — A PICTURE SEALED WITH THE LETTER, as a persisted content URI
+         * ("" = none). The member: *"and your letter place is bad too and it
+         * doesnt even have any image or voive note option"*.
+         *
+         * The URI is the one the picker handed back with a PERSISTABLE grant
+         * taken on it (the same pattern the journal's prints use), so it still
+         * resolves months later — a capsule is read after the app has been
+         * restarted a hundred times, and a temporary grant would have expired.
+         */
+        val photo: String = "",
+        /**
+         * v502 — THE MEMBER'S OWN VOICE, sealed with the letter: a path in the
+         * app's own audio store (see AudioStorageManager), with the facts the
+         * wave is drawn from ([voiceBars], [voiceSeconds]) kept beside it so the
+         * note renders and plays without decoding anything.
+         */
+        val voice: String = "",
+        val voiceSeconds: Int = 0,
+        val voiceBars: String = ""
     ) {
         val sealed: Boolean get() = openedAt == 0L
     }
@@ -139,7 +159,14 @@ object CurioTimeCapsules {
                     sealedAt = o.optLong("sealedAt"),
                     openAt = o.optLong("openAt"),
                     spanLabel = o.optString("span"),
-                    openedAt = o.optLong("openedAt")
+                    openedAt = o.optLong("openedAt"),
+                    // v502 — a capsule sealed before the letter could carry a
+                    // picture or a voice simply has none: the fields are OPTIONAL
+                    // in the record, so an old letter still reads.
+                    photo = o.optString("photo"),
+                    voice = o.optString("voice"),
+                    voiceSeconds = o.optInt("voiceSeconds"),
+                    voiceBars = o.optString("voiceBars")
                 )
             }
         } catch (_: Exception) {
@@ -160,6 +187,10 @@ object CurioTimeCapsules {
                     .put("openAt", c.openAt)
                     .put("span", c.spanLabel)
                     .put("openedAt", c.openedAt)
+                    .put("photo", c.photo)
+                    .put("voice", c.voice)
+                    .put("voiceSeconds", c.voiceSeconds)
+                    .put("voiceBars", c.voiceBars)
             )
         }
         prefs(context).edit().putString(KEY_ITEMS, arr.toString()).apply()
@@ -183,9 +214,27 @@ object CurioTimeCapsules {
      * — silently moving the day the member chose would be worse than saying no, so
      * the PAGE is what keeps its clock legal (see `TimeCapsuleScreen`).
      */
-    fun sealAt(context: Context, message: String, openAt: Long, label: String): Capsule? {
+    fun sealAt(
+        context: Context,
+        message: String,
+        openAt: Long,
+        label: String,
+        /**
+         * v502 — WHAT THE LETTER CARRIES BESIDES WORDS: a picture (a persisted
+         * content URI) and a voice note (a path in the app's own audio store).
+         * Both are optional, and both are sealed WITH the letter — the store
+         * holds them, so nothing on the writing page has to survive the screen.
+         */
+        photo: String = "",
+        voice: String = "",
+        voiceSeconds: Int = 0,
+        voiceBars: String = ""
+    ): Capsule? {
         val text = message.trim()
-        if (text.isBlank()) return null
+        // A letter needs SOMETHING in it. Words are the ordinary something, but a
+        // picture the member chose and a recording of their own voice are a letter
+        // too — refusing those would be the store second-guessing the page.
+        if (text.isBlank() && photo.isBlank() && voice.isBlank()) return null
         val now = System.currentTimeMillis()
         if (openAt <= now + MIN_LEAD_MS) return null
         val capsule = Capsule(
@@ -193,7 +242,11 @@ object CurioTimeCapsules {
             message = text,
             sealedAt = now,
             openAt = openAt,
-            spanLabel = label
+            spanLabel = label,
+            photo = photo,
+            voice = voice,
+            voiceSeconds = voiceSeconds,
+            voiceBars = voiceBars
         )
         val list = read(context)
         list.add(capsule)

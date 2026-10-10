@@ -1,15 +1,21 @@
 package com.curio.app.features.timecapsule
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -39,6 +46,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +61,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -66,16 +75,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CurioTimeCapsules
+import com.curio.app.data.PersonalAudioBars
+import com.curio.app.features.capture.AudioRecorder
+import com.curio.app.features.personal.PersonalPagePhoto
+import com.curio.app.features.personal.PersonalVoiceBar
+import com.curio.app.features.personal.PersonalVoiceRecorderCapsule
+import com.curio.app.features.personal.PersonalVoiceSession
+import com.curio.app.features.personal.appPermissionSettingsIntent
+import com.curio.app.features.personal.rememberRecordPermission
+import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.PixelFontFamily
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -97,6 +120,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
 import java.util.Calendar
 import java.util.TimeZone
@@ -155,6 +179,135 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     // working"). The refusal is written here and drawn under the button.
     var sealNote by remember { mutableStateOf("") }
     var nowTick by remember { mutableIntStateOf(0) }
+
+    // ── v502 — WHAT THE LETTER CARRIES BESIDES WORDS ─────────────────────────
+    //
+    // The member: *"and your letter place is bad too and it doesnt even have any
+    // image or voive note option"*. A capsule is a letter for a later day, and a
+    // letter can hold a picture and the writer's own voice — both are sealed WITH
+    // it (see [CurioTimeCapsules.sealAt]) and both come back out on the day the
+    // words do.
+    var photo by remember { mutableStateOf("") }
+    var voicePath by remember { mutableStateOf("") }
+    var voiceSeconds by remember { mutableIntStateOf(0) }
+    var voiceBars by remember { mutableStateOf("") }
+    // The live recording is owned HERE rather than through the journal's app-wide
+    // recording singleton: a capsule is not a journal note, and taking that state
+    // over would put a "still recording" pill on every other screen offering to
+    // return to a note that does not exist.
+    var recorder by remember { mutableStateOf<PersonalVoiceSession?>(null) }
+    var recordIssue by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    // The picture door. The grant taken here is PERSISTABLE on purpose: this URI
+    // is read again on the day the capsule lands, long after the picker's own
+    // grant would have expired (the journal's prints use the same pattern).
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris ->
+        val uri = uris.firstOrNull() ?: return@rememberLauncherForActivityResult
+        runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+        photo = uri.toString()
+        sealNote = ""
+        recordIssue = ""
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    }
+
+    val askMic = rememberRecordPermission(
+        onGranted = {
+            val fresh = AudioRecorder(context.applicationContext)
+            if (runCatching { fresh.start() }.isSuccess) {
+                recorder = PersonalVoiceSession(
+                    noteId = "capsule",
+                    returnRoute = CurioRoutes.TIME_CAPSULE,
+                    recorder = fresh
+                )
+                recordIssue = ""
+                sealNote = ""
+            } else {
+                runCatching { fresh.release() }
+                recordIssue = "The microphone is busy or unavailable. Try again in a moment."
+            }
+        },
+        onDenied = {
+            recordIssue =
+                "Curio needs the microphone for a voice note. Android's own settings page for Curio is where that can be allowed."
+        }
+    )
+
+    /**
+     * KEEP THE RECORDING: the cache file the recorder wrote is copied into the
+     * app's own audio store and its waveform extracted ONCE — the same two things
+     * the journal does with a voice note (see `PersonalVoiceRecording.keep`), so a
+     * capsule's recording is a first-class recording rather than a cache file with
+     * a path in it. A copy also goes into the device's own music library under
+     * `Your Journal Voices`, so an uninstall cannot take the member's voice away.
+     */
+    fun keepRecording(live: PersonalVoiceSession) {
+        recorder = null
+        scope.launch {
+            val cache = runCatching { live.stop() }.getOrNull()
+            if (cache == null) {
+                recordIssue = "That recording could not be saved."
+                return@launch
+            }
+            val secondsNow = live.seconds
+            val saved = withContext(Dispatchers.IO) {
+                val bars = WaveformExtractor.extract(cache, PersonalAudioBars.BAR_COUNT)
+                    ?: FloatArray(PersonalAudioBars.BAR_COUNT) { 0.08f }
+                val madeAt = System.currentTimeMillis()
+                val persisted = runCatching {
+                    AudioStorageManager.persistAudio(
+                        context.applicationContext,
+                        cache,
+                        "capsule_$madeAt"
+                    )
+                }.getOrNull()
+                val published = persisted?.let { result ->
+                    runCatching {
+                        AudioStorageManager.publishVoice(
+                            context.applicationContext,
+                            result.persistentPath,
+                            madeAt
+                        )
+                    }.getOrNull()
+                }
+                if (persisted != null) runCatching { File(cache).delete() }
+                if (published != null) {
+                    runCatching {
+                        AudioStorageManager.deleteAudio(
+                            context.applicationContext,
+                            persisted.persistentPath
+                        )
+                    }
+                }
+                Triple(
+                    published ?: persisted?.persistentPath ?: cache,
+                    secondsNow,
+                    PersonalAudioBars.encode(bars)
+                )
+            }
+            voicePath = saved.first
+            voiceSeconds = saved.second
+            voiceBars = saved.third
+            sealNote = ""
+            recordIssue = ""
+        }
+    }
+
+    // The recording's own clock and meter, ticked while it runs.
+    LaunchedEffect(recorder) {
+        val live = recorder ?: return@LaunchedEffect
+        while (true) {
+            live.tick()
+            delay(80)
+        }
+    }
 
     // The head's own count, and the app's one place that recomputes what is
     // waiting: the page can be the first thing opened after a return.
@@ -378,51 +531,153 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(Modifier.height(12.dp))
+
+                // ── AND WHAT THE LETTER CARRIES ───────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CapsuleAttachmentDoor(
+                        glyph = CurioIcons.Image,
+                        label = if (photo.isBlank()) "Add a picture" else "Change the picture",
+                        accent = accent,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // A capsule is one letter, so one picture: the member can
+                        // change it, and does not have to manage a gallery here.
+                        photoPicker.launch(arrayOf("image/*"))
+                    }
+                    CapsuleAttachmentDoor(
+                        glyph = CurioIcons.Mic,
+                        label = if (voicePath.isBlank()) "Add your voice" else "Record again",
+                        accent = accent,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        if (recorder == null) askMic()
+                        else recordIssue = "A recording is already running."
+                    }
+                }
+
+                if (photo.isNotBlank()) {
+                    Spacer(Modifier.height(10.dp))
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        PersonalPagePhoto(
+                            uri = photo,
+                            height = 190.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                        )
+                        CapsuleAttachmentRemove(
+                            label = "Remove the picture",
+                            accent = accent,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                        ) { photo = "" }
+                    }
+                }
+
+                if (recorder != null) {
+                    Spacer(Modifier.height(12.dp))
+                    PersonalVoiceRecorderCapsule(
+                        session = recorder!!,
+                        onKeep = { recorder?.let { keepRecording(it) } },
+                        onDiscard = {
+                            val live = recorder
+                            recorder = null
+                            runCatching { live?.discard() }
+                        }
+                    )
+                } else if (voicePath.isNotBlank()) {
+                    Spacer(Modifier.height(12.dp))
+                    PersonalVoiceBar(
+                        path = voicePath,
+                        seconds = voiceSeconds,
+                        bars = voiceBars,
+                        ink = scheme.onSurface,
+                        accent = accent,
+                        onRemove = {
+                            voicePath = ""
+                            voiceSeconds = 0
+                            voiceBars = ""
+                        }
+                    )
+                }
+
+                if (recordIssue.isNotBlank()) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        recordIssue,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = scheme.error,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // A permission refused for good is only given back on Android's
+                    // own page for this app (see [appPermissionSettingsIntent]).
+                    val micSettings = remember(context) { appPermissionSettingsIntent(context) }
+                    if (micSettings != null && recorder == null) {
+                        Spacer(Modifier.height(8.dp))
+                        CapsuleAttachmentDoor(
+                            glyph = CurioIcons.Settings,
+                            label = "Open Android's app settings",
+                            accent = accent,
+                            modifier = Modifier.fillMaxWidth()
+                        ) { runCatching { context.startActivity(micSettings) } }
+                    }
+                }
+
                 Spacer(Modifier.height(20.dp))
 
-                Button(
-                    onClick = {
+                // ── v502 — AND SEALING IT IS A GESTURE, NOT A TAP ──────
+                //
+                // The member: *"and the optio sea it it lands in 1 2month that
+                // option is bad make it like a way to user have to swipe to save"*.
+                // A button says "press me"; a letter that will be sealed away for
+                // months is not a button's job. The slug is DRAGGED along the
+                // track to its end and the seal lands there; released early it
+                // springs home and nothing is sealed, so a slip of the thumb
+                // cannot send a letter into next year.
+                val carriesSomething = message.isNotBlank() ||
+                    photo.isNotBlank() || voicePath.isNotBlank()
+                CapsuleSealSwipe(
+                    enabled = carriesSomething,
+                    accent = accent,
+                    onSeal = {
                         val sealed = CurioTimeCapsules.sealAt(
                             context = context,
                             message = message,
                             openAt = target,
-                            label = promise
+                            label = promise,
+                            photo = photo,
+                            voice = voicePath,
+                            voiceSeconds = voiceSeconds,
+                            voiceBars = voiceBars
                         )
                         if (sealed != null) {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             sealNote = ""
                             sealedCapsule = sealed
                         } else {
-                            // The store said no, so the page says why. A button that
-                            // silently does nothing is the bug the member reported.
-                            sealNote = if (message.isBlank()) {
-                                "Write a line first. A capsule needs something to carry."
+                            // The store said no, so the page says why. A control
+                            // that silently does nothing is the bug the member
+                            // reported.
+                            sealNote = if (!carriesSomething) {
+                                "A capsule needs something to carry. A line, a picture, or your voice."
                             } else {
                                 "That moment has already passed. Set the clock a little further on."
                             }
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
-                    },
-                    enabled = message.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(containerColor = accent),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    CurioIcon(CurioIcons.Lock, null, tint = scheme.onPrimary, size = 20.dp)
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = "Seal it",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    )
-                }
-                // WHY THE BUTTON IS NOT LIT, and why a seal was refused: one line,
+                    }
+                )
+                // WHY THE TRACK IS LOCKED, and why a seal was refused: one line,
                 // drawn only when it has something to say.
                 val note = sealNote.ifBlank {
-                    if (message.isBlank()) "Write a line and the seal lights up." else ""
+                    if (!carriesSomething) {
+                        "Add a line, a picture or a voice note, and the track unlocks."
+                    } else ""
                 }
                 if (note.isNotBlank()) {
                     Spacer(Modifier.height(10.dp))
@@ -1005,6 +1260,116 @@ private fun CapsuleCircleButton(
     }
 }
 
+/**
+ * SLIDE TO SEAL — the travelling confirm that sends a letter on its way.
+ *
+ * A track with a slug at its leading edge: the slug is DRAGGED to the far end and
+ * the seal lands there, with a tick as it comes unstuck and the app's own confirm
+ * thunk on the arrival. Dragged less than [SEAL_REACH] of the way, it springs home
+ * and NOTHING is sealed — which is the whole point of a travelling confirm over a
+ * button (a slip of the thumb cannot send a letter into next year by accident).
+ *
+ * The travel is a plain `mutableFloatStateOf` and the settling is
+ * `animateFloatAsState`: no `snapTo`/`animateTo` is ever called from the gesture
+ * callback (a gesture lambda is not a suspend context — the rule the tear-strip
+ * went red on once), so a released slug is the animation doing its own job.
+ */
+@Composable
+private fun CapsuleSealSwipe(
+    enabled: Boolean,
+    accent: Color,
+    onSeal: () -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    val haptics = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    var trackWidth by remember { mutableFloatStateOf(0f) }
+    var travelled by remember { mutableFloatStateOf(0f) }
+    var sealed by remember { mutableStateOf(false) }
+    val knob = 46.dp
+    val knobPx = with(density) { knob.toPx() }
+    val travel = (trackWidth - knobPx - 12f).coerceAtLeast(1f)
+    val settled by animateFloatAsState(
+        targetValue = travelled,
+        animationSpec = CurioMotion.Springs.Snappy,
+        label = "capsuleSealSwipe"
+    )
+    val progress = (settled / travel).coerceIn(0f, 1f)
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = lerp(scheme.surfaceContainerHighest, accent, 0.16f + progress * 0.44f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp)
+            .onSizeChanged { trackWidth = it.width.toFloat() }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                // The words step aside as the slug travels, so the thing reads as
+                // a track rather than as a label with a handle on it.
+                text = if (enabled) "Slide to seal" else "Add a line, a picture or your voice",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = lerp(scheme.onSurfaceVariant, Color.Transparent, progress * 0.9f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .padding(start = knob + 10.dp, end = knob + 10.dp)
+            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 6.dp)
+                    .offset(x = with(density) { settled.toDp() })
+                    .size(knob)
+                    .background(
+                        color = if (enabled) accent else scheme.surfaceContainerHigh,
+                        shape = RoundedCornerShape(11.dp)
+                    )
+                    .pointerInput(enabled, travel) {
+                        if (!enabled) return@pointerInput
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                if (travelled / travel < SEAL_REACH) travelled = 0f
+                            },
+                            onDragCancel = {
+                                if (travelled / travel < SEAL_REACH) travelled = 0f
+                            }
+                        ) { _, dx ->
+                            if (sealed) return@detectHorizontalDragGestures
+                            val next = (travelled + dx).coerceIn(0f, travel)
+                            if (next > 2f && travelled <= 2f) {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                            travelled = next
+                            if (travelled / travel >= SEAL_REACH) {
+                                sealed = true
+                                travelled = travel
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onSeal()
+                            }
+                        }
+                    }
+            ) {
+                CurioIcon(
+                    CurioIcons.Lock,
+                    "Slide to seal",
+                    tint = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant,
+                    size = 20.dp
+                )
+            }
+        }
+    }
+}
+
+/** How far the slug has to travel before the seal lands (and below which a
+ *  release springs back). Four fifths: far enough that a slip cannot do it,
+ *  short enough that a deliberate slide never has to touch the very edge. */
+private const val SEAL_REACH = 0.8f
+
 @Composable
 private fun CapsulePresetChip(
     label: String,
@@ -1100,6 +1465,35 @@ private fun Color.luminance(): Float = 0.299f * red + 0.587f * green + 0.114f * 
  * how many MORE letters are behind this one, so a member who was away for a
  * season knows the stack has a bottom.
  */
+/**
+ * v493 — THE ARRIVAL: the day a capsule is due, it TAKES THE WHOLE SCREEN.
+ *
+ * The member's answer, verbatim in intent: *"it covers the whole screen on the
+ * day it returns"*. So this is not a card and not a notification — it is a sealed
+ * envelope over everything, and the letter inside only exists once the seal is
+ * broken. That is the feature: the words are unreadable until the day, and the
+ * screen is what proves it.
+ *
+ * ⚠️ v502 — AND IT IS OPENED BY HOLDING, NOT BY TAPPING (the member: *"when the
+ * time capsule lands use similiar style which shows when app in opened with way
+ * unique way to open it it should feel like a nostagia or something"*).
+ *
+ * A tap is a door; a hold is an act. The seal now has to be HELD DOWN: a ring
+ * fills around the disc while the thumb stays on it, one slow second of pressure,
+ * and only a completed hold breaks it. Let go and the ring runs back down and
+ * nothing happens — so a letter written months ago cannot be torn open by a
+ * pocket. It is the same language as the swipe that sealed it: a deliberate,
+ * felt gesture rather than a button.
+ *
+ * The page around it wears the capsule's own pixel face ([pixelTypography]) and
+ * its soft rectangles, so the writing page, the arrival and the letter all read
+ * as one object. The letter's own words stay in the reading face: a letter is
+ * something to READ, and the pixel face is the machine's voice, not the friend's.
+ *
+ * It waits rather than expiring (the same rule as the Return), and `waiting` names
+ * how many MORE letters are behind this one, so a member who was away for a
+ * season knows the stack has a bottom.
+ */
 @Composable
 fun TimeCapsuleArrival(
     capsule: CurioTimeCapsules.Capsule,
@@ -1109,200 +1503,365 @@ fun TimeCapsuleArrival(
     onDismiss: () -> Unit
 ) {
     val haptics = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
     val scheme = MaterialTheme.colorScheme
-    val brass = lerp(scheme.surface, Color(0xFFB08D4F), if (scheme.surface.luminance() > 0.5f) 0.55f else 0.72f)
+    val brass = lerp(scheme.tertiary, Color(0xFFB08D4F), if (scheme.surface.luminance() > 0.5f) 0.45f else 0.55f)
     val ink = scheme.onSurface
     val paper = lerp(scheme.surface, Color.White, if (scheme.surface.luminance() > 0.5f) 0.5f else 0.06f)
 
     // `broken` is the whole state machine: false = sealed, true = the letter is out.
     var broken by remember(capsule.id) { mutableStateOf(false) }
-    // Two clocks on purpose: `press` is the thumb coming down on the wax, and
-    // `reveal` is the letter itself arriving once the words are the member's.
-    val press = remember { Animatable(0f) }
+    // The hold: `holding` is the thumb's own state, and `fill` is how far round
+    // the ring has gone. The effect restarts on release, which is what makes the
+    // ring run back down and NOTHING happen.
+    var holding by remember { mutableStateOf(false) }
+    val fill = remember { Animatable(0f) }
+    // `reveal` is the letter arriving once the words are the member's.
     val reveal = remember { Animatable(0f) }
-    // Driven off the BREAK rather than off the click, so the letter's entrance is
-    // the same beat as the thunk instead of a frame ahead of it.
+    // Driven off the BREAK rather than off the gesture, so the letter's entrance
+    // is the same beat as the thunk instead of a frame ahead of it.
     LaunchedEffect(broken) {
         if (broken) reveal.animateTo(1f, CurioMotion.Springs.Bouncy)
     }
+    LaunchedEffect(holding) {
+        if (holding) {
+            fill.snapTo(0f)
+            // An incomplete hold is CANCELLED here (this effect restarts when the
+            // thumb lifts), which is exactly why the completion is verified rather
+            // than assumed.
+            fill.animateTo(1f, tween(HOLD_TO_OPEN_MS, easing = LinearEasing))
+            if (fill.value >= 1f) {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                broken = true
+                onOpened(capsule)
+            }
+        } else {
+            fill.animateTo(0f, tween(220, easing = FastOutSlowInEasing))
+        }
+    }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(lerp(scheme.scrim, brass, 0.18f), scheme.scrim)
+    MaterialTheme(colorScheme = scheme, typography = pixelTypography()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(lerp(scheme.scrim, brass, 0.20f), scheme.scrim)
+                    )
                 )
-            )
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.Center
-    ) {
-        if (!broken) {
-            // ── SEALED: the envelope and its wax ────────────────────────
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = if (waiting > 1) "A LETTER FROM YOU · $waiting WAITING"
-                    else "A LETTER FROM YOU",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.6.sp
-                    ),
-                    color = brass
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = "Sealed ${dayLabel(capsule.sealedAt)} · for ${capsule.spanLabel}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ink.copy(alpha = 0.65f)
-                )
-                Spacer(Modifier.height(30.dp))
-                // The envelope: a slab of the member's own paper with a wax disc
-                // on it, and the disc is the button.
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = paper,
-                    shadowElevation = 14.dp,
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!broken) {
+                // ── SEALED: the envelope and its wax ────────────────────────
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(230.dp)
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "sealed",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = FrauncesFontFamily,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = ink.copy(alpha = 0.25f)
-                        )
-                        Surface(
-                            onClick = {
-                                if (press.value <= 0f) {
-                                    // The same two halves as every other landing
-                                    // in the app: the press is felt on the way
-                                    // down, and the THUNK lands on the break —
-                                    // which is the moment the words become the
-                                    // member's again.
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    scope.launch {
-                                        press.animateTo(1f, CurioMotion.Springs.Snappy)
-                                        broken = true
-                                        onOpened(capsule)
+                    Text(
+                        text = if (waiting > 1) "A LETTER FROM YOU · $waiting WAITING"
+                        else "A LETTER FROM YOU",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.6.sp
+                        ),
+                        color = brass
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "Sealed ${dayLabel(capsule.sealedAt)} · for ${capsule.spanLabel}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ink.copy(alpha = 0.65f),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(28.dp))
+                    // The envelope: a slab of the member's own paper with a wax
+                    // disc on it, and the disc is what has to be held.
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = paper,
+                        shadowElevation = 14.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(230.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "sealed",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(104.dp)
+                                    .pointerInput(capsule.id) {
+                                        detectTapGestures(
+                                            onPress = {
+                                                holding = true
+                                                haptics.performHapticFeedback(
+                                                    HapticFeedbackType.TextHandleMove
+                                                )
+                                                tryAwaitRelease()
+                                                holding = false
+                                            }
+                                        )
+                                    }
+                            ) {
+                                // THE RING: how much of the hold is done, drawn
+                                // as an arc that closes on the disc.
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    drawArc(
+                                        color = brass.copy(alpha = 0.30f),
+                                        startAngle = -90f,
+                                        sweepAngle = 360f,
+                                        useCenter = false,
+                                        style = Stroke(width = 5f)
+                                    )
+                                    if (fill.value > 0f) {
+                                        drawArc(
+                                            color = brass,
+                                            startAngle = -90f,
+                                            sweepAngle = 360f * fill.value,
+                                            useCenter = false,
+                                            style = Stroke(width = 5f)
+                                        )
                                     }
                                 }
-                            },
-                            shape = CircleShape,
-                            color = brass,
-                            shadowElevation = 8.dp,
-                            modifier = Modifier
-                                .size(84.dp)
-                                .graphicsLayer {
-                                    // Coming down: the seal leans while it is
-                                    // pressed, so the break has a before.
-                                    val s = 1f - press.value * 0.1f
-                                    scaleX = s
-                                    scaleY = s
+                                Surface(
+                                    shape = CircleShape,
+                                    color = brass,
+                                    shadowElevation = 8.dp,
+                                    modifier = Modifier
+                                        .size(84.dp)
+                                        .graphicsLayer {
+                                            val s = 1f - fill.value * 0.08f
+                                            scaleX = s
+                                            scaleY = s
+                                        }
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        CurioIcon(
+                                            CurioIcons.Lock,
+                                            "Hold to break the seal",
+                                            tint = Color.White,
+                                            size = 30.dp
+                                        )
+                                    }
                                 }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(18.dp))
+                    Text(
+                        text = if (holding) "Keep holding" else "Hold the seal to open it",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = ink.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Let go and nothing happens",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = ink.copy(alpha = 0.45f)
+                    )
+                }
+            } else {
+                // ── BROKEN: the letter itself ───────────────────────────────
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .graphicsLayer {
+                            alpha = reveal.value
+                            val s = 0.96f + 0.04f * reveal.value
+                            scaleX = s
+                            scaleY = s
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        // `spanLabel` is a DATE and TIME since the rewrite ("12
+                        // March 2027 at 09:30"), so "YOU, … AGO" reads off the seal
+                        // date instead of the promise.
+                        text = "YOU, ${agoLabel(capsule.sealedAt).uppercase()}",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.6.sp
+                        ),
+                        color = brass
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    // ── AND WHAT THE LETTER CARRIED ────────────────────────
+                    // The picture comes back FIRST, above the words, because that
+                    // is the order it was meant in: the photograph the member chose
+                    // for this day is what they will look at, and the words under it
+                    // are what they wrote about it.
+                    if (capsule.photo.isNotBlank()) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = paper,
+                            shadowElevation = 12.dp,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                CurioIcon(
-                                    CurioIcons.Lock,
-                                    "Break the seal",
-                                    tint = Color.White,
-                                    size = 30.dp
+                            PersonalPagePhoto(
+                                uri = capsule.photo,
+                                height = 220.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+                        }
+                        Spacer(Modifier.height(14.dp))
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = paper,
+                        shadowElevation = 14.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 380.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                // The letter's words stay in the reading face: a
+                                // letter is something to read, and the pixel face
+                                // is the machine's voice, not the friend's.
+                                text = capsule.message,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontFamily = FontFamily.Default,
+                                    lineHeight = 26.sp
+                                ),
+                                color = ink
+                            )
+                            Spacer(Modifier.height(18.dp))
+                            Text(
+                                text = "written ${dayLabel(capsule.sealedAt)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = ink.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                    // ── AND THE VOICE, READ BACK ───────────────────────────
+                    // The same wave the member recorded, played with the same
+                    // control the journal gives a note (see PersonalVoiceBar): a
+                    // letter read months later should sound like the person who
+                    // wrote it.
+                    if (capsule.voice.isNotBlank()) {
+                        Spacer(Modifier.height(14.dp))
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = paper,
+                            shadowElevation = 12.dp,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(modifier = Modifier.padding(10.dp)) {
+                                PersonalVoiceBar(
+                                    path = capsule.voice,
+                                    seconds = capsule.voiceSeconds,
+                                    bars = capsule.voiceBars,
+                                    ink = ink,
+                                    accent = brass
                                 )
                             }
                         }
                     }
-                }
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    text = "Tap the seal to open it",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = ink.copy(alpha = 0.6f)
-                )
-            }
-        } else {
-            // ── BROKEN: the letter itself ───────────────────────────────
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .graphicsLayer {
-                        alpha = reveal.value
-                        val s = 0.96f + 0.04f * reveal.value
-                        scaleX = s
-                        scaleY = s
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    // v497 — `spanLabel` is a DATE and TIME since the rewrite
-                    // ("12 March 2027 at 09:30"), so "YOU, … AGO" reads off the
-                    // seal date instead of the promise.
-                    text = "YOU, ${agoLabel(capsule.sealedAt).uppercase()}",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.6.sp
-                    ),
-                    color = brass
-                )
-                Spacer(Modifier.height(18.dp))
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = paper,
-                    shadowElevation = 14.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 380.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .padding(20.dp)
+                    Spacer(Modifier.height(20.dp))
+                    Surface(
+                        onClick = { onDismiss() },
+                        shape = RoundedCornerShape(14.dp),
+                        color = brass,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = capsule.message,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                lineHeight = 26.sp
+                            text = "Put it away",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold
                             ),
-                            color = ink
-                        )
-                        Spacer(Modifier.height(18.dp))
-                        Text(
-                            text = "written ${dayLabel(capsule.sealedAt)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ink.copy(alpha = 0.45f)
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 15.dp)
                         )
                     }
-                }
-                Spacer(Modifier.height(22.dp))
-                Surface(
-                    onClick = { onDismiss() },
-                    shape = RoundedCornerShape(50),
-                    color = brass,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Put it away",
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 15.dp)
-                    )
                 }
             }
         }
     }
 }
+
+/**
+ * A DOOR FOR WHAT THE LETTER CARRIES: a soft rectangle in the page's own shape
+ * language, with a glyph and a word. The two doors are one size whether or not
+ * they hold something — the LABEL is what changes ("Add a picture" becoming
+ * "Change the picture"), so the row never jumps when the member uses it.
+ */
+@Composable
+private fun CapsuleAttachmentDoor(
+    glyph: String,
+    label: String,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = lerp(scheme.surfaceContainerHigh, accent, 0.10f),
+        modifier = modifier.height(46.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp)
+        ) {
+            CurioIcon(glyph, null, tint = accent, size = 18.dp)
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = scheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/** The way to take an attachment back off the letter, on the attachment itself. */
+@Composable
+private fun CapsuleAttachmentRemove(
+    label: String,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = lerp(scheme.surface, accent, 0.18f),
+        shadowElevation = 4.dp,
+        modifier = modifier.size(34.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            CurioIcon(CurioIcons.Close, label, tint = scheme.onSurface, size = 18.dp)
+        }
+    }
+}
+
+/** How long the seal has to be held before it breaks. One slow second: long
+ *  enough that it cannot be a tap by accident, short enough that it is not a
+ *  chore. */
+private const val HOLD_TO_OPEN_MS = 1000
