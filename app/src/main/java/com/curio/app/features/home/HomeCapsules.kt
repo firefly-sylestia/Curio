@@ -54,8 +54,9 @@ import com.curio.app.ui.theme.curioSheetContainerColor
  *    ("3 waiting") and opens the answering sheet. It is the loudest thing it ever
  *    needs to be, and it is still one line tall.
  *  · **Nothing due yet** — it says when the next one comes round ("next in 3
- *    days") and opens the ladder behind it ([RecallAheadSheet]), so the schedule
- *    the member is walking is a thing they can READ rather than only wait for.
+ *    days") and opens the Return's own page, where the ladder is written out, so
+ *    the schedule the member is walking is a thing they can READ rather than only
+ *    wait for.
  *  · **Nothing on the ladder at all** — it says so in four words ("nothing
  *    waiting yet"). It is not a dead pill: the sheet behind it explains what
  *    starts a return (finishing a topic).

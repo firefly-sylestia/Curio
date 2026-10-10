@@ -10923,3 +10923,71 @@ screen.
 - (Future) `app/src/main/java/com/curio/app/ui/theme/AGENTS.md` — design system primitive contracts, added when the theme system grows (Phase 3+ when dark-mode polish, motion tokens, etc. land).
 - [`src/main/java/com/curio/app/data/supabase/AGENTS.md`](src/main/java/com/curio/app/data/supabase/AGENTS.md) — the online layer's contract: Supabase client, session store, Online Mode state and the credential rules (public keys only).
 - (Future) `app/src/main/java/com/curio/app/data/AGENTS.md` — data-model contracts, added when Room + repositories land in Phase 4.
+
+### v502 — THE RETURN GETS ITS OWN PAGE, THE SEAL IS HELD OPEN, A LETTER CARRIES A PICTURE AND A VOICE, AND A HEADING READS AS A HEADING
+
+The remainder of the member's capsule/Return list (*"finish the remaining task all of them"*) plus
+two closing asks: *"title and conetnt in journal page should have their own distintion wih maybe
+line s space with color code or indicator something, and also in book review the space collapse iand
+the text comes closer if that exist fix it."* Pushed as **1.5.2 / `20260945`** (and **1.5.3 /
+`20260946`** for the import repair below) — see `Prompt.md` §98.
+
+- **THE RETURN IS A PAGE, NOT A SHEET.** `features/home/RecallScreen.kt` (new) + `CurioRoutes.RECALL`
+  + the `CurioNavHost` entry. One screen holds BOTH halves: the due topic, its last answer quoted
+  back, one field to answer in, and the whole widening ladder under it. **The two writes live there
+  and nowhere else** (`CurioQuests.awardXpOnly` then `CurioRecall.answer`) — a composable must never
+  score. `RecallSurface.kt` (v489's answering sheet) and `HomeCapsules.RecallAheadSheet` (v496's
+  ladder sheet) are DELETED, and Home's Return line is one `navigate(CurioRoutes.RECALL)` whatever
+  its state, so the answer and the schedule are never behind two different doors. `RECALL` is listed
+  in `popScreenRoutePrefixes`.
+- **THE ARRIVAL IS OPENED BY HOLDING** (`TimeCapsuleArrival`). A ring (`Canvas.drawArc`) fills around
+  the wax disc over `HOLD_TO_OPEN_MS` = one second while the thumb stays down; releasing restarts the
+  effect, which cancels the animation and runs the ring back down — so the completion is *verified*
+  (`if (fill.value >= 1f)`) rather than assumed. `holding` is the thumb's own state, driven by
+  `detectTapGestures(onPress = { … tryAwaitRelease() })`; `broken` is the whole state machine. The
+  page wears the capsule's pixel face and its soft rectangles; the letter's OWN words stay in the
+  reading face (`FontFamily.Default`), because the pixel face is the machine's voice, not the
+  friend's.
+- **⚠️ A LETTER CAN CARRY A PICTURE AND A VOICE — a real data-contract change
+  (`CurioTimeCapsules.Capsule`).** New fields, ALL OPTIONAL IN THE RECORD so a capsule sealed before
+  them still reads: `photo` (a PERSISTED content URI — the picker's own grant expires long before
+  the day the letter lands), `voice` (a path in the app's own audio store), `voiceSeconds`,
+  `voiceBars`. `sealAt(...)` takes them and now accepts an **attachment-only letter** (words, a
+  picture or a recording is each "something to carry"). The page's two soft-rectangle doors
+  (`CapsuleAttachmentDoor`) pick a picture (`OpenMultipleDocuments` + `takePersistableUriPermission`)
+  and record through **`AudioRecorder` + `PersonalVoiceSession` + `PersonalVoiceRecorderCapsule`,
+  owned LOCALLY** — deliberately NOT through `PersonalVoiceRecording`, the journal's app-wide
+  singleton: a capsule is not a journal note, and taking that state over would put a "still
+  recording" pill on every other screen offering to return to a note that does not exist. Storage
+  reuses `AudioStorageManager.persistAudio` + `publishVoice` with ONE `WaveformExtractor` pass, and
+  a refused microphone says so and offers `appPermissionSettingsIntent`. The arrival hands the
+  picture back above the words and the voice under them (`PersonalVoiceBar`).
+- **THE JOURNAL'S DOCK, HEADING DOOR AND CONTENTS DRAWER (the member's §97 list).** The put-away
+  arrow collapses the bar into **one circular pill** (the surface wraps the button; 28dp radius on a
+  52dp box). The heading control is **ONE door wearing the caret line's level** (`HeadingBadge`: I /
+  II / i) that expands into heading I / heading II / content inside the dock (`PersonalDockGroup.HEADING`),
+  driven by `headingLevelOfFocused` + `setHeadingLevel` so the mark pressed and the mark on the line
+  cannot disagree. The contents door wears **three lines** (`CurioIcons.Menu`) and opens a **drawer**
+  from the page's end edge (`AnimatedVisibility` + `MutableTransitionState`), not a bottom sheet.
+  `PersonalPinnedLine` wears the same badge, fed by a per-page `headingLevels` map in
+  `PersonalWritingPage` so no frame walks the block list.
+- **A HEADING IS SET APART FROM CONTENT (`TITLE_LEAD` / `TITLE2_LEAD` / `TITLE_RULE` +
+  `drawHeadingRule`).** Air above the line and a hairline in the page's accent at its foot — firm
+  (2dp, 0.55 alpha) for Heading I and a whisper (0.6×, 0.22) for Heading II. **Drawn in BOTH passes
+  from the same constants**, because the pen and the eye draw one page.
+- **⚠️ AN EMPTY ROW DREW NO LINE AT ALL IN THE READ VIEW (the member's "the space collapse and the
+  text comes closer").** Compose draws **no line box for an empty string**, so every blank row in
+  `PersonalDocView` was the column's 8dp gap and nothing else: a page READ back was tighter than the
+  page written, and two paragraphs a line apart in the pen sat almost touching in the eye. Visible in
+  a book review and anywhere a paste cut blank lines into their own blocks (`insertPlainText` splits
+  on `\n`). The row now takes a `heightIn(min = eyeLine)` floor — its own style's line height — in
+  journals and book reviews alike. **The general rule: any read-view change must be measured against
+  the pen, because the two passes are the same page.**
+- **⚠️ TWO RED BUILDS, BOTH ONE MISSING IMPORT — read this before inserting a helper.** `0866e206`
+  (the previous push) failed all four jobs on `TimeCapsuleScreen.kt:934:18 Unresolved reference
+  'offset'`: the split-flap's `CardHalf` calls `Modifier.offset(y = …)` and the file's import list
+  never got `androidx.compose.foundation.layout.offset`. This push's own first build was red the same
+  way in reverse: `PersonalCanvas.kt`'s blank-row floor calls `LocalDensity.current` with
+  `androidx.compose.ui.platform.LocalDensity` not imported. **Both are the root rule 13 shape — an
+  insertion written without reading the import block (or the two lines above it).** Fix inside the
+  same `str_replace` as the code that needs it.

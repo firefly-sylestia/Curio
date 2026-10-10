@@ -104,6 +104,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import com.curio.app.ui.components.CurioMenuToggle
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryRestoreMode
