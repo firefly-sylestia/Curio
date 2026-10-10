@@ -214,7 +214,7 @@ fun UserExperimentsScreen(navController: NavController) {
                     CurioSettingsDivider()
                     ExperimentSwitchRow(
                         "Pinned title view",
-                        "Keep the current Book Review and Journal title visible while scrolling. Experimental.",
+                        "Keep the current Book Review and Journal title visible while scrolling.",
                         AppPreferences.pinnedTitleViewState
                     ) { AppPreferences.setPinnedTitleViewEnabled(context, it) }
                 }

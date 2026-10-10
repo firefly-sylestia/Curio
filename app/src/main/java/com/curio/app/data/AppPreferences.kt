@@ -1424,9 +1424,15 @@ object AppPreferences {
     // the current screen is frozen and peels away from where you tapped, a
     // touch faster than the theme wipe. Off = today's plain transitions.
     var screenRevealEnabledState by mutableStateOf(false)
-    // v394 — PINNED TITLES experiment (Settings ▸ Experiments, default OFF):
-    // keeps the current title line visible while scrolling Book Review and Journal.
-    var pinnedTitleViewState by mutableStateOf(false)
+    // v394 — PINNED TITLES (Settings ▸ Experiments, default ON since v496):
+    // keeps the current title line visible while scrolling Book Review and
+    // Journal. It shipped opt-in; the member has since reported the bar as
+    // MISSING ("sometimes the heading dont show") — an experiment whose answer is
+    // "I want it and it isn't there" is decided, so a fresh install (and every
+    // install that never touched the switch) gets it. The switch stays: a stored
+    // choice still wins, and turning it off is still one tap. Same rule v406
+    // applied to the capture studio and the cover consent.
+    var pinnedTitleViewState by mutableStateOf(true)
     // v3xx52 — CAPTURE STUDIO experiment (Settings ▸ Experiments, default OFF):
     // the Save-your-take page gets a redesigned workspace shell — tinted topic
     // hero, a take rail riding the bottom tray, pickers moved into a tools
@@ -2817,9 +2823,11 @@ object AppPreferences {
         screenRevealEnabledState = enabled
     }
 
-    /** Whether the pinned title view experiment is on (default OFF). */
+    /** Whether the pinned title view is on. v496 — default ON, the v406 rule: an
+     *  install that has never touched the switch gets it, and a stored choice
+     *  (including an OFF somebody set while it was opt-in) still wins. */
     fun isPinnedTitleViewEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PINNED_TITLE_VIEW, false)
+        prefs(context).getBoolean(KEY_PINNED_TITLE_VIEW, true)
 
     fun setPinnedTitleViewEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PINNED_TITLE_VIEW, enabled).apply()

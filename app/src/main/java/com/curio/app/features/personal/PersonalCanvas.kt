@@ -85,6 +85,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -1175,10 +1176,21 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         }
         val id = focused
         val block = blocks[id] ?: return
-        val selection = selections[id]
-        if (selection != null && !selection.collapsed) {
-            val start = selection.min.coerceIn(0, block.text.length)
-            val end = selection.max.coerceIn(0, block.text.length)
+        // ── v496 — ASK THE FITTED RECORD, NEVER THE RAW ONE ─────────────
+        //
+        // [selections] is what the keyboard last SAID; it outlives the text it was
+        // said about (a deletion, a split, an undo that put rows back), and a
+        // stored range read raw is how a tool came to dress characters the member
+        // never picked — a marker landing past the end of the words, a heading
+        // stamped on a range that no longer exists. [selection] is the one
+        // accessor that fits a stored range to the text about to be used, and a
+        // range that no longer fits is a CARET at the end, which is the honest
+        // reading of "the member is not holding a range any more". Every tool in
+        // this class reads it now.
+        val held = selection(id)
+        if (held != null && !held.collapsed) {
+            val start = held.min.coerceIn(0, block.text.length)
+            val end = held.max.coerceIn(0, block.text.length)
             // Tapping the pen the stretch already wears takes it off.
             val every = (start until end).all { highlightKeyOf(mask(id).getOrElse(it) { 0 }) == key }
             masks[id] = maskApplyHighlight(mask(id), start, end, if (every) null else key)
@@ -1482,6 +1494,25 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     fun onFieldChange(id: String, value: TextFieldValue) {
         val old = blocks[id] ?: return
         val newText = value.text
+        // ── v496 — THE SAME KEYSTROKE, DELIVERED TWICE ──────────────────────
+        //
+        // A row's Enter is taken by the key handler ([requestRowSplit]) and
+        // honoured a frame later — but a soft keyboard may ALSO send that newline
+        // as its own edit, which arrives here as the block's text plus one
+        // newline. While the split is still waiting to run, that is the same
+        // keystroke arriving twice rather than a second edit: taking it would
+        // append a newline to a block that is about to be cut in two (a phantom
+        // empty line, or the line twice over). It is dropped, and the selection
+        // it brought is kept so the caret stays where the member put it.
+        pendingRowSplit?.let { asked ->
+            if (asked.blockId == id && newText == old.text + "\n") {
+                selections[id] = value.selection
+                return
+            }
+        }
+        // The mask BEFORE this edit — a line's own tools are read from it below,
+        // and by then `mask(id)` is the mask of the new words.
+        val beforeMask = mask(id)
         if (newText != old.text) {
             // Typing ends a page-wide selection: the member is editing a row
             // again, and a wash over the whole page beside a live caret reads
@@ -1529,8 +1560,17 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                 if (armedFont != null) armedFont = null
                 selections[id] = value.selection
                 compositions[id] = value.composition
-                caret = PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
-                pendingSplit = caret
+                // ── v496 — THE SPLIT INTENT HAS ITS OWN CHANNEL ──────────────
+                //
+                // This used to publish the caret too, and `caret` is the canvas'
+                // FOCUS token — so every keystroke in a row line asked the same
+                // field to take focus again mid-word. A focus request while the
+                // keyboard is writing is answered by the keyboard rebuilding its
+                // own buffer, which is the other half of the duplicated-line
+                // report. The split moves the caret itself when it runs (see
+                // [splitBlock]), so nothing here has to.
+                pendingSplit =
+                    PersonalCaret(id, value.selection.start.coerceIn(0, newText.length))
                 publish()
                 return
             }
@@ -1587,6 +1627,26 @@ internal class PersonalEditorState(initial: PersonalDoc) {
                     !personalBlockCarries(newText, mask(id), FLAG_BULLET)
                 ) {
                     masks[id] = maskApply(mask(id), 0, newText.length, FLAG_CHECKBOX, true)
+                }
+            }
+            // ── v496 — A LINE THE WRITER EMPTIED KEEPS ITS LINE'S TOOL ───────
+            //
+            // A heading, a small note and a bullet item are LINE tools, and a
+            // line tool lives on the line's own characters — so deleting the last
+            // one of them took the tool with it and the line quietly became prose,
+            // with the next word typed arriving as ordinary body text (member
+            // report: "the title chnages back to normal text"). The line
+            // REMEMBERS what it was and leaves that tool ARMED, exactly as an
+            // emptied to-do row remembers being a row (see the block above): the
+            // first word typed back into the line comes back as the heading it
+            // was. The CHECKBOX is deliberately not in this set — emptying a to-do
+            // row ENDS its list (v398), and that manner is the member's own.
+            if (newText.isEmpty() && old.text.isNotEmpty()) {
+                val lineTools = lineFlags(old.text, beforeMask) and
+                    (FLAG_TITLE or FLAG_SMALL or FLAG_BULLET)
+                if (lineTools != 0) {
+                    armed = armed or lineTools
+                    armedOff = armedOff and lineTools.inv()
                 }
             }
         }
@@ -1653,7 +1713,9 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      */
     private fun caretFlags(id: String): Int {
         val blockMask = mask(id)
-        val at = (selections[id]?.start ?: blockMask.size).coerceIn(0, blockMask.size)
+        // v496 — the fitted range (see [selection]): a stale record pointed the
+        // dock's lit state at a caret the line no longer has.
+        val at = (selection(id)?.start ?: blockMask.size).coerceIn(0, blockMask.size)
         return when {
             at - 1 in blockMask.indices && blockMask[at - 1] != 0 -> blockMask[at - 1]
             at in blockMask.indices && blockMask[at] != 0 -> blockMask[at]
@@ -1690,8 +1752,8 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             return flags or armed
         }
         val id = focusedId ?: return armed
-        val selection = selections[id]
-        if (selection == null || selection.collapsed) {
+        val held = selection(id)
+        if (held == null || held.collapsed) {
             // NO SELECTION: the buttons are an INPUT STYLE, exactly like a rich
             // text editor's — they report what the NEXT keypress wears, which is
             // the style the caret already sits in unless the member has switched
@@ -1701,7 +1763,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             // written.
             return (caretFlags(id) and armedOff.inv()) or armed
         }
-        val range = selection.min to selection.max
+        val range = held.min to held.max
         val blockMask = mask(id)
         var flags = 0
         ALL_FLAGS.forEach { flag ->
@@ -1748,12 +1810,12 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             publish()
             return
         }
-        val selection = selections[id]
-        if (selection != null && !selection.collapsed) {
+        val held = selection(id)
+        if (held != null && !held.collapsed) {
             val chosen = mask(id)
-            val current = maskCovers(chosen, selection.min, selection.max, flag)
-            var updated = maskApply(chosen, selection.min, selection.max, flag, !current)
-            if (!current) updated = maskApply(updated, selection.min, selection.max, other, false)
+            val current = maskCovers(chosen, held.min, held.max, flag)
+            var updated = maskApply(chosen, held.min, held.max, flag, !current)
+            if (!current) updated = maskApply(updated, held.min, held.max, other, false)
             masks[id] = updated
             armed = armed and listFlags.inv()
             publish()
@@ -1807,8 +1869,8 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // caret is on the bullet and its marker (the line goes on its own block
         // first, see [isolateCaretLine]; a chosen RANGE still means exactly the
         // words the member chose).
-        val selection = selections[focused]
-        val id = if (selection != null && !selection.collapsed) focused else isolateCaretLine(focused)
+        val held = selection(focused)
+        val id = if (held != null && !held.collapsed) focused else isolateCaretLine(focused)
         val block = blocks[id] ?: return
         val text = block.text
         if (text.isEmpty()) {
@@ -1937,6 +1999,19 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      * button does.
      */
     private val pageUndo = ArrayDeque<() -> Unit>()
+
+    /**
+     * v496 — HOW DEEP THE STACK IS, AS STATE.
+     *
+     * The stack itself is an ordinary deque, so `pageUndo.isNotEmpty()` was never
+     * a value Compose could watch: the bar's Undo pill was told whether to look
+     * alive by a read that could not change, and after a Cut it could stay drawn
+     * as a dead control — which the member reads as *"undo in the copy box doesn't
+     * put back what it took"* (they press a button that never lit and nothing
+     * happens). The DEPTH is snapshot state now, so the pill is lit exactly while
+     * there is something to put back.
+     */
+    private var pageUndoDepth by mutableIntStateOf(0)
 
     /** One row the bar took away, kept whole (its words, its mask and where it
      *  sat) so Undo can put it back exactly where it was. */
@@ -2115,7 +2190,18 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (text.isEmpty()) return
         val range = pageCharRange
         pageCharRange = if (!pageLettersPicked) {
-            val caret = selections[id]?.start ?: 0
+            // ── v496 — WHERE A FRESH LETTER WINDOW OPENS ────────────────
+            //
+            // The caret when there IS one, and the END of the line when there is
+            // not — which is the ordinary case on a saved page opened for editing:
+            // nothing has been typed yet in this session, so no caret has ever
+            // been reported, and the old `?: 0` opened the window on the FIRST
+            // letter of the line instead of the one the member was looking at
+            // (member report: *"l doesnt get select when im not typing"*). The end
+            // of the line is where a caret lands when a page is opened and where
+            // the next word is written, so ← takes the last letter first and →
+            // takes the first — both grow from the place the writing is.
+            val caret = selection(id)?.start ?: text.length
             val at = if (caret in 0 until text.length) {
                 caret
             } else if (pageGrowsUp) {
@@ -2230,34 +2316,60 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         if (pageRange.isEmpty()) emptyList() else pageRange.mapNotNull { order.getOrNull(it) }
 
     /**
+     * v496 — THE SELECTION, WITH THE STYLING IT IS WEARING.
+     *
+     * One (words, mask) pair per row of the reach — or a single pair for a letter
+     * window — which is what a clipboard needs to leave a page as something more
+     * than plain text (see [copyStyledToClipboard]). It is also the only place the
+     * reach's words are read now, so the plain copy and the styled one can never
+     * disagree about what is in hand: [pageSelectionText] joins these parts.
+     */
+    fun pageSelectionParts(): List<Pair<String, IntArray>> {
+        if (pageLettersPicked) {
+            val id = pageLetterRowId() ?: return emptyList()
+            val text = blocks[id]?.text.orEmpty()
+            val from = pageCharRange.min.coerceIn(0, text.length)
+            val to = pageCharRange.max.coerceIn(0, text.length)
+            if (to <= from) return emptyList()
+            return listOf(text.substring(from, to) to mask(id).copyOfRange(from, to))
+        }
+        val parts = selectedRowIds()
+            .mapNotNull { id -> blocks[id]?.takeIf { !it.isPhoto && it.audio == null } }
+            .map { block -> block.text to mask(block.id) }
+        // The same trim the plain copy has always done: a run of empty rows at
+        // either end of the reach is not words the member picked.
+        val first = parts.indexOfFirst { it.first.isNotBlank() }
+        val last = parts.indexOfLast { it.first.isNotBlank() }
+        return if (first < 0) emptyList() else parts.subList(first, last + 1).toList()
+    }
+
+    /** Every writing row of the whole page, styled — the page-wide copy (v496). */
+    fun pageAllParts(): List<Pair<String, IntArray>> = order
+        .mapNotNull { id -> blocks[id]?.takeIf { !it.isPhoto && it.audio == null } }
+        .map { block -> block.text to mask(block.id) }
+
+    /**
      * The selection's words, top to bottom (a print or a voice note holds none).
      * With letters PICKED it is the characters the window holds and nothing else —
      * the member has said which clause they mean, so that is what Cut and Copy
-     * take.
+     * take. Read off [pageSelectionParts] so the two can never disagree.
      */
-    fun pageSelectionText(): String = if (pageLettersPicked) {
-        val id = pageLetterRowId() ?: return ""
-        val text = blocks[id]?.text.orEmpty()
-        val from = pageCharRange.min.coerceIn(0, text.length)
-        val to = pageCharRange.max.coerceIn(0, text.length)
-        if (to > from) text.substring(from, to) else ""
-    } else {
-        selectedRowIds()
-            .mapNotNull { blocks[it] }
-            .filter { !it.isPhoto && it.audio == null }
-            .joinToString("\n") { it.text }
-            .trim('\n')
-    }
+    fun pageSelectionText(): String =
+        pageSelectionParts().joinToString("\n") { it.first }.trim('\n')
 
     private fun rememberPageUndo(undo: () -> Unit) {
         if (pageUndo.size >= 8) pageUndo.removeFirst()
         pageUndo.addLast(undo)
+        pageUndoDepth = pageUndo.size
     }
 
-    val canUndoPageEdit: Boolean get() = pageUndo.isNotEmpty()
+    /** v496 — read off the DEPTH, which Compose can watch (see [pageUndoDepth]). */
+    val canUndoPageEdit: Boolean get() = pageUndoDepth > 0
 
     fun undoPageEdit() {
-        pageUndo.removeLastOrNull()?.invoke()
+        val undo = pageUndo.removeLastOrNull() ?: return
+        pageUndoDepth = pageUndo.size
+        undo()
     }
 
     /** Copy: the selection's words, and the page is left exactly as it is. */
@@ -2278,6 +2390,10 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         rememberPageUndo {
             blocks[id] = blocks[id]?.copy(text = words) ?: block
             masks[id] = mask
+            // v496 — and the CARET goes back with the words: the cut left it at the
+            // head of the gap, and an Undo that put the clause back but left the
+            // writing somewhere else is not the page the member had.
+            selections[id] = TextRange(range.min)
             pageCharRange = range
             publish()
         }
@@ -2413,7 +2529,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             return
         }
         val id = focusedId ?: return
-        val selection = selections[id]
+        val held = selection(id)
         // ── A LINE TOOL POINTS AT THE LINE (v389e) ─────────────────────
         //
         // A HEADING (and a small note) is the LINE'S OWN: it describes the line
@@ -2428,11 +2544,11 @@ internal class PersonalEditorState(initial: PersonalDoc) {
         // page, and the block is the unit every view reads a heading from (the
         // read-only page's display serif, the book review's pinned chapter).
         if (flag == FLAG_TITLE || flag == FLAG_SMALL) {
-            if (selection != null && !selection.collapsed) {
+            if (held != null && !held.collapsed) {
                 // The words the member actually chose: exactly those, as ever.
                 val chosen = mask(id)
-                val on = !maskCovers(chosen, selection.min, selection.max, flag)
-                masks[id] = maskApply(chosen, selection.min, selection.max, flag, on)
+                val on = !maskCovers(chosen, held.min, held.max, flag)
+                masks[id] = maskApply(chosen, held.min, held.max, flag, on)
                 armed = armed and flag.inv()
                 armedOff = armedOff and flag.inv()
                 publish()
@@ -2464,7 +2580,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             return
         }
         val blockMask = mask(id)
-        if (selection == null || selection.collapsed) {
+        if (held == null || held.collapsed) {
             // NO SELECTION: the tool is an INPUT STYLE. Tapping it changes what
             // the NEXT keystroke wears — never the line already written, which
             // is the whole point of the user report above. Inside a bold phrase
@@ -2481,7 +2597,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
             publish()
             return
         }
-        val range = selection.min to selection.max
+        val range = held.min to held.max
         val on = !maskCovers(blockMask, range.first, range.second, flag)
         masks[id] = maskApply(blockMask, range.first, range.second, flag, on)
         armed = armed and flag.inv()
@@ -2544,7 +2660,7 @@ internal class PersonalEditorState(initial: PersonalDoc) {
     private fun insertAtCaret(makeBlock: () -> PersonalBlock) {
         val id = focusedId ?: order.lastOrNull() ?: return
         val block = blocks[id] ?: return
-        val caretIndex = (selections[id]?.start ?: block.text.length)
+        val caretIndex = (selection(id)?.start ?: block.text.length)
             .coerceIn(0, block.text.length)
         val head = PersonalBlock(
             id = newBlockId(),
@@ -2961,7 +3077,14 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      *  selected). */
     private fun caretIn(id: String): Int {
         val length = blocks[id]?.text?.length ?: return 0
-        return (selections[id]?.start ?: length).coerceIn(0, length)
+        // ── v496 — THE FITTED RANGE, NEVER THE RAW RECORD ────────────────
+        //
+        // A line tool has to point at the line the caret is really in. The raw
+        // record can hold a range from before the text changed (an edit that
+        // shortened the line, a split, a reload), and reading THAT is how a tool
+        // landed on the wrong line. [selection] is the one accessor that fits a
+        // stored range to the text it is about to be used against.
+        return (selection(id)?.start ?: length).coerceIn(0, length)
     }
 
     /**
@@ -3086,7 +3209,40 @@ internal class PersonalEditorState(initial: PersonalDoc) {
      */
     fun splitAtCaret(id: String) {
         val block = blocks[id] ?: return
-        splitBlock(id, selections[id]?.start ?: block.text.length, mask(id))
+        splitBlock(id, (selection(id)?.start ?: block.text.length), mask(id))
+    }
+
+    /**
+     * v496 — ENTER ASKS; THE NEXT FRAME DOES.
+     *
+     * A row split REPLACES the block under the caret with two blocks: a change
+     * to the page's SHAPE, made while the keyboard still holds its own edit open.
+     * That is the very hazard v389d already named for pastes (see [pendingSplit]) —
+     * a keyboard's buffer is a frame behind the page, so an edit that moves the
+     * page underneath a live batch can land the text the field held BEFORE the
+     * page moved, which is how one Enter put a line on the page a second time
+     * (member report: "when… i tap enter the text copies and paste in enter
+     * below").
+     *
+     * So the key handler only ASKS. The caret is read from the fitted record, and
+     * the split itself runs on the canvas' next frame, with the keyboard's batch
+     * behind it.
+     */
+    var pendingRowSplit by mutableStateOf<PersonalCaret?>(null)
+        private set
+
+    fun requestRowSplit(id: String) {
+        val block = blocks[id] ?: return
+        val at = (selection(id)?.start ?: block.text.length).coerceIn(0, block.text.length)
+        pendingRowSplit = PersonalCaret(id, at)
+    }
+
+    /** Runs the deferred Enter, once the IME's batch is behind us. */
+    fun runPendingRowSplit(request: PersonalCaret) {
+        pendingRowSplit = null
+        val id = request.blockId
+        if (blocks[id] == null) return
+        splitBlock(id, request.index, mask(id))
     }
 
     /**
@@ -3423,6 +3579,15 @@ internal fun PersonalCanvas(
         withFrameNanos { }
         state.runPendingSplit(waiting)
     }
+    // v496 — the deferred ENTER, on the same terms: the page's shape changes one
+    // frame after the key, never inside the keyboard's own edit batch (see
+    // [PersonalEditorState.requestRowSplit]).
+    val pendingRowSplit = state.pendingRowSplit
+    LaunchedEffect(pendingRowSplit) {
+        val asked = pendingRowSplit ?: return@LaunchedEffect
+        withFrameNanos { }
+        state.runPendingRowSplit(asked)
+    }
     // The page's own reporter, or the one its host provided (see
     // [LocalPersonalTitleReport]).
     val titleReport = onTitlePosition ?: LocalPersonalTitleReport.current
@@ -3440,8 +3605,11 @@ internal fun PersonalCanvas(
     // only what "Select all" DOES changes, and Copy is re-pointed with it so the
     // gesture carries through to the clipboard instead of copying one line.
     val clipboard = LocalClipboardManager.current
+    // v496 — the styled copy needs the platform clipboard (see
+    // [copyStyledToClipboard]); Compose's own manager is still what PASTE reads.
+    val clipboardContext = LocalContext.current
     val platformToolbar = LocalTextToolbar.current
-    val pageToolbar = remember(platformToolbar, clipboard) {
+    val pageToolbar = remember(platformToolbar, clipboard, clipboardContext) {
         object : TextToolbar {
             override val status: TextToolbarStatus get() = platformToolbar.status
 
@@ -3459,7 +3627,9 @@ internal fun PersonalCanvas(
                     onCopyRequested = {
                         val whole = state.pageText()
                         if (state.pageSelected && whole.isNotBlank()) {
-                            clipboard.setText(AnnotatedString(whole))
+                            // v496 — the page's own words leave with the styling
+                            // they are set in (see [copyStyledToClipboard]).
+                            copyStyledToClipboard(clipboardContext, state.pageAllParts())
                         } else {
                             onCopyRequested?.invoke()
                         }
@@ -3501,7 +3671,9 @@ internal fun PersonalCanvas(
             rect = Rect(pageBounds.left, pageBounds.bottom, pageBounds.right, pageBounds.bottom + 1f),
             onCopyRequested = {
                 val whole = state.pageText()
-                if (whole.isNotBlank()) clipboard.setText(AnnotatedString(whole))
+                if (whole.isNotBlank()) {
+                    copyStyledToClipboard(clipboardContext, state.pageAllParts())
+                }
             },
             onPasteRequested = null,
             onCutRequested = null,
@@ -4376,7 +4548,9 @@ private fun PersonalTextBlock(
                     !event.isShiftPressed &&
                     state.lineStartsNewRow(id)
                 ) {
-                    state.splitAtCaret(id)
+                    // v496 — ASK, never split here: the page's shape must not move
+                    // inside the keyboard's own batch (see requestRowSplit).
+                    state.requestRowSplit(id)
                     return@onPreviewKeyEvent true
                 }
                 // ── v389d — SELECT ALL MEANS THE PAGE ────────────────────
@@ -5504,6 +5678,18 @@ internal fun PersonalDocView(
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(VIEW_ROW_GAP)) {
         doc.blocks.forEachIndexed { index, block ->
+            // ── v496 — A ROW IS KEYED BY ITS OWN ID ─────────────────────────
+            //
+            // The editor's own loop has always done this; this one did not, and
+            // it is the reason a heading could vanish: every row registers a
+            // per-block effect (the title report, and the "not a place any more"
+            // clear that goes with it — see [LocalPersonalTitleReport]), and
+            // without a key Compose hands each slot's remembered state to
+            // whichever block slid into it. Inserting or removing a row above a
+            // heading therefore disposed the heading's entry with ANOTHER block's
+            // id, and the pinned bar lost a heading that was still on the page
+            // (member report: "sometimes the heading dont show").
+            key(block.id) {
             val quoteAbove = index > 0 && isQuoteRun(doc.blocks[index - 1])
             val quoteBelow = index < doc.blocks.lastIndex && isQuoteRun(doc.blocks[index + 1])
             if (block.isPhoto) {
@@ -5598,6 +5784,7 @@ internal fun PersonalDocView(
                 // for it and the page does not say it twice.
             } else if (block.text.isNotBlank()) {
                 renderLine(index, block, quoteAbove, quoteBelow)
+            }
             }
         }
     }
@@ -5733,6 +5920,92 @@ private fun DockPanelDivider(ink: Color) {
  * Undo is the box's own last actions (see the state's own note) — it is not a
  * keystroke undo, and nothing here pretends it is.
  */
+/**
+ * v496 — LEAVING THE PAGE WITH ITS STYLING.
+ *
+ * A page's Copy used to put PLAIN text on the clipboard, so a copied heading came
+ * back as body words and a bolded clause arrived unbolded (member report:
+ * "copying loses the styling"). Android's clipboard can carry both at once —
+ * `ClipData.newHtmlText` holds the words AND the same words marked up — so the
+ * reach is written as an HTML clip: a rich target (a document, a mail, a note
+ * app) pastes the styling, and everything else pastes the plain text it always
+ * got. The page's own Paste keeps reading the plain half, so pasting into Curio
+ * still lands words.
+ *
+ * The markup is generated from the SAME per-character mask the page draws from,
+ * so what leaves is what was on the page. The marker pens are deliberately not
+ * carried: a pen is a wash of colour no phone editor's HTML will honour, and a
+ * colour that arrives as none is worse than words that arrive clean.
+ */
+internal fun copyStyledToClipboard(
+    context: android.content.Context,
+    parts: List<Pair<String, IntArray>>
+) {
+    val plain = parts.joinToString("\n") { it.first }.trim('\n')
+    if (plain.isBlank()) return
+    val manager = runCatching {
+        context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+            as? android.content.ClipboardManager
+    }.getOrNull() ?: return
+    runCatching {
+        manager.setPrimaryClip(
+            android.content.ClipData.newHtmlText("Curio", plain, clipHtmlFor(parts))
+        )
+    }
+}
+
+/** The four letter styles a clipboard can carry, plus the two line sizes. */
+private const val CLIP_STYLE_BITS =
+    FLAG_TITLE or FLAG_BOLD or FLAG_ITALIC or FLAG_UNDERLINE or FLAG_STRIKE
+
+private fun clipHtmlFor(parts: List<Pair<String, IntArray>>): String {
+    val html = StringBuilder()
+    parts.forEachIndexed { index, part ->
+        val words = part.first
+        val mask = part.second
+        if (index > 0) html.append("<br>")
+        var open = 0
+        words.forEachIndexed { at, character ->
+            val bits = mask.getOrElse(at) { 0 } and CLIP_STYLE_BITS
+            if (bits != open) {
+                html.append(clipCloseTags(open)).append(clipOpenTags(bits))
+                open = bits
+            }
+            when (character) {
+                '&' -> html.append("&amp;")
+                '<' -> html.append("&lt;")
+                '>' -> html.append("&gt;")
+                '\n' -> html.append("<br>")
+                else -> html.append(character)
+            }
+        }
+        html.append(clipCloseTags(open))
+    }
+    return html.toString()
+}
+
+/** The tags a set of style bits opens — outermost first. */
+private fun clipOpenTags(bits: Int): String {
+    val out = StringBuilder()
+    if (bits and FLAG_TITLE != 0) out.append("<span style=\"font-size:1.3em\">")
+    if (bits and FLAG_BOLD != 0) out.append("<b>")
+    if (bits and FLAG_ITALIC != 0) out.append("<i>")
+    if (bits and FLAG_UNDERLINE != 0) out.append("<u>")
+    if (bits and FLAG_STRIKE != 0) out.append("<strike>")
+    return out.toString()
+}
+
+/** …and the same tags closed, innermost first, so the markup nests. */
+private fun clipCloseTags(bits: Int): String {
+    val out = StringBuilder()
+    if (bits and FLAG_STRIKE != 0) out.append("</strike>")
+    if (bits and FLAG_UNDERLINE != 0) out.append("</u>")
+    if (bits and FLAG_ITALIC != 0) out.append("</i>")
+    if (bits and FLAG_BOLD != 0) out.append("</b>")
+    if (bits and FLAG_TITLE != 0) out.append("</span>")
+    return out.toString()
+}
+
 // internal: the BOX is the caller's to place now (see [PersonalWritingPage] — it
 // floats over the page's foot rather than riding in the dock's own pill), and a
 // private one could not leave this file.
@@ -5743,6 +6016,9 @@ internal fun PersonalPageEditBar(
     ink: Color
 ) {
     val clipboard = LocalClipboardManager.current
+    // v496 — the STYLED copy needs the platform clipboard (see
+    // [copyStyledToClipboard]); the page's own Paste still reads through Compose.
+    val clipboardContext = LocalContext.current
     val hasReach = state.pageSelectionCount > 0 || state.pageLettersPicked
     val lineHere = state.pageSelectionCount > 0
     // ── v439 — THE REACH HAS A DOOR, AND THE DOOR SAYS WHAT IS IN HAND ────
@@ -5852,8 +6128,12 @@ internal fun PersonalPageEditBar(
                     if (!hasReach) {
                         offerReach()
                     } else {
+                        // v496 — the reach is read BEFORE the cut takes it away,
+                        // and it leaves with its styling (see
+                        // [copyStyledToClipboard]).
+                        val parts = state.pageSelectionParts()
                         val text = state.cutPageSelection()
-                        if (text.isNotEmpty()) clipboard.setText(AnnotatedString(text))
+                        if (text.isNotEmpty()) copyStyledToClipboard(clipboardContext, parts)
                     }
                 }
             ) {
@@ -5869,7 +6149,9 @@ internal fun PersonalPageEditBar(
                     } else {
                         val text = state.copyPageSelection()
                         if (text.isNotEmpty()) {
-                            clipboard.setText(AnnotatedString(text))
+                            // v496 — the words AND the styling they were written
+                            // in leave together (see [copyStyledToClipboard]).
+                            copyStyledToClipboard(clipboardContext, state.pageSelectionParts())
                             state.closePageEditBar()
                         }
                     }
@@ -6144,6 +6426,19 @@ internal fun PersonalToolDock(
      */
     journalAccent: Int = JOURNAL_ACCENT_THEME,
     onJournalAccent: ((Int) -> Unit)? = null,
+    /**
+     * v496 — THE BAR PUTS ITSELF AWAY, AND STAYS AWAY UNTIL IT IS ASKED BACK.
+     *
+     * The member's own words: *"make each tool as a circular pill, and also a way
+     * to hide them with a arrow maybe, and it stays in view once expanded"*. The
+     * bar used to be hidden BY THE PAGE — a downward scroll took it away and an
+     * upward nudge brought it back (v391) — which meant the tools moved on their
+     * own while the member was reading back what they had written. The door is
+     * the member's now: the arrow at the row's leading edge puts the tools away
+     * and brings them back, and NOTHING else hides them.
+     */
+    collapsed: Boolean = false,
+    onToggleCollapsed: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     surface: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
@@ -6197,21 +6492,20 @@ internal fun PersonalToolDock(
     LaunchedEffect(state.captionFocusedId) {
         if (state.captionFocusedId != null) openGroup = null
     }
-    // ── v444 — A PANEL IS FOR THE LINE YOU OPENED IT ON ───────────────────
+    // ── v444 SUPERSEDED BY v496 — AN OPEN PANEL STAYS OPEN ────────────────
     //
-    // The member: *"the collapse auto closes when I start typing or I tap the
-    // page"*. A panel of choices standing under the dock while the member writes
-    // is furniture: they made their choice the moment the line changed or a
-    // letter went in, and the dock should be a tool row again. Two signals, both
-    // the state's own: the FOCUS moving to another line (which is what tapping
-    // the page does) and the TEXT of the focused line changing (typing). Applying
-    // a marker or a list style does neither — it writes the mask, not the words —
-    // so the panel the member is choosing from is never closed out from under
-    // the choice they just made.
-    val focusedLine = state.focusedId
-    val focusedWords = focusedLine?.let { state.text(it) }.orEmpty()
-    LaunchedEffect(focusedLine, focusedWords) {
-        openGroup = null
+    // v444 closed the panel on the two signals the state owns — the caret moving
+    // to another line, and the focused line's words changing — on the theory that
+    // a panel of choices standing under the dock while the member writes is
+    // furniture. The member's answer is the opposite (*"an open tool panel must
+    // stay until I close it"*), and their reading is the better one: choosing a
+    // marker while a line is being written is exactly when a panel gets tapped
+    // "through", and a panel that closes itself mid-choice makes the member open
+    // it twice. A door's second press and the panel's own cross are the ways out,
+    // and the swap to a caption's tools (a different subject entirely) still
+    // takes the panel with it.
+    LaunchedEffect(collapsed) {
+        if (collapsed) openGroup = null
     }
     // v389 — TEXT HISTORY, the dock's FIRST tool.
     //
@@ -6296,14 +6590,49 @@ internal fun PersonalToolDock(
         // [PersonalDockGroup]). `animateContentSize` is what makes the pill grow
         // to hold it instead of jumping.
         Column(modifier = Modifier.animateContentSize()) {
+        if (collapsed && onToggleCollapsed != null) {
+            // ── v496 — THE BAR AS IT IS PUT AWAY ────────────────────────
+            //
+            // ONE pill with ONE arrow: the page's foot is the page's again, and
+            // the way back is exactly where the tools were. It is a branch of its
+            // own rather than an empty row so the put-away bar cannot be mistaken
+            // for a tool that vanished.
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PersonalToolButton(
+                    label = "Show the writing tools",
+                    active = false,
+                    accent = accentInk, ink = ink,
+                    onClick = onToggleCollapsed
+                ) {
+                    CurioIcon(CurioIcons.KeyboardArrowUp, null, size = 19.dp)
+                }
+            }
+        } else {
+        Row(
+            modifier = Modifier.padding(start = 6.dp, end = 10.dp, top = 9.dp, bottom = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+        if (onToggleCollapsed != null) PersonalToolButton(
+            label = "Hide the writing tools",
+            active = false,
+            accent = accentInk, ink = ink,
+            onClick = onToggleCollapsed
+        ) {
+            CurioIcon(CurioIcons.KeyboardArrowDown, null, size = 19.dp)
+        }
         Row(
             modifier = Modifier
                 // Nine tools in a fixed row overflowed a narrow phone and cut
                 // the last icons in half; the row scrolls, so every tool is
                 // always reachable and nothing is clipped — and it keeps its
-                // place (see [toolScroll]).
-                .horizontalScroll(toolScroll)
-                .padding(horizontal = 10.dp, vertical = 9.dp),
+                // place (see [toolScroll]). The put-away arrow above stands
+                // OUTSIDE this scroll on purpose: a door that can scroll off the
+                // bar is not a door.
+                .horizontalScroll(toolScroll),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp)
         ) {
@@ -6567,6 +6896,8 @@ internal fun PersonalToolDock(
                 CurioIcon(CurioIcons.Download, null, size = 18.dp)
             }
         }
+        }
+        }
         // ── AND THE PANEL A DOOR OPENS, IN THE DOCK ITSELF (v433) ────────
         //
         // Not a menu over the page: the choices stand where the tools are, so a
@@ -6574,7 +6905,7 @@ internal fun PersonalToolDock(
         // floating list somewhere else. The cross at the panel's end puts it
         // away, and so does the door (a second press closes what it opened).
         AnimatedVisibility(
-            visible = openGroup != null,
+            visible = openGroup != null && !collapsed,
             enter = expandVertically(tween(170)) + fadeIn(tween(130)),
             exit = shrinkVertically(tween(130)) + fadeOut(tween(100))
         ) {
@@ -7337,7 +7668,18 @@ private fun PersonalToolButton(
     // choose — the same pairing the date pill and the eye/pen switch wear.
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (active) accent else Color.Transparent,
+        // ── v496 — EVERY TOOL IS ITS OWN CIRCULAR PILL ──────────────────
+        //
+        // An idle tool used to be a bare glyph inside one long capsule: nine
+        // glyphs floating in a bar, with nothing saying where one tool ended and
+        // the next began (member request: *"make each tool as a circular pill"*).
+        // An idle tool now wears a faint disc of its own — the bar's own fill
+        // blended a step toward the ink, so the circle reads on the light page and
+        // on the dark one alike — and the lit tool is still the solid accent disc
+        // it was (v433). The blend is OPAQUE on purpose: a translucent fill lets
+        // the bar's own shadow bleed through it (root compile-safety rule 11).
+        color = if (active) accent
+        else lerp(MaterialTheme.colorScheme.surfaceContainerHigh, ink, 0.10f),
         modifier = Modifier
             // v436 — 42dp rather than 36: the dock was called too thin, and a
             // 36dp target is under the 48dp a thumb wants on the row a member

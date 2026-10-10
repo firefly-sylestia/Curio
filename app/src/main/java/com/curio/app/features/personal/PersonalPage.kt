@@ -515,36 +515,26 @@ internal fun PersonalWritingPage(
         snapshotFlow { pageScroll.value }.collect { report(it) }
     }
 
-    // ── v391 — THE DOCK IS A TYPING INSTRUMENT, NOT FURNITURE ─────────────
+    // ── v391 SUPERSEDED BY v496 — THE DOCK IS THE MEMBER'S TO PUT AWAY ────
     //
-    // Two things decide whether the tools are up (user request: "hide the tool
-    // bar when keyboard is closed and i scroll down, smoothly hide it … only
-    // show the journal tool bar when the keyboard is open and the cursor is in
-    // focus in the text field"):
+    // v391 hid the tools on a downward scroll and brought them back on an upward
+    // nudge, which was the right answer to "hide the tool bar when… i scroll
+    // down" — until it wasn't: the tools moved on their own WHILE the member was
+    // reading back what they had written, and "once expanded, it must stop
+    // auto-hiding when I scroll down" is their own correction. The put-away door
+    // is on the bar itself now (see [PersonalToolDock]'s `collapsed`): one arrow,
+    // pressed by a finger, and the bar stays exactly as it was left.
     //
-    //   1. the KEYBOARD. The IME inset is read in composition the way the rest
-    //      of the app reads it, so with no keyboard up there is nothing to
-    //      format — which is also exactly the moment a page is being READ
-    //      rather than written. Focus alone could not say this: dismissing the
-    //      keyboard leaves the caret in the line.
-    //   2. the SCROLL DIRECTION. A downward scroll means the member is moving
-    //      through the page (looking for a place to type, or reading what they
-    //      wrote) — the tools step out of the way; the smallest upward nudge
-    //      brings them back, and so does coming back to write (see the reset
-    //      below). The threshold is what keeps a stray pixel of drift from
-    //      flapping the dock in and out.
+    // The flag is SAVED rather than only remembered, because a bar the member put
+    // away is a decision about the page, not a frame of a scroll — and the two
+    // halves of the page (the writing one below, the reading one in the eye) must
+    // not disagree about it after a rotation.
+    //
+    // What is left of v391's keyboard rule is the honest half of it: the reading
+    // side has nothing to format, so the bar is not drawn there at all (this file
+    // hides it with `editing`, as it always did).
     val densityNow = LocalDensity.current
-    var dockScrolledAway by remember { mutableStateOf(false) }
-    LaunchedEffect(pageScroll) {
-        val threshold = with(densityNow) { 18.dp.toPx() }
-        var last = pageScroll.value
-        snapshotFlow { pageScroll.value }.collect { now ->
-            val travel = now - last
-            last = now
-            if (travel > threshold) dockScrolledAway = true
-            else if (travel < -threshold) dockScrolledAway = false
-        }
-    }
+    var dockCollapsed by rememberSaveable(entryId) { mutableStateOf(false) }
 
     // ── v389e — THE PAGE FOLLOWS A CARRIED BLOCK ─────────────────────────
     //
@@ -597,10 +587,12 @@ internal fun PersonalWritingPage(
             }
         }
     }
-    // Writing again is what asks for the tools back.
-    LaunchedEffect(editor.focusedId) {
-        dockScrolledAway = false
-    }
+    // ── v496 — NOTHING HIDES THE BAR BUT THE MEMBER ────────────────────
+    //
+    // v391's "writing again asks for the tools back" is gone with the scroll
+    // rule it belonged to: a bar the member put away with the arrow stays away
+    // while they write (the arrow is right there), and a bar they left open is
+    // never taken away from them mid-sentence.
 
     // ── THE PAGE'S OWN SECTIONS, HELD AT THE TOP (v389) ─────────────────
     //
@@ -994,10 +986,10 @@ internal fun PersonalWritingPage(
         // toolbars and eighteen controls in it while the member was doing the
         // one thing: picking a reach and cutting it. The copy box IS the page's
         // bottom while it is open, so the dock goes away with the same slide it
-        // leaves by when the writing is scrolled past (see [dockScrolledAway]).
+        // leaves by when the member puts it away (see [PersonalToolDock]'s
+        // `collapsed` — v496 replaced the old scroll-away with the bar's own door).
         AnimatedVisibility(
-            visible = editing && liveVoice == null && !dockScrolledAway &&
-                !editor.pageEditBarOpen,
+            visible = editing && liveVoice == null && !editor.pageEditBarOpen,
             enter = CurioMotion.pillArrive(),
             exit = CurioMotion.pillLeave(),
             modifier = Modifier.fillMaxWidth()
@@ -1019,6 +1011,8 @@ internal fun PersonalWritingPage(
                         showJournalTools = showJournalTools,
                         journalAccent = journalAccent,
                         onJournalAccent = onJournalAccent,
+                        collapsed = dockCollapsed,
+                        onToggleCollapsed = { dockCollapsed = !dockCollapsed },
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
