@@ -2484,6 +2484,23 @@ private fun CapsuleArchive(
                     }
                     if (expanded) {
                         Spacer(Modifier.height(10.dp))
+                        // ── v510 — A SEALED LETTER STAYS SEALED ────────────────
+                        // The row used to expand into the message, the picture and
+                        // the voice whatever its state, so a capsule still WAITING
+                        // for its day showed the words it was sealed to keep — the
+                        // member: *"the sealed capsule text should not be viible when
+                        // its sealed"*. A waiting row now opens onto the promise, not
+                        // the letter; the text arrives with the day (a `ready` row
+                        // retires the seal first, so opening it there is opening it).
+                        if (waiting) {
+                            Text(
+                                "Sealed until ${
+                                    CurioTimeCapsules.untilText(capsule.openAt, now)
+                                }. The letter opens with its day.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = scheme.onSurfaceVariant
+                            )
+                        } else {
                         if (capsule.message.isNotBlank()) {
                             Text(
                                 capsule.message,
@@ -2515,6 +2532,7 @@ private fun CapsuleArchive(
                                 accent = if (ready) onAccentQuiet else accent,
                                 onRemove = null
                             )
+                        }
                         }
                     }
                 }

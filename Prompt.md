@@ -6,6 +6,38 @@ from the state rather than from memory.
 
 ---
 
+## §102 — THE NEXT BATCH: PUSH, THE SIDES, THE TYPE STEP, AND THE SEALED CAPSULE (v510 / `1.5.12` / `20260955`)
+
+**WHAT THE MEMBER CHOSE** (asked with `ask_user` after v509 was committed): next batch = **both leftovers, heroes
+first**; **push it now**; type **90% in landscape** *"also overllay make everything a little smaller in
+portraight too. like just a little"*; and **fix the sealed capsule text** from the stale tail prompt.
+
+1. **PUSHED `eca43d1d`** (the v509 landscape pass) — and the v508 category-tint push before it is **CI green**.
+2. **A SHORT WINDOW FILLS ITS SIDES** (`CurioNavHost`): the `widthIn(max = CurioContentMaxWidth)` on the shared
+   `SharedTransitionLayout` is now skipped when `CurioLayout.isCompact()`. That was the actual cause of BOTH
+   "the tear design stays cut from the sides" and "halfly reached" — a landscape phone is ~800dp wide and the
+   pages were 720dp, centred. Tablets and desktop windows keep the column.
+3. **THE TYPE STEP** (`MainActivity`): `fontScale × 0.90` compact / `× 0.97` everywhere else. Multiplied, not
+   replaced, so a member's system text size still works.
+4. **A SEALED LETTER STAYS SEALED** (`CapsuleArchive` in `TimeCapsuleScreen`): the stale item is the "Your
+   letters" list — an expanded row drew the message, picture and voice whatever the capsule's state, so a letter
+   still **waiting** for its day opened onto the words it was sealed to keep. A waiting row now expands onto the
+   promise ("Sealed until … The letter opens with its day."), and the contents are drawn only for a `read`
+   capsule or a `ready` one whose seal the same tap retires. **Read before moving:** a scripted attempt to move
+   the "Sealed" confirmation panel out of the page's column turned out to be a NO-OP — the panel was already a
+   sibling of that column — so the file came back byte-identical and the wrong diagnosis was dropped.
+
+**⚠️ STILL OWED: the header search.** Journals, Topic Database, History, Settings and the pickers keep their
+search as an in-scroll row; each needs its own header action slot wired to its own query state, and Cabinet's
+banner (which already has it) is the model. Not started in this batch.
+
+**CHECKS.** No Gradle here (CI is the validation; the v509 run was queued at push time). `TimeCapsuleScreen` was
+re-read at both seams after the move and balances at 0 braces; every other edited file was re-read and balances.
+Version `1.5.11 → 1.5.12`, code `20260954 → 20260955`, `changelogs/20260955.txt` copied forward from
+`20260954.txt` with the three bullets.
+
+---
+
 ## §101 — THE LANDSCAPE PASS (v509 / `1.5.11` / `20260954`; COMMITTED, NOT PUSHED — the member: "now just commit it dont push it until i say so")
 
 > "now our leftover landscape mode tqweaks. love the shuffler page, just the psin button is contantly showing
@@ -2468,4 +2500,7 @@ prompt stays below it.)*
 
 
 ## next prompt
-fix the cl failure also the sealed capsule text should not be viible when its sealed
+
+*(The prompt that sat here — "fix the cl failure also the sealed capsule text should not be viible when its
+sealed" — is ANSWERED: the CL half was the v507 build, and the sealed-capsule half landed in **v510** (§102).
+No pending prompt; the next one goes here.)*

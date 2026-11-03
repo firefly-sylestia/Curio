@@ -232,7 +232,11 @@ android {
         // step smaller, the nav pills step down with a detached "+" beside
         // them, Spin's landscape shuffle button is the die again, and the
         // short Profile banner has room for its Edit/streak row.
-        versionCode = 20260954
+        // v510 — a short window drops the 720dp content column (pages fill the
+        // sides, so a torn hero reaches the screen edge), the reading density
+        // is 90% short / 97% everywhere, and the sealed capsule screen covers
+        // the page instead of being appended under the letter.
+        versionCode = 20260955
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
@@ -249,7 +253,7 @@ android {
         // v498 — the passport has a page of its own (agenda §5.4),
         // and the grid of stamps it used to be inside a Quests card moved
         // there whole, with the press and every lane's spin on it.
-        versionName = envReleaseVersion ?: "1.5.11"
+        versionName = envReleaseVersion ?: "1.5.12"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

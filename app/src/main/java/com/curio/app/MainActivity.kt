@@ -279,23 +279,25 @@ class MainActivity : ComponentActivity() {
             )
         }
         setContent {
-            // v509 — A SHORT WINDOW READS ONE STEP SMALLER.
+            // v510 — THE APP READS ONE STEP SMALLER, IN EVERY WINDOW.
             //
             // The member, of landscape: *"many things feels too big in buttom
             // sheets and dialog box etc … and make everything smaller and
-            // compact"*. A phone in landscape is `CurioLayout.isCompact()` and
-            // its body is ~360dp tall, so the portrait type steps (sized for a
-            // 700dp column) crowd every sheet, dialog and list. The fix is one
-            // reader, not a hundred: the composition's DENSITY is re-provided
-            // with the font scale at 94% in a compact window. dp spacing is
-            // untouched (only `sp` type shrinks), every theme, sheet and page
-            // inherits it at once, and a portrait phone, a tablet and a desktop
-            // window keep today's sizes exactly.
+            // compact"*, and then, of the fix: *"smaller 90% also overllay make
+            // everything a little smaller in portraight too. like just a little"*.
+            //
+            // One reader instead of a hundred paddings: the composition's DENSITY
+            // is re-provided with a font scale of 90% in a compact window
+            // (landscape, or a body under 520dp tall) and 97% everywhere else. dp
+            // spacing is untouched — only `sp` type shrinks — so every theme,
+            // sheet, dialog, list and page inherits it at once and no layout is
+            // rebuilt around it. `fontScale` is MULTIPLIED, not replaced, so a
+            // member's own system text size still scales from their setting.
             val windowDensity = LocalDensity.current
             val compactWindow = CurioLayout.isCompact()
             val readingDensity = remember(windowDensity, compactWindow) {
-                if (compactWindow) Density(windowDensity.density, windowDensity.fontScale * 0.94f)
-                else windowDensity
+                val step = if (compactWindow) 0.90f else 0.97f
+                Density(windowDensity.density, windowDensity.fontScale * step)
             }
             CompositionLocalProvider(LocalDensity provides readingDensity) {
                 CurioTheme {

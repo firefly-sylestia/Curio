@@ -770,9 +770,21 @@ fun CurioNavHost(
             // "reveal-hero" shared elements, so opening a landed topic
             // morphs the reveal hero OUT of the ticket's position instead
             // of the page sliding in from the side.
+            //
+            // v510 — A SHORT WINDOW FILLS ITS SIDES. The 720dp content column
+            // is right for a TABLET (a long line of text is unreadable wider)
+            // but a phone in landscape is only 360dp tall, so the same cap left
+            // a visible gutter on both sides and a torn hero stopping short of
+            // the screen — the member: *"the tear design stays in landscape
+            // staying cut from the sides … fill up the sides and not halfly
+            // reached"*. A compact window (landscape, or a body under 520dp)
+            // now uses the whole width; every other window keeps the column.
             modifier = Modifier
                 .fillMaxHeight()
-                .widthIn(max = CurioContentMaxWidth)
+                .then(
+                    if (CurioLayout.isCompact()) Modifier
+                    else Modifier.widthIn(max = CurioContentMaxWidth)
+                )
         ) {
             val sharedTransitionScope = this
         // ── What's New is offered from the ROOT, not here (v406) ────────

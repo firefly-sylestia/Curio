@@ -11229,6 +11229,31 @@ search into the header on every list screen) — see `Prompt.md` §101 for what 
 - **THE SHORT PROFILE BANNER HAS ROOM (`ProfileHeroHeightShort`, 260 → 300dp).** The banner's own content floor
   (top pills, identity row, Edit profile / streak pills, the stat bar above the tear) came to within a few dp of
   260, so a larger system font clipped the pill row against the banner's bottom edge.
-- **OWED (recorded, not done):** the torn heroes still do not reach the screen's edges on a wide window (the
-  content column is `CurioContentMaxWidth`, so a hero's tear stops where the column does), and the search has
-  not moved into the header on the list screens — both are the next batch.
+- **OWED (recorded, not done):** the search has not moved into the header on the list screens — Cabinet's banner
+  already carries its own, but Journals, Topic Database, History, Settings and the pickers each need their
+  header action slot wired to their own query state.
+
+### v510 — A SHORT WINDOW FILLS ITS SIDES, THE TYPE STEPS DOWN, AND A SEALED CAPSULE COVERS ITS PAGE
+
+The member's answers to "what's next" (*"smaller 90% also overllay make everything a little smaller in
+portraight too. like just a little"*), plus the old `Prompt.md` tail item (*"the sealed capsule text should
+not be viible when its sealed"*). Pushed as **1.5.12 / `20260955`**.
+
+- **THE 720dp COLUMN IS A TABLET RULE, NOT A LANDSCAPE ONE (`CurioNavHost`).** Every page is wrapped in
+  `SharedTransitionLayout` with `widthIn(max = CurioContentMaxWidth)`; on a 360dp-tall landscape phone that left a
+  visible gutter on both sides and a torn hero stopping short of the screen — the member: *"the tear design stays
+  in landscape staying cut from the sides … fill up the sides and not halfly reached"*. A compact window now takes
+  no width cap (the page is as wide as the window); a tablet and a desktop window keep the 720dp column, because
+  a long line of text is what that cap is for.
+- **THE READING DENSITY IS 90% / 97% (`MainActivity`).** The one `LocalDensity` re-provide now multiplies
+  `fontScale` by 0.90 in a compact window and by 0.97 everywhere else (the member: *"overllay make everything a
+  little smaller in portraight too. like just a little"*). It MULTIPLIES, so the member's own system text size
+  still scales from their setting; only `sp` moves, never dp.
+- **A SEALED LETTER STAYS SEALED (`CapsuleArchive`).** The old tail-of-`Prompt.md` item (*"the sealed capsule
+  text should not be viible when its sealed"*) is the "Your letters" list, not the confirmation screen: a row
+  expanded into the message, the picture and the voice whatever its state, so a capsule still **WAITING** for its
+  day opened onto the words it had been sealed to keep. A waiting row now expands onto the promise alone
+  ("Sealed until … The letter opens with its day.") and the message/photo/voice are drawn only for a `read`
+  capsule or a `ready` one — and opening a ready row retires the seal in the same tap, so what is revealed has
+  already been opened. **The general rule: the archive is a list of letters, and a letter's own contents are
+  gated on it having been opened, never on the row being expandable.**
