@@ -244,6 +244,6 @@ class AppModel extends ChangeNotifier {
     if (Platform.isMacOS) {
       return Directory('$home/Library/Application Support/Curio');
     }
-    return Directory('$home${separator}.curio');
+    return Directory('$home$separator.curio');
   }
 }

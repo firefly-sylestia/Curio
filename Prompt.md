@@ -52,6 +52,16 @@ output is well-formed, both workflow YAMLs parse, and the JSON store paths are p
 no plugin dependency. **The first `curio-flutter` CI run is the real check** — if it is red, the
 failed log is the next action, and nothing in it can affect Android.
 
+**✅ FIRST REAL BUILD — RED, THEN GREEN, AND THE CAUSE WAS PREDICTED IN THE COMMIT.** The first
+`curio-flutter` run (41660325645, on `a329ed37`) FAILED at `Analyse` with 20 issues, all in
+`test/widget_test.dart` — a file that was not in the commit. `flutter create .` had written Flutter's
+template `widget_test.dart` (which imports `MyApp`), and `flutter_test` was not a dev dependency yet.
+The very next commit (`8ef0da38`) had already occupied that path with a real test and added
+`flutter_test`, so the following run (41661616974) passed **Analyse → Test → Build → Upload**. Two
+info-level lints it reported (`prefer_const_constructors` on the Home header, an unnecessary brace in
+`app_model.dart`'s data path) are fixed in the following commit; neither was fatal
+(`--no-fatal-infos`).
+
 **OPEN.** iOS: `flutter create --platforms=ios .`, then the Swift platform view for iOS 26
 `UIGlassEffect`, then a macos-latest job. Not started. Also open: committing a generated `windows/`
 runner (needs a machine with the SDK), and the six "before the next release" improvements listed

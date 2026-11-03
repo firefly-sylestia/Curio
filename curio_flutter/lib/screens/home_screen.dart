@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PageHeader(
+          const PageHeader(
             title: 'Curio',
             subtitle: 'One good thing to explore, and somewhere to keep it.',
           ),
