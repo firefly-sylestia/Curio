@@ -1779,8 +1779,14 @@ object AppPreferences {
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
      * theme background when the user toggles it in settings.
+     *
+     * v508 — DEFAULT OFF: the plain theme background is the shipped look, and
+     * a member who wants every category-aware page washed in its lane's colour
+     * turns **Category tint** on in Settings → Appearance. This starts on the
+     * same value [isTintWashEnabled] reads, so a fresh install and a stored
+     * preference can never disagree.
      */
-    var tintWashEnabledState by mutableStateOf(true)
+    var tintWashEnabledState by mutableStateOf(false)
         private set
 
     /**
@@ -3102,9 +3108,16 @@ object AppPreferences {
     }
 
     // ── Category tint wash ────────────────────────────────────────────
-    /** Whether category-tinted page backgrounds are enabled (default on). */
+    /**
+     * Whether category-tinted page backgrounds are enabled (default OFF).
+     *
+     * v508 — a member who never touched the switch reads the plain theme
+     * background on every category-aware page; the wash is opt-in in
+     * Settings → Appearance → **Category tint**. The key is untouched, so an
+     * explicit choice (on or off) survives exactly as it was stored.
+     */
     fun isTintWashEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_TINT_WASH_ENABLED, true)
+        prefs(context).getBoolean(KEY_TINT_WASH_ENABLED, false)
 
     /**
      * Whether category-tinted backgrounds are on. v78 — the theme-style

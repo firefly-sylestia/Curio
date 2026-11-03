@@ -6,6 +6,44 @@ from the state rather than from memory.
 
 ---
 
+## §100 — THE CATEGORY TINT IS OFF BY DEFAULT (v508 / `1.5.10` / `20260953`; PUSHED)
+
+> "the project has been off for a long while, lets do some adjustments, first turn off category accent in backgroud off by default in settings."
+
+**WHAT THE SETTING IS.** The one row that matches "category accent in background" is **Settings → Appearance
+→ Category tint** (subtext *Colorful page backgrounds*, `AppPreferences.tintWashEnabledState` /
+`isTintWashEnabled` / `KEY_TINT_WASH_ENABLED`), the switch behind `categoryBackgroundWash()` on the Spin page,
+Topic Reveal, the Save/Capture screen and the Cabinet's filter-chip tint, and behind Home/Profile's tint lane
+(`categoryTintLane`). It shipped **ON by default**. No other row (Pastel colors, Glyph backdrop, the hero
+themes) matches the words, so no question was needed — the change is a default, not a removal.
+
+**WHAT CHANGED (three lines of code, one look).**
+1. `isTintWashEnabled` reads `getBoolean(KEY_TINT_WASH_ENABLED, false)` and `tintWashEnabledState` starts on
+   `false` — the two start from the same value, so a fresh install and a stored preference cannot disagree.
+2. Nothing else needed touching: every consumer already asks `tintWashEffective()`, so the plain theme
+   background is what all those pages wear now. The wash recipe, the key, the setter and the Settings row are
+   untouched — an explicit ON still gets exactly the v81/v185 wash.
+3. `app/AGENTS.md` — the durable design bullet now says the wash is **opt-in, default OFF**, and a new
+   `### v508` section records the reasoning ("a preference is a decision, so flipping a default must never
+   overwrite one").
+
+**⚠️ ONE CONSEQUENCE TO KNOW.** Existing members who never touched the switch have no stored value, so they
+flip to OFF with this build (the old look returns the moment they turn it on). That is what "off by default"
+means here; a member who explicitly turned it ON keeps it.
+
+**CHECKS, IN THIS ENVIRONMENT'S TERMS.** No Gradle command was run (root `AGENTS.md` forbids it here) — CI is
+the validation, and the change is two literals plus comments. Both edited regions were read back, and
+`grep` confirms `setTintWashEnabled` still has exactly one caller (the Settings row) and the key one writer.
+Version `1.5.9 → 1.5.10`, code `20260952 → 20260953`, `changelogs/20260953.txt` copied forward from
+`20260952.txt` with the new bullet under FIX (the old file untouched).
+
+**⚠️ STILL PENDING FROM THE PREVIOUS SESSION (not this request):** the tail of `Prompt.md` still carries
+`## next prompt — fix the cl failure also the sealed capsule text should not be viible when its sealed`. The CL
+half was fixed in v507 (and that push went red on one forward-referenced local, repaired in the same build);
+the sealed-capsule-text half has no recorded answer. Asked, not assumed.
+
+---
+
 ## 0. THE CURRENT REQUEST — §91 + §91b + §92 + §92a/b/c/d/e/f — the idea agenda, The Return built off it, then the second (manipulation) round BUILT IN FULL: the riffle, the press-stamp, the pencil margin, the time capsule, the tear, and the fold (AGENDA SAVED+PUSHED · THE RETURN (v489) · THE RIFFLE (v490, v490b) · THE PRESS-STAMP (v491) · THE PENCIL MARGIN (v492) · THE TIME CAPSULE (v493) · THE TEAR (v494) · THE FOLD (v495))
 ### ⚠️ §94 — THE JUDGEMENT PASS (v497 / `5.0.0` / `20260942`): three of those six are DELETED, the capsule's page is rebuilt, the Return is a capsule that always shows
 

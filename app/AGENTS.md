@@ -228,7 +228,7 @@ app/src/main/java/com/curio/app/
 - **Social privacy is a real, server-enforced surface (`supabase/schema.sql` §5f + `features/settings/PrivacyScreen.kt`, route `CurioRoutes.SETTINGS_PRIVACY`).** Three member-owned decisions: `profiles.profile_visibility` (`public` | `friends` — the discoverable SELECT policy exposes the row to accepted friends only when it is `friends`, see `curio_are_friends`), `profiles.hide_activity` + `profiles.last_active_at` (hiding CLEARS the stamp in the same write through `SocialApi.updatePrivacy`, so a hidden member has nothing on the server to read — presence is a courtesy line, never a record, and `CurioPerson.presenceLabel` returns null for a hidden, unknown or stale stamp), and `member_blocks` (one row per block, `curio_is_blocked(a,b)` as a security-definer test). A block is enforced in the policies themselves — profiles, `community_cards`, `community_comments`, `community_reactions`, `friend_requests` and `dm_messages` in BOTH directions — and blocking lives on the member's profile page while the Privacy page lists who is blocked and lifts it. Every privacy switch writes its LOCAL pref first (so the choice holds offline) and mirrors to the profile row; the privacy columns are a SECOND opt-in select (`SocialApi.profile` → `PERSON_COLUMNS_PRIVACY`) that falls back to `PERSON_COLUMNS` when a project has not been re-pasted, because a missing column must never blank a profile. Never add a privacy column to `PERSON_COLUMNS` itself.
 
 ### UI
-- **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
+- **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. **v508 — the wash is OPT-IN, DEFAULT OFF** (`AppPreferences.isTintWashEnabled` reads `false` when no choice is stored, and `tintWashEnabledState` starts on that same value): a member who never touched **Settings → Appearance → Category tint** gets the plain theme background on every one of those pages, and the recipe below is exactly what anyone who turns the switch on gets. The stored key is unchanged, so an explicit choice survives. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
 - **No close buttons in bottom sheets (user):** bottom sheets dismiss by
   swipe-down/back only — NEVER put a cross/close icon in one (the category
   picker + album sheets are the model; the book/series notes sheets had
@@ -11172,3 +11172,24 @@ see `Prompt.md` §99.
   into what is behind it (`scrimTop`, `paper`), which is the same picture with no hole in it. The hero
   drops its black-to-transparent scrim for a SOLID deep-accent plaque (55% toward black) that the promise
   and the distance sit on, and its lock disc is solid white with the accent's glyph in it.
+
+### v508 — THE CATEGORY TINT IS OFF BY DEFAULT
+
+The member's ask after a long break (*"turn off category accent in backgroud off by default in settings"*).
+Pushed as **1.5.10 / `20260953`**.
+
+- **THE SWITCH IS THE SAME SWITCH; ITS DEFAULT IS `false`.** `AppPreferences.isTintWashEnabled` read
+  `getBoolean(KEY_TINT_WASH_ENABLED, true)` and `tintWashEnabledState` started on `true`; both are `false`
+  now, and the state starts from the same value the getter reads so a fresh install cannot disagree with a
+  stored preference. That is the WHOLE change: every consumer already asked `tintWashEffective()`, so the
+  Spin page, Topic Reveal, Save/Capture, the Cabinet's filter-chip tint, Home/Profile's tint lane and the
+  mixed-deck wash all fall back to the plain theme background without a second gate being added.
+- **THE KEY AND THE ROW ARE UNTOUCHED.** `tint_wash_enabled` is still what an explicit choice is stored
+  under, `setTintWashEnabled` is still the only writer, and **Settings → Appearance → Category tint**
+  (the same row `SettingsHubScreen`'s deep row and search open) still turns the wash on. A member who had
+  turned it on keeps it on; a member who never touched it now sees the plain page.
+- **THE RECIPE DID NOT MOVE.** `categoryBackgroundWash`, the 20% deep-accent-over-cream light branch, the
+  16% light-twin dark branch, `categorySurface`/`categoryChipSurface` and the mixed-deck wash are exactly
+  as v81/v185 left them — this changes WHO gets the wash, not what it looks like.
+- **No migration, no stored value is rewritten.** A preference is a decision, so flipping a default must
+  never overwrite one: the code reads the new default only where nothing was ever written.
