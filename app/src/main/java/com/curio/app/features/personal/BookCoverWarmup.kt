@@ -21,10 +21,11 @@ import kotlinx.coroutines.withContext
  *
  * So the resolution lives in one place, on the machinery the Cabinet already
  * uses for its liked covers ([CabinetCoverCache]): the catalogue's own curated
- * URL for a book Curio knows, otherwise the provider cascade (iTunes Search,
- * then Open Library's title cover), and a URL is only ever written onto the
- * book's row once its BYTES have actually arrived — a dead placeholder is
- * never remembered as the answer, which is what left covers blank for good.
+ * URL for a book Curio knows (or the row's own, v512 — see [ensureCover]),
+ * otherwise the provider cascade (iTunes Search, then Open Library's title
+ * cover), and a URL is only ever written onto the book's row once its BYTES
+ * have actually arrived — a dead placeholder is never remembered as the
+ * answer, which is what left covers blank for good.
  *
  * Nothing here reaches the network with cover fetching switched off in
  * Settings; the catalogue's own cover is local, so it is still adopted.
@@ -37,12 +38,33 @@ internal object BookCoverWarmup {
      * Returns the URL that delivered an image (or the catalogue's own URL when
      * fetching is off), or null when nothing could be resolved — in which case
      * the row is left exactly as it was and the generated cover keeps its
-     * place. A book that already has a cover URL is never re-resolved: the row
-     * is the answer, and the shelf is not the place to second-guess it.
+     * place.
+     *
+     * ── v512 — A BOOK THAT ALREADY HAS A URL IS WARMED TOO ──────────────────
+     *
+     * The member: *"do a double check on source as some books covers isnt showing
+     * up instantly"*. The cause was this guard: an early `return` on
+     * `book.coverUrl.isNotBlank()` meant a book that arrived WITH a cover URL (the
+     * add sheet's iTunes hit, the reveal's shelf bridge) never had its BYTES put on
+     * disk — only books that came in blank were warmed. Every plate for those books
+     * therefore fell back to `coverUrl` and let Coil fetch it in the layout, so the
+     * cover arrived a beat after the card, again on a cold cache, and never became
+     * the instant local file that [CabinetCoverCache] exists to provide.
+     *
+     * So the row's own URL is now the warmer's `authoredUrl` just like the
+     * catalogue's, the cascade still advances past it if it is dead, and the only
+     * short-circuit left is the one that matters: a cover whose bytes are already on
+     * disk returns without touching the network (and returns the URL, so a caller
+     * can still adopt it).
      */
     suspend fun ensureCover(context: Context, book: PersonalBookEntity): String? {
         if (book.title.isBlank()) return null
-        if (book.coverUrl.isNotBlank()) return null
+        val kind = CabinetCoverCache.CoverKind.BOOK
+        // The bytes are the answer: nothing to fetch, nothing to resolve.
+        CabinetCoverCache.localCoverFile(context, kind, book.title)?.let {
+            return CabinetCoverCache.persistedUrl(context, kind, book.title)
+                ?: book.coverUrl.takeIf { url -> url.isNotBlank() }
+        }
         val catalogCover = catalogCover(book.catalogId)
         if (!AppPreferences.coverFetchEnabledState) {
             // Fetching is off: adopt the catalogue's own cover when the app
@@ -50,13 +72,12 @@ internal object BookCoverWarmup {
             catalogCover?.let { write(book.id, it) }
             return catalogCover
         }
-        val kind = CabinetCoverCache.CoverKind.BOOK
         val file = CabinetCoverCache.ensureLocalCover(
             context = context,
             kind = kind,
             name = book.title,
             byline = book.author.takeIf { it.isNotBlank() },
-            authoredUrl = catalogCover,
+            authoredUrl = book.coverUrl.takeIf { it.isNotBlank() } ?: catalogCover,
             // The CALLER bumps the cache version once for the whole batch (a
             // per-cover bump recomposes every version-keyed plate per save) —
             // the Cabinet's own warmer rule, v3xx37.

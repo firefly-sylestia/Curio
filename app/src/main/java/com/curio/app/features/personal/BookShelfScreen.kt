@@ -1,6 +1,7 @@
 package com.curio.app.features.personal
 
 import android.net.Uri
+import android.os.SystemClock
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -74,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.curio.app.BuildConfig
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.PersonalBookEntity
@@ -90,11 +92,36 @@ import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
+
+/**
+ * v512 — HOW MANY COVERS THE SHELF WARMS AT ONCE.
+ *
+ * The member: *"some books covers isnt showing up instantly"*. The warm pass used
+ * to run one book at a time, and each one is up to a search plus a download, so a
+ * dozen books meant a dozen round trips before the last plate could even begin.
+ * Three in flight fills a shelf in a few seconds without turning the launch into a
+ * burst of parallel requests.
+ */
+private const val CoverWarmParallel = 3
+
+/**
+ * v512 — HOW OFTEN THE GRID IS TOLD A COVER LANDED.
+ *
+ * Each [CabinetCoverCache.version] bump re-checks the local file for every plate
+ * on the shelf, so a bump per download was refused long ago (the Cabinet's own
+ * batching rule, v3xx37). A quarter of a second is the middle: a cover that lands
+ * is on screen a frame later, and a batch of twelve costs a handful of passes
+ * instead of a dozen plus one.
+ */
+private const val CoverWarmBumpIntervalMs = 250L
 
 /**
  * v387 — THE BOOK SHELF.
@@ -129,28 +156,58 @@ fun BookShelfScreen(navController: NavController) {
 
     // ── THE COVERS COME TO THE SHELF (v410) ────────────────────────────
     // Every book on the shelf carries its own cover URL once it has one, and
-    // books that came in without any (shelved from a topic reveal before v410,
-    // typed in by hand, imported from a file) are resolved here — quietly, one
-    // at a time, on the same verified-bytes machinery the Cabinet uses (see
-    // [BookCoverWarmup]) — so the shelf fills with real artwork instead of a
-    // grid of generated plates. Each result is written onto the book's row, so
-    // the shelf, the book page, the Cabinet and Home all pick it up at once.
+    // books whose BYTES are not on disk yet are warmed here — at the same
+    // verified-bytes machinery the Cabinet uses (see [BookCoverWarmup]) — so the
+    // shelf fills with real artwork instead of a grid of generated plates. Each
+    // result is written onto the book's row, so the shelf, the book page, the
+    // Cabinet and Home all pick it up at once.
+    //
+    // v512 — "NOT SHOWING UP INSTANTLY" HAD THREE CAUSES, ALL IN THIS EFFECT:
+    //
+    //  1. it only warmed books with NO cover URL, so a book that arrived with one
+    //     never had its bytes stored and its plate re-fetched the art through Coil
+    //     on every visit (see [BookCoverWarmup]). The list is every book whose local
+    //     file is missing now, whatever its row says.
+    //  2. it fetched ONE AT A TIME, so a shelf of twelve waited twelve sequential
+    //     network searches before the last cover could even start. [CoverWarmParallel]
+    //     books are in flight at once.
+    //  3. it bumped the cache version ONCE, after the whole loop — so a cover that
+    //     landed in the first second stayed hidden until the last one finished. The
+    //     grid re-checks as they land, throttled to [CoverWarmBumpIntervalMs] so the
+    //     whole shelf is not recomposed per download (the Cabinet's batching rule).
     val coverConsent = AppPreferences.coverFetchEnabledState
-    val coverless = remember(books) {
-        books.filter { it.coverUrl.isBlank() && it.title.isNotBlank() }
+    val coverless = remember(books, context) {
+        books.filter { book ->
+            book.title.isNotBlank() && CabinetCoverCache.localCoverFile(
+                context, CabinetCoverCache.CoverKind.BOOK, book.title
+            ) == null
+        }
     }
     LaunchedEffect(coverless.map { it.id }, coverConsent) {
         if (coverless.isEmpty()) return@LaunchedEffect
-        var fetched = 0
-        withContext(Dispatchers.IO) {
-            for (book in coverless) {
-                if (BookCoverWarmup.ensureCover(context, book) != null) fetched++
+        val gates = Semaphore(CoverWarmParallel)
+        var lastBump = 0L
+        var landed = 0
+        var bumpPending = false
+        coroutineScope {
+            coverless.forEach { book ->
+                launch {
+                    gates.withPermit {
+                        if (BookCoverWarmup.ensureCover(context, book) == null) return@withPermit
+                        landed++
+                        val now = SystemClock.elapsedRealtime()
+                        if (now - lastBump >= CoverWarmBumpIntervalMs) {
+                            lastBump = now
+                            bumpPending = false
+                            CabinetCoverCache.version.intValue++
+                        } else {
+                            bumpPending = true
+                        }
+                    }
+                }
             }
         }
-        // ONE version bump for the whole batch, so the grid re-checks the
-        // local files once instead of recomposing per cover (the Cabinet's own
-        // warmer batching rule, v3xx37).
-        if (fetched > 0) CabinetCoverCache.version.intValue++
+        if (landed > 0 && bumpPending) CabinetCoverCache.version.intValue++
     }
 
     Box(
@@ -614,7 +671,19 @@ internal fun BookCover(
     val cachedArt = remember(title, cacheVersion) {
         CabinetCoverCache.localCoverFile(context, CabinetCoverCache.CoverKind.BOOK, title)
     }
-    val art: Any? = cachedArt ?: coverUrl.takeIf { it.isNotBlank() }
+    // v512 — A cover the app has NOT stored yet still has to be drawn from its
+    // URL, and that request deserves the fade every other cover request in the app
+    // gets: without it the artwork POPS over the generated plate at whatever moment
+    // the network answers, which reads as a glitch rather than as a cover arriving.
+    val remoteRequest = remember(context, coverUrl) {
+        coverUrl.takeIf { it.isNotBlank() }?.let { url ->
+            ImageRequest.Builder(context)
+                .data(url)
+                .crossfade(120)
+                .build()
+        }
+    }
+    val art: Any? = cachedArt ?: remoteRequest
     Box(modifier = modifier) {
         Box(
             modifier = Modifier

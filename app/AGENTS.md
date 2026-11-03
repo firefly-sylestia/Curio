@@ -11283,3 +11283,45 @@ animation. it just switches instaltnty add vibration and motion and proper slown
   card shares `CARD_WIDTH` (112dp) at 64dp tall so the five of them form one column. The 12-hour hour card carries
   its own AM/PM (`flipHourLabel`) — a single card has no separate cell for a marker, and an hour without one is
   ambiguous.
+
+### v512 — THE DRAWER'S STARS ARE ALL DIFFERENT AND SCATTERED, AND A BOOK'S COVER IS ON DISK
+
+The member: *"change the drawer stars shapes to be different and scatter it more and try to fill up the empty spaces
+make it random. and suggest more improvements before another release, and also do a double check on source as some
+books covers isnt showing up instantly."* Released as **1.5.14 / `20260957`** (committed with the variant tree; see
+Prompt.md for whether it is on origin).
+
+- **EVERY LANE GETS ITS OWN MARK (`starMarkFor`).** v507 made every lane the same four-point sparkle, which is what
+  made the sky read as wallpaper. A lane's mark is now derived from its OWN NAME (`id.name.hashCode()`, stable across
+  opens and independent of load order): four-point sparkle (3 of 9 buckets), five-point, six-point, eight-point
+  glint, and one bucket that is a DIAMOND (four points turned 45°, waist 0.26). `starPath` takes `points` and
+  `turnDeg` now. Each mark also takes a ±13% scale from the same hash.
+  **⚠️ THE RULE v477/v507 WON THAT MUST SURVIVE THIS: size and shape vary by NAME, never by knowledge.** No star may
+  grow as an archive fills. The largest mark (6.4dp × 1.02 × 1.14 ≈ 7.4dp) still clears the hairline trim
+  (`StarCoreDp` × `HaloTrimFactor` = 8.6dp).
+- **THE LAYOUT IS BEST-CANDIDATE, NOT A SPIRAL (`starScatterByFamily`).** Both golden-angle spirals are gone: the
+  family anchor and each lane inside its patch are chosen from `AnchorCandidates`/`PatchCandidates` seeded points
+  (`discPoint` — radius from `sqrt(u)` so points cover AREA, not pile at the middle, which is what filled the rim),
+  keeping whichever is furthest from what is already placed. Families are placed biggest-patch-first, with clearance
+  measured patch-edge to patch-edge. Still deterministic (`scatterWobble`) — random-LOOKING, not random, because the
+  sky has to stay a landmark. Patch width went 0.086+0.048·√n → 0.104+0.056·√n and `MinStarGap` 0.115 → 0.108
+  (which still clears two largest marks + the join).
+- **MORE DUST, WITH DEPTH.** `starDust` returns `StarDust(x, y, size, ink)` now: 150 specks (was 56) at 0.45…1.55dp
+  and 0.06…0.24 muted ink, so the wedges between families are sky rather than bare page. One `drawCircle` each on a
+  canvas that already drew a hundred ops; Lite mode still parks the twinkle.
+- **A BOOK'S COVER IS WARMED EVEN WHEN ITS ROW HAS A URL (`BookCoverWarmup.ensureCover`).** The report ("some books
+  covers isnt showing up instantly") was a real guard, not a network speed problem: `if (book.coverUrl.isNotBlank())
+  return null` meant only books that came in BLANK were ever stored on disk, so every book added from a search drew
+  its art through Coil in the layout, late and again on a cold cache. The row's own URL is now the warmer's
+  `authoredUrl`, and the only short-circuit is "the bytes are already on disk". `BookDetailScreen`'s early return is
+  gone for the same reason.
+- **AND THE SHELF FILLS AS COVERS LAND (`BookShelfScreen`).** The batch was sequential and bumped
+  `CabinetCoverCache.version` once AFTER the loop, so a cover that landed in the first second stayed hidden until
+  the last one finished. Now `Semaphore(CoverWarmParallel = 3)`, and the version bumps as covers land, throttled to
+  `CoverWarmBumpIntervalMs = 250` (the Cabinet's v3xx37 rule: never a bump per download). A live-fetched cover also
+  gets a 120ms crossfade instead of popping over the generated plate.
+  **The rule: warming is keyed on the BYTES, never on the row's URL.**
+- **AND A COVER'S REQUEST IS REMEMBERED (`BookBrowserScreen.BookBrowserRow`).** Its `ImageRequest.Builder(...)` sat
+  inside composition, so every recomposition of a search row handed Coil a NEW request instance and restarted the
+  load — the blink/blank beat in that list. `remember(cover, context)` now.
+  **The rule: a Coil model built in composition must be remembered on its data, or every redraw reloads it.**

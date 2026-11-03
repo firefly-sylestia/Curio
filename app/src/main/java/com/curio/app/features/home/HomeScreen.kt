@@ -3532,10 +3532,23 @@ private fun DrawerLaneStarMap(
     // cost the cached aura existed to avoid, so the shapes are cached exactly as the
     // points are, around each lane's own point, and the draw pass is a fill inside the
     // same transform the twinkle and the birth already share.
+    //
+    // v512 — AND NO TWO SHAPES HAVE TO BE THE SAME (the member: *"change the drawer
+    // stars shapes to be different"*). A lane's mark is [starMarkFor] its own name, so
+    // the sky carries four-, five-, six- and eight-pointed stars and the odd diamond,
+    // each turned a little off its neighbour and each with its own reach — while the
+    // arrangement is still identical on every open.
     val starOuterPx = with(density) { StarOuterDp.dp.toPx() }
-    val starInnerPx = starOuterPx * StarInnerRatio
-    val starShapes: List<Path> = remember(starPoints, starOuterPx) {
-        starPoints.map { point -> starPath(point, starOuterPx, starInnerPx) }
+    // The key is the lane NAMES, not the list: the drawer rebuilds its lane list on
+    // unrelated state changes, and a new (equal) list of names still matches, so the
+    // paths are rebuilt when a lane appears or leaves and never on a twinkle frame.
+    val laneNames = remember(lanes) { lanes.map { it.id.name } }
+    val starShapes: List<Path> = remember(starPoints, starOuterPx, laneNames) {
+        starPoints.mapIndexed { index, point ->
+            val mark = starMarkFor(laneNames.getOrNull(index) ?: "lane$index")
+            val reach = starOuterPx * mark.scale
+            starPath(point, reach, reach * mark.waist, mark.points, mark.turnDeg)
+        }
     }
     val lit = remember { Animatable(0f) }
     LaunchedEffect(lanes.size) {
@@ -3726,8 +3739,8 @@ private fun DrawerLaneStarMap(
             //    muted ink — no alpha anywhere.
             dust.forEach { dot ->
                 drawCircle(
-                    color = lerp(page, muted, 0.08f + 0.12f * dot.y),
-                    radius = 0.9.dp.toPx(),
+                    color = lerp(page, muted, dot.ink),
+                    radius = dot.size.dp.toPx(),
                     center = Offset(dot.x * size.width, dot.y * size.height)
                 )
             }
@@ -3861,16 +3874,18 @@ private fun DrawerLaneStarMap(
             // round it (a circle round a star read as furniture rather than as the
             // star answering).
             //
-            // ⚠️ v507 — EVERY LANE IS ONE SMALL STAR, THE SAME SHAPE AND SIZE.
+            // ⚠️ v507 — EVERY LANE IS ONE SMALL STAR, AND v512 VARIES ITS SHAPE.
             // The member: *"the knowleg makes some star to grow and also that weird
             // star look is bad fi xit, and use star shape small not circle or nythung
             // else"*. So the aura, the hot core and the knowledge glint are GONE, and
-            // each lane is a four-point star ([starPath]) filled in one colour: its
-            // own accent when the lane is explored or picked, the dim page mix when it
-            // is not. One `drawPath` a star inside the transform the twinkle and the
-            // birth already shared — cheaper than the three draw ops v503 spent on the
-            // same star, and it cannot grow with knowledge because nothing about the
-            // path depends on it.
+            // each lane is one star ([starPath]) filled in one colour: its own accent
+            // when the lane is explored or picked, the dim page mix when it is not.
+            // v512 varies the mark itself — four, five, six or eight points, or a
+            // diamond, at its own size and turn ([starMarkFor]) — but the variation
+            // is the lane's NAME, never its knowledge, so nothing grows as an archive
+            // fills. One `drawPath` a star inside the transform the twinkle and the
+            // birth already shared: cheaper than the three draw ops v503 spent on the
+            // same star.
             lanes.forEachIndexed { index, lane ->
                 // The staggered light-up: each star waits its own turn, so the sky
                 // fills in as a sweep rather than blinking on.
@@ -3921,7 +3936,7 @@ private fun DrawerLaneStarMap(
  * v422 — 56, not 46: the sky is taller now, and the dust is what gives a
  * backgroundless scatter its depth, so it has to cover the area it grew into.
  */
-private const val STAR_DUST_COUNT = 56
+private const val STAR_DUST_COUNT = 150
 
 /**
  * v414 — ONE LANE'S PLACE ON THE CHART: a polar SLOT (angle + radius), not a
@@ -3962,17 +3977,71 @@ private fun starPoint(slot: StarSlot, hub: Offset, width: Float, height: Float):
  * pass only ever fills this one. [centre] is the lane's own point, so the path needs
  * no transform of its own — the twinkle and the birth scale it about that point.
  */
-private fun starPath(centre: Offset, outer: Float, inner: Float): Path {
+private fun starPath(
+    centre: Offset,
+    outer: Float,
+    inner: Float,
+    points: Int,
+    turnDeg: Float
+): Path {
     val path = Path()
-    for (i in 0 until 8) {
+    val turn = turnDeg * (Math.PI.toFloat() / 180f)
+    val step = Math.PI.toFloat() / points.coerceAtLeast(2)
+    for (i in 0 until points * 2) {
         val reach = if (i % 2 == 0) outer else inner
-        val angle = (-90f + i * 45f) * (Math.PI.toFloat() / 180f)
+        val angle = -Math.PI.toFloat() / 2f + turn + i * step
         val x = centre.x + cos(angle) * reach
         val y = centre.y + sin(angle) * reach
         if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
     }
     path.close()
     return path
+}
+
+/**
+ * ── v512 — ONE LANE'S OWN MARK: HOW MANY POINTS, HOW DEEP THE WAIST, HOW BIG AND
+ *    WHICH WAY UP ─────────────────────────────────────────────────────────────────
+ *
+ * The member: *"change the drawer stars shapes to be different and scatter it more
+ * and try to fill up the empty spaces make it random"*. Every lane used to be the
+ * same four-point sparkle, which is what made the sky read as a wallpaper rather
+ * than as a sky; the shape is chosen from a lane's OWN NAME now, so it never
+ * changes between opens and never depends on the order lanes are loaded in.
+ *
+ * The variety is made of the two numbers that define a star ([points] and [waist])
+ * plus a small turn and a small scale:
+ *
+ *  * a four-point sparkle (the v507 mark) is the commonest, at the base waist;
+ *  * five and six points are the next most common, their waists a little fuller so
+ *    the arms stay readable at 6.4dp;
+ *  * one lane in nine is an eight-point glint (a tight waist, arms everywhere);
+ *  * one is a DIAMOND — four points turned 45° with almost no waist.
+ *
+ * ⚠️ AND SIZE IS STILL NOT A MEASURE. The variation is [scale] by seed only, ±13%
+ * of the same reach, and it is decided by the lane's name exactly as its shape is:
+ * no amount of knowledge makes a star fatter (v477/v507's rule, which this must not
+ * undo). The largest mark still clears the hairline trim below ([HaloTrimFactor]).
+ */
+private data class StarMark(
+    val points: Int,
+    val waist: Float,
+    val scale: Float,
+    val turnDeg: Float
+)
+
+private fun starMarkFor(seed: String): StarMark {
+    val h = seed.hashCode()
+    fun part(shift: Int) = ((h ushr shift) and 0xFFFF).toFloat() / 65535f
+    val pick = (part(0) * 9f).toInt().coerceIn(0, 8)
+    val turn = (part(16) - 0.5f) * 26f
+    val base = when (pick) {
+        0, 1, 2 -> StarMark(points = 4, waist = StarInnerRatio, scale = 1f, turnDeg = turn * 0.5f)
+        3, 4 -> StarMark(points = 5, waist = 0.46f, scale = 1.02f, turnDeg = turn)
+        5, 6 -> StarMark(points = 6, waist = 0.50f, scale = 0.96f, turnDeg = turn * 0.6f)
+        7 -> StarMark(points = 8, waist = 0.34f, scale = 1f, turnDeg = turn * 0.4f)
+        else -> StarMark(points = 4, waist = 0.26f, scale = 0.94f, turnDeg = 45f + turn * 0.3f)
+    }
+    return base.copy(scale = base.scale * (0.88f + 0.26f * part(8)))
 }
 
 /**
@@ -3991,9 +4060,9 @@ private const val HaloTrimFactor = 2.2f
  *
  * The member: *"use star shape small not circle or nythung else"*. [StarOuterDp] is
  * the point's reach, [StarInnerRatio] is how far the arms' waist sits between the
- * point and the middle — a four-point star drawn from eight alternating vertices (see
- * [starPath]) — and [StarPickGrow] is the whole of the picked star's answer, which is
- * feedback and never a measure.
+ * point and the middle for the four-point sparkle — the base every other mark is
+ * derived from (see [starMarkFor] for the shapes, v512) — and [StarPickGrow] is the
+ * whole of the picked star's answer, which is feedback and never a measure.
  *
  * ONE SIZE, for every lane, at every knowledge level: a star that grew as an archive
  * filled was refused twice by the member (see [StarCoreDp]), and the v503 glint added
@@ -4083,21 +4152,31 @@ private const val StarCoreDp = 3.0f
 private const val MaxBranchStars = 6
 
 // ── v483 — THE TERRITORIES (see [starScatterByFamily]) ────────────────────
-// A family's anchor is spread round the sky between these radii by the golden
-// angle, and its own patch grows with its lane count (a square root, so the big
-// families share the sky with the single-lane ones). The whole layout is scaled
-// back inside [TerritoryFitRadius] if a big family would otherwise reach the rim.
-// v488 — the anchors sit a little FURTHER OUT (0.32…0.52, was 0.26…0.46). With the
-// cross-family lines gone each family stands on its own, and the member asked for
-// the sky to read "more … scattered … beautiful": pushing the anchors outward gives
-// the hub air and spreads the constellations round the rim, without touching the
-// patch sizes (a patch is what makes a branch read as a constellation rather than
-// as a blob, and widening it would put two territories back on top of each other).
+// A family's patch grows with its lane count (a square root, so the big families
+// share the sky with the single-lane ones), its anchor is placed by best-candidate
+// sampling inside [TerritoryFitRadius], and the whole layout is scaled back inside
+// that radius only if the placement could not honour it.
+//
+// v512 — the anchor's minimum reach is [TerritoryAnchorInner]'s half, and the patch
+// is WIDER than v503's (0.104 + 0.056·√n, was 0.086 + 0.048·√n): the member asked
+// for the sky to be scattered *more* and for its empty spaces to be filled, and a
+// patch that only just holds its lanes leaves the wedges between families bare.
 private const val TerritoryAnchorInner = 0.38f
-private const val TerritoryAnchorOuter = 0.30f
-private const val TerritorySpreadBase = 0.086f
-private const val TerritorySpreadPerLane = 0.048f
-private const val TerritoryFitRadius = 0.92f
+private const val TerritorySpreadBase = 0.104f
+private const val TerritorySpreadPerLane = 0.056f
+private const val TerritoryFitRadius = 0.94f
+
+/**
+ * v512 — HOW MANY SEEDED POINTS ARE TRIED (the member: *"make it random"*).
+ *
+ * A best-candidate (Mitchell) sample draws [AnchorCandidates] points for a family's
+ * anchor and [PatchCandidates] for each of its lanes, and keeps the one furthest
+ * from everything already placed. More candidates means a fuller, less regular
+ * field; these two numbers are the whole cost of it, and they are spent ONCE per
+ * lane layout (the result is remembered), never per frame.
+ */
+private const val AnchorCandidates = 16
+private const val PatchCandidates = 12
 
 /**
  * ── v480/483 — HOW CLOSE TWO STARS MAY SIT, AND HOW HARD THEY PUSH APART ──
@@ -4107,14 +4186,15 @@ private const val TerritoryFitRadius = 0.92f
  *
  * Two stars are [StarOuterDp]-reach marks ([starPath]) whose trimmed joins stop a
  * little beyond that, so their centre-to-centre distance must clear the two marks
- * and the hairline between them or the sky's marks touch. v483
- * raises [MinStarGap] to just past that (unit space is the ellipse [starPoint]
- * scales; 0.115 × the 152dp half-width is 17.5dp, the tightest axis) so NO two
- * dots or halos overlap, and the deterministic relaxation is a few passes longer
- * to settle the tighter territories. The clamp runs inside every pass, so a star
- * pushed off the rim is brought back before the next pair is measured.
+ * and the hairline between them or the sky's marks touch. v512 lowers [MinStarGap]
+ * to 0.108 (was 0.115): the marks vary by ±15% now ([starMarkFor]), and the smaller
+ * gap lets the best-candidate layout keep its even spread instead of being folded
+ * back toward the middle by the relaxation. 0.108 × the 152dp half-width is 16.4dp,
+ * which still clears the two largest marks and the join between them. The clamp runs
+ * inside every pass, so a star pushed off the rim is brought back before the next
+ * pair is measured.
  */
-private const val MinStarGap = 0.115f
+private const val MinStarGap = 0.108f
 private const val SeparationPasses = 32
 
 /**
@@ -4153,87 +4233,117 @@ private const val BranchEasePower = 1.8f
  * surface: *"the drawer pattern and connections are still very much messy and
  * overlapping … make it beautiful"* — and, asked how the sky should be laid out,
  * chose **"Territories per family"**. So the spiral no longer runs across the whole
- * sky: each family gets ONE ANCHOR (spread round the sky by the same golden angle)
- * and its own patch, its lanes on a small local Vogel spiral inside it, and the
- * whole layout is scaled to fit the field ([TerritoryFitRadius]). Nothing a branch
- * draws can reach into another family's territory, which is what stops the lines
- * running through stranger stars. Deterministic as ever — the same lanes always
- * land in the same places.
+ * sky: each family gets ONE ANCHOR and its own patch, and the whole layout is
+ * scaled to fit the field ([TerritoryFitRadius]). Nothing a branch draws can reach
+ * into another family's territory, which is what stops the lines running through
+ * stranger stars. Deterministic as ever — the same lanes always land in the same
+ * places.
+ *
+ * v512 — THE SPIRALS ARE GONE, AND THE SKY FILLS ITS CORNERS. The member: *"change
+ * the drawer stars shapes to be different and scatter it more and try to fill up
+ * the empty spaces make it random"*. Golden-angle spirals fill a DISC evenly but
+ * they are still a spiral: every lane kept a machine's constant turn, every family
+ * sat on one ring, and the rim and the wedges between the patches stayed empty.
+ * The two layouts are now **best-candidate (Mitchell) samples** instead — the
+ * technique a star field actually wants:
+ *
+ *  * a family's ANCHOR is one of [AnchorCandidates] seeded points, whichever is
+ *    furthest from every anchor already placed (measured patch-edge to
+ *    patch-edge, so a wide family may not sit on top of a small one);
+ *  * each LANE inside that patch is one of [PatchCandidates] seeded points,
+ *    whichever is furthest from the lanes already placed in the same patch — so a
+ *    family's stars spread through its whole patch instead of spiralling out of
+ *    its middle.
+ *
+ * Both are still seeded from [scatterWobble], so the arrangement is random-LOOKING
+ * and identical every time: the map stays the landmark the member learns. The dust
+ * fills what the stars leave ([starDust]), and the short relaxation below is still
+ * what guarantees two marks never touch.
  */
 private fun starScatterByFamily(familyOf: List<CategoryFamily>): List<StarSlot> {
     if (familyOf.isEmpty()) return emptyList()
-    // The golden angle in radians — Vogel's constant, irrational on purpose so
-    // successive points never fall into a repeating spoke.
-    val goldenAngle = 2.3999632f
     val count = familyOf.size
     // ── 1) ONE ANCHOR PER FAMILY, AND EACH FAMILY'S OWN PATCH ─────────────
     // v483 — TERRITORIES (the member's own answer, *"Territories per family"*):
     // every family owns a region of the sky and no branch's stars sit inside
     // another family's patch, so a line can never run through a stranger's
-    // constellation. The anchors are spread round the whole sky by the golden
-    // angle the sky has always used, and a family's patch grows with its size —
-    // balanced by a square root so a fourteen-lane SCIENCE does not swallow a
-    // one-lane SPORTS.
+    // constellation. A family's patch grows with its size — balanced by a square
+    // root so a fourteen-lane SCIENCE does not swallow a one-lane SPORTS.
     val families = familyOf.distinct()
     val familyCount = families.size
-    // ── v503 — THE RINGS ARE DEALT BY SIZE, NOT BY TURN ───────────────────
-    // The anchor radius used to follow the family's index in the catalog, which
-    // put a fourteen-lane family on the rim as often as a one-lane one — and a
-    // wide patch out there has no room to the edge, so the fit below pulled the
-    // whole sky in toward the middle. The anchors are dealt from the INSIDE out
-    // in order of how much room a family's patch wants instead: the big families
-    // take the middle (where there is room for them) and the small ones take the
-    // rim, which is also what makes the sky read as scattered rather than as one
-    // ring of equally-sized clumps.
-    val need = families.map { family ->
-        TerritorySpreadBase + TerritorySpreadPerLane *
-            kotlin.math.sqrt(familyOf.count { it == family }.toFloat())
-    }
-    val ringRank = families.indices
-        .sortedByDescending { need[it] }
-        .withIndex()
-        .associate { (rank, fi) -> fi to rank }
+    val sizes = families.map { family -> familyOf.count { it == family } }
     val gathered = MutableList(count) { Offset.Zero }
+    // ── 1a) ONE ANCHOR PER FAMILY — BEST-CANDIDATE, BIGGEST FIRST ─────────
+    // A wide patch needs room, so the largest families are placed before the small
+    // ones (a lone lane takes whatever space is left at the rim instead of pushing
+    // a fourteen-lane patch out of the sky). Each family's patch grows with its own
+    // size and is kept whole inside the field, so the fit below stays a last
+    // resort rather than something the layout leans on.
+    val anchorOf = MutableList(familyCount) { Offset.Zero }
+    val patchOf = FloatArray(familyCount)
+    val placedAnchors = ArrayList<Offset>(familyCount)
+    val placedPatches = ArrayList<Float>(familyCount)
+    families.indices.sortedByDescending { sizes[it] }.forEach { fi ->
+        val patch = (TerritorySpreadBase + TerritorySpreadPerLane * kotlin.math.sqrt(sizes[fi].toFloat()))
+        val room = (TerritoryFitRadius - patch).coerceAtLeast(TerritoryAnchorInner * 0.5f)
+        var best = discPoint(
+            scatterWobble(fi * 17 + 5),
+            scatterWobble(fi * 31 + 11),
+            TerritoryAnchorInner * 0.5f,
+            room
+        )
+        var bestClearance = -Float.MAX_VALUE
+        repeat(AnchorCandidates) { c ->
+            val candidate = discPoint(
+                scatterWobble(fi * 101 + c * 37 + 7),
+                scatterWobble(fi * 53 + c * 71 + 19),
+                TerritoryAnchorInner * 0.5f,
+                room
+            )
+            var clearance = Float.MAX_VALUE
+            placedAnchors.forEachIndexed { k, other ->
+                val edge = (candidate - other).getDistance() - (patch + placedPatches[k])
+                if (edge < clearance) clearance = edge
+            }
+            if (clearance > bestClearance) {
+                bestClearance = clearance
+                best = candidate
+            }
+        }
+        anchorOf[fi] = best
+        patchOf[fi] = patch
+        placedAnchors.add(best)
+        placedPatches.add(patch)
+    }
+    // ── 1b) EVERY LANE FILLS ITS PATCH — BEST-CANDIDATE AGAIN ──────────────
+    // The lane that fills the emptiest part of the patch wins, so a family's stars
+    // spread across the whole of it instead of spiralling out of its middle: the
+    // constellation is drawn through stars that are actually distributed, which is
+    // what makes the sky read as found rather than plotted.
     families.forEachIndexed { fi, family ->
         val ids = familyOf.indices.filter { familyOf[it] == family }
-        val n = ids.size
-        // ── v503 — SCATTERED, NOT ARRANGED (the member: *"make it more
-        // scattered look"*). Every anchor and every lane carries a small
-        // deterministic wobble now: without it the anchors sat on one perfect
-        // golden-angle ring at one spacing, which is a machine's arrangement and
-        // reads as one however hard the constellations inside it are jittered.
-        val rank = ringRank[fi] ?: fi
-        val anchorAngle = fi * goldenAngle + 0.34f * scatterWobble(fi * 17 + 5)
-        val anchorRadius = (TerritoryAnchorInner +
-            TerritoryAnchorOuter * kotlin.math.sqrt((rank + 0.5f) / familyCount)) *
-            (1f + 0.17f * scatterWobble(fi * 31 + 11))
-        val anchor = Offset(cos(anchorAngle) * anchorRadius, sin(anchorAngle) * anchorRadius)
-        // Each family's lanes sit on a small Vogel spiral inside its own patch, so
-        // a branch reads as a constellation rather than as a blob.
-        // v503 — the patch is WIDER than it was (a family read as one tight
-        // blob at the old numbers, which is the opposite of a scatter), and each
-        // lane inside it wobbles off the spiral so the constellation looks found
-        // rather than plotted.
-        //
-        // ⚠️ AND A PATCH MAY NOT REACH PAST THE FIELD. The old code let a big
-        // family run past the rim and then scaled the WHOLE layout back to fit
-        // ([TerritoryFitRadius]) — which is the opposite of what the member asked
-        // for: one wide family pulled every other family in toward the middle and
-        // left the rim empty. The room left between a family's anchor and the rim
-        // is the most its patch may spend instead, so the anchors keep their new
-        // outward spread and the sky stays scattered to its edge; the global fit
-        // remains only as a last resort.
-        val room = (TerritoryFitRadius - anchor.getDistance()).coerceAtLeast(0.10f)
-        val spread = (TerritorySpreadBase + TerritorySpreadPerLane * kotlin.math.sqrt(n.toFloat()))
-            .coerceAtMost(room)
-        ids.forEachIndexed { k, index ->
-            val localAngle = k * goldenAngle + fi * 0.9f + 0.46f * scatterWobble(index * 7 + 3)
-            val localRadius = spread * kotlin.math.sqrt((k + 0.5f) / n) *
-                (1f + 0.32f * scatterWobble(index * 13 + 5))
-            gathered[index] = Offset(
-                anchor.x + cos(localAngle) * localRadius,
-                anchor.y + sin(localAngle) * localRadius
-            )
+        val anchor = anchorOf[fi]
+        val patch = patchOf[fi]
+        val placed = ArrayList<Offset>(ids.size)
+        ids.forEach { index ->
+            var best = anchor
+            var bestGap = -1f
+            repeat(PatchCandidates) { c ->
+                val candidate = anchor + discPoint(
+                    scatterWobble(index * 31 + c * 17 + 3),
+                    scatterWobble(index * 59 + c * 43 + 11),
+                    0f,
+                    patch
+                )
+                val gap = if (placed.isEmpty()) 1f else
+                    placed.minOf { (it - candidate).getDistance() }
+                if (gap > bestGap) {
+                    bestGap = gap
+                    best = candidate
+                }
+            }
+            placed.add(best)
+            gathered[index] = best
         }
     }
     // ── 2) AND THE WHOLE LAYOUT IS KEPT INSIDE THE FIELD ───────────────────
@@ -4475,22 +4585,56 @@ private fun scatterWobble(seed: Int): Float {
 }
 
 /**
+ * v512 — A POINT IN THE UNIT DISC, from two −1…1 hashes.
+ *
+ * [scatterWobble] answers a number in −1…1; this turns a pair of them into a point
+ * between [minRadius] and [maxRadius]. The RADIUS is taken from the square root of
+ * the first hash and the angle from the second, which is what makes the points
+ * evenly spread over the AREA rather than bunched at the middle (a linear radius
+ * would put half of them inside a quarter of the disc — the empty rim the member
+ * asked to fill).
+ */
+private fun discPoint(radial: Float, angular: Float, minRadius: Float, maxRadius: Float): Offset {
+    val u = (radial + 1f) * 0.5f
+    val v = (angular + 1f) * 0.5f
+    val r = kotlin.math.sqrt(minRadius * minRadius + u * (maxRadius * maxRadius - minRadius * minRadius))
+    val a = v * 2f * kotlin.math.PI.toFloat()
+    return Offset(cos(a) * r, sin(a) * r)
+}
+
+/** One speck of the sky's dust: where it sits in UNIT space, how big it is in dp and
+ *  how much muted ink it carries. v512 — the three are separate numbers so the field
+ *  has depth (a sky is not a grid of identical dots). */
+private data class StarDust(val x: Float, val y: Float, val size: Float, val ink: Float)
+
+/**
  * v419 — A FAINT DUST FIELD, so the panel is a SKY rather than a flat plate.
  *
  * A cheap deterministic pseudo-random (a linear congruential step) scatters
  * tiny dim points in UNIT space; the painter scales them by the panel, so the
  * dust never stretches. Not random: the same specks land in the same places on
  * every open.
+ *
+ * v512 — AND THERE IS A LOT MORE OF IT (the member: *"scatter it more and try to
+ * fill up the empty spaces"*). 150 specks instead of 56, each with its own size
+ * (0.45…1.55dp) and its own share of the muted ink (0.06…0.24): the areas between
+ * the constellations used to be bare page, and a field of varied fine dots is what
+ * turns them into sky instead of a gap. The per-frame cost is one `drawCircle` per
+ * speck on a canvas that was already drawing a hundred-odd ops.
  */
-private fun starDust(count: Int): List<Offset> {
-    val out = ArrayList<Offset>(count)
+private fun starDust(count: Int): List<StarDust> {
+    val out = ArrayList<StarDust>(count)
     var seed = 0x2545F491
+    fun next(): Float {
+        seed = seed * 1103515245 + 12345
+        return ((seed ushr 8) and 0xFFFF) / 65535f
+    }
     repeat(count) {
-        seed = seed * 1103515245 + 12345
-        val x = ((seed ushr 8) and 0xFFFF) / 65535f
-        seed = seed * 1103515245 + 12345
-        val y = ((seed ushr 8) and 0xFFFF) / 65535f
-        out.add(Offset(x, y))
+        val x = next()
+        val y = next()
+        val size = 0.45f + 1.10f * next()
+        val ink = 0.06f + 0.18f * next()
+        out.add(StarDust(x, y, size, ink))
     }
     return out
 }

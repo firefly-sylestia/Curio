@@ -330,9 +330,13 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
     // machinery the Cabinet and the shelf use (see [BookCoverWarmup]) and
     // written onto the row, so the cover is there on this visit and every one
     // after it. Fetching is gated on the Settings cover consent inside.
+    // v512 — AND IT IS WARMED EVEN WHEN THE ROW ALREADY HAS A URL. The guard
+    // here used to skip those books, which is why a book added from a search drew
+    // its cover late on this page too: the URL was fetched by Coil in the layout
+    // instead of being stored as the local file every plate prefers (see
+    // [BookCoverWarmup.ensureCover], which now short-circuits on the bytes).
     LaunchedEffect(book?.id, book?.coverUrl) {
         val current = book ?: return@LaunchedEffect
-        if (current.coverUrl.isNotBlank()) return@LaunchedEffect
         if (BookCoverWarmup.ensureCover(context, current) != null) {
             // The bytes are on disk now, so the plate re-checks the local file
             // rather than downloading the same art a second time through Coil.

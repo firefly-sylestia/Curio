@@ -6,6 +6,50 @@ from the state rather than from memory.
 
 ---
 
+## §104 — THE DRAWER'S SKY: DIFFERENT STARS, A REAL SCATTER, AND A BOOK'S COVER ON DISK (v512 / `1.5.14` / `20260957`; COMMITTED, NOT PUSHED)
+
+> "chnage the drawer stars shapes to be differnt and scatter it more and try to fill up the empty spaces make it
+> random. and suggest more improvements before another release, and also do a double check on source as some books
+> covers isnt showing up instantly. then we will work on desktop app with totally new code, i meant desktop and ios
+> together in a totally new language code. with totally new layout style for desktop windows .exe and ios similiar
+> style as android but with liquid glass nativae ios liquid glass supoort."
+
+**THE DRAWER'S SKY (`HomeScreen.kt`, `DrawerLaneStarMap`).** Three faults, all in the same drawing:
+
+1. **Every star was the same four-point sparkle** (v507). → `starMarkFor(lane.id.name)`: four-, five-, six- and
+   eight-pointed marks and one diamond, each with its own turn and a ±13% scale, chosen from the lane's NAME so the
+   sky is identical on every open. `starPath` takes `points` + `turnDeg` now. **Size is still never a measure** —
+   the variation is by name, not knowledge (v477/v507's rule); the largest mark still clears the hairline trim.
+2. **The layout was two golden-angle spirals.** They fill a disc evenly but still look plotted: every lane keeps a
+   constant turn and every family sits on one ring. → both are **best-candidate (Mitchell) samples** now: a family's
+   anchor is the furthest of `AnchorCandidates` seeded points from the anchors already placed (biggest patch first,
+   clearance measured edge to edge), and each lane is the furthest of `PatchCandidates` points from the lanes already
+   in its patch. New `discPoint` takes the radius from `sqrt(u)` so points cover AREA instead of piling at the middle
+   — that is what fills the rim. Patches widened (0.104 + 0.056·√n) and `MinStarGap` 0.115 → 0.108.
+3. **The dust was 56 identical specks.** → `StarDust(x, y, size, ink)`, 150 specks at 0.45…1.55dp and 0.06…0.24
+   muted ink, so the wedges between families read as sky.
+
+**THE BOOK COVERS — the "not instantly" was a guard, not bandwidth.** `BookCoverWarmup.ensureCover` began with
+`if (book.coverUrl.isNotBlank()) return null`, so ONLY books that arrived blank were ever stored on disk; a book
+added from a search (or brought in with a URL by the reveal's shelf bridge) drew its art through Coil in the layout
+on every visit, late and again on a cold cache. Now the row's own URL is the warmer's `authoredUrl` and the only
+short-circuit is the bytes. `BookDetailScreen` had the same early return — removed. `BookShelfScreen`'s batch was
+sequential and bumped `CabinetCoverCache.version` once AFTER the loop (a cover that landed first stayed hidden), so
+it now runs `Semaphore(3)` with a 250ms-throttled bump as covers land, and `BookCover`'s live-URL request crossfades
+120ms instead of popping.
+
+**CHECKS.** No Gradle here, so no compile: all four edited Kotlin files balance braces/parens under the
+string-and-comment-aware checker, every edit was read back at its seam, and the star draw pass, the shape cache and
+the dust loop were re-read against their call sites. Version `1.5.13 → 1.5.14`, code `20260956 → 20260957`,
+`changelogs/20260957.txt` copied forward with the six bullets (`20260956.txt` untouched). **Committed, NOT pushed** —
+the member's standing instruction for this one.
+
+**OPEN.** The desktop + iOS rebuild is the next request and is NOT started: it needs the stack decision (Flutter /
+Dart vs React Native / TS vs Kotlin Multiplatform) and the fate of the existing `desktop/` module before any file is
+written. The "improvements before another release" list was answered in the session message, not built.
+
+---
+
 ## §103 — THE TIME CAPSULE PAGE: THE APP'S TYPE, ONE ROW PER UNIT, AND A FLIP THAT TURNS (v511 / `1.5.13` / `20260956`; COMMITTED, NOT PUSHED)
 
 > "now the time capsule page redesing, as the page doesnt follow the app theming at all, and the time etc is
@@ -2542,6 +2586,6 @@ prompt stays below it.)*
 
 ## next prompt
 
-*(The prompt that sat here — "fix the cl failure also the sealed capsule text should not be viible when its
-sealed" — is ANSWERED: the CL half was the v507 build, and the sealed-capsule half landed in **v510** (§102).
-No pending prompt; the next one goes here.)*
+*(The prompt that sat here — the drawer-star / book-cover batch and the desktop+iOS request — is ANSWERED for the
+Android half in **§104** (v512, committed not pushed); the desktop+iOS half is NOT started and is waiting on the
+member's stack answers (§104's OPEN note). No pending prompt; the next one goes here.)*

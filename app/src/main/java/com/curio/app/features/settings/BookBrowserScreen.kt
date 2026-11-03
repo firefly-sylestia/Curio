@@ -322,11 +322,21 @@ private fun BookBrowserRow(
                     BookCoverFetch.coverCandidates(book.name, book.imageUrl).firstOrNull()
                 } else null
                 if (cover != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
+                    // v512 — THE REQUEST IS REMEMBERED, NOT REBUILT PER FRAME.
+                    // `ImageRequest.Builder(...)` inside composition makes a NEW
+                    // request object on every recomposition of this row, and Coil's
+                    // painter restarts when its model's identity changes — which is
+                    // the flicker/blank beat this list showed whenever a row
+                    // recomposed (the shelf's own plates were already remembered).
+                    val context = LocalContext.current
+                    val request = remember(cover, context) {
+                        ImageRequest.Builder(context)
                             .data(cover)
                             .crossfade(true)
-                            .build(),
+                            .build()
+                    }
+                    AsyncImage(
+                        model = request,
                         contentDescription = "Cover of ${book.name}",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
