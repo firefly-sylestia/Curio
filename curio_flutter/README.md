@@ -37,12 +37,20 @@ the `windows/` / `ios/` lines removed from `.gitignore`.
 
 ```bash
 ./tool/sync_assets.sh
+flutter test          # the lane table + the catalog parser (pure Dart)
 flutter build windows --release
 # → build/windows/x64/runner/Release/
 ```
 
 CI (`.github/workflows/curio-flutter.yml`) runs exactly these steps on
-`windows-latest` and uploads the built folder.
+`windows-latest` and uploads the built folder as `curio-windows-<run number>`.
+
+**On a `v*` tag it does one more thing:** it zips the Release folder into
+`Curio-<tag>-windows.zip` and attaches it to the GitHub release the Android
+workflow creates for the same tag. The upload is guarded — if the release does
+not exist yet (the Android job may still be running) it says so and the run stays
+green, with the build still available as a run artifact. It never creates a
+release of its own, so it can never race Android's release notes.
 
 ## Layout of the code
 

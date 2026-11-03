@@ -10,6 +10,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    # Tag pushes build too, so every `v*` release has a Windows build beside the
+    # Android APKs. A tag push is not path-filtered, which is why `paths` below
+    # only ever narrows branch runs.
+    tags: ['v*']
     paths:
       - 'curio_flutter/**'
       - 'data/topics/**'
@@ -24,8 +28,10 @@ concurrency:
   group: curio-flutter-${{ github.ref }}
   cancel-in-progress: true
 
+# `write` so a tag run can attach its build to the GitHub release the Android
+# workflow creates (`gh release upload`). PR and branch runs only read.
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows:
@@ -60,6 +66,12 @@ jobs:
       - name: Analyse
         run: flutter analyze --no-fatal-infos
 
+      # The lane table and the catalog parser are pure Dart — they run without a
+      # GPU or a window, so a drift between the Kotlin catalog and lanes.dart,
+      # or a phone topic the desktop model cannot read, fails here first.
+      - name: Test
+        run: flutter test
+
       - name: Build
         run: flutter build windows --release
 
@@ -70,3 +82,33 @@ jobs:
           path: curio_flutter/build/windows/x64/runner/Release/
           if-no-files-found: error
           retention-days: 7
+
+      # ── On a tag, the build also becomes a release asset ───────────────────
+      # Zipped here (the Release folder is a tree, not a file) and attached to
+      # the release the Android workflow creates for the same tag. The upload is
+      # GUARDED: if the release does not exist yet — the Android job may still be
+      # running — or `gh` fails, this step says so and the run stays green,
+      # because the build itself succeeded and its artifact is in the run. It
+      # never creates a release of its own, so it can never race Android's
+      # release body.
+      - name: Package the Windows app
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* `
+            -DestinationPath "Curio-${{ github.ref_name }}-windows.zip" -Force
+
+      - name: Attach it to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          file="Curio-${tag}-windows.zip"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$file" --clobber
+            echo "Attached $file to release $tag"
+          else
+            echo "No release for $tag yet — the Windows build is in this run's artifacts."
+          fi

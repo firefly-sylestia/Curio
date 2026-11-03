@@ -31,8 +31,14 @@ from the state rather than from memory.
   Verified: the generator ran, produced 38 rows, and its first rows match the Kotlin catalog
   (`artists` · #4338CA, `books` · #B45309, `wildcard` · #FF8FA3).
 - **CI** (`.github/workflows/curio-flutter.yml`, windows-latest): bundle → `flutter create
-  --platforms=windows` → pub get → analyze → `flutter build windows --release` → upload. It is a
-  separate workflow from `android.yml`, so a red Flutter run cannot block an Android release.
+  --platforms=windows` → pub get → analyze → `flutter test` → `flutter build windows --release` →
+  upload. It is a separate workflow from `android.yml`, so a red Flutter run cannot block an Android
+  release. **Tag pushes build too**, and the built app is zipped and attached to the GitHub release the
+  Android workflow creates for the same tag — guarded by `gh release view`, so a run that beats the
+  Android release to the tag says so instead of failing or creating a competing release.
+  `test/catalog_test.dart` covers what runs without a window: every lane has a unique slug
+  (38 of them), a stale preference falls back to the wildcard, and a real phone topic parses into the
+  desktop model (and a topic with no `exploreAction` still reads, as `Explore`).
 
 **WHAT WAS REMOVED (same session, second commit).** `desktop/` (the Compose Multiplatform Kotlin
 port), its `desktop-release.yml`, the disabled `desktop` job in `android.yml`, and
