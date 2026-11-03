@@ -636,7 +636,7 @@ class JournalController extends TextEditingController {
   /// painted page and the exported file, so what is written out is exactly what
   /// was seen.
   List<JournalRun> _segments(String line, int start) {
-    if (line.isEmpty) return <JournalRun>[JournalRun(text: '')];
+    if (line.isEmpty) return <JournalRun>[const JournalRun(text: '')];
     final end = start + line.length;
     final marks = <InlineMark>[
       for (final mark in _marks)
@@ -823,13 +823,16 @@ class JournalController extends TextEditingController {
   }) {
     if (range.end <= range.start) return false;
     if (!bold && !italic && !underline && !strike) return false;
-    var covered = 0;
+    // `num` on purpose: `dart:math`'s `min`/`max` are generic over `num`, and a
+    // caller that hands them two ints still gets a `num` back on some SDKs.
+    num covered = 0;
     for (final mark in _marks) {
       if (bold && !mark.bold) continue;
       if (italic && !mark.italic) continue;
       if (underline && !mark.underline) continue;
       if (strike && !mark.strike) continue;
-      final overlap = min(mark.end, range.end) - max(mark.start, range.start);
+      final overlap =
+          min<int>(mark.end, range.end) - max<int>(mark.start, range.start);
       if (overlap > 0) covered += overlap;
     }
     return covered >= range.end - range.start;
