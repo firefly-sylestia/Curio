@@ -11257,3 +11257,29 @@ not be viible when its sealed"*). Pushed as **1.5.12 / `20260955`**.
   capsule or a `ready` one — and opening a ready row retires the seal in the same tap, so what is revealed has
   already been opened. **The general rule: the archive is a list of letters, and a letter's own contents are
   gated on it having been opened, never on the row being expandable.**
+
+### v511 — THE TIME CAPSULE PAGE WEARS THE APP'S TYPE, AND ITS CLOCK IS ONE ROW PER UNIT
+
+The member: *"now the time capsule page redesing, as the page doesnt follow the app theming at all, and the time
+etc is really unalligned and swiping those time to chnage is buggy it should chnage based on which thing i am
+touching not always minutes, and also the switching of the slides of the time etc isnt looking good with the
+animation. it just switches instaltnty add vibration and motion and proper slowness."* Pushed as
+**1.5.13 / `20260956`** (committed, not pushed on the member's word for this one).
+
+- **THE PAGE SPEAKS THE APP'S LANGUAGE.** Its whole voice was a nested
+  `MaterialTheme(typography = pixelTypography())` — a VT323 terminal face, sized up for that face, over the app's
+  own scheme — so the time capsule read as a second app inside Curio. `pixelTypography()` and the pixel face are
+  DELETED: the page, its pickers (`CapsuleDialogTheme` is now just the app's typography) and the arrival inherit
+  the app's type, and the clock's digits wear `ChangaOneFontFamily` (single weight — ask for Normal, never a fake
+  bold). The v507 plate/ink palette is untouched: a flip clock is a machine on paper.
+- **THE CLOCK IS ONE ROW PER UNIT (`CapsuleClock` + `ClockUnitRow`).** DAY · MONTH · YEAR · HOUR · MINUTE, each
+  its own `Surface` row with its own card, in ONE column. The old shape shared three cards per row by WEIGHT, so
+  the day deck's columns and the hour deck's never lined up; and every row on the time deck was wired to
+  `onStepMinutes`, so dragging the HOUR turned the minutes. Each row now owns its drag and its own `onStep`, and a
+  step is a FIELD step (`Calendar.add(field, delta)` through `stepUnit`) — a month is a month, and a day does not
+  drift across a DST boundary. **The rule: a deck row may only ever call the unit it shows.**
+- **A CARD TURNS RATHER THAN CUTS (`FlipCard`).** 150+170ms with an ease-out landing read as a cut; the fall is
+  `FLIP_FALL_MS` 240 and the landing `FLIP_LAND_MS` 300, with a `TextHandleMove` tick as the leaf lands, and every
+  card shares `CARD_WIDTH` (112dp) at 64dp tall so the five of them form one column. The 12-hour hour card carries
+  its own AM/PM (`flipHourLabel`) — a single card has no separate cell for a marker, and an hour without one is
+  ambiguous.

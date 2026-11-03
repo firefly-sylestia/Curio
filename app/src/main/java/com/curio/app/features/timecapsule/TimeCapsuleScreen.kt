@@ -43,7 +43,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,7 +71,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -89,12 +87,11 @@ import com.curio.app.features.personal.appPermissionSettingsIntent
 import com.curio.app.features.personal.rememberRecordPermission
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.WaveformExtractor
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.FrauncesFontFamily
-import com.curio.app.ui.theme.PixelFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -361,10 +358,21 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
         }
     }
 
-    fun shift(delta: Long) {
+    /**
+     * ── v511 — ONE STEP IS ONE UNIT, AND IT IS THE ROW THE THUMB IS ON ────────
+     *
+     * The old step took a MILLISECOND delta and the clock had only two of them (a
+     * day and a minute), so the hour row was wired to the minute step — dragging
+     * the hour turned the minutes (the member: *"it should chnage based on which
+     * thing i am touching not always minutes"*). A field step also stops a "+1
+     * day" from drifting across a DST boundary the way 24h of millis does, and a
+     * month step is a real month rather than 30 days.
+     */
+    fun stepUnit(field: Int, delta: Int) {
         val minAt = System.currentTimeMillis() + floor
-        val next = target + delta
-        target = if (next < minAt) minAt else next
+        val cal = Calendar.getInstance().apply { timeInMillis = target }
+        cal.add(field, delta)
+        target = maxOf(cal.timeInMillis, minAt)
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
     }
 
@@ -385,8 +393,8 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     // they already know), but they used to open in Material's default type over a
     // default container while the page behind them was a split-flap — the member's
     // *"the dialog screen doesnt have similiar stle too fix all"*. Each dialog is
-    // wrapped in the page's own nested theme (the same `pixelTypography()` the page
-    // body uses) and takes the app's own dialog container, so the picker reads as
+    // wrapped in the page's own nested theme and takes the app's own dialog
+    // container, so the picker reads as
     // part of the capsule rather than as a different app's window.
 
     if (dateOpen) {
@@ -475,12 +483,12 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
         }
     }
 
-    // v502 — THE WHOLE PAGE WEARS THE PIXEL FACE (the member: "i want digital
-    // that clocl tyle font for the whole page"). VT323 ships one weight, so Compose
-    // synthesises the bold requests, which is exactly the heavy phosphor look a
-    // split-flap page wants. v504 — and the two pickers above wear it as well (see
-    // `dialogTheme`), because they are part of this page rather than a second app.
-    MaterialTheme(colorScheme = scheme, typography = pixelTypography()) {
+    // v511 — THE PAGE WEARS THE APP'S OWN TYPE. It used to swap the whole
+    // composition's typography for a pixel face (VT323) and sized every style up for
+    // it, which is the member's *"the page doesnt follow the app theming at all"*: a
+    // terminal page inside a cream paper app. The scheme was always the app's; the
+    // voice is now too.
+    MaterialTheme(colorScheme = scheme) {
         Box(modifier = Modifier.fillMaxSize().background(scheme.background)) {
             Column(
                 modifier = Modifier
@@ -559,8 +567,11 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
                     accent = accent,
                     onEditDay = { dateOpen = true },
                     onEditTime = { timeOpen = true },
-                    onStepDays = { shift(it.toLong() * DAY_MS) },
-                    onStepMinutes = { shift(it.toLong() * MINUTE_MS) }
+                    onStepDay = { stepUnit(Calendar.DAY_OF_MONTH, it) },
+                    onStepMonth = { stepUnit(Calendar.MONTH, it) },
+                    onStepYear = { stepUnit(Calendar.YEAR, it) },
+                    onStepHour = { stepUnit(Calendar.HOUR_OF_DAY, it) },
+                    onStepMinute = { stepUnit(Calendar.MINUTE, it) }
                 )
                 Spacer(Modifier.height(16.dp))
 
@@ -975,26 +986,32 @@ fun TimeCapsuleScreen(onBack: () -> Unit) {
     }
 }
 
-private const val DAY_MS = 24L * 60L * 60L * 1000L
-private const val HOUR_MS = 60L * 60L * 1000L
-private const val MINUTE_MS = 60L * 1000L
 
 /**
- * v504 — THE PAGE'S OWN THEME, WRAPPED AROUND ITS TWO PICKERS.
+ * A day in millis — the page's opening default (seven days out) and the archive's
+ * "how long ago" line both read it. The CLOCK no longer spends millis on its steps
+ * (v511 — `Calendar.add` per unit, see `stepUnit`), so this is a duration, not a
+ * step size.
+ */
+private const val DAY_MS = 24L * 60L * 60L * 1000L
+
+
+/**
+ * THE PAGE'S OWN THEME, WRAPPED AROUND ITS TWO PICKERS.
  *
- * The writing page applies its pixel face with a nested `MaterialTheme` (see
- * [pixelTypography]), and the date and time dialogs sit ABOVE that in the
- * composition, so they used to open in Material's default type over the page that
- * had a split-flap on it — the member's *"the dialog screen doesnt have similiar
- * stle too fix all"*. A named composable rather than a lambda-typed value: this is a
- * theme wrapper, and it reads that way at both call sites.
+ * The date and time dialogs sit ABOVE the page in the composition, so from v504 they
+ * are wrapped in a theme of their own rather than opening in Material's default over
+ * a page that had a split-flap on it — the member's *"the dialog screen doesnt have
+ * similiar stle too fix all"*. v511 — the page wears the app's own type now, so this
+ * wrapper only states the composition's scheme; there is no second typography to
+ * push over the pickers. A named composable rather than a lambda-typed value, because
+ * it is a theme wrapper and reads that way at both call sites.
  */
 @Composable
 private fun CapsuleDialogTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = MaterialTheme.colorScheme,
-        typography = pixelTypography()
-    ) { content() }
+    // v511 — the page and the app are one voice now, so the pickers inherit it
+    // instead of having a second typography pushed over them.
+    MaterialTheme(colorScheme = MaterialTheme.colorScheme) { content() }
 }
 
 /**
@@ -1120,178 +1137,127 @@ private fun CapsuleClock(
     accent: Color,
     onEditDay: () -> Unit,
     onEditTime: () -> Unit,
-    onStepDays: (Int) -> Unit,
-    onStepMinutes: (Int) -> Unit
+    onStepDay: (Int) -> Unit,
+    onStepMonth: (Int) -> Unit,
+    onStepYear: (Int) -> Unit,
+    onStepHour: (Int) -> Unit,
+    onStepMinute: (Int) -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
-    // ── v507 — THE CLOCK HAS ITS OWN PALETTE, AND IT NO LONGER INVERTS ───────────
+    // ── v511 — A LIST OF UNITS, EACH ONE ITS OWN DIAL ──────────────────────────
     //
-    // The member: *"still the time capsule button colors etc is bad and sepeiclaly the
-    // clock number colors"*. The old pair was a single inversion of the page in both
-    // themes — `plate = lerp(surface, onSurface, 0.86)` — which happens to read as a
-    // black deck with white digits on a LIGHT page and as a WHITE deck with black
-    // digits on a DARK one. A flip clock is not whichever way the page happens to
-    // lean; it is a dark plate with bright digits, always, which is what makes it read
-    // as a machine on paper and as a machine in the dark.
+    // The member: *"the time etc is really unalligned and swiping those time to
+    // chnage is buggy it should chnage based on which thing i am touching not
+    // always minutes"*. Both halves came from the old shape: three cards sharing a
+    // row by WEIGHT (so the day deck's columns and the hour deck's columns could
+    // never line up), and ONE drag handler per ROW feeding ONE step — the hour
+    // row's step was `onStepMinutes`, so dragging the HOUR turned the minutes.
     //
-    // So both themes draw a DEEP plate (`0.86` of the way to the page's ink on a light
-    // page, and the page's own surface lifted a touch on a dark one, because a page
-    // that is already black needs a plate it can still be seen against) with BRIGHT
-    // digits, and both carry a whisper of the page's accent: the plate a 6% tint, the
-    // digits 18% — enough that the clock belongs to the page it sits on, nowhere near
-    // enough to cost the contrast a number being read across a room needs.
+    // One unit per row fixes both by construction: DAY · MONTH · YEAR · HOUR ·
+    // MINUTE, each with its own card, its own drag and its own step, all on one
+    // column of cards of the same width and height. A tap still opens Android's
+    // own picker for that row's family (the day rows open the calendar, the time
+    // rows open the clock) — the door the member already knows.
+    //
+    // v507's palette is unchanged and still deliberate: a DEEP plate with BRIGHT
+    // digits in both themes, carrying a whisper of the page's accent, because a
+    // flip clock is a machine on paper — never whichever way the page leans.
     val dark = scheme.surface.luminance() <= 0.5f
-    // The plate's own colour, before the accent is mixed in: the LIGHT page's ink on
-    // a light page, and the dark page's own surface lifted just enough to be seen
-    // against it on a dark one.
     val plateBase = if (dark) {
         lerp(scheme.surface, scheme.onSurface, 0.14f)
     } else {
         lerp(scheme.surface, scheme.onSurface, 0.86f)
     }
     val plate = lerp(plateBase, accent, 0.06f)
-    // The digits: bright in both themes, toward the accent by a fifth.
     val digitBase = if (dark) {
         lerp(scheme.onSurface, scheme.surface, 0.04f)
     } else {
         lerp(scheme.onSurface, scheme.surface, 0.96f)
     }
     val ink = lerp(digitBase, accent, 0.18f)
-    // ⚠️ v501 — THE CLOCK IS ITS OWN EDITOR (the member's "remove the plus and
-    // arro sign, tapping it should let me edit it and with gesture edit with
-    // scrolling", and "the pick a date pick a time feels duplicat).
-    //
-    // It used to be a deck of cards flanked by six circular step buttons with a
-    // pair of "15 min earlier / 15 min later" bars below them and TWO separate
-    // "Pick a date" / "Pick a time" doors underneath all of that. Three ways to
-    // move one clock, none of them the thing a member's thumb goes to first. The
-    // steppers and the doors are gone; the deck IS the control:
-    //
-    //   • tap the day row    → Android's own calendar
-    //   • tap the time row   → Android's own time picker
-    //   • drag either row up or down → that row's unit turns, one notch per
-    //     thumb's width of travel, with a tick each notch
-    //
-    // The rows are centred with fixed card widths, so the two decks line up with
-    // each other instead of being pushed off centre by a button either side.
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = scheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // v504 — THE CARDS SHARE THE ROW BY WEIGHT, NOT BY A FIXED WIDTH.
-            //
-            // Three fixed widths (84 + 132 + 112dp plus the gaps) came to more than
-            // the page's own content width on a 360dp phone, so the deck ran past
-            // its panel — which is what "some isnt properly aligned" was about, and
-            // why the cards could not simply be made bigger. Weights give every card
-            // a share of whatever the screen actually has, so the deck is as wide as
-            // its panel on every size, and the cards are bigger for free.
-            ClockRow(
-                label = "The day it comes back",
-                accent = accent,
+            ClockUnitRow(
+                label = "Day",
+                value = flipDay(cal),
+                plate = plate,
+                ink = ink,
                 onTap = onEditDay,
-                onStep = onStepDays
-            ) {
-                FlipCard(
-                    value = flipDay(cal),
-                    caption = "DAY",
-                    plate = plate,
-                    ink = ink,
-                    modifier = Modifier.weight(1f)
-                )
-                FlipCard(
-                    value = flipMonth(cal),
-                    caption = "MONTH",
-                    plate = plate,
-                    ink = ink,
-                    modifier = Modifier.weight(1.45f)
-                )
-                FlipCard(
-                    value = flipYear(cal),
-                    caption = "YEAR",
-                    plate = plate,
-                    ink = ink,
-                    modifier = Modifier.weight(1.25f)
-                )
-            }
-
-            ClockRow(
-                label = "The hour it opens",
-                accent = accent,
+                onStep = onStepDay,
+                clickLabel = "Set the day"
+            )
+            ClockUnitRow(
+                label = "Month",
+                value = flipMonth(cal),
+                plate = plate,
+                ink = ink,
+                onTap = onEditDay,
+                onStep = onStepMonth,
+                clickLabel = "Set the month"
+            )
+            ClockUnitRow(
+                label = "Year",
+                value = flipYear(cal),
+                plate = plate,
+                ink = ink,
+                onTap = onEditDay,
+                onStep = onStepYear,
+                clickLabel = "Set the year"
+            )
+            ClockUnitRow(
+                label = "Hour",
+                value = flipHourLabel(cal, hours24),
+                plate = plate,
+                ink = ink,
                 onTap = onEditTime,
-                onStep = onStepMinutes
-            ) {
-                FlipCard(
-                    value = flipHour(cal, hours24),
-                    caption = "HOUR",
-                    plate = plate,
-                    ink = ink,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    ":",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = scheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
-                FlipCard(
-                    value = flipMinute(cal),
-                    caption = "MIN",
-                    plate = plate,
-                    ink = ink,
-                    modifier = Modifier.weight(1f)
-                )
-                if (!hours24) {
-                    FlipCard(
-                        value = flipMarker(cal),
-                        caption = "",
-                        plate = plate,
-                        ink = ink,
-                        modifier = Modifier.weight(0.8f)
-                    )
-                }
-            }
+                onStep = onStepHour,
+                clickLabel = "Set the hour"
+            )
+            ClockUnitRow(
+                label = "Minute",
+                value = flipMinute(cal),
+                plate = plate,
+                ink = ink,
+                onTap = onEditTime,
+                onStep = onStepMinute,
+                clickLabel = "Set the minute"
+            )
         }
     }
 }
 
 /**
- * ONE DECK OF THE CLOCK, AND THE GESTURES THAT TURN IT.
+ * ONE UNIT OF THE CLOCK — a label on the left, that unit's own card on the right,
+ * and the gesture that turns it.
  *
- * A tap opens the picker that owns this row's unit; a SIDEWAYS drag turns the deck
- * under the thumb, one notch each [NOTCH] of travel, with a tick at every notch and
- * a tick when the thumb lands.
+ * **A SIDEWAYS DRAG TURNS THIS ROW'S UNIT AND NOTHING ELSE** ([onStep] is the
+ * row's own). The drag is read on whichever axis is doing the work, so a thumb that
+ * sets off slightly uphill still turns the card instead of being ignored (v507's
+ * fault), and one notch is [NOTCH] of travel — about a thumb's width.
  *
- * ⚠️ v504 — THE DRAG IS HORIZONTAL, AND THAT IS THE FIX FOR A REAL FAULT: this page
- * is a `verticalScroll` column, so a VERTICAL drag on the clock was fighting the
- * page's own scroll for the same gesture — and the scroll, being the ancestor, won
- * most of it: the member's *"the time adjust gesture is bad too"*. A sideways drag
- * on a deck is not a scroll the page wants, so there is nothing to lose it to. Left
- * takes the unit on, right takes it back — the deck travels the way the thumb pushes
- * it, which is the same rule the vertical version used, rotated.
- *
- * The press-detection pointer input sits BEFORE the click in the chain (see the
- * project's modifier-order rule): the drag consumes its own movement, so a real
- * drag never fires the tap, and a tap with no travel never turns a card.
+ * **A TAP OPENS THE PICKER FOR THIS ROW'S FAMILY** (the calendar for the date rows,
+ * the clock for the time rows). The press-detection pointer input sits BEFORE the
+ * click in the chain (the project's modifier-order rule), and a drag consumes its
+ * own movement, so a real drag never fires the tap.
  */
 @Composable
-private fun ClockRow(
+private fun ClockUnitRow(
     label: String,
-    accent: Color,
+    value: String,
+    plate: Color,
+    ink: Color,
     onTap: () -> Unit,
     onStep: (Int) -> Unit,
-    content: @Composable RowScope.() -> Unit
+    clickLabel: String
 ) {
     val scheme = MaterialTheme.colorScheme
-    val haptics = LocalHapticFeedback.current
     val density = LocalDensity.current
     val notch = with(density) { NOTCH.toPx() }
     Surface(
@@ -1299,80 +1265,55 @@ private fun ClockRow(
         color = scheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            // v504 — the row is a bigger target: a deck you drag has to be tall
-            // enough to put a thumb on without covering the card you are watching.
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    var travel = 0f
+                    detectDragGestures(
+                        onDragStart = { travel = 0f },
+                        onDragEnd = { travel = 0f },
+                        onDragCancel = { travel = 0f }
+                    ) { change, drag ->
+                        travel += if (kotlin.math.abs(drag.x) >= kotlin.math.abs(drag.y)) {
+                            drag.x
+                        } else {
+                            -drag.y
+                        }
+                        val notches = (travel / notch).toInt()
+                        if (notches != 0) {
+                            travel -= notches * notch
+                            onStep(notches)
+                            // The movement is spent, so the page's own scroll does
+                            // not act on it as well.
+                            change.consume()
+                        }
+                    }
+                }
+                .clickable(onClickLabel = clickLabel, onClick = onTap)
+                .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 label,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.SemiBold
                 ),
-                color = scheme.onSurface
+                color = scheme.onSurface,
+                modifier = Modifier.weight(1f)
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pointerInput(Unit) {
-                        var travel = 0f
-                        // ⚠️ v507 — ANY DIRECTION, AND A SHORTER NOTCH (the member,
-                        // twice: *"the time adjust gesture is bad too"*, then *"the
-                        // gesture to chnage isnt working"*). Two causes, both here:
-                        //
-                        //  · **the detector was HORIZONTAL-ONLY** — a thumb that set
-                        //    off even slightly uphill was not recognised at all and
-                        //    the page scrolled instead, which is exactly what "isnt
-                        //    working" looks like from the outside. A plain drag
-                        //    detector is what a deck wants: any direction counts, and
-                        //    the row still lets a MOSTLY VERTICAL drag through to the
-                        //    page (it only consumes what it turned).
-                        //  · **one notch cost 34dp** of travel, more than a short
-                        //    flick covers, so a small drag did nothing and felt
-                        //    broken. It is 22dp now (see [NOTCH]).
-                        //
-                        // A drag is read on whichever axis is doing the work: left or
-                        // up takes the unit on, right or down takes it back — the deck
-                        // travels the way the thumb pushes it, in either direction.
-                        detectDragGestures(
-                            onDragStart = {
-                                travel = 0f
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            },
-                            onDragEnd = { travel = 0f },
-                            onDragCancel = { travel = 0f }
-                        ) { change, drag ->
-                            travel += if (kotlin.math.abs(drag.x) >= kotlin.math.abs(drag.y)) {
-                                drag.x
-                            } else {
-                                -drag.y
-                            }
-                            val notches = (travel / notch).toInt()
-                            if (notches != 0) {
-                                travel -= notches * notch
-                                onStep(notches)
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                // The movement is spent, so nothing downstream (the
-                                // page's own scroll) acts on it as well.
-                                change.consume()
-                            }
-                        }
-                    }
-                    .clickable(
-                        onClickLabel = if (label.startsWith("The day")) "Set the day"
-                        else "Set the hour and minute",
-                        onClick = onTap
-                    ),
-                content = content
+            FlipCard(
+                value = value,
+                caption = "",
+                plate = plate,
+                ink = ink,
+                modifier = Modifier.width(CARD_WIDTH)
             )
         }
     }
 }
+
 
 /**
  * ── v507 — THE ONE FILL EVERY DOOR ON THIS PAGE WEARS, AND IT IS SOLID ───────
@@ -1444,15 +1385,27 @@ private fun FlipCard(
     val lower = remember { Animatable(0f) }
     val upper = remember { Animatable(0f) }
     var leafFace by remember { mutableStateOf(value) }
+    val haptics = LocalHapticFeedback.current
+    // ── v511 — THE FLIP TAKES ITS TIME, AND IT LANDS ─────────────────────────
+    //
+    // The member: *"the switching of the slides of the time etc isnt looking good
+    // with the animation. it just switches instaltnty add vibration and motion and
+    // proper slowness"*. The old pair was 150ms + 170ms with an ease-OUT on the
+    // landing leaf, so a value left the frame before the eye caught it and landed
+    // with no settle at all — read as a cut, not as a flap. The fall is now
+    // [FLIP_FALL_MS] and the landing [FLIP_LAND_MS] (+[FLIP_SETTLE_MS] of the
+    // card's own tiny overshoot), and the leaf that lands tickles the haptic: a
+    // split-flap's whole character is the CLACK at the end of the drop.
     LaunchedEffect(value) {
         if (value == shown) return@LaunchedEffect
         lower.snapTo(0f)
-        lower.animateTo(1f, tween(150, easing = FastOutLinearInEasing))
+        lower.animateTo(1f, tween(FLIP_FALL_MS, easing = FastOutLinearInEasing))
         // Behind the crease, edge-on, the card changes its mind.
         shown = value
         upper.snapTo(1f)
         leafFace = value
-        upper.animateTo(0f, tween(170, easing = FastOutSlowInEasing))
+        upper.animateTo(0f, tween(FLIP_LAND_MS, easing = FastOutSlowInEasing))
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
     }
     Column(
         modifier = modifier,
@@ -1532,13 +1485,25 @@ private fun FlipCard(
  * A split-flap is the one thing on this page you are meant to read from across
  * the room; at 62dp with `headlineSmall` digits it read as a row of small tiles,
  * which is the member's *"tey are not big"* (see also their "the time adjust
- * gesture is bad too", which is the vertical-drag fault noted on [ClockRow]). The
+ * gesture is bad too", which is the drag fault noted on [ClockUnitRow]). The
  * deck grew, the digits went up a step ([CardGlyph]) and the row that holds them
  * got taller in the same pass, so the whole clock is a control rather than a
  * detail.
  */
-private val CARD_HEIGHT = 80.dp
-private val CARD_HALF = 40.dp
+private val CARD_HEIGHT = 64.dp
+private val CARD_HALF = 32.dp
+
+/**
+ * v511 — EVERY CARD IN THE DECK IS THE SAME WIDTH, and the rows are a list, so the
+ * five cards form one column down the page (see `ClockUnitRow`). 112dp is the width
+ * a five-character face needs at `headlineSmall` in Changa One — "09 PM" and
+ * "2027" both fit — so no unit is a different size from its neighbour.
+ */
+private val CARD_WIDTH = 112.dp
+
+/** How long the old leaf takes to fall away, and how long the new one takes to land. */
+private const val FLIP_FALL_MS = 240
+private const val FLIP_LAND_MS = 300
 
 /**
  * The opaque plate of one half of a card, clipped to its own side of the crease.
@@ -1596,9 +1561,9 @@ private fun CardGlyph(value: String, ink: Color) {
         Text(
             value,
             style = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = PixelFontFamily,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.sp
+                fontFamily = ChangaOneFontFamily,
+                fontWeight = FontWeight.Normal,
+                letterSpacing = 0.5.sp
             ),
             color = ink,
             maxLines = 1,
@@ -1607,58 +1572,6 @@ private fun CardGlyph(value: String, ink: Color) {
     }
 }
 
-/**
- * EVERY STYLE ON THIS PAGE, IN THE PIXEL FACE — AND AT SIZES THE PIXEL FACE
- * ACTUALLY WANTS.
- *
- * One nested theme rather than a `fontFamily` argument on forty `Text` calls:
- * the page's whole voice changes in one place and a style added later inherits it.
- *
- * ⚠️ v504 — IT USED TO CHANGE THE FAMILY AND NOTHING ELSE, which is the member's
- * *"the text font size etc isnt good"*: VT323 is a bitmap-derived face drawn on a
- * coarse grid, so at Material's sizes it comes out visibly SMALLER and much lighter
- * than the same point size in a text face — a `bodyMedium` (14sp) paragraph read as
- * a caption and a `labelSmall` (11sp) caption read as a speck. The whole scale is
- * set here for THIS face: each style is a couple of points larger than Material's
- * with its line height opened to match (a pixel face needs the extra leading or the
- * ascenders of one line sit on the descenders of the last), and the small styles
- * carry a little tracking because a bitmap face's glyphs touch at small sizes.
- *
- * Nothing here changes a LAYOUT: only sizes, line heights and tracking, so every
- * padding and every panel on the page keeps the rhythm it had.
- */
-@Composable
-private fun pixelTypography(): Typography {
-    val base = MaterialTheme.typography
-    fun pixel(
-        style: TextStyle,
-        size: Float,
-        line: Float,
-        tracking: Float = 0.0f
-    ): TextStyle = style.copy(
-        fontFamily = PixelFontFamily,
-        fontSize = size.sp,
-        lineHeight = line.sp,
-        letterSpacing = tracking.sp
-    )
-    return base.copy(
-        displayLarge = pixel(base.displayLarge, 40f, 46f),
-        displayMedium = pixel(base.displayMedium, 34f, 40f),
-        displaySmall = pixel(base.displaySmall, 29f, 35f),
-        headlineLarge = pixel(base.headlineLarge, 27f, 33f),
-        headlineMedium = pixel(base.headlineMedium, 24f, 29f),
-        headlineSmall = pixel(base.headlineSmall, 21f, 26f),
-        titleLarge = pixel(base.titleLarge, 19f, 25f, 0.2f),
-        titleMedium = pixel(base.titleMedium, 17.5f, 23f, 0.2f),
-        titleSmall = pixel(base.titleSmall, 16f, 21f, 0.3f),
-        bodyLarge = pixel(base.bodyLarge, 16.5f, 23f, 0.2f),
-        bodyMedium = pixel(base.bodyMedium, 15f, 21f, 0.2f),
-        bodySmall = pixel(base.bodySmall, 13.5f, 19f, 0.3f),
-        labelLarge = pixel(base.labelLarge, 14.5f, 19f, 0.6f),
-        labelMedium = pixel(base.labelMedium, 13f, 17f, 0.8f),
-        labelSmall = pixel(base.labelSmall, 12f, 16f, 1.0f)
-    )
-}
 
 @Composable
 private fun CapsuleCircleButton(
@@ -1897,6 +1810,14 @@ private fun flipHour(cal: Calendar, hours24: Boolean): String {
     return String.format(Locale.US, "%02d", if (!hours24 && hour == 0) 12 else hour)
 }
 
+/**
+ * The hour's card carries its own AM/PM in 12-hour regions: the deck is a list of
+ * single cards now, so the marker has no separate cell to sit in, and an hour with
+ * no marker is an ambiguous hour.
+ */
+private fun flipHourLabel(cal: Calendar, hours24: Boolean): String =
+    if (hours24) flipHour(cal, hours24) else "${flipHour(cal, hours24)} ${flipMarker(cal)}"
+
 private fun flipMinute(cal: Calendar): String =
     String.format(Locale.US, "%02d", cal.get(Calendar.MINUTE))
 
@@ -1963,7 +1884,7 @@ private fun Color.luminance(): Float = 0.299f * red + 0.587f * green + 0.114f * 
  * pocket. It is the same language as the swipe that sealed it: a deliberate,
  * felt gesture rather than a button.
  *
- * The page around it wears the capsule's own pixel face ([pixelTypography]) and
+ * The page around it wears the app's own type and
  * its soft rectangles, so the writing page, the arrival and the letter all read
  * as one object. The letter's own words stay in the reading face: a letter is
  * something to READ, and the pixel face is the machine's voice, not the friend's.
@@ -2036,7 +1957,7 @@ fun TimeCapsuleArrival(
         }
     }
 
-    MaterialTheme(colorScheme = scheme, typography = pixelTypography()) {
+    MaterialTheme(colorScheme = scheme) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

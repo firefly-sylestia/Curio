@@ -236,7 +236,10 @@ android {
         // sides, so a torn hero reaches the screen edge), the reading density
         // is 90% short / 97% everywhere, and the sealed capsule screen covers
         // the page instead of being appended under the letter.
-        versionCode = 20260955
+        // v511 — the time capsule page is rebuilt in the app's own type, its
+        // clock is one aligned row per unit with a per-row drag, and the
+        // split-flap turns slowly enough to read with a tick as it lands.
+        versionCode = 20260956
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
@@ -253,7 +256,7 @@ android {
         // v498 — the passport has a page of its own (agenda §5.4),
         // and the grid of stamps it used to be inside a Quests card moved
         // there whole, with the press and every lane's spin on it.
-        versionName = envReleaseVersion ?: "1.5.12"
+        versionName = envReleaseVersion ?: "1.5.13"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

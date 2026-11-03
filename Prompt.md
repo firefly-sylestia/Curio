@@ -6,6 +6,47 @@ from the state rather than from memory.
 
 ---
 
+## §103 — THE TIME CAPSULE PAGE: THE APP'S TYPE, ONE ROW PER UNIT, AND A FLIP THAT TURNS (v511 / `1.5.13` / `20260956`; COMMITTED, NOT PUSHED)
+
+> "now the time capsule page redesing, as the page doesnt follow the app theming at all, and the time etc is
+> really unalligned and swiping those time to chnage is buggy it should chnage based on which thing i am
+> touching not always minutes, and also the switching of the slides of the time etc isnt looking good with the
+> animation. it just switches instaltnty add vibration and motion and proper slowness."
+
+**FOUR FAULTS, FOUR CAUSES — all read off the code before editing.**
+
+1. **THE PAGE DID NOT WEAR THE APP'S TYPE.** The whole writing page sat inside
+   `MaterialTheme(colorScheme = scheme, typography = pixelTypography())` — VT323, with every style re-sized for
+   that bitmap face — and the two Android pickers and the arrival repeated it. That is the "second app inside
+   Curio" the member is describing. `pixelTypography()` and the `PixelFontFamily` import are DELETED; the page,
+   `CapsuleDialogTheme` and the arrival inherit the app's type, and the clock's digits wear
+   `ChangaOneFontFamily` at Normal weight (a fake bold on a display face is what smears it).
+2. **THE CLOCK WAS THREE CARDS PER ROW BY WEIGHT.** `CapsuleClock` had a day deck (1 / 1.45 / 1.25 weights) and
+   an hour deck (1 / ":" / 1 / 0.8), so the two decks' columns could never line up — "really unalligned".
+3. **THE HOUR DECK WAS WIRED TO THE MINUTE STEP.** `ClockRow` took one `onStep` for the whole row and the hour
+   row passed `onStepMinutes`; that is exactly "it should chnage based on which thing i am touching not always
+   minutes". The step also moved MILLIS (24h of millis for a day, 60k for a minute), which drifts across DST.
+4. **THE FLIP WAS 150 + 170ms with an ease-OUT landing** and no haptic — read as a cut rather than a flap.
+
+**WHAT WAS BUILT**
+
+- `CapsuleClock` is a LIST: DAY · MONTH · YEAR · HOUR · MINUTE, one `ClockUnitRow` each — a label on the left, the
+  unit's own `FlipCard` on the right, every card `CARD_WIDTH` (112dp) at 64dp tall, so the five form one column.
+- Every row owns its drag and its own `onStep`; a step is a FIELD step (`stepUnit` → `Calendar.add(field, delta)`),
+  so a month is a month and a day cannot drift across a time change. Taps still open Android's calendar (date rows)
+  or clock (time rows).
+- `FlipCard`: `FLIP_FALL_MS` 240 + `FLIP_LAND_MS` 300, and a `TextHandleMove` tick as the leaf lands.
+- The 12-hour hour card carries its own marker (`flipHourLabel`, "09 PM") — a single card has no cell for a
+  separate AM/PM, and an hour without one is ambiguous. `HOUR_MS`/`MINUTE_MS` are gone; `DAY_MS` stays (the
+  page's 7-day default and the archive's "how long ago" read it, so it is a DURATION, not a step).
+
+**CHECKS.** No Gradle here, so no compile; the edited file was re-read at each seam and balances at 0 braces, and
+`pixelTypography` / `ClockRow` / `MINUTE_MS` / `Typography` / `TextStyle` / `PixelFontFamily` are all at 0
+references. Version `1.5.12 → 1.5.13`, code `20260955 → 20260956`, `changelogs/20260956.txt` copied forward from
+`20260955.txt` with the four bullets. **Committed, NOT pushed** (the member's instruction for this one).
+
+---
+
 ## §102 — THE NEXT BATCH: PUSH, THE SIDES, THE TYPE STEP, AND THE SEALED CAPSULE (v510 / `1.5.12` / `20260955`)
 
 **WHAT THE MEMBER CHOSE** (asked with `ask_user` after v509 was committed): next batch = **both leftovers, heroes
