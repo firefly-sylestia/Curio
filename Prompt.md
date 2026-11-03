@@ -6,6 +6,53 @@ from the state rather than from memory.
 
 ---
 
+## §105 — THE WINDOWS + iOS APP: A NEW FLUTTER CLIENT, AND THE OLD Compose DESKTOP MODULE REMOVED (2026-11-03; COMMITTED, NOT PUSHED)
+
+> "then we will work on desktop app with totally new code, i meant desktop and ios together in a totally new language code.
+> with totally new layout style for desktop windows .exe and ios similiar style as android but with liquid glass nativae
+> ios liquid glass supoort."
+
+**FOUR DECISIONS, ALL ASKED AND ANSWERED BEFORE ANY FILE WAS WRITTEN:** the stack is **Flutter
+(Dart)**; the old `desktop/` module is **replaced and deleted**; **Windows first**; and iOS is
+**26+ only** with **native Liquid Glass** (no simulated fallback).
+
+**WHAT WAS BUILT (commit `2ce090b2`).** A project at `curio_flutter/`, not a port:
+
+- **The Windows frame** (`lib/shell/app_shell.dart`): a 76dp rail of four rooms (Home · Spin ·
+  Cabinet · Settings), a 300dp context column (lanes / saved / device), and the page. This is the
+  "totally new layout" — the phone's bottom bar and one column are the wrong shape for a wide window.
+- **The deck** is a stack of three (front card face up, two behind), with the verb, target, minutes
+  and instruction that the phone keeps on its reveal.
+- **Two JSON stores** (`lib/store/app_model.dart`): `prefs.json` + `cabinet.json` under
+  `%APPDATA%\Curio` on Windows (`~/.curio` elsewhere), via `dart:io`. No database, no account.
+- **Shared content, not shared code:** `tool/sync_assets.sh` bundles `data/topics/*.json` into
+  `assets/topics/` exactly as the Android CI does; `tool/sync_lanes.py` GENERATES
+  `lib/data/lanes.dart` (38 lanes: slug, label, accent) from `Category.kt` + `CurioColors.kt`.
+  Verified: the generator ran, produced 38 rows, and its first rows match the Kotlin catalog
+  (`artists` · #4338CA, `books` · #B45309, `wildcard` · #FF8FA3).
+- **CI** (`.github/workflows/curio-flutter.yml`, windows-latest): bundle → `flutter create
+  --platforms=windows` → pub get → analyze → `flutter build windows --release` → upload. It is a
+  separate workflow from `android.yml`, so a red Flutter run cannot block an Android release.
+
+**WHAT WAS REMOVED (same session, second commit).** `desktop/` (the Compose Multiplatform Kotlin
+port), its `desktop-release.yml`, the disabled `desktop` job in `android.yml`, and
+`include(":desktop")` in `settings.gradle.kts`. `android.yml` still parses (checked with PyYAML: its
+jobs are now `build`, `lint`, `report`, `cache-cleanup`). Git history keeps the module.
+
+**⚠️ UNVERIFIED, STATED PLAINLY.** There is **no Flutter SDK in this environment**, so no Dart in
+this commit has been compiled or analysed. What WAS checked: every Dart file balances braces and
+parens under a string/comment-aware scanner (12 files, 0 mismatches), the lane generator ran and its
+output is well-formed, both workflow YAMLs parse, and the JSON store paths are plain file IO with
+no plugin dependency. **The first `curio-flutter` CI run is the real check** — if it is red, the
+failed log is the next action, and nothing in it can affect Android.
+
+**OPEN.** iOS: `flutter create --platforms=ios .`, then the Swift platform view for iOS 26
+`UIGlassEffect`, then a macos-latest job. Not started. Also open: committing a generated `windows/`
+runner (needs a machine with the SDK), and the six "before the next release" improvements listed
+in §104's session reply.
+
+---
+
 ## §104 — THE DRAWER'S SKY: DIFFERENT STARS, A REAL SCATTER, AND A BOOK'S COVER ON DISK (v512 / `1.5.14` / `20260957`; COMMITTED, NOT PUSHED)
 
 > "chnage the drawer stars shapes to be differnt and scatter it more and try to fill up the empty spaces make it

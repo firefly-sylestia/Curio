@@ -16,7 +16,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 - `.github/workflows/android.yml` — Branch and pull-request verification
 - `.github/workflows/release.yml` — Tag-triggered signed release publishing (Android APKs)
-- `.github/workflows/desktop-release.yml` — Windows desktop installers (.exe app image + .msi) on tag releases (manual dispatch for testing)
+- `.github/workflows/curio-flutter.yml` — the Windows client in `curio_flutter/` (Flutter/Dart): bundles the catalog, analyses and builds the app on `windows-latest`
 - `.github/ISSUE_TEMPLATE/bug-report.yml` — Curio Android bug report form
 - `.github/ISSUE_TEMPLATE/feature-request.yml` — Curio product and UX request form
 - `.github/PULL_REQUEST_TEMPLATE.md` — Curio pull-request review template
@@ -25,7 +25,7 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 ### Android CI workflow
 
-`android.yml` runs on pushes and pull requests targeting `main`/`Alpha`, plus manual dispatch. It has FIVE JOBS: `build` and `lint` (**each a two-job MATRIX — two editions × two phases**, see below), `report` (the reader-facing summary), `cache-cleanup`, and the disabled `desktop`.
+`android.yml` runs on pushes and pull requests targeting `main`/`Alpha`, plus manual dispatch. It has FOUR JOBS: `build` and `lint` (**each a two-job MATRIX — two editions × two phases**, see below), `report` (the reader-facing summary) and `cache-cleanup`. (The disabled `desktop` job is gone with the module.)
 
 **v465e — `build` IS A MATRIX: ONE PARALLEL JOB PER EDITION (`Curio Android · core · build`, `Curio Android · full · build`).** One job used to build both editions in a single Gradle invocation, which is why a run took ~30 minutes; `fail-fast: false` so a `core` failure does not cancel `full` — this job's whole purpose is proving BOTH build, and the run where one broke is exactly when the other's answer is most wanted.
 
@@ -85,99 +85,56 @@ Artifact/annotation/comment copy stays Curio-specific; never echo a secret's val
 - Publishes the release APKs through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
 - Never falls back to debug signing for a published release.
 
-### Desktop CI job (android.yml) + desktop release workflow
+### Curio Flutter (curio_flutter/) — the Windows client, and later iOS
 
-**DISABLED until the desktop app is finished.** Both desktop build paths
-are gated with `if: false` (the `desktop` job in `android.yml` and the
-`windows` job in `desktop-release.yml`), so neither push/PR CI nor tag
-pushes build the desktop module. Re-enable by flipping both gates to
-`if: true`. When active:
+`curio-flutter.yml` is a workflow of its own, deliberately INDEPENDENT of
+`android.yml`: a red run there never blocks an Android release, and the Android
+release never builds it. It runs on `windows-latest`, on any push or PR that
+touches `curio_flutter/**`, `data/topics/**` or itself, plus manual dispatch.
 
-- The `desktop` job in `android.yml` compiles the JVM/desktop module on
-  **every push and PR** so the port can't silently rot. The compiled JAR
-  is uploaded as an artifact **only on branch pushes** (`main`/`Alpha`) —
-  PR runs skip the upload (a 4MB jar per PR commit was piling up in
-  artifact storage) — and with **1-day retention**, matching the
-  release-APK policy.
-- `desktop-release.yml` (below) is **tag-only**: it runs on a
-  **windows-latest** runner on the same `v*` tags as the Android release
-  workflow (plus manual dispatch for testing — PR/push CI builds just the
-  Android APK, see `android.yml`). It:
+- **It bundles first.** `curio_flutter/tool/sync_assets.sh` copies
+  `data/topics/*.json` into `curio_flutter/assets/topics/` and FAILS if the copy
+  is empty — the same rule `android.yml` follows, for the same reason: the JSON
+  is not in git under assets/, so a run without this step proves nothing about
+  the app users would get.
+- **It generates the runner.** `flutter create --org com.curio
+  --platforms=windows .` makes the `windows/` folder on the runner (it is
+  `.gitignore`d until a runner has been produced and committed — see
+  `curio_flutter/README.md`).
+- **Then `flutter pub get`, `flutter analyze --no-fatal-infos`, and
+  `flutter build windows --release`**, uploading
+  `curio_flutter/build/windows/x64/runner/Release/` as
+  `curio-windows-<run number>` (7-day retention).
+- **No secrets, no signing.** A Flutter Windows release build is unsigned;
+  code signing is a later, deliberate step.
+- **iOS is not built here yet.** The decision is Windows first; when iOS follows,
+  it gets its own job (`macos-latest`, `flutter build ios --no-codesign` or an
+  unsigned archive) rather than being bolted onto the Windows one.
 
-- Requires NO secrets — the desktop port has no signing story yet (jpackage
-  code signing is optional and unconfigured).
-- Installs the **WiX Toolset** via chocolatey (jpackage needs it to build
-  the `.msi`) and exposes it via `WIX`/`PATH`. The install folder is
-  VERSIONED (v3.11, v3.14, ...) and changes between runner images — the
-  step DISCOVERS it (`WiX Toolset*` glob) instead of hardcoding a version.
-  jpackage itself locates the toolset by scanning Program Files, so
-  `WIX`/`PATH` are belt-and-braces: `WIX` = installation root (the standard
-  `%WIX%` convention), `PATH` = the `bin` dir.
-- Compiles the module FIRST (`:desktop:build`) so code errors fail fast
-  with a clear log before the slow WiX/jpackage steps, then runs
-  `:desktop:createDistributable` AND `:desktop:packageDistributionForCurrentOS`
-  — on Windows this builds the app image (contains `Curio.exe`, left on
-  disk by `createDistributable`) plus the `.msi` installer (built by
-  `packageDistributionForCurrentOS`; its `packageMsi` task consumes its own
-  jpackage image internally and does NOT leave the app image behind, so
-  both tasks must run for the portable zip to exist); `Dmg`/`Deb` are
-  macOS/Linux formats and are skipped.
-- Zips the app image into a **portable** `Curio-Windows-{version}-portable.zip`
-  and attaches both it and the `.msi` to the GitHub release on tags, next
-  to the Android APKs published by `release.yml`. Manual-dispatch runs
-  (no tag) upload the same two files as run artifacts
-  (`curio-desktop-windows-*`, 7-day retention) so the proper `.exe` can be
-  downloaded for testing — the release-only steps (release body, prerelease
-  detection, `action-gh-release` publish) are gated on
-  `startsWith(github.ref, 'refs/tags/')`. `RELEASE_VERSION` is only set for
-  tag runs; manual-dispatch runs keep the module's default `1.0.0` package
-  version (and the zip's default name) because jpackage rejects
-  non-numeric versions.
-- **Tag version is the package version:** exports `RELEASE_VERSION` (tag
-  minus `v`) so `desktop/build.gradle.kts` versions the installer from the
-  tag, mirroring the Android convention. jpackage validates
-  `packageVersion` per bundle format, and the Windows MSI is the strict one:
-  it requires exactly `MAJOR.MINOR.BUILD` (255 / 255 / 65535). The desktop
-  module therefore NORMALIZES the tag instead of trusting it — prerelease/
-  build suffixes stripped (`v1.0.2-beta` → `1.0.2`) and missing components
-  padded with 0 (`v2.1-beta6` → `2.1.0`, `v2` → `2.0.0`) — and a tag that
-  yields nothing jpackage accepts falls back to `1.0.0` with a build
-  warning. A two-component tag used to fail **configuration**
-  (`Illegal version for 'Msi': '2.1'`), and since Gradle configures every
-  project before running `:app:assembleRelease`, that broke the Android
-  release on the same tag (v2.1-beta6). The Android `versionName` is a plain
-  string and keeps its suffix. The portable zip name keeps the full tag
-  (distinguishes prerelease from later stable artifacts); the release body's
-  MSI row uses the installer's ACTUAL file name (`CURIO_MSI_NAME`, published
-  by the collect step) rather than re-deriving the rule, so the body can
-  never name a file the build did not produce.
-- Publishes through GitHub Releases with the same `alpha`/`beta`/`rc`
-  prerelease detection as the Android workflow, and `update_release_body:
-  false` so it never clobbers the Android workflow's release body when both
-  run on the same tag.
-- Validates the build output with hard guards: the `.msi` must exist, the
-  app image must contain `Curio.exe`; unmatched upload files fail the run.
+The old Compose Multiplatform `desktop/` module and its two workflows
+(`desktop-release.yml`, and the `desktop` job in `android.yml`) are GONE — the
+Flutter client replaces them. The Android `settings.gradle.kts` no longer
+includes `:desktop`.
 
 ### Editable release note (`docs/RELEASE_NOTES.md`)
 
 `docs/RELEASE_NOTES.md` is the EDITABLE release note the user maintains.
 **It was `RELEASE_NOTES.md` at the repo root until the root-cleanup pass**
 (the root keeps its DOX rail, its build files and its two standard files);
-the path is read literally by both workflows below, so moving it again means
-editing them too — the "file is missing" branch is silent, and a misplaced
-note would simply stop reaching releases. Both tag workflows embed it at the
-TOP of the GitHub release body when they create the release:
+the path is read literally by `release.yml`, so moving it again means
+editing that workflow too — the "file is missing" branch is silent, and a
+misplaced note would simply stop reaching releases. On a tag run the Android
+workflow embeds it at the TOP of the GitHub release body when it creates the
+release:
 
-- `release.yml` (Android) and `desktop-release.yml` (Windows) read the
-  file on tag runs and prepend its content, followed by a `---` rule,
-  ABOVE their auto-generated install guide (the APK table for Android;
-  the portable zip / MSI table for desktop). The install help is always
-  appended after the note, never replaced by it.
+- `release.yml` reads the file on tag runs and prepends its content, followed
+  by a `---` rule, ABOVE the auto-generated install guide (the APK table).
+  The install help is always appended after the note, never replaced by it.
 - The file is always included when present — no template guard. The user
   updates it before tagging; the v1.0 launch copy is the shipped default.
-- The desktop workflow only writes a body when IT creates the release
-  first (same `update_release_body: false` race handling), so either
-  workflow winning the race still ships the note.
+- The release workflow only writes a body when IT creates the release first
+  (`update_release_body: false` race handling), so a re-run never clobbers a
+  body that is already published.
 
 ### Contributor templates
 

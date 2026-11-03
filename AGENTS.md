@@ -16,9 +16,9 @@ Top-level instruction file for all AI agents (Codebuff/Buffy and spawned sub-age
 
 **⚠️ SCOPE: This project's active workstream is the Android app (`app/`) plus
 the account site (`auth-web/`, which is live infrastructure for that app's
-accounts, not a port). `web/` and `desktop/` are separate projects on hold — do
-not touch them unless the user explicitly asks (see the 🔒 Scope section
-below).**
+accounts, not a port) and now the Windows/iOS client (`curio_flutter/`, Windows
+first). `web/` is a separate project on hold — do not touch it unless the user
+explicitly asks (see the 🔒 Scope section below).**
 
 ## ❓ ASK WHEN UNSURE
 
@@ -424,92 +424,67 @@ Durable multi-step feature plans and researched idea backlogs live under
   idea is built or dropped. Once built, the binding description belongs in the
   owning `AGENTS.md`, not in the agenda.
 
-## 🔒 Scope — Android App ONLY (web/ + desktop/ on hold)
+## 🔒 Scope — Android app + the Windows/iOS client (web/ on hold)
 
-**Do NOT edit, build, or touch anything under `web/` or `desktop/` unless
-the user explicitly asks for it in the current request.** The active
-workstream is the **Android app only** (`app/` module).
+**Do NOT edit, build, or touch anything under `web/` unless the user explicitly
+asks for it in the current request.** The active workstreams are the **Android
+app** (`app/`) and the **Windows/iOS client** (`curio_flutter/`) — two separate
+apps in two languages, which share content and lane declarations and nothing
+else.
 
-- The web (React/TS) and desktop (Compose Multiplatform) ports are
-  **separate projects on hold** — do not treat them as part of any Android
-  task, do not "keep them in sync" with Android changes, and do not apply
-  Android fixes/features to them.
+- The web (React/TS) port is a **separate project on hold** — do not treat it as
+  part of an Android or Flutter task, do not "keep it in sync" with either, and
+  do not apply Android fixes/features to it.
+- **`curio_flutter/` is its own app.** Do not "port" an Android widget into it
+  line by line, and do not apply a Flutter change to the Android app. What the
+  two DO share: `data/topics/*.json` (the one catalog), and the lane slugs,
+  labels and accents that `curio_flutter/tool/sync_lanes.py` generates from the
+  Kotlin catalog.
 - This includes data mirrors: Android data fixes (e.g. topic JSON dedupes)
-  apply to `app/src/main/assets/` ONLY — do not touch
-  `web/src/data/topics/` or desktop-adjacent data unless the user says so.
-- If a request is ambiguous about scope, default to Android-only and note
-  the web/desktop impact in your summary so the user can opt in.
+  apply to `data/topics/` (the shared source) — do not touch `web/src/data/topics/`
+  unless the user says so.
+- If a request is ambiguous about scope, default to the Android app and note the
+  `curio_flutter/` and web impact in your summary so the user can opt in.
 
-## Desktop App (desktop/) — ⛔ ON HOLD (do not touch unless asked)
+## Windows + iOS App (`curio_flutter/`) — ACTIVE, Windows build first
 
-The `desktop/` directory is the **Compose Multiplatform (JVM) port** of the
-Android app — the same Kotlin codebase running as a native Windows `.exe`
-(via jpackage, plus macOS/Linux). It is a separate Gradle module (`:desktop`)
-that compiles independently of the Android `:app` module.
+The desktop app is **no longer the Compose Multiplatform `desktop/` module** —
+that module was deleted on the member's instruction (2026-11-03) and replaced by
+a **separate Flutter/Dart client in `curio_flutter/`**, built for **Windows** and,
+next, for **iOS** from the same code. It is a NEW app, not a port: it shares the
+content and the lane declarations, never the Kotlin.
 
-**Current state (milestones 1–3):** the desktop app mirrors the Android app's
-four-tab structure — **Home** (rose hero with Streak · Cabinet · Topics
-stats, lane chips, spin CTA), **Spin** (lane chip bar, the deck with front
-ticket + 2 peek cards, reveal card with a **Save to Cabinet** pill, and a
-Browse list), **Cabinet** (saved discoveries persisted to
-`~/.curio/entries.json` via `DesktopEntryStore`, with open/remove), and
-**Settings** (Light/Dark theme, clear entries, reset preferences, about). A
-bottom nav bar (Home · Spin · Cabinet · Settings) mirrors the Android app.
-Plus a **persisted preferences store** (`DesktopPreferences`: tiny JSON at
-`~/.curio/prefs.json` via Gson): the active tab, selected lane, last landed
-topic, window size/position and the theme survive restarts. It reads the
-SAME topic JSON files as Android by pointing the module's resources at
-`app/src/main/assets/topics` (no duplicate assets — content edits flow into
-both builds automatically). Data classes are desktop mirrors of the Android
-schema; fields absent from legacy JSON (`byline`, `tier`) are nullable with
-`safe*` accessors because Gson bypasses Kotlin default-parameter
-constructors.
+**The member's decisions (asked and answered, 2026-11-03):** stack **Flutter
+(Dart)**; the old `desktop/` module **replaced/deleted**; **Windows .exe first**;
+iOS **26+ only** — the native Liquid Glass is used, with no fallback below it.
 
-**Key facts:**
-- `desktop/build.gradle.kts` — CMP plugin (`org.jetbrains.compose`), JVM 17
-  toolchain, `compose.material3` + Gson only (no Android APIs yet).
-- `desktop/src/main/kotlin/com/curio/desktop/Main.kt` — app entry + window
-  geometry (`main()`/`saveWindowGeometry`), theme schemes, the shared
-  `CurioShellState`/`shell` object (internal, consumed by every screen),
-  the bottom-nav screen host.
-- `desktop/src/main/kotlin/com/curio/desktop/DesktopCommon.kt` — shared
-  `DesktopPill`, `ScreenHeader`, `LaneChipsRow`.
-- `desktop/src/main/kotlin/com/curio/desktop/DesktopHome.kt` /
-  `DesktopSpin.kt` / `DesktopCabinet.kt` / `DesktopSettings.kt` — the four
-  screens (deck + reveal live in DesktopSpin; entries in DesktopCabinet).
-- `desktop/src/main/kotlin/com/curio/desktop/DesktopCatalog.kt` — topic
-  loader (Gson) + the 36-lane category table.
-- `desktop/src/main/kotlin/com/curio/desktop/DesktopPreferences.kt` — the
-  JSON preferences store (`~/.curio/prefs.json`, Gson, best-effort load,
-  `clear()` for the reset action).
-- `desktop/src/main/kotlin/com/curio/desktop/DesktopEntryStore.kt` — the
-  JSON saved-entries store (`~/.curio/entries.json`, reactive via Compose
-  state).
-- CI: the desktop build paths are **DISABLED until the app is finished** —
-  the `desktop` job in `.github/workflows/android.yml` and the `windows`
-  job in `.github/workflows/desktop-release.yml` are both gated with
-  `if: false` (flip to `if: true` to re-enable). When active: the
-  `desktop` job compiles the module on every push and PR
-  (`:desktop:build`) so the port can't silently rot, and uploads the
-  compiled JAR as an artifact (`curio-desktop-jar-*`) **only on branch
-  pushes** (PR runs skip the upload — a 4MB jar per PR commit was piling
-  up in artifact storage), with 1-day retention. Native Windows
-  installers (`.exe` app image + `.msi`) build only on tag pushes (plus
-  manual dispatch) via `desktop-release.yml` (a windows-latest runner,
-  WiX via chocolatey, jpackage `createDistributable` for the `.exe` app
-  image + `packageDistributionForCurrentOS` for the `.msi`; the portable
-  zip + `.msi` attach to the GitHub release on tags and upload as run
-  artifacts on manual-dispatch runs).
+- **Layout:** a Windows window gets its own frame — a rail of four rooms
+  (Home · Spin · Cabinet · Settings), a context column (lanes / saved /
+  device), and the page — decided in `curio_flutter/lib/shell/app_shell.dart`.
+  The iOS shell keeps the same state and swaps this frame for a tab bar and one
+  column, the way Android looks, with native glass surfaces.
+- **Content is shared, never copied into git here:** `tool/sync_assets.sh`
+  bundles the repo's `data/topics/*.json` into `assets/topics/`, exactly as the
+  Android CI does, and `tool/sync_lanes.py` regenerates
+  `lib/data/lanes.dart` (slug, label, accent) from `Category.kt` and
+  `CurioColors.kt`. A lane is still declared ONCE, in Kotlin.
+- **State:** two plain JSON files (`prefs.json`, `cabinet.json`) under
+  `%APPDATA%\Curio` on Windows (`~/.curio` elsewhere), written with `dart:io`.
+  No database, no account, nothing leaves the machine.
+- **CI:** `.github/workflows/curio-flutter.yml` (windows-latest) generates the
+  Windows runner, bundles the catalog, analyses and builds the app. The
+  development environment has **no Flutter SDK**, so CI is the only compile.
+  `windows/` and `ios/` are generated by `flutter create` and are `.gitignore`d
+  until a runner has been produced and committed.
+- **No Gradle involvement.** `settings.gradle.kts` no longer includes `:desktop`,
+  and `android.yml` no longer has a desktop job. Deleting `:desktop` did NOT
+  touch the Android build's dependencies.
 
-**To run locally:** `./gradlew :desktop:run` (this environment forbids
-running Gradle — CI validates instead).
+**iOS, when it starts:** same project, `flutter create --platforms=ios .`, then a
+Swift platform view wrapping iOS 26 `UIGlassEffect` for the glass surfaces — the
+one place Swift has to exist, because "native Liquid Glass" cannot be faked in
+Dart. No iOS job exists yet.
 
-**Not yet ported** (milestone 4+): capture/sessions, quests/pet, the
-floating overlay, and the remaining Android-only services — each needs a
-desktop stub. macOS `.dmg` and Linux `.deb` packaging is already declared
-in `targetFormats` but has no release job yet (add runners per OS when
-wanted). UI parity with Android (per the tablet-layout pass + web parity
-effort) is the ongoing goal; the shuffle deck must stay 2 peek cards.
 
 ## Web App (web/) — ⛔ ON HOLD (do not touch unless asked)
 
@@ -576,6 +551,6 @@ real destination the project's Site URL answers instead, whose default is
 - [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)
 - [fastlane/AGENTS.md](fastlane/AGENTS.md) — Android store metadata and release notes
 - [fdroid/AGENTS.md](fdroid/AGENTS.md) — F-Droid listing material (fdroiddata metadata draft + inclusion checklist; not part of the app build)
-- [desktop/](desktop/) — Compose Multiplatform desktop port (see the
-  Desktop App section above)
+- [curio_flutter/AGENTS.md](curio_flutter/AGENTS.md) — the Windows/iOS client
+  (Flutter/Dart; see the Windows + iOS section above)
 - [.github/AGENTS.md](.github/AGENTS.md) — GitHub CI/CD and issue templates
