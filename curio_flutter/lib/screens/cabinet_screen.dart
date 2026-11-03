@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 
+import '../data/journal.dart';
 import '../data/lanes.dart';
 import '../data/topic.dart';
 import '../store/app_model.dart';
 import '../theme/curio_theme.dart';
 import '../widgets/curio_widgets.dart';
+import 'journal_editor.dart';
 
-/// The Cabinet: everything kept, as a grid of tinted cards.
+/// The Cabinet: what you kept, and what you wrote.
 ///
-/// The grid's column count comes from the window's width (a 1440px window fits
-/// four, a small one fits two) — the same `maxCrossAxisExtent` idea the phone
-/// uses for its shelf, which is what keeps a wide window from stretching each
-/// card into a banner.
-class CabinetScreen extends StatelessWidget {
+/// Two tabs, because the phone puts both in the same room: **Discoveries** (the
+/// kept cards) and **Journals** (the pages). An open page takes the whole room —
+/// a writing surface behind a tab bar is a writing surface with a strip of
+/// furniture over it.
+class CabinetScreen extends StatefulWidget {
   const CabinetScreen({super.key, required this.model});
 
   final AppModel model;
 
   @override
+  State<CabinetScreen> createState() => _CabinetScreenState();
+}
+
+class _CabinetScreenState extends State<CabinetScreen> {
+  int _tab = 0;
+
+  @override
   Widget build(BuildContext context) {
+    final model = widget.model;
+    final open = model.openJournal;
+    if (open != null) {
+      return JournalEditor(model: model, entry: open);
+    }
     final scheme = Theme.of(context).colorScheme;
     return PageBody(
       child: Column(
@@ -26,41 +40,39 @@ class CabinetScreen extends StatelessWidget {
         children: [
           PageHeader(
             title: 'Cabinet',
-            subtitle: model.saved.isEmpty
-                ? 'Nothing kept yet — a card you spin can be kept here.'
-                : '${model.saved.length} ${model.saved.length == 1 ? 'discovery' : 'discoveries'} kept',
-            trailing: model.saved.isEmpty
-                ? null
-                : TextButton.icon(
-                    onPressed: () => _confirmClear(context),
-                    icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-                    label: const Text('Clear'),
+            subtitle: _tab == 0
+                ? (model.saved.isEmpty
+                    ? 'Nothing kept yet — a card you spin can be kept here.'
+                    : '${model.saved.length} ${model.saved.length == 1 ? 'discovery' : 'discoveries'} kept')
+                : (model.journals.isEmpty
+                    ? 'No pages yet. A journal is yours alone, kept on this device.'
+                    : '${model.journals.length} ${model.journals.length == 1 ? 'page' : 'pages'} · ${model.journalWords} words'),
+            trailing: _tab == 0
+                ? (model.saved.isEmpty
+                    ? null
+                    : TextButton.icon(
+                        onPressed: () => _confirmClear(context),
+                        icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                        label: const Text('Clear'),
+                      ))
+                : FilledButton.icon(
+                    onPressed: model.createJournal,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('New page'),
                   ),
           ),
+          const SizedBox(height: 14),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(value: 0, label: Text('Discoveries')),
+              ButtonSegment(value: 1, label: Text('Journals')),
+            ],
+            selected: <int>{_tab},
+            onSelectionChanged: (selection) => setState(() => _tab = selection.first),
+          ),
           const SizedBox(height: CurioSpace.gap + 4),
-          if (model.saved.isEmpty)
-            _EmptyCabinet(hasCatalog: !model.catalogEmpty)
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 300,
-                mainAxisExtent: 190,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-              ),
-              itemCount: model.saved.length,
-              itemBuilder: (context, index) {
-                final entry = model.saved[index];
-                return _SavedCard(
-                  topic: entry.topic,
-                  savedAt: entry.savedAt,
-                  onRemove: () => model.remove(entry.topic.id),
-                );
-              },
-            ),
-          if (model.saved.isNotEmpty) ...[
+          if (_tab == 0) _discoveries(context) else _journals(context),
+          if (_tab == 0 && model.saved.isNotEmpty) ...[
             const SizedBox(height: 18),
             Text(
               'Kept on this device. The phone\'s own Cabinet is separate until a '
@@ -73,14 +85,107 @@ class CabinetScreen extends StatelessWidget {
     );
   }
 
+  Widget _discoveries(BuildContext context) {
+    final model = widget.model;
+    if (model.saved.isEmpty) return _EmptyCabinet(hasCatalog: !model.catalogEmpty);
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 300,
+        mainAxisExtent: 190,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+      ),
+      itemCount: model.saved.length,
+      itemBuilder: (context, index) {
+        final entry = model.saved[index];
+        return _SavedCard(
+          topic: entry.topic,
+          savedAt: entry.savedAt,
+          onRemove: () => model.remove(entry.topic.id),
+        );
+      },
+    );
+  }
+
+  Widget _journals(BuildContext context) {
+    final model = widget.model;
+    if (model.journals.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(CurioSpace.pageRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Your pages', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 6),
+            Text(
+              'A page is written for yourself: headings, quotes, checklists, a '
+              'mood and tags. It stays on this device, in the same folder as the '
+              'Cabinet.',
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: model.createJournal,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Write the first page'),
+            ),
+          ],
+        ),
+      );
+    }
+    return Column(
+      children: [
+        for (final entry in model.journals)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _JournalRow(
+              entry: entry,
+              onOpen: () => model.openJournalById(entry.id),
+              onDelete: () => _confirmDeleteJournal(context, entry),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _confirmDeleteJournal(BuildContext context, JournalEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete “${entry.displayTitle}”?'),
+        content: const Text('The page is removed from this device. This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Keep it'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) await widget.model.deleteJournal(entry.id);
+  }
+
   Future<void> _confirmClear(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear the Cabinet?'),
-        content: const Text(
-          'Every kept discovery is removed. This cannot be undone.',
-        ),
+        content: const Text('Every kept discovery is removed. This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -93,7 +198,108 @@ class CabinetScreen extends StatelessWidget {
         ],
       ),
     );
-    if (confirmed ?? false) await model.clearCabinet();
+    if (confirmed ?? false) await widget.model.clearCabinet();
+  }
+}
+
+/// One page in the Journals list: its title, when it was last written, how long
+/// it is, and the mood it was left in.
+class _JournalRow extends StatelessWidget {
+  const _JournalRow({
+    required this.entry,
+    required this.onOpen,
+    required this.onDelete,
+  });
+
+  final JournalEntry entry;
+  final VoidCallback onOpen;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(CurioSpace.cardRadius),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 10, 16),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(CurioSpace.cardRadius),
+          ),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    JournalEntry.moodGlyphs[entry.mood.clamp(0, 4).toInt()],
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: entry.mood == 0 ? scheme.onSurfaceVariant : scheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+                    ),
+                    if (entry.preview.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        entry.preview,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${entry.words} ${entry.words == 1 ? 'word' : 'words'} · ${_when(entry.updatedAt)}',
+                style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+              ),
+              IconButton(
+                tooltip: 'Delete this page',
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded, size: 17),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _when(DateTime value) {
+    final local = value.toLocal();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(local.year, local.month, local.day);
+    final difference = today.difference(day).inDays;
+    if (difference == 0) return 'today';
+    if (difference == 1) return 'yesterday';
+    if (difference < 7) return '$difference days ago';
+    const months = <String>[
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${local.day} ${months[local.month - 1]}';
   }
 }
 

@@ -74,7 +74,11 @@ class _CurioShellState extends State<CurioShell> {
       return const Center(child: CircularProgressIndicator());
     }
     return switch (_room) {
-      0 => HomeScreen(model: model, onSpin: () => setState(() => _room = 1)),
+      0 => HomeScreen(
+          model: model,
+          onSpin: () => setState(() => _room = 1),
+          onWrite: () => setState(() => _room = 2),
+        ),
       1 => SpinScreen(model: model),
       2 => CabinetScreen(model: model),
       _ => SettingsScreen(model: model),

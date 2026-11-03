@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../data/journal.dart';
 import '../data/lanes.dart';
 import '../data/topic.dart';
 import '../data/topic_catalog.dart';
@@ -63,6 +64,14 @@ class AppModel extends ChangeNotifier {
   final List<SavedEntry> saved = <SavedEntry>[];
   final List<Topic> deck = <Topic>[];
 
+  /// The journals, newest first. Kept in the same folder as the cabinet, in
+  /// their own file, because a page of writing is the member's own and must not
+  /// be lost to a bad cabinet write (or the other way round).
+  final List<JournalEntry> journals = <JournalEntry>[];
+
+  /// The journal whose page is open in the Cabinet room, if any.
+  String? openJournalId;
+
   Directory get dataDir => _dataDir ??= _resolveDataDir();
 
   String get dataPath => dataDir.path;
@@ -83,6 +92,70 @@ class AppModel extends ChangeNotifier {
 
   bool isSaved(String topicId) => saved.any((entry) => entry.topic.id == topicId);
 
+  /// The journal the editor is showing.
+  JournalEntry? get openJournal {
+    final id = openJournalId;
+    if (id == null) return null;
+    for (final entry in journals) {
+      if (entry.id == id) return entry;
+    }
+    return null;
+  }
+
+  /// Words written, across every page — the number Home shows.
+  int get journalWords =>
+      journals.fold<int>(0, (total, entry) => total + entry.words);
+
+  JournalEntry? get latestJournal => journals.isEmpty ? null : journals.first;
+
+  /// The newest few pages, for Home's recents list.
+  List<JournalEntry> get recentJournals =>
+      journals.length <= 4 ? journals : journals.sublist(0, 4);
+
+  /// The page that is open, or the newest one — what "Continue" means.
+  JournalEntry? get resumeJournal => openJournal ?? latestJournal;
+
+  /// ── THE STREAK ───────────────────────────────────────────────────
+  ///
+  /// Consecutive days on which something was done: a page was written, or a
+  /// card was kept. The phone's `StreakTracker` counts the same activity, so the
+  /// two apps agree about what a streak IS — and nothing new is stored for it:
+  /// every timestamp is one the cabinet and the journals already carry. The run
+  /// may end today (still going) or yesterday (not broken yet at breakfast),
+  /// which is the phone's own rule.
+  int get streakDays {
+    final days = <DateTime>{
+      for (final entry in journals) ...<DateTime>{
+        _dayOf(entry.updatedAt),
+        _dayOf(entry.createdAt),
+      },
+      for (final entry in saved) _dayOf(entry.savedAt),
+    };
+    if (days.isEmpty) return 0;
+    var cursor = _dayOf(DateTime.now());
+    if (!days.contains(cursor)) {
+      cursor = cursor.subtract(const Duration(days: 1));
+      if (!days.contains(cursor)) return 0;
+    }
+    var streak = 0;
+    while (days.contains(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
+  /// Words written today, across every page touched today.
+  int get wordsToday {
+    final today = _dayOf(DateTime.now());
+    return journals
+        .where((entry) => _dayOf(entry.updatedAt) == today)
+        .fold<int>(0, (total, entry) => total + entry.words);
+  }
+
+  static DateTime _dayOf(DateTime moment) =>
+      DateTime(moment.year, moment.month, moment.day);
+
   /// Reads the catalog and both stores, then deals the first hand.
   ///
   /// A failure is REPORTED (`loadError`), never swallowed into a blank window:
@@ -93,6 +166,7 @@ class AppModel extends ChangeNotifier {
       _catalog = await TopicCatalog.load();
       await _readPrefs();
       await _readCabinet();
+      await _readJournals();
       _deal();
     } catch (error) {
       loadError = '$error';
@@ -132,6 +206,60 @@ class AppModel extends ChangeNotifier {
     await _writeCabinet();
   }
 
+  // ── Journals ───────────────────────────────────────────────────────────
+
+  /// Opens a blank page at the top of the list. The page is written to disk at
+  /// once, so the Cabinet never shows a journal that a crash could take away.
+  Future<JournalEntry> createJournal() async {
+    final now = DateTime.now();
+    final entry = JournalEntry(
+      id: newJournalId(),
+      title: '',
+      text: '',
+      blocks: const <JournalBlock>[JournalBlock()],
+      marks: const <InlineMark>[],
+      mood: 0,
+      tags: const <String>[],
+      createdAt: now,
+      updatedAt: now,
+    );
+    journals.insert(0, entry);
+    openJournalId = entry.id;
+    notifyListeners();
+    await _writeJournals();
+    return entry;
+  }
+
+  void openJournalById(String id) {
+    openJournalId = id;
+    notifyListeners();
+  }
+
+  void closeJournal() {
+    openJournalId = null;
+    notifyListeners();
+  }
+
+  /// Saves an edited page in place, keeping the list ordered by the last edit.
+  Future<void> saveJournal(JournalEntry entry) async {
+    final index = journals.indexWhere((item) => item.id == entry.id);
+    if (index < 0) {
+      journals.insert(0, entry);
+    } else {
+      journals[index] = entry;
+    }
+    journals.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    notifyListeners();
+    await _writeJournals();
+  }
+
+  Future<void> deleteJournal(String id) async {
+    journals.removeWhere((entry) => entry.id == id);
+    if (openJournalId == id) openJournalId = null;
+    notifyListeners();
+    await _writeJournals();
+  }
+
   Future<void> remove(String topicId) async {
     saved.removeWhere((entry) => entry.topic.id == topicId);
     notifyListeners();
@@ -168,6 +296,9 @@ class AppModel extends ChangeNotifier {
 
   File get _cabinetFile =>
       File('${dataDir.path}${Platform.pathSeparator}cabinet.json');
+
+  File get _journalsFile =>
+      File('${dataDir.path}${Platform.pathSeparator}journals.json');
 
   Future<void> _readPrefs() async {
     try {
@@ -217,6 +348,36 @@ class AppModel extends ChangeNotifier {
     } catch (_) {
       // Same rule as the prefs: an unreadable cabinet is left alone rather than
       // overwritten, so a hand-fixed file still has its chance.
+    }
+  }
+
+  Future<void> _readJournals() async {
+    try {
+      if (!await _journalsFile.exists()) return;
+      final decoded = jsonDecode(await _journalsFile.readAsString());
+      if (decoded is! List) return;
+      // Every page is kept, including a brand-new blank one: "New page" writes
+      // its entry at once, and a restart must not quietly delete the sheet the
+      // member had only just opened.
+      journals
+        ..clear()
+        ..addAll(decoded.whereType<Map<String, dynamic>>().map(JournalEntry.fromJson));
+      journals.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    } catch (_) {
+      // A corrupt journals file is left alone rather than overwritten: a page
+      // of writing is not something to replace with an empty list.
+    }
+  }
+
+  Future<void> _writeJournals() async {
+    try {
+      await dataDir.create(recursive: true);
+      await _journalsFile.writeAsString(
+        jsonEncode(journals.map((entry) => entry.toJson()).toList(growable: false)),
+      );
+    } catch (error) {
+      loadError = 'Could not write the journals: $error';
+      notifyListeners();
     }
   }
 
