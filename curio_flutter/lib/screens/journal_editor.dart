@@ -335,7 +335,7 @@ class _JournalEditorState extends State<JournalEditor> {
   // ── The dock ───────────────────────────────────────────────────────────
 
   Widget _dock(ColorScheme scheme) {
-    final padding = const EdgeInsets.fromLTRB(
+    const padding = EdgeInsets.fromLTRB(
       CurioSpace.page,
       0,
       CurioSpace.page,

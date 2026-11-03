@@ -30,7 +30,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final resume = model.resumeJournal;
     return PageBody(
       child: Column(
@@ -77,7 +76,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: CurioSpace.gap + 10),
-          _SectionLabel(text: 'Pick a lane'),
+          const _SectionLabel(text: 'Pick a lane'),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -234,7 +233,7 @@ class _Hero extends StatelessWidget {
                     _HeroStat(
                       glyph: Icons.local_fire_department_rounded,
                       value: '${model.streakDays}',
-                      label: model.streakDays == 1 ? 'day streak' : 'day streak',
+                      label: 'day streak',
                       ink: ink,
                     ),
                     _HeroStat(

@@ -125,8 +125,10 @@ class JournalController extends TextEditingController {
     value = TextEditingValue(
       text: snapshot.text,
       selection: snapshot.selection.copyWith(
-        baseOffset: snapshot.selection.baseOffset.clamp(0, snapshot.text.length),
-        extentOffset: snapshot.selection.extentOffset.clamp(0, snapshot.text.length),
+        baseOffset:
+            snapshot.selection.baseOffset.clamp(0, snapshot.text.length).toInt(),
+        extentOffset:
+            snapshot.selection.extentOffset.clamp(0, snapshot.text.length).toInt(),
       ),
     );
     // The snapshot's own marks and pens are already positioned for its text, so
@@ -191,7 +193,7 @@ class JournalController extends TextEditingController {
   }
 
   int get caretLine {
-    final offset = selection.baseOffset.clamp(0, text.length);
+    final offset = selection.baseOffset.clamp(0, text.length).toInt();
     return _lineOf(offset);
   }
 
@@ -485,10 +487,9 @@ class JournalController extends TextEditingController {
       replacement = '$wanted$body';
     }
     final startOffset = _lineStart(index);
-    final caret = (selection.baseOffset - startOffset - prefix.length).clamp(
-      0,
-      max(0, replacement.length - wanted.length),
-    );
+    final caret = (selection.baseOffset - startOffset - prefix.length)
+        .clamp(0, max(0, replacement.length - wanted.length))
+        .toInt();
     lines[index] = replacement;
 
     // Renumber the contiguous numbered run that starts at this line.
@@ -539,7 +540,7 @@ class JournalController extends TextEditingController {
 
   /// Puts the caret at the start of [line] — the contents door's jump.
   void jumpToLine(int line) {
-    final offset = _lineStart(line.clamp(0, text.split('\n').length - 1));
+    final offset = _lineStart(line.clamp(0, text.split('\n').length - 1).toInt());
     selection = TextSelection.collapsed(offset: offset);
     notifyListeners();
   }
@@ -650,12 +651,12 @@ class JournalController extends TextEditingController {
     }
     final cuts = <int>{0, line.length};
     for (final mark in marks) {
-      cuts.add((mark.start - start).clamp(0, line.length));
-      cuts.add((mark.end - start).clamp(0, line.length));
+      cuts.add((mark.start - start).clamp(0, line.length).toInt());
+      cuts.add((mark.end - start).clamp(0, line.length).toInt());
     }
     for (final pen in pens) {
-      cuts.add((pen.start - start).clamp(0, line.length));
-      cuts.add((pen.end - start).clamp(0, line.length));
+      cuts.add((pen.start - start).clamp(0, line.length).toInt());
+      cuts.add((pen.end - start).clamp(0, line.length).toInt());
     }
     final points = cuts.toList()..sort();
     final runs = <JournalRun>[];
@@ -794,8 +795,8 @@ class JournalController extends TextEditingController {
   }
 
   List<int> _selectedLines() {
-    final from = _lineOf(selection.start.clamp(0, text.length));
-    final to = _lineOf(selection.end.clamp(0, text.length));
+    final from = _lineOf(selection.start.clamp(0, text.length).toInt());
+    final to = _lineOf(selection.end.clamp(0, text.length).toInt());
     return [for (var line = min(from, to); line <= max(from, to); line++) line];
   }
 
@@ -803,13 +804,13 @@ class JournalController extends TextEditingController {
   ({int start, int end}) _activeRange() {
     if (selection.isValid && !selection.isCollapsed) {
       return (
-        start: min(selection.start, selection.end).clamp(0, text.length),
-        end: max(selection.start, selection.end).clamp(0, text.length),
+        start: min(selection.start, selection.end).clamp(0, text.length).toInt(),
+        end: max(selection.start, selection.end).clamp(0, text.length).toInt(),
       );
     }
     final line = caretLine;
     final start = _lineStart(line);
-    final end = (start + _lines()[line].length).clamp(0, text.length);
+    final end = (start + _lines()[line].length).clamp(0, text.length).toInt();
     return (start: start, end: end);
   }
 
@@ -874,7 +875,7 @@ class JournalController extends TextEditingController {
     if (record) _push(_snapshot());
     value = TextEditingValue(
       text: next,
-      selection: TextSelection.collapsed(offset: caret.clamp(0, next.length)),
+      selection: TextSelection.collapsed(offset: caret.clamp(0, next.length).toInt()),
     );
     if (old != next) applyEdit(old, record: false);
     _shakeBaseline = DateTime.now();

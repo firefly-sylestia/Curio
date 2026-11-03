@@ -2646,6 +2646,31 @@ prompt stays below it.)*
 - (empty slot)
 
 
+- **§105 — the journal editor's tools, Home and Spin, brought up to the phone's own design (`curio_flutter`, Windows).**
+  The dock is the Android dock's now, in its order and its manner: undo/redo, the FORMAT door (Aa → bold,
+  italic, underline, strikethrough), the MARKER door (the four pens of `PERSONAL_HIGHLIGHT_KEYS`, with the
+  phone's one-tap first pen and its "taking the pen off is the way out" cross), the HEADING door (one badge
+  wearing I/II/i, opening I · II · Content), TODO, small text, the BULLET door (dot · dash · numbered, plus
+  Remove list), quote, contents and EXPORT (Markdown / plain text, written to `<data>/exports/` and named in
+  a snackbar). Every multi-choice tool opens IN the dock (v433's collapse language) instead of a popup, and
+  the row puts itself away into one circle (v502) and comes back where it was. `JournalController` gained
+  undo/redo (a typing burst is one step), underline/strike on `InlineMark`, marker pens as ranges on the
+  page, and marks+pens that survive every edit — with `onMutated` so a tool's own write keeps the editor's
+  "text as it was" honest (a stale one shifted every mark by the wrong amount after any tool press).
+  Keyboard: Ctrl/Cmd+B · I · U · Shift+X, Ctrl/Cmd+Z, Shift+Z / Y.
+  **The one phone tool deliberately not here: per-line ALIGNMENT** — a Compose block aligns on its own, a
+  `TextField` publishes one `textAlign` for the whole page, and a button that re-aligned every line would be
+  worse than no button (the controller's own header says so).
+  Home now carries the phone's hero language: the rose slab with its watermark collage and date overline,
+  and the `HeroStatSegment` row inside it (streak · Cabinet · topics · words today), the streak derived from
+  the timestamps the cabinet and the journals already carry (`AppModel.streakDays`, no new store); then
+  TODAY'S CARD in its lane wash, the writing desk, the recently-written list and the lane rail.
+  Spin got the phone's `SpinButton` + `OrbitRing`: a 104dp raised accent disc with the die inside a dashed
+  ring that turns while the deck is dealt, under the hand instead of in a corner — plus peeks that wear the
+  name of the card behind them, a deal transition (the old card lifts and fades, the new one rises) and the
+  lane-tinted shadow.
+  **No Android change, no SQL, no migration.** Android's own version was not bumped (a Windows-only push has
+  no Play release to name); the Windows app's version went `1.0.0+1 → 1.0.1+2`.
 
 ## next prompt
 

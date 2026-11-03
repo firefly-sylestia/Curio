@@ -27,10 +27,18 @@ class SpinScreen extends StatefulWidget {
 
 class _SpinScreenState extends State<SpinScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _turn = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 620),
-  );
+  late final AnimationController _turn;
+
+  @override
+  void initState() {
+    super.initState();
+    // Built here, not in a field initializer: a controller needs `this` as its
+    // vsync, and `this` is not available while fields are still being set up.
+    _turn = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 620),
+    );
+  }
 
   @override
   void dispose() {

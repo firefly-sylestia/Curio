@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:curio/data/journal.dart';
 import 'package:curio/store/app_model.dart';
 import 'package:curio/store/journal_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// The journal page's tools, tested where they live: in the controller.
