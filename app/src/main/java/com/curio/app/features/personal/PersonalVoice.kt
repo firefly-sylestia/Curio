@@ -90,6 +90,7 @@ import com.curio.app.ui.components.formatRecordingTime
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.curioTintOn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1659,6 +1660,7 @@ private fun PersonalVoiceStyleSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),

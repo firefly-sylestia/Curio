@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
@@ -14,6 +15,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import android.graphics.Color as AndroidColor
@@ -29,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.curio.app.data.AppPreferences
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.frostColor
 import com.curio.app.ui.components.liquidglass.windowBlurAvailable
@@ -699,6 +702,28 @@ fun curioSheetContainerColor(base: Color = Color.Unspecified): Color =
     curioFrostedPanel(
         if (base == Color.Unspecified) MaterialTheme.colorScheme.surfaceContainerLow else base
     )
+
+/**
+ * v509 — A SHEET IS AS WIDE AS A SHORT WINDOW.
+ *
+ * Material caps every modal sheet at [BottomSheetDefaults.SheetMaxWidth] (640dp)
+ * and centres it, so on a phone in landscape the sheet sat in the middle of a
+ * wide window with the page showing in the gutters on both sides — the member:
+ * *"the buttom sheet which opens in landscape mode is really bad as it is not
+ * fully up to the sides"*. In a compact window ([CurioLayout.isCompact]) the
+ * sheet is handed `Dp.Unspecified`, which is M3's own "no maximum": the sheet is
+ * then as wide as the window and only its top corners stay rounded. Every other
+ * window keeps the 640dp cap exactly as before, so a tablet and a phone in
+ * portrait are untouched.
+ *
+ * Pass this as `sheetMaxWidth` at every `ModalBottomSheet` call — it is the one
+ * argument that decides the sheet's width, and there is no composition local for
+ * it.
+ */
+@Composable
+@ReadOnlyComposable
+fun curioSheetMaxWidth(): Dp =
+    if (CurioLayout.isCompact()) Dp.Unspecified else BottomSheetDefaults.SheetMaxWidth
 
 /**
  * Theme-aware AlertDialog container. LIGHT (v170): the theme's own

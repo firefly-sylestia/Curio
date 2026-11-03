@@ -152,6 +152,7 @@ import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.PendingCreateOpen
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.features.recent.RecentFeedItem
@@ -374,6 +375,15 @@ fun HomeScreen(navController: NavController) {
     // book). The button itself hides while the page is scrolled down, so a
     // long read is never covered by it.
     var writeSheetOpen by remember { mutableStateOf(false) }
+    // v509 — the landscape nav bar's own "+" asks for this sheet through
+    // [PendingCreateOpen] (a short window draws no writing disc). The trigger is
+    // MONOTONIC: the effect keys on the request count, so a second tap after
+    // the sheet was closed opens it again, and the first composition (trigger 0)
+    // never opens anything by itself.
+    val createRequest = PendingCreateOpen.trigger
+    LaunchedEffect(createRequest) {
+        if (createRequest > 0) writeSheetOpen = true
+    }
     val streakDays = StreakTracker.getStreak(context)
     val reminderEnabled = AppPreferences.reminderEnabledState
     // v8.8 — the pet's flower bed at Home (spec §10.3): the pet naps here
@@ -1501,14 +1511,20 @@ fun HomeScreen(navController: NavController) {
                     previous = now
                 }
             }
-            PersonalCreateLauncher(
-                visible = createVisible,
-                onClick = { writeSheetOpen = true },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 18.dp)
-                    .padding(bottom = 92.dp + navInsets.calculateBottomPadding())
-            )
+            // v509 — in a SHORT window the door is the nav bar's own detached
+            // disc ([com.curio.app.ui.components.CurioCompactCreateButton]);
+            // two floating "+" buttons on one short page would be one too many,
+            // so Home's disc stands down there and only there.
+            if (!CurioLayout.isCompact()) {
+                PersonalCreateLauncher(
+                    visible = createVisible,
+                    onClick = { writeSheetOpen = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 18.dp)
+                        .padding(bottom = 92.dp + navInsets.calculateBottomPadding())
+                )
+            }
 
             // ── v389 — INCURSION's door, and ONLY for a member who has typed
             // the phrase into a search field somewhere in the app. It draws

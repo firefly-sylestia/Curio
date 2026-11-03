@@ -5,6 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.lifecycle.lifecycleScope
 import android.net.Uri
 import com.curio.app.data.AppPreferences
@@ -32,6 +36,7 @@ import com.curio.app.navigation.PendingCommunityOpen
 import com.curio.app.navigation.PendingDirectMessageOpen
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.theme.CurioTheme
 import com.curio.app.ui.theme.CurioThemeTransitionHost
 
@@ -274,10 +279,29 @@ class MainActivity : ComponentActivity() {
             )
         }
         setContent {
-            CurioTheme {
-                CurioThemeTransitionHost {
-                    CurioNavHost()
-                }
+            // v509 — A SHORT WINDOW READS ONE STEP SMALLER.
+            //
+            // The member, of landscape: *"many things feels too big in buttom
+            // sheets and dialog box etc … and make everything smaller and
+            // compact"*. A phone in landscape is `CurioLayout.isCompact()` and
+            // its body is ~360dp tall, so the portrait type steps (sized for a
+            // 700dp column) crowd every sheet, dialog and list. The fix is one
+            // reader, not a hundred: the composition's DENSITY is re-provided
+            // with the font scale at 94% in a compact window. dp spacing is
+            // untouched (only `sp` type shrinks), every theme, sheet and page
+            // inherits it at once, and a portrait phone, a tablet and a desktop
+            // window keep today's sizes exactly.
+            val windowDensity = LocalDensity.current
+            val compactWindow = CurioLayout.isCompact()
+            val readingDensity = remember(windowDensity, compactWindow) {
+                if (compactWindow) Density(windowDensity.density, windowDensity.fontScale * 0.94f)
+                else windowDensity
+            }
+            CompositionLocalProvider(LocalDensity provides readingDensity) {
+                CurioTheme {
+                    CurioThemeTransitionHost {
+                        CurioNavHost()
+                    }
                 // v389 — INCURSION's one announcement. Composed at the root,
                 // over whatever page the member happened to type the phrase in,
                 // because the door it opens is on Home and they are somewhere
@@ -295,7 +319,8 @@ class MainActivity : ComponentActivity() {
                 // nothing until a face asks to move, and stops the moment the
                 // last one leaves the screen.
                 com.curio.app.features.community.BlobatarIdleClock()
-            }
+                } // CurioTheme
+            } // CompositionLocalProvider (the compact window's reading density)
         }
     }
 

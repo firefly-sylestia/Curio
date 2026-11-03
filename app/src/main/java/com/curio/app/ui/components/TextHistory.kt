@@ -71,6 +71,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.curioAccentInk
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.curioTertiaryInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.delay
@@ -456,6 +457,7 @@ fun TextHistoryBrowser(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),

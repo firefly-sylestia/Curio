@@ -74,6 +74,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioFillInk
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.delay
@@ -529,6 +530,7 @@ private fun NewChatSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
@@ -620,6 +622,7 @@ private fun ChatActionsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val name = thread.person.label
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

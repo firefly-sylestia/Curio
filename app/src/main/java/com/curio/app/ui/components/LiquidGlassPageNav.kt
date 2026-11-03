@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioSheetMaxWidth
 
 /**
  * v294 — REUSABLE PAGE NAV: circular prev/next + capsule page pill.
@@ -191,6 +192,7 @@ fun LiquidGlassPageNav(
     // Page picker bottom sheet — hold page pill to jump (scrollable)
     if (showPagePicker) {
         ModalBottomSheet(
+            sheetMaxWidth = curioSheetMaxWidth(),
             onDismissRequest = { showPagePicker = false },
             containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)) {
             CurioGlassWindowBlur()

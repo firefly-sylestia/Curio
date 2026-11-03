@@ -58,6 +58,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
@@ -415,6 +416,7 @@ fun WhatsNewSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val accent = curioRoseInk()
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface)) {

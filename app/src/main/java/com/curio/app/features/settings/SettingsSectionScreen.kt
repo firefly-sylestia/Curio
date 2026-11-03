@@ -72,6 +72,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.IntOffset
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import com.curio.app.ui.components.liquidGlassCapsule
@@ -700,6 +701,7 @@ private fun ColorThemeSheet(
     val accent = settingsCardAccentInk()
     val choices = colorThemeChoices()
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
@@ -1470,6 +1472,7 @@ private fun ReminderTimeSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),

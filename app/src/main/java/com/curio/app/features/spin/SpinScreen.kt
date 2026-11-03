@@ -171,6 +171,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
@@ -1256,7 +1257,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = 62.dp),
+                        // v509 — the old 62dp band was reserved for the tray that
+                        // moved to the page's sides in v479, so it was dead space
+                        // under an already-short stage (the member: *"alot of
+                        // empty space"*). The trio is on the edges, so the deck
+                        // may use this height.
+                        .padding(bottom = 40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -1298,6 +1304,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                     onCategories = { showCategoryPicker = true },
                     onFilter = { showFilters = true },
                     onShuffle = onSpinClick,
+                    shuffling = shuffling,
                     vertical = true,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -1538,6 +1545,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             onDispose { PetLandmarks.noteSheet("spin", false) }
         }
         androidx.compose.material3.ModalBottomSheet(
+            sheetMaxWidth = curioSheetMaxWidth(),
             onDismissRequest = { showCategoryPicker = false },
             sheetState = pickerSheetState,
             containerColor = curioSheetContainerColor(deckCat.categoryBackgroundWash()),
@@ -1950,6 +1958,7 @@ private fun FilterSheet(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = {
             // v189 — popping the sheet back (swipe / scrim tap / back)
             // with chips ticked APPLIES the draft instead of silently
@@ -4295,6 +4304,12 @@ private fun SpinFloatTrio(
     onCategories: () -> Unit,
     onFilter: () -> Unit,
     onShuffle: () -> Unit,
+    // v509 — the shuffle button is the DIE, and it only turns while the deck is
+    // actually shuffling. Before this it was [ShuffleGlyph] — a six-dot ring on
+    // an infinite transition — so the landscape stage showed a button that
+    // animated for ever and never read as the dice at all (the member:
+    // *"the spin button is constantly showing spin animation not the dice"*).
+    shuffling: Boolean = false,
     vertical: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -4315,6 +4330,7 @@ private fun SpinFloatTrio(
             SpinShuffleFloatButton(
                 cat = cat,
                 onShuffle = onShuffle,
+                shuffling = shuffling,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = SpinFloatEdgeInset)
@@ -4328,7 +4344,7 @@ private fun SpinFloatTrio(
         ) {
             SpinCategoryFloatButton(cat = cat, onCategories = onCategories)
             SpinFilterFloatButton(cat = cat, hasFilters = hasFilters, onFilter = onFilter)
-            SpinShuffleFloatButton(cat = cat, onShuffle = onShuffle)
+            SpinShuffleFloatButton(cat = cat, onShuffle = onShuffle, shuffling = shuffling)
         }
     }
 }
@@ -4371,15 +4387,36 @@ private fun SpinFilterFloatButton(
 private fun SpinShuffleFloatButton(
     cat: CurioCategory,
     onShuffle: () -> Unit,
+    shuffling: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // v509 — THE DIE, NOT A LOOP. One full turn is spent per shuffle (the
+    // retired state is 0°, so a resting button draws a still die), which is the
+    // same trick the big centre button uses: motion means "this is happening".
+    val roll by animateFloatAsState(
+        targetValue = if (shuffling) 360f else 0f,
+        animationSpec = tween(700, easing = LinearEasing),
+        label = "spinFloatDieRoll"
+    )
     SpinFloatButton(
         container = cat.themedAccent(),
         tint = cat.onAccent(),
         onClick = onShuffle,
         modifier = modifier
     ) {
-        ShuffleGlyph(tint = cat.onAccent(), modifier = Modifier.size(24.dp))
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .graphicsLayer { rotationZ = roll },
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                name = CurioIcons.Casino,
+                contentDescription = "Shuffle",
+                tint = cat.onAccent(),
+                size = 24.dp
+            )
+        }
     }
 }
 

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.CurioLayout
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.curioFauxGlassSheen
@@ -310,6 +312,55 @@ internal fun curioGlassIndicatorColors(): Pair<Color, Color> {
 
 private val FloatingPillIconWidth = 64.dp
 private val FloatingPillExpandedWidth = 136.dp
+// v509 — the SHORT-WINDOW sizes: the same pills, a size down, so a landscape
+// phone's bar does not take a band off the body or read oversized.
+private val CompactPillIconWidth = 52.dp
+private val CompactPillExpandedWidth = 116.dp
+private val CompactPillHeight = 42.dp
+
+/**
+ * v509 — THE SHORT WINDOW'S OWN "+", DETACHED FROM THE BAR.
+ *
+ * A landscape window draws no writing disc on Home and the bar had no create
+ * door at all (the member: *"theres no + button in landscape why not in
+ * landscape make it appear on the nav and keep it unattached"*). It is a small
+ * disc standing beside the pill bar's baseline, outside the capsule: the bar
+ * stays exactly the bar, and the door is still one thumb away. Tapping it asks
+ * Home for its writing sheet through [com.curio.app.navigation.PendingCreateOpen]
+ * and lands on Home if the member was elsewhere.
+ */
+@Composable
+fun CurioCompactCreateButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val fill = MaterialTheme.colorScheme.primary
+    val ink = MaterialTheme.colorScheme.onPrimary
+    val interaction = remember { MutableInteractionSource() }
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = fill,
+        contentColor = ink,
+        shadowElevation = 6.dp,
+        modifier = modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(50))
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = CurioIcons.Add,
+                contentDescription = "Write",
+                tint = ink,
+                size = 22.dp
+            )
+        }
+    }
+}
 // v201 — the leave-hold collapse pulls the pill TIGHTER than its resting
 // icon width (64 → 44dp): just the icon + a sliver of breathing room, so
 // the pill visibly cinches in before the bar unmounts instead of stopping
@@ -412,6 +463,16 @@ fun CurioFloatingNavBar(
     }
     // v188 — a light tick when switching tabs.
     val haptics = LocalHapticFeedback.current
+    // v509 — A SHORT WINDOW GETS A SMALLER BAR. The pills were sized for a
+    // phone held upright (64dp icon / 136dp expanded / 52dp tall); in landscape
+    // they take a band off an already short body and read oversized (the
+    // member: *"dont make the button nav buttons big too"*). Every size below
+    // steps down together, so the bar keeps its proportions.
+    val compactWindow = CurioLayout.isCompact()
+    val pillIconWidth = if (compactWindow) CompactPillIconWidth else FloatingPillIconWidth
+    val pillExpandedWidth = if (compactWindow) CompactPillExpandedWidth else FloatingPillExpandedWidth
+    val pillIconSize = if (compactWindow) 22.dp else 26.dp
+    val pillLabelSize = if (compactWindow) 13.sp else 15.sp
 
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
@@ -476,7 +537,7 @@ fun CurioFloatingNavBar(
                     val selected = destination.route == selectedRoute ||
                         destination.route == routePrefix
                     val tabWidth by animateDpAsState(
-                        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+                        targetValue = if (selected) pillExpandedWidth else pillIconWidth,
                         animationSpec = PillWidthSpring,
                         label = "glassNavTabWidth"
                     )
@@ -494,7 +555,7 @@ fun CurioFloatingNavBar(
                             name = if (selected) destination.selectedIcon else destination.icon,
                             contentDescription = destination.label,
                             tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 26.dp
+                            size = pillIconSize
                         )
                         AnimatedVisibility(
                             visible = selected,
@@ -508,7 +569,7 @@ fun CurioFloatingNavBar(
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontFamily = ChangaOneFontFamily,
                                     fontWeight = FontWeight.Normal,
-                                    fontSize = 15.sp
+                                    fontSize = pillLabelSize
                                 ),
                                 color = activeInk,
                                 maxLines = 1,
@@ -560,6 +621,7 @@ fun CurioFloatingNavBar(
                         } == true
                     FloatingNavPill(
                         destination = destination,
+                        compact = compactWindow,
                         selected = selected,
                         // v201 — during the leave-hold the pill cinches below
                         // its idle icon width (see [FloatingPillCollapsedWidth]).
@@ -605,6 +667,8 @@ fun CurioFloatingNavBar(
 @Composable
 private fun FloatingNavPill(
     destination: CurioBottomDestination,
+    // v509 — the short-window size step (see CurioFloatingNavBar's note).
+    compact: Boolean,
     selected: Boolean,
     // v201 — true only during the bar's leave-hold: the pill cinches to
     // [FloatingPillCollapsedWidth] (tighter than the idle icon pill) so
@@ -617,9 +681,9 @@ private fun FloatingNavPill(
     onClick: () -> Unit
 ) {
     val pillWidth by animateDpAsState(
-        targetValue = if (selected) FloatingPillExpandedWidth
+        targetValue = if (selected) (if (compact) CompactPillExpandedWidth else FloatingPillExpandedWidth)
         else if (collapsing) FloatingPillCollapsedWidth
-        else FloatingPillIconWidth,
+        else (if (compact) CompactPillIconWidth else FloatingPillIconWidth),
         // v162 — the shared [PillWidthSpring] (near-critical 0.9 + Medium),
         // identical to the fill/icon/label springs so they stay in lockstep.
         animationSpec = PillWidthSpring,
@@ -658,7 +722,7 @@ private fun FloatingNavPill(
     Box(
         modifier = Modifier
             .width(pillWidth)
-            .height(FloatingPillHeight)
+            .height(if (compact) CompactPillHeight else FloatingPillHeight)
             .clip(RoundedCornerShape(50))
             .background(fillColor)
             .clickable(
@@ -678,7 +742,7 @@ private fun FloatingNavPill(
                 name = if (selected) destination.selectedIcon else destination.icon,
                 contentDescription = destination.label,
                 tint = iconTint,
-                size = 26.dp
+                size = if (compact) 22.dp else 26.dp
             )
             // v162 — the label's expand/shrink + fade run the SAME spring
             // as the pill width (AnimatedVisibility's own tweens used to
@@ -704,7 +768,7 @@ private fun FloatingNavPill(
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontFamily = ChangaOneFontFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 15.sp
+                        fontSize = if (compact) 13.sp else 15.sp
                     ),
                     color = activeInk,
                     maxLines = 1,

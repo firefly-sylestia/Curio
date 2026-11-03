@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlin.math.roundToInt
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -1994,6 +1995,7 @@ private fun AddSuggestionSheet(
     val current = if (userList.isNotEmpty()) userList else AppPreferences.defaultSuggestions
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),
@@ -2171,6 +2173,7 @@ fun MixEditorSheet(
     val shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surfaceContainerLow),

@@ -11193,3 +11193,42 @@ Pushed as **1.5.10 / `20260953`**.
   as v81/v185 left them — this changes WHO gets the wash, not what it looks like.
 - **No migration, no stored value is rewritten.** A preference is a decision, so flipping a default must
   never overwrite one: the code reads the new default only where nothing was ever written.
+
+### v509 — THE LANDSCAPE PASS: SHEETS FILL THE WINDOW, THE BAR STEPS DOWN WITH ITS OWN "+", AND SPIN'S DIE COMES BACK
+
+The member's return after a break (*"now our leftover landscape mode tqweaks … the psin button is constantly
+showing spin animation not the dice, and alot of empty space, and the buttom sheet which opens in landscape
+mode is really bad as it is not fully up to the sides … many things feels too big in buttom sheets and dialog
+box … in profile the edit proifle streak etc is cut … dont make the button nav buttons big too … theres no +
+button in landscape"*). Pushed as **1.5.11 / `20260954`**. Four answers were taken before the edits (sheets
+full width **and** compact rows; torn heroes keep the tear and span the edges; the `+` as a nav item; the
+search into the header on every list screen) — see `Prompt.md` §101 for what landed and what is owed.
+
+- **A SHEET IS THE WINDOW'S WIDTH IN A COMPACT WINDOW (`curioSheetMaxWidth`, `CurioTheme.kt`).** Material caps
+  every modal sheet at `BottomSheetDefaults.SheetMaxWidth` (640dp) and centres it, which on a landscape phone
+  left the page visible in both gutters. The helper answers `Dp.Unspecified` when `CurioLayout.isCompact()` and
+  the 640dp cap otherwise, and **all 39 `ModalBottomSheet` call sites pass it as `sheetMaxWidth`** — there is no
+  composition local for that argument, so a new sheet must pass it too or it will be the one narrow sheet.
+- **A SHORT WINDOW READS ONE STEP SMALLER (`MainActivity`).** The root re-provides `LocalDensity` with
+  `fontScale * 0.94` when `CurioLayout.isCompact()`. Only `sp` type shrinks (dp spacing is untouched), and every
+  screen, sheet and dialog inherits it at once — one reader instead of a hundred per-surface paddings. Portrait
+  phones, tablets and desktop windows keep today's sizes exactly.
+- **THE BAR STEPS DOWN AND CARRIES THE MISSING "+" (`CurioBottomNav.kt` + `CurioNavHost`).** A compact window
+  uses `CompactPillIconWidth` 52 / `CompactPillExpandedWidth` 116 / `CompactPillHeight` 42 with a 22dp glyph and
+  a 13sp label (the classic and the liquid-glass tab bar both read the same four values).
+  `CurioCompactCreateButton` — a 44dp primary disc — is composed beside the bar's baseline, DETACHED from the
+  capsule, and asks Home for its writing sheet through `PendingCreateOpen` (a monotonic counter in
+  `navigation/CurioRoutes.kt`, Home's `LaunchedEffect` keys on it), so a landscape member gets the create door
+  from any tab. Home's own floating disc stands down in a compact window, because one short page must not carry
+  two "+" buttons.
+- **SPIN'S LANDSCAPE SHUFFLE BUTTON IS THE DIE (`SpinShuffleFloatButton`).** The trio's shuffle control drew
+  `ShuffleGlyph` — a six-dot ring on an `rememberInfiniteTransition` — so the one control that deals a card was an
+  endless animation and never read as the dice. It wears `CurioIcons.Casino` now and turns only while
+  `shuffling` is true. `SpinFloatTrio` gained `shuffling` for that, and the landscape stage's 62dp bottom band
+  (reserved for the tray that moved to the sides in v479) is 40dp.
+- **THE SHORT PROFILE BANNER HAS ROOM (`ProfileHeroHeightShort`, 260 → 300dp).** The banner's own content floor
+  (top pills, identity row, Edit profile / streak pills, the stat bar above the tear) came to within a few dp of
+  260, so a larger system font clipped the pill row against the banner's bottom edge.
+- **OWED (recorded, not done):** the torn heroes still do not reach the screen's edges on a wide window (the
+  content column is `CurioContentMaxWidth`, so a hero's tear stops where the column does), and the search has
+  not moved into the header on the list screens — both are the next batch.

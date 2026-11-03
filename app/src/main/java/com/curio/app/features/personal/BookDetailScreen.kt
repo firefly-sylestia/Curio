@@ -109,6 +109,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
@@ -2260,6 +2261,7 @@ private fun DownloadHelpSheet(
     val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = shape,

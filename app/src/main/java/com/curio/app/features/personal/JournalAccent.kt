@@ -48,6 +48,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioNamedTheme
 import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -138,6 +139,7 @@ internal fun JournalAccentSheet(
     // colour being chosen rather than only its most lit version.
     val picked = Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, sat, value)))
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

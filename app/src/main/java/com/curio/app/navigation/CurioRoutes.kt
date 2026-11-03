@@ -223,6 +223,34 @@ object PendingCommunityOpen {
 }
 
 /**
+ * v509 — the landscape nav bar's own "+".
+ *
+ * The writing disc belongs to Home ([com.curio.app.features.home.HomeScreen]'s
+ * `PersonalCreateLauncher`), and a short landscape window shows no `+` at all —
+ * the member: *"theres no + button in landscape why not in landscape make it
+ * appear on the nav and keep it unattached"*. The bar cannot open Home's sheet
+ * itself, so it asks here and Home answers: the request bumps a monotonic
+ * counter (the NavHost / Home key an effect on it) and Home navigates nowhere —
+ * it is already the root the bar switched to — and simply opens its sheet.
+ */
+object PendingCreateOpen {
+    private val counter = mutableIntStateOf(0)
+
+    /** Asks Home to open its writing sheet on its next composition. */
+    fun request() {
+        counter.intValue++
+    }
+
+    /**
+     * Monotonic bump — the consumer keys its open-effect on this. It is the
+     * state's own value, so a read during composition subscribes to it (no
+     * `@Composable` helper is needed, and this object stays free of Compose
+     * function imports).
+     */
+    val trigger: Int get() = counter.intValue
+}
+
+/**
  * Out-of-band handoff for the daily-reminder notification tap.
  *
  * The daily shuffle reminder ("A little curiosity awaits") carries a boolean

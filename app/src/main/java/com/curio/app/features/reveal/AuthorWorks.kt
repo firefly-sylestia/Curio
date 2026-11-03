@@ -65,6 +65,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.notesSheetContainerColor
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -426,6 +427,7 @@ internal fun AuthorWorksSheet(
     val listed = works
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(cat.notesSheetContainerColor()),
@@ -753,6 +755,7 @@ internal fun AuthorWorkSheet(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(cat.notesSheetContainerColor()),

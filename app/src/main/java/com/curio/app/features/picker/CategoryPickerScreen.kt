@@ -74,6 +74,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -194,6 +195,7 @@ fun CategoryPickerScreen(navController: NavController) {
 
     val sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = { navController.popBackStack() },
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(washCat.categoryBackgroundWash()),

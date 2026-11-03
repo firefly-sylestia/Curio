@@ -131,6 +131,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -4214,6 +4215,7 @@ private fun AlbumNotesSheet(
     val favTracks = AppPreferences.albumFavTracksState[topic.name].orEmpty()
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // Same category-tinted wash + top hairline as the book-notes sheet.
@@ -5097,6 +5099,7 @@ private fun EpisodeNotesSheet(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(coverPal?.container ?: cat.notesSheetContainerColor()),
@@ -5689,6 +5692,7 @@ private fun PosterNotesSheet(
         .takeIf { it.isNotBlank() }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // The same category-tinted wash + top hairline as the book / album /
@@ -7027,6 +7031,7 @@ private fun FileToCollectionSheet(
     var newName by rememberSaveable { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),
@@ -7212,6 +7217,7 @@ private fun RevealShareChoiceSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

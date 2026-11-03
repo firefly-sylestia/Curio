@@ -59,6 +59,7 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.launch
 
@@ -710,6 +711,7 @@ private fun FormBuilderSheet(
     val problem = FeedbackApi.draftProblem(draft)
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

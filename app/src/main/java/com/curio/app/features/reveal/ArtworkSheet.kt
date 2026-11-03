@@ -57,6 +57,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.notesSheetContainerColor
 import com.curio.app.ui.theme.themedAccent
 import java.net.HttpURLConnection
@@ -577,6 +578,7 @@ internal fun ArtworkSheet(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(cat.notesSheetContainerColor()),

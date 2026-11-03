@@ -160,8 +160,17 @@ private val ProfileHeroHeightTall = 372.dp
  *  banner was taller than the whole window, so the identity strip, edit pill
  *  and stat bar are held at their own content floor and the list gets the
  *  rest. A landscape TABLET is not short (`CurioLayout.isShortWindow` reads
- *  height only), so it keeps the tall banner. */
-private val ProfileHeroHeightShort = 260.dp
+ *  height only), so it keeps the tall banner.
+ *
+ *  v509 — 260 → 300dp. At 260 the banner's own content floor (top pills, the
+ *  identity row, the Edit profile / streak pills and the stat bar above the
+ *  tear) came to within a few dp of the height, so on a device with a larger
+ *  system font or a thicker status bar the pill row was CLIPPED by the banner's
+ *  own bottom edge — the member: *"in profile the edit proifle streak etc is
+ *  cut"*. The window's reading density now steps the type down too (see
+ *  `MainActivity`), so 300dp is room for the row, not a taller hero: the list
+ *  below it gains nothing and loses nothing. */
+private val ProfileHeroHeightShort = 300.dp
 
 /**
  * The banner height this window gets — the tall banner, or its short-window

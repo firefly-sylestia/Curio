@@ -228,7 +228,11 @@ android {
         // page (Spin, Reveal, Save, Cabinet, Home/Profile's tint lane) wears
         // the plain theme background until **Category tint** is turned on in
         // Settings → Appearance. The stored pref is untouched.
-        versionCode = 20260953
+        // v509 — the landscape pass: sheets fill the window and read one type
+        // step smaller, the nav pills step down with a detached "+" beside
+        // them, Spin's landscape shuffle button is the die again, and the
+        // short Profile banner has room for its Edit/streak row.
+        versionCode = 20260954
         // v406 — the local/PR default matches the version now being tagged, so
         // a build from main reports the release it belongs to (a v* tag still
         // overrides it through RELEASE_VERSION).
@@ -245,7 +249,7 @@ android {
         // v498 — the passport has a page of its own (agenda §5.4),
         // and the grid of stamps it used to be inside a Quests card moved
         // there whole, with the press and every lane's spin on it.
-        versionName = envReleaseVersion ?: "1.5.10"
+        versionName = envReleaseVersion ?: "1.5.11"
 
         // v354 — optional Google Books API key baked into BuildConfig so the
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the

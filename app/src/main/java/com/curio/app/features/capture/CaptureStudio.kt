@@ -79,6 +79,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.glyph
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
@@ -926,6 +927,7 @@ private fun NewTakePickerSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioDialogContainerColor(),
@@ -1055,6 +1057,7 @@ private fun CaptureToolsSheet(
     }
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioDialogContainerColor(),

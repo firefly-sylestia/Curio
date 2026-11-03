@@ -6,6 +6,71 @@ from the state rather than from memory.
 
 ---
 
+## §101 — THE LANDSCAPE PASS (v509 / `1.5.11` / `20260954`; COMMITTED, NOT PUSHED — the member: "now just commit it dont push it until i say so")
+
+> "now our leftover landscape mode tqweaks. love the shuffler page, just the psin button is contantly showing
+> spin animation not the dice, and alot of empty space, and the buttom sheet which opens in landscape mode is
+> really bad as it is not fully up to the sides and the tear design breaks and feels cut, and many things feels
+> too big in buttom sheets and dialog box etc. and in many area the tear design stays in landscape staying cut
+> from the sides. and in profile the edit proifle streak etc is cut and move the search to the header in
+> landscape and and make everything smaller and compact and fill up the sides and not halfly reached and looking
+> crlike crap. dont make the button nav buttons big too, and add floating small buttons for landscape. for
+> asscibility. like theres no + button in landscape why not in landscape make it appear on the nav and keep it
+> unattached. and similiarly more tweak suggestions with ask user, now just commit it dont push it until i say so"
+
+**FOUR QUESTIONS WERE ASKED (the "more tweak suggestions" half) AND EVERY ANSWER SHAPED THE BUILD:** sheets
+**full width + compact rows**; torn heroes **keep the tear and span the edges**; the `+` **as a nav item**; and
+the search into the header **on every list screen**. The last two are the ones this batch does NOT complete — see
+OWED below, which is the honest state of the pass.
+
+### WHAT WAS BUILT
+
+1. **SHEETS FILL THE WINDOW.** `curioSheetMaxWidth()` (`CurioTheme.kt`) answers `Dp.Unspecified` in a compact
+   window and Material's 640dp cap everywhere else; **all 39 `ModalBottomSheet` call sites pass it as
+   `sheetMaxWidth`** (there is no composition local for that argument, so a new sheet must pass it too).
+2. **THE WHOLE APP READS ONE STEP SMALLER IN A SHORT WINDOW.** `MainActivity` re-provides `LocalDensity` with
+   `fontScale * 0.94` when `CurioLayout.isCompact()`. Only `sp` type moves; dp spacing is untouched, and every
+   sheet, dialog and row inherits it at once instead of a per-surface padding pass.
+3. **THE NAV BAR STEPS DOWN AND CARRIES THE MISSING "+".** `CompactPillIconWidth` 52 / `CompactPillExpandedWidth`
+   116 / `CompactPillHeight` 42, a 22dp glyph and a 13sp label, read by BOTH the classic pills and the liquid-glass
+   tabs. `CurioCompactCreateButton` (a 44dp primary disc) stands beside the bar's baseline, DETACHED from the
+   capsule, composed by `CurioNavHost`; it asks Home for the writing sheet through the new
+   `PendingCreateOpen` counter, so it works from any tab. Home's own floating disc stands down in a compact
+   window so one short page never carries two "+" buttons.
+4. **SPIN'S LANDSCAPE SHUFFLE BUTTON IS THE DIE.** It drew `ShuffleGlyph` (a six-dot ring on an infinite
+   transition), which is the member's "constantly showing spin animation not the dice". It wears
+   `CurioIcons.Casino` and turns only while `shuffling`. `SpinFloatTrio` gained `shuffling`, and the landscape
+   stage's dead 62dp band (left over from the tray that moved to the sides in v479) is 40dp.
+5. **PROFILE'S SHORT BANNER HAS ROOM.** `ProfileHeroHeightShort` 260 → 300dp: the Edit profile / streak pills sat
+   on the banner's own bottom edge and were clipped.
+
+### ⚠️ OWED — THE TWO ANSWERS THIS BATCH DOES NOT DELIVER YET
+
+- **Torn heroes spanning the edges** — the heroes already fill their own width, but a wide window wraps the page
+  in `CurioContentMaxWidth` (720dp), so a landscape phone's tear stops where that column does. Making the tear
+  reach the screen edge is a per-hero change (and a scroll-content decision), not an argument.
+- **Search into the header on every list screen** — Cabinet's banner already carries its search; Journals,
+  Topic Database, History, Settings and the pickers keep theirs as a row inside the scroll. Each needs its own
+  header action slot wired to its own query state, which is a per-screen pass.
+
+### CHECKS, IN THIS ENVIRONMENT'S TERMS
+
+- **No Gradle command was run** (root `AGENTS.md` forbids it here); CI is the validation and this batch is NOT
+  pushed. Every edited Kotlin file passes a string/comment-aware brace+paren balance check (31 files, all 0).
+- **The 39-site sheet edit was scripted and counted, not eyeballed:** the grep count (39) matched the number of
+  insertions exactly, the import was added once per file, and the argument was inserted as a NAMED argument at
+  the call's first position, so evaluation order and the existing trailing commas are untouched.
+- **`sheetMaxWidth` was verified as a real Material3 1.4.0 parameter** (not remembered): the API reference lists
+  it as the sheet's maximum width, and `Dp.Unspecified` is the documented "no maximum".
+- **Every new identifier was checked against its imports** (root rule 13's cheap twin): `CurioLayout`, `Density`,
+  `LocalDensity`, `CompositionLocalProvider` in `MainActivity`; `size` + `CurioLayout` in the nav bar;
+  `CurioCompactCreateButton` in `CurioNavHost`; `PendingCreateOpen` in Home (`navigation` is the same package for
+  the NavHost, so it needs none). No annotation was displaced — every insertion sits inside a function body.
+- Version `1.5.10 → 1.5.11`, code `20260953 → 20260954`, `changelogs/20260954.txt` copied forward from
+  `20260953.txt` (the old file untouched) with the six bullets of this batch.
+
+---
+
 ## §100 — THE CATEGORY TINT IS OFF BY DEFAULT (v508 / `1.5.10` / `20260953`; PUSHED)
 
 > "the project has been off for a long while, lets do some adjustments, first turn off category accent in backgroud off by default in settings."

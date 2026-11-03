@@ -79,6 +79,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioCardShadow
 import com.curio.app.ui.theme.curioFillInk
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import com.curio.app.ui.theme.curioTintOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -1895,6 +1896,7 @@ private fun IncursionDetailSheet(
     // surface in front of a page that already had one, on the only screen where
     // a title's synopsis is read out. The sheet gives it room instead of 420dp.
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

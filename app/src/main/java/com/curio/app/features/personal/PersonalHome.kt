@@ -67,6 +67,7 @@ import com.curio.app.data.PersonalRepositoryHolder
 import com.curio.app.data.newPersonalBookId
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.PendingJournalDay
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -187,6 +188,7 @@ fun CreateEntrySheet(
     // door's arguments, on every recomposition of the sheet).
     val accent = personalAccent()
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface),

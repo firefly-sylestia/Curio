@@ -57,6 +57,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.FrauncesFontFamily
 import com.curio.app.ui.theme.WritingFontFamily
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -501,6 +502,7 @@ private fun TopicPickerSheet(
     val typed = query.trim()
 
     ModalBottomSheet(
+        sheetMaxWidth = curioSheetMaxWidth(),
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface)) {

@@ -65,6 +65,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
+import com.curio.app.ui.theme.curioSheetMaxWidth
 import kotlin.coroutines.resume
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -8889,7 +8890,7 @@ fun TopicShareSheet(
     // tool-freezing glitch). With gestures off the sheet simply never moves
     // until Done/back drops edit mode (then normal swipe-dismiss returns);
     // content scrolling and the card carousel keep working throughout.
-    ModalBottomSheet(onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, sheetGesturesEnabled = !editMode, containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface), dragHandle = { BottomSheetDefaults.DragHandle() }) {
+    ModalBottomSheet(sheetMaxWidth = curioSheetMaxWidth(), onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, sheetGesturesEnabled = !editMode, containerColor = curioSheetContainerColor(MaterialTheme.colorScheme.surface), dragHandle = { BottomSheetDefaults.DragHandle() }) {
         CurioGlassWindowBlur()
         // v325 — BACK cancels the Customise editor first, then (on a second
         // press) exits the sheet — it was previously swallowed while editing.

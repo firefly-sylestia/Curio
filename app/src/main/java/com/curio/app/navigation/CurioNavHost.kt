@@ -157,6 +157,7 @@ import com.curio.app.features.home.HomeScreen
 import com.curio.app.features.splash.SplashScreen
 import com.curio.app.features.fieldmind.FieldMindObservationScreen
 import com.curio.app.ui.CurioLayout
+import com.curio.app.ui.components.CurioCompactCreateButton
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
@@ -1540,6 +1541,25 @@ composable(CurioRoutes.COMMUNITY) {
                 collapsing = !showBottomBar,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
+            // v509 — THE SHORT WINDOW'S "+". A landscape window draws no
+            // writing disc on Home, so the create door stands beside the nav
+            // bar's baseline instead — small, round, and DETACHED from the
+            // capsule (the member: *"add floating small buttons for landscape
+            // … theres no + button in landscape why not in landscape make it
+            // appear on the nav and keep it unattached"*). It asks Home for the
+            // writing sheet and lands on Home when the member is elsewhere.
+            if (CurioLayout.isCompact()) {
+                CurioCompactCreateButton(
+                    onClick = {
+                        PendingCreateOpen.request()
+                        navController.navigateToTab(CurioRoutes.HOME)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(end = 14.dp, bottom = 18.dp)
+                )
+            }
         }
         // v208e — the reveal's Like/Dislike pill renders in THIS overlay,
         // composed AFTER the bar, so it draws ON TOP of the collapsing nav
