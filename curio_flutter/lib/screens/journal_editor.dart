@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../data/journal.dart';
 import '../store/app_model.dart';
 import '../store/journal_controller.dart';
+import '../theme/curio_paper.dart';
 import '../theme/curio_theme.dart';
 
 /// A journal page, with the phone editor's tools on a desktop page.
@@ -253,42 +254,56 @@ class _JournalEditorState extends State<JournalEditor> {
               ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          _TagsRow(
-            key: ValueKey<String>(_base.id),
-            tags: _tags,
-            onChanged: (tags) {
-              setState(() => _tags = tags);
-              _dirty = true;
-              _saveTimer?.cancel();
-              _saveTimer = Timer(const Duration(milliseconds: 700), _flush);
-            },
+          // ── THE SHEET'S OWN TEXTURE ─────────────────────────────────
+          //
+          // The phone's pages are `PaperCard`s — a grain and a few tonal
+          // clouds under the words (see [PaperBackdrop]). A flat cream fill
+          // is the one thing that made this page read as a text box on a
+          // panel rather than as a sheet of paper, so the sheet is textured
+          // here too, under the text so it never fights the ink.
+          const Positioned.fill(
+            child: PaperBackdrop(seed: 3, strength: 0.75),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(38, 8, 38, 24),
-              child: CallbackShortcuts(
-                bindings: _shortcuts(),
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focus,
-                  onChanged: (_) => _onChanged(),
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  cursorColor: scheme.primary,
-                  cursorWidth: 1.6,
-                  style: _controller.styleFor(BlockKind.body),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isCollapsed: true,
-                    hintText: 'Start writing…',
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _TagsRow(
+                key: ValueKey<String>(_base.id),
+                tags: _tags,
+                onChanged: (tags) {
+                  setState(() => _tags = tags);
+                  _dirty = true;
+                  _saveTimer?.cancel();
+                  _saveTimer = Timer(const Duration(milliseconds: 700), _flush);
+                },
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(38, 8, 38, 24),
+                  child: CallbackShortcuts(
+                    bindings: _shortcuts(),
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focus,
+                      onChanged: (_) => _onChanged(),
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      cursorColor: scheme.primary,
+                      cursorWidth: 1.6,
+                      style: _controller.styleFor(BlockKind.body),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isCollapsed: true,
+                        hintText: 'Start writing…',
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),

@@ -6,7 +6,9 @@ import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/spin_screen.dart';
 import '../store/app_model.dart';
+import '../theme/curio_paper.dart';
 import '../theme/curio_theme.dart';
+import '../widgets/curio_glyphs.dart';
 
 /// The desktop shell: a rail of four rooms, a context column, and the page.
 ///
@@ -29,10 +31,10 @@ class _CurioShellState extends State<CurioShell> {
   int _room = 0;
 
   static const _rooms = <_Room>[
-    _Room('Home', Icons.home_outlined, Icons.home_rounded),
-    _Room('Spin', Icons.casino_outlined, Icons.casino_rounded),
-    _Room('Cabinet', Icons.inventory_2_outlined, Icons.inventory_2_rounded),
-    _Room('Settings', Icons.settings_outlined, Icons.settings_rounded),
+    _Room('Home', CurioGlyph.home),
+    _Room('Spin', CurioGlyph.spin),
+    _Room('Cabinet', CurioGlyph.cabinet),
+    _Room('Settings', CurioGlyph.settings),
   ];
 
   @override
@@ -43,25 +45,38 @@ class _CurioShellState extends State<CurioShell> {
       builder: (context, _) {
         final scheme = Theme.of(context).colorScheme;
         return Scaffold(
-          body: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          body: Stack(
             children: [
-              _Rail(
-                rooms: _rooms,
-                selected: _room,
-                onSelect: (index) => setState(() => _room = index),
+              // ── THE PAPER UNDER EVERY ROOM ───────────────────────────
+              //
+              // The phone's look is a sheet on a table, and the sheet's own
+              // texture is what carries it — not its torn edge (see
+              // [PaperBackdrop]). One field for the whole window, seeded, so a
+              // room change never re-scatters the grain.
+              const Positioned.fill(
+                child: PaperBackdrop(seed: 11, strength: 0.9, clouds: false),
               ),
-              VerticalDivider(width: 1, color: scheme.outlineVariant),
-              SizedBox(
-                width: CurioSpace.paneWidth,
-                child: _ContextPane(
-                  model: model,
-                  room: _room,
-                  onOpenRoom: (index) => setState(() => _room = index),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Rail(
+                    rooms: _rooms,
+                    selected: _room,
+                    onSelect: (index) => setState(() => _room = index),
+                  ),
+                  VerticalDivider(width: 1, color: scheme.outlineVariant),
+                  SizedBox(
+                    width: CurioSpace.paneWidth,
+                    child: _ContextPane(
+                      model: model,
+                      room: _room,
+                      onOpenRoom: (index) => setState(() => _room = index),
+                    ),
+                  ),
+                  VerticalDivider(width: 1, color: scheme.outlineVariant),
+                  Expanded(child: _page(model)),
+                ],
               ),
-              VerticalDivider(width: 1, color: scheme.outlineVariant),
-              Expanded(child: _page(model)),
             ],
           ),
         );
@@ -87,11 +102,13 @@ class _CurioShellState extends State<CurioShell> {
 }
 
 class _Room {
-  const _Room(this.label, this.icon, this.selectedIcon);
+  const _Room(this.label, this.glyph);
 
   final String label;
-  final IconData icon;
-  final IconData selectedIcon;
+
+  /// The room's mark, from Curio's own drawn set — a rail of stock Material
+  /// glyphs is the one place the borrowed family shows the most.
+  final CurioGlyph glyph;
 }
 
 /// The left rail. A destination is one pill: its glyph, and its name under it
@@ -122,13 +139,10 @@ class _Rail extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'C',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+            child: const CurioGlyphIcon(
+              CurioGlyph.spark,
+              size: 20,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 22),
@@ -182,7 +196,7 @@ class _RailButton extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(active ? room.selectedIcon : room.icon, size: 22, color: ink),
+                CurioGlyphIcon(room.glyph, size: 21, color: ink),
                 const SizedBox(height: 3),
                 Text(
                   room.label,

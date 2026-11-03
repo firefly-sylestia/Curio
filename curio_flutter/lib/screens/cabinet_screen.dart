@@ -26,6 +26,19 @@ class CabinetScreen extends StatefulWidget {
 class _CabinetScreenState extends State<CabinetScreen> {
   int _tab = 0;
 
+  /// The Cabinet's own search and lane filter. The phone's Cabinet has both
+  /// (search over the kept rows, chips by category) and a collection you cannot
+  /// search is a pile — a kept card you have to scroll for is a kept card you
+  /// will not find again.
+  final TextEditingController _search = TextEditingController();
+  String? _laneId;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final model = widget.model;
@@ -88,26 +101,100 @@ class _CabinetScreenState extends State<CabinetScreen> {
   Widget _discoveries(BuildContext context) {
     final model = widget.model;
     if (model.saved.isEmpty) return _EmptyCabinet(hasCatalog: !model.catalogEmpty);
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 300,
-        mainAxisExtent: 190,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-      ),
-      itemCount: model.saved.length,
-      itemBuilder: (context, index) {
-        final entry = model.saved[index];
-        return _SavedCard(
-          topic: entry.topic,
-          savedAt: entry.savedAt,
-          onRemove: () => model.remove(entry.topic.id),
-        );
-      },
+    final scheme = Theme.of(context).colorScheme;
+    final query = _search.text.trim().toLowerCase();
+    final rows = model.saved.where((entry) {
+      if (_laneId != null && _laneOf(entry.topic) != _laneId) return false;
+      if (query.isEmpty) return true;
+      final topic = entry.topic;
+      return topic.name.toLowerCase().contains(query) ||
+          topic.credit.toLowerCase().contains(query) ||
+          topic.teaser.toLowerCase().contains(query) ||
+          topic.tags.any((tag) => tag.toLowerCase().contains(query));
+    }).toList(growable: false);
+    final laneIds = <String>{for (final entry in model.saved) _laneOf(entry.topic)};
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _search,
+          onChanged: (_) => setState(() {}),
+          style: const TextStyle(fontSize: 13),
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: 'Search what you kept',
+            prefixIcon: const Icon(Icons.search_rounded, size: 17),
+            prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+            suffixIcon: _search.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Clear the search',
+                    onPressed: () => setState(() => _search.clear()),
+                    icon: const Icon(Icons.close_rounded, size: 15),
+                  ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(999),
+              borderSide: BorderSide(color: scheme.outlineVariant),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            LaneChip(
+              label: 'All',
+              accent: 0xFFB08A86,
+              selected: _laneId == null,
+              onTap: () => setState(() => _laneId = null),
+            ),
+            for (final id in laneIds)
+              LaneChip(
+                label: laneById(id).label,
+                accent: laneById(id).accent,
+                selected: _laneId == id,
+                onTap: () => setState(() => _laneId = _laneId == id ? null : id),
+              ),
+          ],
+        ),
+        const SizedBox(height: CurioSpace.gap + 4),
+        if (rows.isEmpty)
+          Text(
+            query.isEmpty
+                ? 'Nothing kept in that lane yet.'
+                : 'Nothing matches “${_search.text.trim()}”.',
+            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 300,
+              mainAxisExtent: 190,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+            ),
+            itemCount: rows.length,
+            itemBuilder: (context, index) {
+              final entry = rows[index];
+              return _SavedCard(
+                topic: entry.topic,
+                savedAt: entry.savedAt,
+                onRemove: () => model.remove(entry.topic.id),
+              );
+            },
+          ),
+      ],
     );
   }
+
+  /// A kept topic's lane — the same mapping the saved card itself draws with.
+  static String _laneOf(Topic topic) =>
+      laneById(topic.categoryId.toLowerCase().replaceAll('_', '-')).id;
 
   Widget _journals(BuildContext context) {
     final model = widget.model;

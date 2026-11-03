@@ -110,8 +110,9 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Windows build 1.0.0 · catalog and lane colours read from the '
-                  'Android app\'s own declarations, so the two never disagree.',
+                  'Windows build 1.0.1 · catalog, lane colours and the paper '
+                  'texture are read from the Android app\'s own declarations, so '
+                  'the two never disagree.',
                   style: TextStyle(
                     fontSize: 12,
                     height: 1.5,

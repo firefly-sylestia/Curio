@@ -6,6 +6,7 @@ import '../data/journal.dart';
 import '../data/lanes.dart';
 import '../store/app_model.dart';
 import '../theme/curio_theme.dart';
+import '../widgets/curio_glyphs.dart';
 import '../widgets/curio_widgets.dart';
 
 /// The Home room.
@@ -160,9 +161,24 @@ class _Hero extends StatelessWidget {
           // The phone's mirrored watermark collage (`HomeHeroSymbol`): a few of
           // the app's own glyphs, rotated and held at a whisper, so the slab is
           // a place rather than a rectangle of colour.
-          const _Watermark(glyph: Icons.auto_stories_rounded, alignment: Alignment.topRight, size: 120, turn: 0.18),
-          const _Watermark(glyph: Icons.explore_rounded, alignment: Alignment.bottomRight, size: 92, turn: -0.22),
-          const _Watermark(glyph: Icons.casino_rounded, alignment: Alignment.bottomLeft, size: 74, turn: 0.12),
+          const _Watermark(
+            glyph: CurioGlyph.book,
+            alignment: Alignment.topRight,
+            size: 132,
+            turn: 0.18,
+          ),
+          const _Watermark(
+            glyph: CurioGlyph.compass,
+            alignment: Alignment.bottomRight,
+            size: 104,
+            turn: -0.22,
+          ),
+          const _Watermark(
+            glyph: CurioGlyph.spark,
+            alignment: Alignment.bottomLeft,
+            size: 78,
+            turn: 0.12,
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(30, 26, 30, 24),
             child: Column(
@@ -231,25 +247,25 @@ class _Hero extends StatelessWidget {
                 Row(
                   children: [
                     _HeroStat(
-                      glyph: Icons.local_fire_department_rounded,
+                      glyph: CurioGlyph.spark,
                       value: '${model.streakDays}',
                       label: 'day streak',
                       ink: ink,
                     ),
                     _HeroStat(
-                      glyph: Icons.inventory_2_rounded,
+                      glyph: CurioGlyph.cabinet,
                       value: '${model.saved.length}',
                       label: 'in the Cabinet',
                       ink: ink,
                     ),
                     _HeroStat(
-                      glyph: Icons.auto_awesome_rounded,
+                      glyph: CurioGlyph.compass,
                       value: '${model.totalTopics}',
                       label: 'topics to meet',
                       ink: ink,
                     ),
                     _HeroStat(
-                      glyph: Icons.edit_note_rounded,
+                      glyph: CurioGlyph.feather,
                       value: '${model.wordsToday}',
                       label: 'words today',
                       ink: ink,
@@ -284,7 +300,7 @@ class _HeroStat extends StatelessWidget {
     required this.ink,
   });
 
-  final IconData glyph;
+  final CurioGlyph glyph;
   final String value;
   final String label;
   final Color ink;
@@ -295,7 +311,7 @@ class _HeroStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(glyph, size: 17, color: ink.withValues(alpha: 0.8)),
+          CurioGlyphIcon(glyph, size: 17, color: ink.withValues(alpha: 0.8)),
           const SizedBox(height: 5),
           Text(
             value,
@@ -332,7 +348,7 @@ class _Watermark extends StatelessWidget {
     required this.turn,
   });
 
-  final IconData glyph;
+  final CurioGlyph glyph;
   final Alignment alignment;
   final double size;
   final double turn;
@@ -347,10 +363,11 @@ class _Watermark extends StatelessWidget {
       child: IgnorePointer(
         child: Transform.rotate(
           angle: turn * math.pi,
-          child: Icon(
+          child: CurioGlyphIcon(
             glyph,
             size: size,
             color: Colors.white.withValues(alpha: 0.07),
+            stroke: 1.2,
           ),
         ),
       ),
@@ -507,7 +524,7 @@ class _Desk extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
-            child: Icon(Icons.edit_note_rounded, color: scheme.primary, size: 24),
+            child: CurioGlyphIcon(CurioGlyph.feather, color: scheme.primary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -598,8 +615,8 @@ class _Recent extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.article_outlined,
+                  CurioGlyphIcon(
+                    CurioGlyph.book,
                     size: 17,
                     color: scheme.onSurfaceVariant,
                   ),

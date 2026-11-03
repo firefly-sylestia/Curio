@@ -6,6 +6,7 @@ import '../data/lanes.dart';
 import '../data/topic.dart';
 import '../store/app_model.dart';
 import '../theme/curio_theme.dart';
+import '../widgets/curio_glyphs.dart';
 import '../widgets/curio_widgets.dart';
 
 /// The Spin room.
@@ -509,9 +510,12 @@ class _SpinDiscState extends State<_SpinDisc> {
                   : null,
             ),
             alignment: Alignment.center,
-            child: Icon(
-              Icons.casino_rounded,
-              size: 36,
+            child: CurioGlyphIcon(
+              // The app's own die, drawn at the phone's stroke — the stock
+              // casino glyph is one of the most recognisably foreign icons in
+              // the whole rail.
+              CurioGlyph.spin,
+              size: 40,
               color: widget.enabled
                   ? inkOn(scheme.primary)
                   : scheme.onSurfaceVariant.withValues(alpha: 0.6),
