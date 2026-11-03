@@ -1,0 +1,13 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # The shell is plain widget code; these keep it honest without noise.
+    - prefer_const_constructors
+    - prefer_final_locals
+    - avoid_print

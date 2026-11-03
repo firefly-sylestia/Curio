@@ -1,0 +1,72 @@
+# Curio Flutter — the Windows client (curio_flutter/), and later iOS.
+#
+# This is the ONLY place the new app is compiled: the development environment has
+# no Flutter SDK, so a push that touches curio_flutter/ or the canonical catalog is
+# what proves it builds. It is deliberately independent of android.yml — a red run
+# here never blocks an Android release.
+name: Curio Flutter
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'curio_flutter/**'
+      - 'data/topics/**'
+      - '.github/workflows/curio-flutter.yml'
+  pull_request:
+    paths:
+      - 'curio_flutter/**'
+      - 'data/topics/**'
+      - '.github/workflows/curio-flutter.yml'
+
+concurrency:
+  group: curio-flutter-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows — analyse and build
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: curio_flutter
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # The catalog is not in git under assets/ — it is the repo's one copy at
+      # data/topics/, the same way the Android build bundles it. Without this the
+      # app compiles and ships with an empty catalog.
+      - name: Bundle the topic catalog
+        run: ./tool/sync_assets.sh
+
+      # windows/ is generated, not committed (see README): this creates the runner
+      # on the runner itself, so the app can be built before a runner is checked in.
+      - name: Generate the Windows runner
+        run: flutter create --org com.curio --platforms=windows .
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Analyse
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build
+        run: flutter build windows --release
+
+      - name: Upload the built app
+        uses: actions/upload-artifact@v4
+        with:
+          name: curio-windows-${{ github.run_number }}
+          path: curio_flutter/build/windows/x64/runner/Release/
+          if-no-files-found: error
+          retention-days: 7

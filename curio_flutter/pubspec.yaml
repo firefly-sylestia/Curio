@@ -1,0 +1,27 @@
+name: curio
+description: Curio for Windows and iOS — one good thing to explore, saved as you go.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+# Deliberately dependency-free beyond the framework. The Android app's desktop
+# sibling needed Gson and a Compose runtime; this shell needs neither — the two
+# stores are plain JSON files read and written with dart:io, and the catalog is
+# the AGP/bundled `data/topics/*.json` copied in by `tool/sync_assets.sh`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Bundled by `tool/sync_assets.sh` from the repo's canonical catalog
+    # (data/topics/) — the SAME JSON the Android app ships, so content edits flow
+    # into both apps. The directory exists in git with only a .gitkeep, and a
+    # build without the sync step shows the app's empty state rather than failing.
+    - assets/topics/

@@ -1,0 +1,21 @@
+# Dart / Flutter build output
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# Platform runners are GENERATED, not hand-written: no Flutter SDK existed in
+# the environment this project was created in, so `windows/` and `ios/` are made
+# by `flutter create --platforms=windows,ios .` (see README). Once one has been
+# generated on a machine with the SDK it should be COMMITTED (a Windows app needs
+# its runner: the icon, the manifest, the CMake project) and these two lines
+# deleted.
+windows/
+ios/
+macos/
+linux/
+
+# The topic catalog is copied in from the repo's canonical data/topics/ by
+# tool/sync_assets.sh — it is never edited here.
+assets/topics/*.json
