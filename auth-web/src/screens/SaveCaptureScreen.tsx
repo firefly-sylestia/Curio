@@ -173,7 +173,7 @@ export const SaveCaptureScreen: React.FC = () => {
               style={{ color: ink, caretColor: ACCENT }}
             />
             <div className="flex items-center justify-between pt-3 text-[10px]" style={{ borderTop: `1px solid ${border}`, color: muted }}>
-              <span>{note.trim() ? `${note.trim().split(/\\s+/).length} words` : 'Your private space to write'}</span>
+              <span>{note.trim() ? 'Draft in progress' : 'Your private space to write'}</span>
               <span>{new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             </div>
           </div>
