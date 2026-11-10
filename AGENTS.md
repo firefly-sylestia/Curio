@@ -14,11 +14,7 @@ This file is part of the **DOX framework** defined in `master.md`. All agents MU
 
 Top-level instruction file for all AI agents (Codebuff/Buffy and spawned sub-agents) working on the Curio Android project. Project-wide rules, global preferences, and the top-level Child DOX Index.
 
-**⚠️ SCOPE: This project's active workstream is the Android app (`app/`) plus
-the account site (`auth-web/`, which is live infrastructure for that app's
-accounts, not a port) and now the Windows/iOS client (`curio_flutter/`, Windows
-first). `web/` is a separate project on hold — do not touch it unless the user
-explicitly asks (see the 🔒 Scope section below).**
+**⚠️ SCOPE: The active workstreams are the Android app (`app/`), Windows/iOS client (`curio_flutter/`) and the unified Curio website (`auth-web/`). The website combines discovery, account flows and its installable PWA in the existing account-site Vercel project. There is no separate `web/` project after this merge.**
 
 ## ❓ ASK WHEN UNSURE
 
@@ -424,27 +420,22 @@ Durable multi-step feature plans and researched idea backlogs live under
   idea is built or dropped. Once built, the binding description belongs in the
   owning `AGENTS.md`, not in the agenda.
 
-## 🔒 Scope — Android app + the Windows/iOS client (web/ on hold)
+## 🔒 Scope — Android + Windows/iOS + unified Curio website
 
-**Do NOT edit, build, or touch anything under `web/` unless the user explicitly
-asks for it in the current request.** The active workstreams are the **Android
-app** (`app/`) and the **Windows/iOS client** (`curio_flutter/`) — two separate
-apps in two languages, which share content and lane declarations and nothing
-else.
+The Android app (`app/`), Windows/iOS client (`curio_flutter/`) and unified
+website (`auth-web/`) are separate product surfaces. Do not assume a change
+to one should be copied to another.
 
-- The web (React/TS) port is a **separate project on hold** — do not treat it as
-  part of an Android or Flutter task, do not "keep it in sync" with either, and
-  do not apply Android fixes/features to it.
-- **`curio_flutter/` is its own app.** Do not "port" an Android widget into it
-  line by line, and do not apply a Flutter change to the Android app. What the
-  two DO share: `data/topics/*.json` (the one catalog), and the lane slugs,
-  labels and accents that `curio_flutter/tool/sync_lanes.py` generates from the
-  Kotlin catalog.
-- This includes data mirrors: Android data fixes (e.g. topic JSON dedupes)
-  apply to `data/topics/` (the shared source) — do not touch `web/src/data/topics/`
-  unless the user says so.
-- If a request is ambiguous about scope, default to the Android app and note the
-  `curio_flutter/` and web impact in your summary so the user can opt in.
+- Android and Flutter share the canonical topic catalog and lane declarations,
+  not UI implementations or app state.
+- The Curio website lives in `auth-web/`: React/Vite discovery, account pages,
+  Supabase serverless functions and PWA are deployed together from the existing
+  Vercel project root.
+- Do not create a separate `web/` deployment or change the existing Vercel
+  project name/root directory for routine website work.
+- The website remains local-first for saved discoveries. Account sign-in does
+  not silently sync the local cabinet.
+- Do not change shared topic catalog content during unrelated website work.
 
 ## Windows + iOS App (`curio_flutter/`) — ACTIVE, Windows build first
 
@@ -486,64 +477,10 @@ one place Swift has to exist, because "native Liquid Glass" cannot be faked in
 Dart. No iOS job exists yet.
 
 
-## Web App (web/) — ⛔ ON HOLD (do not touch unless asked)
-
-The `web/` directory contains a standalone React + TypeScript web application that mirrors the Android app's UI and functionality. It is a separate project from the Android app and is NOT included in the Android build.
-
-**Tech stack:**
-- React 18 with TypeScript
-- Vite for build tooling
-- Tailwind CSS for styling
-- IndexedDB for local storage (mirrors Room database)
-- React Router for navigation
-
-**Key features:**
-- Full UI parity with Android app (Home, Spin, Cabinet, Profile, Settings)
-- 21 categories with matching colors and themes
-- Theme system (Curio/AMOLED/Material styles)
-- Local data persistence via IndexedDB
-- No authentication required
-
-**To run the web app:**
-```bash
-cd web
-npm install
-npm run dev
-```
-
-## Curio Account Web (auth-web/) — ACTIVE (account infrastructure)
-
-The `auth-web/` directory is **the web side of Curio's online accounts**: the
-pages Supabase email links land on (email confirmation, sign-in link, password
-reset) plus a small account desk that can create an account with a password,
-sign in, review the account and delete it. It exists because a Supabase email link has to open somewhere, and without a
-real destination the project's Site URL answers instead, whose default is
-`http://localhost:3000`.
-
-**Key facts:**- **A static site with two serverless functions and no build step.** Plain
-  HTML/CSS/JS, no framework, no npm dependencies: `index.html`, one folder per
-  page (`confirm/`, `link/`, `reset/`, `signup/`, `signin/`, `account/`,
-  `support/`, `privacy/`, `terms/`), `assets/theme.css`, `assets/curio.js`,
-  `api/config.js`, `api/delete-account.js`. Nothing here participates in the
-  Android, desktop or `web/` builds.
-- **The one secret is server-side.** `/api/config` serves only the public project
-  URL + anon key (the same pair the APK carries) from Vercel environment
-  variables; `/api/delete-account` is the only holder of the service-role key and
-  it verifies the caller's own access token against GoTrue before deleting the id
-  that call returns. A client-supplied user id is never honoured.
-- **Vercel:** Root Directory `auth-web`, no build command, no output directory.
-  Environment variables and the Supabase dashboard checklist (Site URL, Redirect
-  URLs, `{{ .RedirectTo }}` email templates) are in `auth-web/README.md`.
-- **The app points at it through `BuildConfig.CURIO_AUTH_SITE_URL`** (see
-  `app/build.gradle.kts`): an empty value sends no `redirect_to` and hides the
-  sign-in form's password-recovery row, so a build without the site behaves
-  exactly as before. Set the `CURIO_AUTH_SITE_URL` repo secret to switch it on.
-- **Read [`auth-web/AGENTS.md`](auth-web/AGENTS.md) before editing it.**
-
 ## Child DOX Index
 
 - [app/AGENTS.md](app/AGENTS.md) — Active Curio Android app module
-- [auth-web/AGENTS.md](auth-web/AGENTS.md) — Curio account web (Supabase email links, password reset, account desk)
+- [auth-web/AGENTS.md](auth-web/AGENTS.md) — Unified Curio website (discovery, accounts, Supabase and installable PWA)
 - [app/APP_AUDIT.md](app/APP_AUDIT.md) — App audit: fixed defects, Lite-mode gating rules, and the deliberately separate UNVERIFIED leads
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
 - [.agents/skills/AGENTS.md](.agents/skills/AGENTS.md) — Skills catalog + the rule to load the matching skill before editing

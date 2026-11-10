@@ -62,7 +62,7 @@ export const TopicBrowserScreen: React.FC = () => {
   }, [catalog, query, selectedCat, sortMode]);
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-explore-screen min-h-screen pb-28 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={BROWSER_HERO_HEIGHT + 30} alphaScale={0.45} />
 
       {/* ── Torn Hero Banner ──────────────────────────────────────── */}

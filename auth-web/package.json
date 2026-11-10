@@ -1,15 +1,34 @@
 {
-  "name": "curio-auth-web",
+  "name": "web",
   "private": true,
-  "version": "1.0.0",
-  "description": "The Curio account site: Supabase email links, password recovery, and account self-service.",
+  "version": "0.0.0",
   "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
-    "check": "node --check assets/curio.js && node --check api/config.js && node --check api/delete-account.js",
-    "dev": "vercel dev"
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "check": "node --check assets/curio.js && node --check api/config.js && node --check api/delete-account.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "idb": "^8.0.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "autoprefixer": "^10.5.4",
+    "oxlint": "^1.75.0",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
 }

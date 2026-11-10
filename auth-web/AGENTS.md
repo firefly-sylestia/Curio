@@ -1,116 +1,45 @@
-# Curio Account Web (`auth-web/`) — AGENTS.md
-
-## DOX Framework
-
-This file is a child of the DOX hierarchy defined in `master.md`. Its parent DOX
-rail is the root `AGENTS.md`.
-
-**DOX chain:** `master.md` ← `AGENTS.md` (root) ← `auth-web/AGENTS.md` (this file)
-
-Read `master.md` and the root `AGENTS.md` first, then this file.
+# Curio Web + Account Site (`auth-web/`) — AGENTS.md
 
 ## Purpose
 
-The web side of Curio's online accounts: the pages Supabase email links land on
-(confirmation, magic link, password recovery) plus a small account desk that can
-sign in, review the account and delete it. Deliberately a **static site with two
-serverless functions**: no build step, no framework, no npm dependencies, so it
-can never break the Android CI and can be deployed straight from the repo.
+The single, installable Curio website. This directory is both the Vercel project root and the source root for the React discovery app, account pages, Supabase functions and PWA.
 
 ## Ownership
 
-- `index.html`, `confirm/`, `link/`, `reset/`, `signup/`, `signin/`, `account/`,
-  `support/`, `privacy/`, `terms/` — the pages. Each one is a complete HTML
-  document that links the two shared assets and declares which flow it is with
-  `<body data-page="...">`.
-- `assets/theme.css` — the whole design system (tokens, glass surfaces, buttons,
-  fields, notices, the aurora backdrop, motion, and a light-mode override).
-- `assets/curio.js` — the only script: config fetch, the GoTrue client, session
-  storage, URL token handling, copy, and the per-page wiring keyed on
-  `document.body.dataset.page`. No inline scripts anywhere (the CSP forbids
-  them), so every behaviour a page needs must be expressible as a `data-` hook
-  this file already knows.
-- `api/config.js` — serves the public Supabase URL + anon key (and the optional
-  support address and download URL) from Vercel environment variables.
-- `api/delete-account.js` — the ONE privileged endpoint. It re-derives the
-  caller's identity from their own access token before deleting anything with
-  the service-role key.
-- `vercel.json` — security headers (strict CSP, no-referrer, frame denial) and
-  asset caching. There is no build configuration on purpose.
-- `README.md` — the operator guide: environment variables, the Supabase
-  dashboard checklist, local preview.
+- `src/` — React + TypeScript discovery experience: Home, Explore, Shuffle, Cabinet, Profile, Settings and supporting routes.
+- `index.html`, `vite.config.ts`, `tailwind.config.js`, `postcss.config.js`, `tsconfig*.json` — Vite application/build configuration.
+- `public/` — static account routes, PWA manifest, service worker, icons and account assets. Vite copies this directory to the build output.
+- `api/config.js` — public Supabase configuration only.
+- `api/delete-account.js` — guarded account deletion endpoint. The service-role key stays server-side.
+- `assets/curio.js`, `assets/theme.css` — retained account source assets. The deployed account pages use the matching copies under `public/assets/`.
+- `vercel.json` — Vercel build, output, security headers and SPA deep-link rewrites.
+- `package.json` and `package-lock.json` — one npm/Vite toolchain for the entire site.
 
 ## Local Contracts
 
-- **The service-role key never reaches the browser.** It is read in
-  `api/delete-account.js` only. `/api/config` returns the anon key alone. Never
-  add an endpoint that echoes a server-only variable, and never inline a secret
-  into a page.
-- **An account's first password is set on `/signup`; a link never creates
-  one.** `signin/`'s "this address is new" checkbox carries the address to
-  `/signup` (sessionStorage, not the URL) and the link form sends
-  `create_user: false`, so a magic link can only sign an existing account in.
-  `/signup` requires the email, the password twice, and the terms acceptance
-  the app's create mode requires, then sends the account to `/confirm` for the
-  address to be proved.
-- **`/api/delete-account` trusts nothing from the request body.** The caller's
-  `Authorization: Bearer <access token>` is verified against GoTrue
-  (`GET /auth/v1/user`), and the id that call returns is the one deleted. A
-  client-supplied `userId` must never be honoured, and the typed `confirm:
-  "DELETE"` is re-checked server-side because the dialog is only a UI affordance.
-- **Two token shapes are supported on purpose.** Supabase can deliver a session
-  as a URL fragment (`#access_token=...`, the classic path through GoTrue's
-  `/verify`), as `?token_hash=&type=` (the modern template form, exchanged at
-  `POST /auth/v1/verify`), or as an error fragment (`error_code`,
-  `error_description`). `assets/curio.js` normalises all three; a new page must
-  use that normaliser rather than reading `location` itself.
-- **Requests carry `redirect_to` as a QUERY parameter**, which is what GoTrue
-  reads for `/signup`, `/recover`, `/otp` and `/resend`. It is built by
-  `siteUrl()` in `assets/curio.js`, which prefers the deployment's CANONICAL
-  address (`SITE_URL`, or Vercel's `VERCEL_PROJECT_PRODUCTION_URL`) and only
-  falls back to `location.origin`. The canonical value is served by
-  `/api/config` and must keep precedence: serving the origin alone is how a
-  preview deployment's hostname rides into an email. **Every path that sends an
-  email must pass it** — a missing `redirect_to` silently falls back to the
-  project's Site URL, which is the `http://localhost:3000` bug this site exists
-  to fix (this is exactly what happened to `/resend`).
-- **A missing configuration is a state, not a crash.** With no environment
-  variables, `/api/config` answers `{ configured: false }` and every page renders
-  its own "not configured yet" notice. Keep that path working: it is what a fresh
-  clone and a half-finished deploy look like.
-- **No inline scripts or styles** (the CSP has neither `unsafe-inline` for
-  scripts nor for styles). Element styling goes through classes in
-  `assets/theme.css`; dynamic values are set through CSSOM
-  (`element.style.setProperty`) or `classList`, never as a `style="..."` string
-  in markup.
-- **Copy rules:** no em dashes, no jargon from the server (`JWT`, `PGRST`,
-  status codes), and every failure state names the ONE next action. The same rule
-  the Android surfaces follow.
-- **The legal pages are a mirror.** `privacy/` and `terms/` carry the text of
-  `docs/ONLINE_PRIVACY.md` and `docs/ONLINE_TERMS.md` **without** the internal
-  "Launch requirement" banner that those files open with (it is an operator note,
-  not part of the published notice). If the docs change, re-sync the pages in the
-  same edit.
-- **No analytics, no third-party scripts, no cookies.** The only external
-  requests are Google Fonts and Supabase itself.
+- **One deployment root:** Vercel Root Directory remains `auth-web`. Do not rename the project, change the root directory, or create a second public website deployment as part of ordinary web work.
+- **One public Curio site:** `/` is discovery. Account routes stay on the same origin at `/signin`, `/signup`, `/confirm`, `/link`, `/reset`, `/account`, `/support`, `/privacy` and `/terms`.
+- **Navigation:** Home, Explore, Shuffle and Cabinet are the four primary destinations in the floating glass navigation pill. Keep the icon, label, active state and moving indicator aligned to all four equal slots.
+- **Local-first discovery:** topic history, saved entries and cabinet data remain local in the browser. Signing into the online account does not imply that local discoveries are backed up or synced.
+- **Account security:** `SUPABASE_SERVICE_ROLE_KEY` is used only by the account deletion serverless function. Never expose it in browser code, Vite variables, HTML, or logs. The deletion function verifies the caller's bearer token with GoTrue and deletes only the verified user id.
+- **PWA cache:** the service worker may cache same-origin app shell/static GET assets. It must bypass API routes, Supabase traffic and authentication callback URLs containing tokens or auth errors.
+- **CSP:** Vite/React currently uses inline style attributes for dynamic UI styling, so `style-src 'unsafe-inline'` is required. Keep inline scripts prohibited.
+- **Account routes:** account HTML pages are under `public/<route>/index.html` so Vite emits them into `dist`; their source assets are under `public/assets/`. Preserve their paths for Supabase email templates.
+- **No topic catalog rewrite:** do not alter discovery topic content as a side effect of UI, PWA or account work.
 
 ## Work Guidance
 
-- New page: copy the shell of the closest existing page, set `data-page`, add its
-  ids to the wiring switch in `assets/curio.js`, and add the route to `README.md`.
-- The site has no test runner and no linter: validate with
-  `node --check assets/curio.js api/*.js` and `python3` tag-balance checks, then
-  deploy a preview.
-- Deployment is a Vercel project whose Root Directory is `auth-web/` (see
-  `README.md`). Nothing in this folder participates in the Android or desktop
-  builds.
+- Install with `npm ci`; run `npm run dev`, `npm run lint`, `npm run check` and `npm run build` as appropriate.
+- Vercel builds from this directory with `npm ci` and `npm run build`, serving `dist/`. Keep the Vercel project's existing name and Root Directory unchanged.
+- Keep `SITE_URL`, Supabase Authentication Site URL/Redirect URLs and Android `CURIO_AUTH_SITE_URL` aligned to the existing production Curio domain. Do not switch production email redirects until preview sign-in, sign-up, confirmation, magic-link, password reset and deletion flows pass.
+- Keep the existing environment variable names and values. No environment variable migration is needed solely for this folder merge.
 
 ## Verification
 
-- `node --check` on every JavaScript file (the functions are Node ESM).
-- Tag balance on every HTML file, and a grep that no page hardcodes a Supabase
-  URL, a key, or an inline `style=`/`<script>` block.
-- CI does not build this folder; a Vercel preview deploy is the real check.
+- `npm run check` validates account JavaScript.
+- `npm run lint` and `npm run build` validate the React/Vite app.
+- Preview-check the root discovery experience, all SPA deep links, account static routes, API config, email callbacks, installability and offline behavior.
+- Never claim that offline discovery is complete unless topic data and relevant assets have been cached and tested.
 
 ## Child DOX Index
 
