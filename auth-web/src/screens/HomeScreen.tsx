@@ -1,12 +1,12 @@
 // Curio Web App - Home Screen
-// Android-matching: seeded torn hero, sticky menu top-left + profile top-right, quest block, recents
+// Editorial discovery home with daily quest and recent entries
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
-import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
+import { MaterialIcon } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
 import { ScreenEntrance, usePressable } from '../animations';
 
@@ -49,7 +49,6 @@ const HomeScreen: React.FC = () => {
 
   const heroAccent = '#DA1E37'; // Curio crimson
   const heroFill = isDark || isAmoled ? '#161A1D' : '#111820';
-  const heroInk = '#fff';
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
