@@ -2,7 +2,7 @@
 // Premium components matching Android app's design system
 
 import React, { useState, useEffect } from 'react';
-import { useTheme, getTextColor, getPastelAccent } from '../theme/ThemeContext';
+import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import type { CurioCategory } from '../types';
 
