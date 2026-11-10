@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
+import { useTheme, getBackgroundColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon } from '../components/SharedComponents';
@@ -48,7 +48,6 @@ const HomeScreen: React.FC = () => {
   };
 
   const heroAccent = '#DA1E37'; // Curio crimson
-  const heroFill = isDark || isAmoled ? '#161A1D' : '#111820';
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
