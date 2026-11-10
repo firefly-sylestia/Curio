@@ -12,21 +12,21 @@ import { ScreenEntrance } from '../animations';
 
 const QUESTS_HERO_HEIGHT = 220;
 const QUESTS_TEAR_SEED = 0x9E57; // Quests-specific seed
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 const QuestChainCard: React.FC<{ chain: QuestChain; questSystem: ReturnType<typeof getQuestSystem> }> = ({ chain, questSystem }) => {
   const { isDark } = useTheme();
   const completedStages = chain.stages.filter(s => questSystem.isStageDone(s)).length;
   const progress = completedStages / chain.stages.length;
   return (
-    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)' }}>
+    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.02)' }}>
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${ROSE_WOOD}18` }}>
           <MaterialIcon name={chain.glyph || 'explore'} size={22} style={{ color: ROSE_WOOD }} />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold text-sm" style={{ color: getTextColor(isDark) }}>{chain.title}</h3>
-          <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>{chain.subtitle}</p>
+          <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>{chain.subtitle}</p>
         </div>
         <span className="text-sm font-bold" style={{ color: ROSE_WOOD }}>{completedStages}/{chain.stages.length}</span>
       </div>
@@ -63,7 +63,7 @@ const DailyQuestCard: React.FC<{ quest: DailyQuest; questSystem: ReturnType<type
   const isClaimed = questSystem.isDailyClaimed(quest.id);
   const pct = Math.min(progress / quest.target, 1) * 100;
   return (
-    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)' }}>
+    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.02)' }}>
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -96,12 +96,12 @@ const WeeklyQuestCard: React.FC<{ quest: WeeklyQuest; questSystem: ReturnType<ty
   const isClaimed = questSystem.isWeeklyClaimed(quest.id);
   const pct = Math.min(progress / quest.target, 1) * 100;
   return (
-    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)' }}>
+    <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.02)' }}>
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold" style={{ color: getTextColor(isDark) }}>{quest.title}</h4>
         <span className="text-sm font-bold" style={{ color: ROSE_WOOD }}>+{quest.xpReward} XP</span>
       </div>
-      <p className="text-xs mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>{quest.description}</p>
+      <p className="text-xs mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>{quest.description}</p>
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
           <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: isComplete ? '#4CAF50' : ROSE_WOOD }} />

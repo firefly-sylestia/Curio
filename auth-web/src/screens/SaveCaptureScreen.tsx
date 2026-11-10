@@ -691,7 +691,7 @@ export const SaveCaptureScreen: React.FC = () => {
 
   if (!category) return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
+      <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} />
     </div>
   );
 
@@ -826,7 +826,7 @@ export const SaveCaptureScreen: React.FC = () => {
       {showSuccess && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
           <div className="p-8 rounded-3xl text-center mx-6" style={{ background: isDark ? '#1a1a2e' : 'white' }}>
-            <MaterialIcon name="celebration" size={64} style={{ color: '#FF8FA3' }} />
+            <MaterialIcon name="celebration" size={64} style={{ color: '#DA1E37' }} />
             <h2 className="text-xl font-bold mt-3 mb-1" style={{ color: getTextColor(isDark) }}>Saved!</h2>
             <p className="text-sm opacity-60" style={{ color: getTextColor(isDark) }}>
               Your entry has been added to your cabinet.

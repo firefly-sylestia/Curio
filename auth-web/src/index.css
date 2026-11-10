@@ -7,11 +7,11 @@
 /* Curio Web App - Global Styles */
 
 :root {
-  --curio-cream: #F7F0E4;
-  --curio-surface: #FFFBF5;
-  --curio-on-surface: #3B0A17;
-  --curio-primary: #FF8FA3;
-  --curio-on-primary: #3B0A17;
+  --curio-cream: #F6F7FB;
+  --curio-surface: #FFFFFF;
+  --curio-on-surface: #171B26;
+  --curio-primary: #DA1E37;
+  --curio-on-primary: #FFFFFF;
 }
 
 * {

@@ -215,8 +215,8 @@ export const TopicRevealScreen: React.FC = () => {
         style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
-          <p className="mt-4" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>Loading topic...</p>
+            style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} />
+          <p className="mt-4" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>Loading topic...</p>
         </div>
       </div>
     );
@@ -247,16 +247,16 @@ export const TopicRevealScreen: React.FC = () => {
       <div className="sticky top-0 z-20 px-4 pt-4 pb-3"
         style={{
           background: getBackgroundColor(isDark, isAmoled),
-          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.06)'}`,
+          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.06)'}`,
         }}>
         <div className="flex items-center gap-3">
           <CurioBackButton onClick={() => navigate(-1)} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <MaterialIcon name={category.iconGlyph} size={18}
-                style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }} />
+                style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }} />
               <span className="text-xs font-medium"
-                style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+                style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>
                 {category.displayName} · {topic.subtype}
               </span>
             </div>
@@ -265,7 +265,7 @@ export const TopicRevealScreen: React.FC = () => {
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
             style={{ background: saved ? `${category.accent}22` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') }}>
             <MaterialIcon name={saved ? 'bookmark' : 'bookmark_add'} size={20}
-              style={{ color: saved ? category.accent : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)') }} />
+              style={{ color: saved ? category.accent : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)') }} />
           </button>
         </div>
       </div>
@@ -323,9 +323,9 @@ export const TopicRevealScreen: React.FC = () => {
             <button onClick={handleExpressYourself}
               className="flex-1 flex items-center justify-center gap-2 h-[52px] rounded-full font-bold text-sm transition-all hover:opacity-90 active:scale-[0.97]"
               style={{
-                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(59,10,23,0.04)',
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(23,27,38,0.04)',
                 color: getTextColor(isDark),
-                border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(59,10,23,0.10)'}`,
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(23,27,38,0.10)'}`,
               }}>
               <MaterialIcon name="edit" size={18} />
               Express yourself
@@ -356,7 +356,7 @@ export const TopicRevealScreen: React.FC = () => {
               </h3>
             </div>
             <p className="text-sm leading-relaxed"
-              style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)' }}>
+              style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(23,27,38,0.7)' }}>
               {action.instruction}
             </p>
           </CurioMoodboardCard>

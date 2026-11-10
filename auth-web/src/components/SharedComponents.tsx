@@ -61,8 +61,8 @@ export const CurioBackButton: React.FC<{
   contentColor?: string;
 }> = ({ onClick, size = 40, containerColor, contentColor }) => {
   const { isDark } = useTheme();
-  const bgColor = containerColor || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.05)');
-  const txtColor = contentColor || (isDark ? 'rgba(255,255,255,0.9)' : '#3B0A17');
+  const bgColor = containerColor || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)');
+  const txtColor = contentColor || (isDark ? 'rgba(255,255,255,0.9)' : '#171B26');
   
   return (
     <button
@@ -96,7 +96,7 @@ export const CurioForwardArrow: React.FC<{
       height={size} 
       viewBox="0 0 24 24" 
       fill="none" 
-      stroke={tint || (isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)')} 
+      stroke={tint || (isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)')} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
@@ -292,9 +292,9 @@ export const CurioPaperCard: React.FC<{
   const { isDark } = useTheme();
 
   // Paper ink color — warm brown/plum for handwriting on paper (matching Android's notePaperInk)
-  const paperInk = isDark ? 'rgba(228,210,188,0.92)' : 'rgba(45,20,15,0.92)';
+  const paperInk = isDark ? 'rgba(245,243,244,0.92)' : 'rgba(23,27,38,0.92)';
   // Warm paper background (like real notebook paper, never pure white)
-  const paperBg = isDark ? 'rgba(28,22,16,0.92)' : '#FFFDF7';
+  const paperBg = isDark ? 'rgba(22,26,29,0.94)' : '#F6F7FB';
   // Red margin line (school notebook style)
   const marginColor = isDark ? 'rgba(220,120,120,0.28)' : 'rgba(210,70,70,0.25)';
   // Ruled line color
@@ -361,7 +361,7 @@ export const CurioPaperCard: React.FC<{
               fontFamily: "'Material Symbols Outlined'",
               fontSize: 80,
               opacity: isDark ? 0.04 : 0.03,
-              color: isDark ? '#fff' : '#3B0A17',
+              color: isDark ? '#fff' : '#171B26',
             }}
           >
             {watermark}
@@ -401,7 +401,7 @@ export const CurioMoodboardCard: React.FC<{
   children: React.ReactNode;
   className?: string;
   accent?: string;
-}> = ({ children, className = '', accent = '#3B0A17' }) => {
+}> = ({ children, className = '', accent = '#171B26' }) => {
   const { isDark } = useTheme();
 
   return (
@@ -451,17 +451,17 @@ export const CurioChip: React.FC<{
       className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
       style={{
         background: isSelected 
-          ? (color || '#3B0A17')
+          ? (color || '#171B26')
           : isDark 
             ? 'rgba(255,255,255,0.1)' 
-            : 'rgba(59,10,23,0.05)',
+            : 'rgba(23,27,38,0.05)',
         color: isSelected 
           ? 'white'
           : isDark 
             ? 'rgba(255,255,255,0.8)' 
-            : '#3B0A17',
+            : '#171B26',
         transform: isPressed ? 'scale(0.95)' : 'scale(1)',
-        boxShadow: isSelected ? `0 2px 8px ${color || '#3B0A17'}44` : 'none',
+        boxShadow: isSelected ? `0 2px 8px ${color || '#171B26'}44` : 'none',
       }}
     >
       {label}
@@ -482,17 +482,17 @@ export const CurioButton: React.FC<{
   const [isPressed, setIsPressed] = useState(false);
 
   const getBackground = () => {
-    if (disabled) return isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.05)';
-    if (variant === 'primary') return color || '#3B0A17';
-    if (variant === 'secondary') return isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.05)';
+    if (disabled) return isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.05)';
+    if (variant === 'primary') return color || '#171B26';
+    if (variant === 'secondary') return isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)';
     return 'transparent';
   };
 
   const getTextColor = () => {
-    if (disabled) return isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)';
+    if (disabled) return isDark ? 'rgba(255,255,255,0.3)' : 'rgba(23,27,38,0.3)';
     if (variant === 'primary') return 'white';
-    if (variant === 'secondary') return isDark ? 'rgba(255,255,255,0.9)' : '#3B0A17';
-    return color || '#3B0A17';
+    if (variant === 'secondary') return isDark ? 'rgba(255,255,255,0.9)' : '#171B26';
+    return color || '#171B26';
   };
 
   return (
@@ -509,7 +509,7 @@ export const CurioButton: React.FC<{
         transform: isPressed ? 'scale(0.95)' : 'scale(1)',
         opacity: disabled ? 0.5 : 1,
         boxShadow: variant === 'primary' && !disabled 
-          ? `0 4px 12px ${color || '#3B0A17'}44`
+          ? `0 4px 12px ${color || '#171B26'}44`
           : 'none',
       }}
     >
@@ -537,7 +537,7 @@ export const CurioToggle: React.FC<{
             </div>
           )}
           {description && (
-            <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+            <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>
               {description}
             </div>
           )}
@@ -547,7 +547,7 @@ export const CurioToggle: React.FC<{
         onClick={() => onChange(!checked)}
         className="relative w-12 h-7 rounded-full transition-colors duration-200"
         style={{
-          background: checked ? '#3B0A17' : isDark ? 'rgba(255,255,255,0.2)' : 'rgba(59,10,23,0.15)',
+          background: checked ? '#171B26' : isDark ? 'rgba(255,255,255,0.2)' : 'rgba(23,27,38,0.15)',
         }}
       >
         <div
@@ -568,7 +568,7 @@ export const CurioProgressBar: React.FC<{
   progress: number;
   color?: string;
   height?: number;
-}> = ({ progress, color = '#3B0A17', height = 8 }) => {
+}> = ({ progress, color = '#171B26', height = 8 }) => {
   const { isDark } = useTheme();
 
   return (
@@ -576,7 +576,7 @@ export const CurioProgressBar: React.FC<{
       className="w-full rounded-full overflow-hidden"
       style={{
         height,
-        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.1)',
+        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.1)',
       }}
     >
       <div
@@ -626,7 +626,7 @@ export const CurioAvatar: React.FC<{
   initial: string;
   color?: string;
   size?: number;
-}> = ({ initial, color = '#3B0A17', size = 40 }) => {
+}> = ({ initial, color = '#171B26', size = 40 }) => {
   return (
     <div
       className="flex items-center justify-center rounded-full text-white font-bold"
@@ -662,7 +662,7 @@ export const CurioSectionHeader: React.FC<{
         <button
           onClick={onAction}
           className="text-sm font-medium transition-colors duration-200"
-          style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}
+          style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }}
         >
           {action}
         </button>
@@ -677,14 +677,14 @@ export const CurioStatCard: React.FC<{
   value: string | number;
   icon?: string;
   color?: string;
-}> = ({ label, value, icon, color = '#3B0A17' }) => {
+}> = ({ label, value, icon, color = '#171B26' }) => {
   const { isDark } = useTheme();
 
   return (
     <div
       className="flex flex-col items-center p-4 rounded-2xl"
       style={{
-        background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)',
+        background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)',
       }}
     >
       {icon && (
@@ -703,7 +703,7 @@ export const CurioStatCard: React.FC<{
       </div>
       <div
         className="text-xs mt-1"
-        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
+        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}
       >
         {label}
       </div>
@@ -732,7 +732,7 @@ export const CurioEmptyState: React.FC<{
       </h3>
       <p
         className="text-sm mb-6"
-        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
+        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}
       >
         {description}
       </p>
@@ -749,7 +749,7 @@ export const CurioEmptyState: React.FC<{
 export const CurioLoadingSpinner: React.FC<{
   size?: number;
   color?: string;
-}> = ({ size = 24, color = '#3B0A17' }) => {
+}> = ({ size = 24, color = '#171B26' }) => {
   return (
     <div
       className="animate-spin"
@@ -817,60 +817,37 @@ export const CurioToast: React.FC<{
 export const CurioWatermarkBackdrop: React.FC<{
   activeCatId?: string;
   alphaScale?: number;
-  topClearance?: number; // px — when set, glyphs stay below this line
+  topClearance?: number;
 }> = ({ activeCatId, alphaScale = 1, topClearance = 0 }) => {
-  const { isDark, pastelColors } = useTheme();
-
+  const { isDark, isAmoled } = useTheme();
+  // Fixed edge anchors keep glyphs apart at every viewport width.
+  // The centre column stays clear for content and reading.
   const slots = [
-    { glyph: 'person', x: -2, y: 5, size: 72, rot: -12 },
-    { glyph: 'album', x: 55, y: 3, size: 52, rot: 10 },
-    { glyph: 'movie', x: 88, y: 20, size: 64, rot: -8 },
-    { glyph: 'menu_book', x: -4, y: 35, size: 58, rot: 8 },
-    { glyph: 'brush', x: -3, y: 62, size: 66, rot: -6 },
-    { glyph: 'palette', x: -5, y: 82, size: 56, rot: 14 },
-    { glyph: 'science', x: 70, y: 65, size: 62, rot: -12 },
-    { glyph: 'smart_display', x: 82, y: 48, size: 50, rot: 16 },
-    { glyph: 'sports_esports', x: 65, y: 85, size: 54, rot: -10 },
-    { glyph: 'casino', x: 22, y: 78, size: 68, rot: 6 },
-    { glyph: 'edit_note', x: 85, y: 75, size: 48, rot: -14 },
+    { glyph: 'person', x: 5, y: 8, size: 42, rot: -12 },
+    { glyph: 'album', x: 94, y: 18, size: 38, rot: 10 },
+    { glyph: 'movie', x: 6, y: 39, size: 44, rot: -8 },
+    { glyph: 'menu_book', x: 94, y: 55, size: 42, rot: 8 },
+    { glyph: 'brush', x: 6, y: 76, size: 40, rot: -7 },
+    { glyph: 'science', x: 94, y: 91, size: 44, rot: 12 },
+    { glyph: 'sports_esports', x: 50, y: 94, size: 34, rot: -8 },
   ];
-
-  // Alpha per theme (matches Android's watermarkAlpha)
-  const inactiveAlpha = isDark
-    ? (pastelColors ? 0.15 : 0.11)
-    : (pastelColors ? 0.22 : 0.15);
-  const activeAlpha = isDark
-    ? (pastelColors ? 0.28 : 0.22)
-    : (pastelColors ? 0.38 : 0.30);
-
+  const glyphColor = isDark || isAmoled ? '#D3D8E0' : '#334155';
+  const baseAlpha = isDark || isAmoled ? 0.075 : 0.065;
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-      {slots.map((s, i) => {
-        let cat = ALL_CATEGORIES.find(c => c.iconGlyph === s.glyph);
-        if (!cat) cat = ALL_CATEGORIES[i % ALL_CATEGORIES.length];
-        const isActive = cat.iconGlyph === activeCatId || cat.id === activeCatId;
-        const rawAccent = cat.accent;
-        const tint = pastelColors ? getPastelAccent(rawAccent, isDark) : rawAccent;
-        const alpha = (isActive ? activeAlpha : inactiveAlpha) * alphaScale;
-        const topOffset = topClearance > 0 ? topClearance : 0;
-
+    <div className="curio-watermark-layer absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true" style={{ zIndex: 0 }}>
+      {slots.map(slot => {
+        const category = ALL_CATEGORIES.find(item => item.iconGlyph === slot.glyph);
+        const isActive = !!category && (category.id === activeCatId || category.iconGlyph === activeCatId);
+        const top = topClearance > 0 ? `calc(${topClearance}px + ${slot.y}vh)` : `${slot.y}%`;
         return (
-          <span
-            key={i}
-            className="material-symbols-outlined absolute select-none"
+          <span key={slot.glyph} className="material-symbols-outlined absolute select-none"
             style={{
-              left: `${s.x}%`,
-              top: topOffset > 0
-                ? `${topOffset + (100 - topOffset) * (s.y / 100)}px`
-                : `${s.y}%`,
-              fontSize: s.size,
-              color: tint,
-              opacity: alpha,
-              transform: `rotate(${s.rot}deg)`,
-            }}
-          >
-            {s.glyph}
-          </span>
+              left: `${slot.x}%`, top, fontSize: slot.size, lineHeight: 1,
+              color: isActive ? '#DA1E37' : glyphColor,
+              opacity: (isActive ? baseAlpha * 1.55 : baseAlpha) * alphaScale,
+              transform: `translate(-50%, -50%) rotate(${slot.rot}deg)`,
+              filter: 'blur(.15px)',
+            }}>{slot.glyph}</span>
         );
       })}
     </div>
@@ -925,7 +902,7 @@ export const CurioModal: React.FC<{
             <button
               onClick={onClose}
               className="text-2xl"
-              style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
+              style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}
             >
               ×
             </button>

@@ -14,7 +14,7 @@ import type { CaptureEntity } from '../types';
 
 const HISTORY_HERO_HEIGHT = 180;
 const HISTORY_TEAR_SEED = 0xAB1E5;
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 /** Scan localStorage for curio-fav-{cat}-{topicId} = 'true' entries. */
 const loadFavoritedTopics = (): Array<{ categoryId: string; topicId: string; name: string; displayName: string; iconGlyph: string; accent: string }> => {
@@ -83,14 +83,14 @@ const FavoriteRow: React.FC<{
 }> = ({ fav, onClick }) => {
   const { isDark } = useTheme();
   const { handlers, pressStyle } = usePressable(0.98);
-  const muted = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(59,10,23,0.46)';
+  const muted = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(23,27,38,0.46)';
   const starColor = '#F5C518';
 
   return (
     <button onClick={onClick} {...handlers} className="w-full flex items-center gap-3 p-3 rounded-2xl text-left"
       style={{
-        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.025)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.045)'}`,
+        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.025)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.045)'}`,
         ...pressStyle,
       }}>
       <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${fav.accent}1C` }}>
@@ -110,13 +110,13 @@ const HistoryRow: React.FC<{ entry: CaptureEntity; onClick: () => void }> = ({ e
   const { handlers, pressStyle } = usePressable(0.98);
   const category = ALL_CATEGORIES.find(c => c.id === entry.categoryId);
   const session = formatSessionShort(entry.sessionTimeMillis);
-  const muted = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(59,10,23,0.46)';
+  const muted = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(23,27,38,0.46)';
 
   return (
     <button onClick={onClick} {...handlers} className="w-full flex items-center gap-3 p-3 rounded-2xl text-left"
       style={{
-        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.025)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.045)'}`,
+        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.025)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.045)'}`,
         ...pressStyle,
       }}>
       <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${category?.accent || ROSE_WOOD}1C` }}>

@@ -51,7 +51,8 @@ const HomeScreen: React.FC = () => {
     navigate(`/spin/${pick.id.toLowerCase()}`);
   };
 
-  const heroAccent = '#C46B7C'; // Rose-wood
+  const heroAccent = '#DA1E37'; // MCU crimson
+  const heroFill = isDark || isAmoled ? '#161A1D' : '#171B26';
   const heroInk = '#fff';
 
   return (
@@ -61,12 +62,13 @@ const HomeScreen: React.FC = () => {
       {/* ── 1. Torn Hero Banner ────────────────────────────────────────── */}
       <TornHero
         height={HOME_HERO_HEIGHT}
-        fill={heroAccent}
+        fill={heroFill}
         ink={heroInk}
         tearSeed={HOME_TEAR_SEED}
         bold={true}
         symbols={HOME_HERO_SYMBOLS}
         isDark={isDark}
+        sheetColor={isDark || isAmoled ? '#10141A' : '#F6F7FB'}
       >
         <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px]">
           {/* Greeting + Name */}
@@ -77,9 +79,9 @@ const HomeScreen: React.FC = () => {
 
           <div className="flex-1" />
 
-          {/* Streak · Cabinet · Topics stat bar */}
+          {/* Streak · Saved · Topics stat bar */}
           <div className="rounded-[20px] border border-white/25" style={{
-            background: 'linear-gradient(180deg, rgba(196,107,124,0.12) 0%, rgba(196,107,124,0.02) 100%)',
+            background: 'linear-gradient(180deg, rgba(218,30,55,0.16) 0%, rgba(218,30,55,0.035) 100%)',
           }}>
             <div className="flex items-center px-1.5 py-2.5">
               <div className="flex flex-col items-center flex-1 gap-0.5">
@@ -112,16 +114,16 @@ const HomeScreen: React.FC = () => {
             style={{
               background: 'transparent',
             }}>
-            {/* Pet bed placeholder */}
+            {/* Quest icon */}
             <div className="w-[46px] h-[46px] rounded-full flex items-center justify-center flex-shrink-0"
               style={{ background: `${heroAccent}18` }}>
               <MaterialIcon name="pets" size={22} style={{ color: heroAccent }} />
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-[10px] font-extrabold tracking-[1.6px] uppercase mb-1"
-                style={{ color: '#8B5E6B' }}>Today's Quest</p>
+                style={{ color: isDark ? '#F06A7B' : '#A4161A' }}>Today's Quest</p>
               <p className="text-lg font-extrabold truncate" style={{ color: getTextColor(isDark) }}>Shuffle the deck</p>
-              <p className="text-xs truncate" style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)' }}>
+              <p className="text-xs truncate" style={{ color: isDark ? 'rgba(245,243,244,0.58)' : 'rgba(23,27,38,0.58)' }}>
                 A fresh mix of ideas, picked for you
               </p>
             </div>
@@ -140,12 +142,12 @@ const HomeScreen: React.FC = () => {
 
           {recents.length === 0 ? (
             <div className="text-center py-10 rounded-2xl"
-              style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.015)' }}>
+              style={{ background: isDark ? 'rgba(255,255,255,0.035)' : 'rgba(23,27,38,0.025)' }}>
               <MaterialIcon name="auto_awesome" size={36} style={{ color: heroAccent, opacity: 0.6 }} />
               <p className="mt-3 text-sm font-medium" style={{ color: getTextColor(isDark) }}>
                 Your journey starts here
               </p>
-              <p className="mt-1 text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+              <p className="mt-1 text-xs" style={{ color: isDark ? 'rgba(245,243,244,0.48)' : 'rgba(23,27,38,0.48)' }}>
                 Shuffle the deck to discover your first topic
               </p>
             </div>
@@ -162,19 +164,6 @@ const HomeScreen: React.FC = () => {
           )}
         </div>
       </ScreenEntrance>
-
-      {/* ── Sticky top bar — menu (top-left) + profile (top-right) ────── */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-between px-4 items-center"
-        style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
-        <button onClick={() => navigate('/profile')}
-          className="curio-quick-action w-[42px] h-[42px] rounded-full flex items-center justify-center"
-          style={{
-            background: `${heroAccent}CC`,
-            border: `1px solid rgba(255,255,255,0.35)`,
-          }}>
-          <MaterialIcon name="person" size={22} style={{ color: '#fff' }} />
-        </button>
-      </div>
 
     </div>
   );
@@ -193,7 +182,7 @@ const RecentEntry: React.FC<{
         border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.03)'}`,
         ...pressStyle,
       }}>
-      <MaterialIcon name={cat?.iconGlyph || 'edit_note'} size={22} style={{ color: cat?.accent || '#999' }} />
+      <MaterialIcon name={cat?.iconGlyph || 'edit_note'} size={22} style={{ color: isDark ? '#AEB8C6' : '#586579' }} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{entry.name}</p>
         <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>

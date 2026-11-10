@@ -31,7 +31,7 @@ const STORAGE_KEY = 'curio-theme-settings';
 const defaultSettings: ThemeSettings = {
   style: 'curio',
   isDark: false,
-  pastelColors: true,
+  pastelColors: false,
   tintWash: true,
   heroGradient: true,
 };
@@ -99,28 +99,28 @@ export const useTheme = () => {
 // Theme-aware color helpers
 export const getBackgroundColor = (isDark: boolean, isAmoled: boolean): string => {
   if (isAmoled) return '#000000';
-  if (isDark) return '#1a1a2e';
-  return '#F7F0E4'; // Soft Cream
+  if (isDark) return '#0B090A';
+  return '#F6F7FB';
 };
 
 export const getSurfaceColor = (isDark: boolean, isAmoled: boolean): string => {
-  if (isAmoled) return '#0a0a0a';
-  if (isDark) return '#252535';
-  return '#FFFBF5';
+  if (isAmoled) return '#08090B';
+  if (isDark) return '#161A1D';
+  return '#FFFFFF';
 };
 
 export const getCardColor = (isDark: boolean, isAmoled: boolean): string => {
-  if (isAmoled) return '#111111';
-  if (isDark) return '#2a2a3a';
+  if (isAmoled) return '#0B0D10';
+  if (isDark) return '#20252C';
   return '#FFFFFF';
 };
 
 export const getTextColor = (isDark: boolean): string => {
-  return isDark ? '#FFFFFF' : '#3B0A17';
+  return isDark ? '#F5F3F4' : '#171B26';
 };
 
 export const getSecondaryTextColor = (isDark: boolean): string => {
-  return isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)';
+  return isDark ? 'rgba(245,243,244,0.70)' : 'rgba(23,27,38,0.68)';
 };
 
 // Pastel color helpers — softens category accents to airy pastels

@@ -21,7 +21,7 @@ import { ScreenEntrance } from '../animations';
 
 const PROFILE_HERO_HEIGHT = 220;
 const PROFILE_TEAR_SEED = 0xC0FEE; // Same as Home
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 const AchievementCard: React.FC<{
   title: string; description: string; icon: string; unlocked: boolean;
@@ -31,22 +31,22 @@ const AchievementCard: React.FC<{
     <div className="flex items-center gap-3 p-3 rounded-2xl transition-all"
       style={{
         background: unlocked
-          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(59,10,23,0.05)')
-          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(59,10,23,0.02)'),
+          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(23,27,38,0.05)')
+          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(23,27,38,0.02)'),
         opacity: unlocked ? 1 : 0.5,
       }}>
       <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: unlocked ? 'linear-gradient(135deg, #FFD97D 0%, #FF8FA3 100%)'
-          : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.05)') }}>
+        style={{ background: unlocked ? 'linear-gradient(135deg, #FFD97D 0%, #DA1E37 100%)'
+          : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)') }}>
         <MaterialIcon name={icon} size={24}
-          style={{ color: unlocked ? '#fff' : isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }} />
+          style={{ color: unlocked ? '#fff' : isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h4 className="text-sm font-semibold" style={{ color: getTextColor(isDark) }}>{title}</h4>
           {unlocked && <CurioBadge count={1} color="#FFD97D" size="small" />}
         </div>
-        <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{description}</p>
+        <p className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{description}</p>
       </div>
     </div>
   );
@@ -56,23 +56,23 @@ const PetDisplay: React.FC<{ pet: any }> = ({ pet }) => {
   const { isDark } = useTheme();
   return (
     <div className="w-full p-4 rounded-2xl"
-      style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+      style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #FF8FA3 0%, #FFD97D 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #DA1E37 0%, #FFD97D 100%)' }}>
           <MaterialIcon name="pets" size={32} style={{ color: '#fff' }} />
         </div>
         <div className="flex-1">
           <h4 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, sans-serif' }}>
             {pet?.name || 'Your Companion'}
           </h4>
-          <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+          <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>
             Level {pet?.level || 1} &middot; {pet?.mood || 'Happy'}
           </p>
           <div className="mt-2">
             <CurioProgressBar
               progress={(pet?.xp || 0) / (pet?.xpToNext || 100) * 100}
-              color="#FF8FA3" height={6} />
+              color="#DA1E37" height={6} />
           </div>
         </div>
       </div>
@@ -178,7 +178,7 @@ export const ProfileScreen: React.FC = () => {
             <CurioSectionHeader title="Your Stats" />
             <div className="grid grid-cols-2 gap-3">
               <CurioStatCard label="Total Entries" value={stats.totalEntries} icon="edit_note" color="#4338CA" />
-              <CurioStatCard label="Current Streak" value={stats.currentStreak} icon="local_fire_department" color="#FF8FA3" />
+              <CurioStatCard label="Current Streak" value={stats.currentStreak} icon="local_fire_department" color="#DA1E37" />
               <CurioStatCard label="Best Streak" value={stats.bestStreak} icon="star" color="#B45309" />
               <CurioStatCard label="Level" value={stats.level} icon="auto_awesome" color="#047857" />
             </div>
@@ -188,16 +188,16 @@ export const ProfileScreen: React.FC = () => {
           <div className="mb-6 overflow-hidden" style={{ margin: '0 -0px', marginBottom: '24px' }}>
             <div className="px-4 mb-2">
               <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Your Constellation</h3>
-              <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>Every star is a lane you've explored</p>
+              <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>Every star is a lane you've explored</p>
             </div>
             <Constellation isDark={isDark} />
           </div>
 
           {/* ── Lifetime totals — matches Android's LifetimeTotalsCard ── */}
           <div className="px-4 mb-6">
-            <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <h3 className="text-base font-extrabold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Lifetime totals</h3>
-              <p className="text-xs mb-3" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>Everything your curiosity has collected</p>
+              <p className="text-xs mb-3" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>Everything your curiosity has collected</p>
               <div className="grid grid-cols-2 gap-2">
                 <LifetimeStatItem icon="auto_awesome" label="Spins" value={lifetime.spins} color="#9B7BB8" />
                 <LifetimeStatItem icon="travel_explore" label="Explores" value={lifetime.explores} color="#7FA0C8" />
@@ -230,14 +230,14 @@ export const ProfileScreen: React.FC = () => {
           {/* Level progress */}
           <div className="px-4 mb-6">
             <CurioSectionHeader title="Level Progress" />
-            <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold" style={{ color: getTextColor(isDark) }}>Level {stats.level}</span>
-                <span className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+                <span className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>
                   {stats.xp} / {xpToNext} XP
                 </span>
               </div>
-              <CurioProgressBar progress={levelProgress} color="#FF8FA3" height={8} />
+              <CurioProgressBar progress={levelProgress} color="#DA1E37" height={8} />
             </div>
           </div>
         </div>
@@ -253,13 +253,13 @@ const LifetimeStatItem: React.FC<{
   const { isDark } = useTheme();
   return (
     <div className="flex items-center gap-2.5 p-2.5 rounded-xl"
-      style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.025)' }}>
+      style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.025)' }}>
       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
         style={{ background: `${color}20` }}>
         <MaterialIcon name={icon} size={17} style={{ color }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{label}</p>
+        <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{label}</p>
         <p className="text-sm font-extrabold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>{value}</p>
       </div>
     </div>

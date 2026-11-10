@@ -312,7 +312,7 @@ export const EntryDetailScreen: React.FC = () => {
     navigate('/cabinet');
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}><div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}><div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} /></div>;
   if (!entry || !category) return <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}><p style={{ color: getTextColor(isDark) }}>Entry not found</p></div>;
 
   const captureData = entry.formatDataJson ? JSON.parse(entry.formatDataJson) : {};

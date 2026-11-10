@@ -15,7 +15,7 @@ import type { CategoryId } from '../types';
 
 const SETTINGS_HERO_HEIGHT = 180;
 const SETTINGS_TEAR_SEED = 0x5EED;
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 const STORAGE_KEY_ORDER = 'curio-category-order';
 const STORAGE_KEY_HIDDEN = 'curio-hidden-categories';
@@ -119,7 +119,7 @@ export const ManageCategoriesScreen: React.FC = () => {
           <div className="flex justify-end mb-3">
             <button onClick={resetToDefault}
               className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-              style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }}>
+              style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }}>
               Reset to default
             </button>
           </div>
@@ -135,7 +135,7 @@ export const ManageCategoriesScreen: React.FC = () => {
                 <div key={catId}
                   className="flex items-center gap-3 p-3 rounded-xl"
                   style={{
-                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)',
                     opacity: isVisible ? 1 : 0.45,
                   }}>
                   {/* Category icon */}
@@ -147,28 +147,28 @@ export const ManageCategoriesScreen: React.FC = () => {
                   {/* Category name */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{cat.displayName}</p>
-                    <p className="text-[11px] truncate" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>{cat.family}</p>
+                    <p className="text-[11px] truncate" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>{cat.family}</p>
                   </div>
 
                   {/* Move up */}
                   <button onClick={() => moveUp(index)} disabled={index === 0}
                     className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ opacity: index === 0 ? 0.25 : 1 }}>
-                    <MaterialIcon name="keyboard_arrow_up" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }} />
+                    <MaterialIcon name="keyboard_arrow_up" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }} />
                   </button>
 
                   {/* Move down */}
                   <button onClick={() => moveDown(index)} disabled={index === order.length - 1}
                     className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ opacity: index === order.length - 1 ? 0.25 : 1 }}>
-                    <MaterialIcon name="keyboard_arrow_down" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)' }} />
+                    <MaterialIcon name="keyboard_arrow_down" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }} />
                   </button>
 
                   {/* Toggle visibility */}
                   <button onClick={() => toggleVisibility(catId)}
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
                     <MaterialIcon name={isVisible ? 'visibility' : 'visibility_off'} size={20}
-                      style={{ color: isVisible ? cat.accent : (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)') }} />
+                      style={{ color: isVisible ? cat.accent : (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(23,27,38,0.3)') }} />
                   </button>
                 </div>
               );
@@ -176,7 +176,7 @@ export const ManageCategoriesScreen: React.FC = () => {
           </div>
 
           <div className="mt-6 mb-4 text-center">
-            <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(59,10,23,0.35)' }}>
+            <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(23,27,38,0.35)' }}>
               {order.length - hidden.size} visible · {hidden.size} hidden
             </p>
           </div>

@@ -12,7 +12,7 @@ import { TornHero, CABINET_HERO_SYMBOLS } from '../components/TornHero';
 
 const CABINET_HERO_HEIGHT = 180;
 const CABINET_TEAR_SEED = 0xCAB1E; // Android's CABINET_TEAR_SEED
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 interface CurioCapture { id: string; title: string; content: string; categoryId: string; topicName?: string; format?: string; createdAt: string; }
 const getCategoryByIdSafe = (id: string) => ALL_CATEGORIES.find(c => c.id === id) || null;
@@ -24,20 +24,20 @@ const EntryCard: React.FC<{ entry: CurioCapture; onClick: () => void }> = ({ ent
   return (
     <button onClick={onClick} {...handlers} className="w-full text-left rounded-2xl overflow-hidden"
       style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', ...pressStyle }}>
-      <div className="h-1" style={{ background: category?.accent || '#3B0A17' }} />
+      <div className="h-1" style={{ background: category?.accent || '#171B26' }} />
       <div className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${category?.accent || '#3B0A17'}15` }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${category?.accent || '#171B26'}15` }}>
             <MaterialIcon name={category?.iconGlyph || 'edit_note'} size={20} style={{ color: category?.accent }} />
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{entry.title || 'Untitled'}</h4>
-            <p className="text-xs mt-0.5 line-clamp-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{entry.content || entry.topicName || 'No content'}</p>
+            <p className="text-xs mt-0.5 line-clamp-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{entry.content || entry.topicName || 'No content'}</p>
           </div>
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${category?.accent || '#3B0A17'}15`, color: category?.accent }}>{entry.format || 'Note'}</span>
-          <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>{new Date(entry.createdAt).toLocaleDateString()}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${category?.accent || '#171B26'}15`, color: category?.accent }}>{entry.format || 'Note'}</span>
+          <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>{new Date(entry.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
     </button>
@@ -48,16 +48,16 @@ const CurioSearchField: React.FC<{ value: string; onChange: (v: string) => void;
   const { isDark } = useTheme();
   return (
     <div className="relative">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>
         <MaterialIcon name="search" size={18} />
       </div>
       <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
         className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none"
-        style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)', color: getTextColor(isDark),
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.06)'}` }} />
+        style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)', color: getTextColor(isDark),
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.06)'}` }} />
       {value && (
         <button onClick={() => onChange('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-          <MaterialIcon name="close" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }} />
+          <MaterialIcon name="close" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }} />
         </button>
       )}
     </div>
@@ -147,7 +147,7 @@ export const CabinetScreen: React.FC = () => {
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
-                  style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
+                  style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} />
               </div>
             ) : filtered.length === 0 ? (
               <CurioEmptyState icon="inventory_2" title={searchQuery ? 'No results' : 'No entries yet'}

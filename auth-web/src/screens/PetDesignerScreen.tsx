@@ -12,8 +12,8 @@ import { ScreenEntrance } from '../animations';
 
 const PET_HERO_HEIGHT = 200;
 const PET_TEAR_SEED = 0xDE70; // Pet-specific seed
-const ROSE_WOOD = '#C46B7C';
-const CORAL = '#FF8FA3';
+const ROSE_WOOD = '#161A1D';
+const CORAL = '#DA1E37';
 
 // ─── Pixel Pet Sprite (simple canvas render) ─────────────────────────
 const BODY_GRID = [

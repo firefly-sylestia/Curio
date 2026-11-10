@@ -221,7 +221,7 @@ export const TornHero: React.FC<{
   vpWidth = 400,
   symbols,
   children,
-  sheetColor = '#FFFDF9',
+  sheetColor = '#F6F7FB',
   isDark = false,
 }) => {
   const vpHeight = 400;
@@ -291,16 +291,10 @@ export const TornHero: React.FC<{
 
 /** Home hero watermark symbols */
 export const HOME_HERO_SYMBOLS: TornHeroSymbol[] = [
-  { glyph: 'casino', biasX: 0.07, biasY: 0.15, size: 44, rotation: -12, alpha: 0.11 },
-  { glyph: 'auto_awesome', biasX: 0.93, biasY: 0.15, size: 44, rotation: 12, alpha: 0.11 },
-  { glyph: 'star', biasX: 0.45, biasY: 0.36, size: 48, rotation: -8, alpha: 0.13 },
-  { glyph: 'local_fire_department', biasX: 0.55, biasY: 0.36, size: 48, rotation: 8, alpha: 0.13 },
-  { glyph: 'psychology', biasX: 0.06, biasY: 0.88, size: 56, rotation: -14, alpha: 0.14 },
-  { glyph: 'menu_book', biasX: 0.94, biasY: 0.88, size: 56, rotation: 14, alpha: 0.14 },
-  { glyph: 'emoji_events', biasX: 0.44, biasY: 0.46, size: 50, rotation: -10, alpha: 0.13 },
-  { glyph: 'palette', biasX: 0.56, biasY: 0.46, size: 50, rotation: 10, alpha: 0.13 },
-  { glyph: 'explore', biasX: 0.06, biasY: 0.20, size: 44, rotation: -6, alpha: 0.11 },
-  { glyph: 'travel_explore', biasX: 0.94, biasY: 0.20, size: 44, rotation: 6, alpha: 0.11 },
+  { glyph: 'casino', biasX: 0.09, biasY: 0.22, size: 38, rotation: -14, alpha: 0.075 },
+  { glyph: 'auto_awesome', biasX: 0.91, biasY: 0.24, size: 42, rotation: 12, alpha: 0.07 },
+  { glyph: 'psychology', biasX: 0.10, biasY: 0.78, size: 46, rotation: -10, alpha: 0.065 },
+  { glyph: 'menu_book', biasX: 0.90, biasY: 0.80, size: 44, rotation: 11, alpha: 0.065 },
 ];
 
 /** Profile hero watermark symbols */

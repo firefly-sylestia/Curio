@@ -13,7 +13,7 @@ import type { CurioTopic, CurioCategory } from '../types';
 
 const BROWSER_HERO_HEIGHT = 180;
 const BROWSER_TEAR_SEED = 0xBD0DE; // Browser-specific seed
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 export const TopicBrowserScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -93,21 +93,21 @@ export const TopicBrowserScreen: React.FC = () => {
           style={{ background: getBackgroundColor(isDark, isAmoled) }}>
           <div className="relative mb-3">
             <MaterialIcon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(59,10,23,0.35)' }} />
+              style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(23,27,38,0.35)' }} />
             <input type="text" value={query} onChange={e => setQuery(e.target.value)}
               placeholder={`Search ${totalTopics} topics…`}
               className="w-full pl-10 pr-10 py-2.5 rounded-full text-sm outline-none"
-              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)', color: getTextColor(isDark),
-                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(59,10,23,0.08)'}` }} />
+              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.04)', color: getTextColor(isDark),
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(23,27,38,0.08)'}` }} />
             {query && (
               <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(59,10,23,0.08)' }}>
-                <MaterialIcon name="close" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }} />
+                style={{ background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(23,27,38,0.08)' }}>
+                <MaterialIcon name="close" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }} />
               </button>
             )}
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
-            <FilterChip label="All" count={totalTopics} accent="#FF8FA3" selected={selectedCat === null} onClick={() => setSelectedCat(null)} />
+            <FilterChip label="All" count={totalTopics} accent="#DA1E37" selected={selectedCat === null} onClick={() => setSelectedCat(null)} />
             {catalog.map(({ category, topics }) => (
               <FilterChip key={category.id} label={category.displayName} count={topics.length} accent={category.accent}
                 selected={selectedCat === category.id} onClick={() => setSelectedCat(selectedCat === category.id ? null : category.id)} />
@@ -123,12 +123,12 @@ export const TopicBrowserScreen: React.FC = () => {
         <div className="px-4 pt-2">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#FF8FA3', borderTopColor: 'transparent' }} />
+              <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} />
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
-              <MaterialIcon name="search_off" size={48} style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(59,10,23,0.25)' }} />
-              <p className="mt-3 text-sm font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
+              <MaterialIcon name="search_off" size={48} style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(23,27,38,0.25)' }} />
+              <p className="mt-3 text-sm font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }}>
                 {query ? 'No topics match your search' : 'No topics in this category'}
               </p>
             </div>
@@ -137,29 +137,29 @@ export const TopicBrowserScreen: React.FC = () => {
               {filtered.map(row => row.section ? (
                 <div key={row.key} className="flex items-center gap-2 pt-2 pb-1 px-1">
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: row.section.accent }} />
-                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>
                     {row.section.displayName}
                   </span>
-                  <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(59,10,23,0.25)' }}>{row.sectionCount}</span>
+                  <span className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(23,27,38,0.25)' }}>{row.sectionCount}</span>
                 </div>
               ) : (
                 <button key={row.key} onClick={() => navigate(`/reveal/${row.cat!.id.toLowerCase()}/${row.topic!.id}`)}
                   className="w-full text-left flex items-center gap-3 p-3 rounded-xl transition-all active:scale-[0.98]"
-                  style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(59,10,23,0.01)',
-                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.03)'}` }}>
+                  style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(23,27,38,0.01)',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.03)'}` }}>
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${row.cat!.accent}18` }}>
                     <MaterialIcon name={row.cat!.iconGlyph} size={18} style={{ color: row.cat!.accent }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{row.topic!.name}</div>
-                    <div className="text-[11px] truncate mt-0.5 flex items-center gap-1.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(59,10,23,0.35)' }}>
+                    <div className="text-[11px] truncate mt-0.5 flex items-center gap-1.5" style={{ color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(23,27,38,0.35)' }}>
                       <span>{row.cat!.displayName}</span><span>·</span><span>{row.topic!.subtype}</span>
                     </div>
                     {row.topic!.teaser && (
-                      <div className="text-xs mt-1 line-clamp-1" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(59,10,23,0.25)' }}>{row.topic!.teaser}</div>
+                      <div className="text-xs mt-1 line-clamp-1" style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(23,27,38,0.25)' }}>{row.topic!.teaser}</div>
                     )}
                   </div>
-                  <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(59,10,23,0.2)' }} />
+                  <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(23,27,38,0.2)' }} />
                 </button>
               ))}
             </div>
@@ -175,9 +175,9 @@ const FilterChip: React.FC<{ label: string; count: number; accent: string; selec
   return (
     <button onClick={onClick} className="flex-shrink-0 px-3.5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap"
       style={{
-        background: selected ? `${accent}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)'),
-        color: selected ? accent : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(59,10,23,0.6)'),
-        border: selected ? `1px solid ${accent}40` : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.06)'}`,
+        background: selected ? `${accent}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.04)'),
+        color: selected ? accent : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)'),
+        border: selected ? `1px solid ${accent}40` : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.06)'}`,
       }}>
       {label} <span className="text-xs opacity-60 ml-0.5">{count}</span>
     </button>
@@ -189,9 +189,9 @@ const SortChip: React.FC<{ label: string; icon: string; selected: boolean; onCli
   return (
     <button onClick={onClick} className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
       style={{
-        background: selected ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(59,10,23,0.08)') : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.02)'),
-        color: selected ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)'),
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.06)'}`,
+        background: selected ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(23,27,38,0.08)') : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(23,27,38,0.02)'),
+        color: selected ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(23,27,38,0.45)'),
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.06)'}`,
       }}>
       <MaterialIcon name={icon} size={14} /> {label}
     </button>

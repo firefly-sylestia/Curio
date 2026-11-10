@@ -27,16 +27,16 @@ const SegmentedRow: React.FC<{
       {(label || description) && (
         <div className="mb-2.5">
           {label && <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{label}</div>}
-          {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{description}</div>}
+          {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{description}</div>}
         </div>
       )}
-      <div className="flex rounded-xl p-0.5" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)' }}>
+      <div className="flex rounded-xl p-0.5" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.04)' }}>
         {options.map(opt => (
           <button key={opt.value} onClick={() => onChange(opt.value)}
             className="flex-1 py-2 px-3 rounded-[10px] text-xs font-semibold transition-all"
             style={{
               background: selected === opt.value ? (isDark ? 'rgba(255,255,255,0.15)' : '#fff') : 'transparent',
-              color: selected === opt.value ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(59,10,23,0.45)'),
+              color: selected === opt.value ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(23,27,38,0.45)'),
               boxShadow: selected === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.08)') : 'none',
             }}>
             {opt.label}
@@ -49,7 +49,7 @@ const SegmentedRow: React.FC<{
 
 const SETTINGS_HERO_HEIGHT = 180;
 const SETTINGS_TEAR_SEED = 0x5EED; // Android's SETTINGS_HERO_TEAR_SEED
-const ROSE_WOOD = '#C46B7C';
+const ROSE_WOOD = '#161A1D';
 
 const SettingsItem: React.FC<{
   icon: string; title: string; description?: string; onClick?: () => void; rightContent?: React.ReactNode;
@@ -60,17 +60,17 @@ const SettingsItem: React.FC<{
     <button onClick={onClick} onMouseDown={() => setIsPressed(true)} onMouseUp={() => setIsPressed(false)}
       onMouseLeave={() => setIsPressed(false)}
       className="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left"
-      style={{ background: isPressed ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(59,10,23,0.05)') : 'transparent' }}
+      style={{ background: isPressed ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(23,27,38,0.05)') : 'transparent' }}
       disabled={!onClick}>
       <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(59,10,23,0.05)' }}>
-        <MaterialIcon name={icon} size={20} style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)' }} />
+        style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)' }}>
+        <MaterialIcon name={icon} size={20} style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(23,27,38,0.7)' }} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{title}</div>
-        {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{description}</div>}
+        {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{description}</div>}
       </div>
-      {rightContent || (onClick && <MaterialIcon name="chevron_right" size={18} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }} />)}
+      {rightContent || (onClick && <MaterialIcon name="chevron_right" size={18} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }} />)}
     </button>
   );
 };
@@ -94,7 +94,7 @@ const MUSIC_SERVICES = [
 const ThemePicker: React.FC<{ selected: string; onSelect: (theme: string) => void }> = ({ selected, onSelect }) => {
   const { isDark } = useTheme();
   const themes = [
-    { id: 'curio', name: 'Curio', color: '#FF8FA3' },
+    { id: 'curio', name: 'Curio', color: '#DA1E37' },
     { id: 'material', name: 'Material', color: '#4338CA' },
     { id: 'amoled', name: 'AMOLED', color: '#000000' },
   ];
@@ -103,7 +103,7 @@ const ThemePicker: React.FC<{ selected: string; onSelect: (theme: string) => voi
       {themes.map(t => (
         <button key={t.id} onClick={() => onSelect(t.id)} className="flex-1 p-3 rounded-xl text-center transition-all"
           style={{
-            background: selected === t.id ? `${t.color}20` : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)'),
+            background: selected === t.id ? `${t.color}20` : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)'),
             border: selected === t.id ? `2px solid ${t.color}` : '2px solid transparent',
           }}>
           <div className="w-8 h-8 rounded-full mx-auto mb-2" style={{ background: t.color }} />
@@ -185,7 +185,7 @@ export const SettingsScreen: React.FC = () => {
         <div className="relative z-10 px-4">
           <div className="mb-6">
             <CurioSectionHeader title="Appearance" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="p-4"><ThemePicker selected={style} onSelect={setThemeStyle} /></div>
               <div className="px-4 pb-2"><CurioToggle checked={settings.darkMode} onChange={(v) => handleSettingChange('darkMode', v)} label="Dark Mode" description="Use dark color scheme" /></div>
               <div className="px-4 pb-2"><CurioToggle checked={settings.pastelColors} onChange={(v) => handleSettingChange('pastelColors', v)} label="Pastel Colors" description="Use softer color palette" /></div>
@@ -194,7 +194,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Notifications" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={settings.notifications} onChange={(v) => handleSettingChange('notifications', v)} label="Enable Notifications" description="Receive reminders and updates" /></div>
               <div className="px-4 pb-3">
                 <SegmentedRow
@@ -218,7 +218,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Data" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={settings.autoSave} onChange={(v) => handleSettingChange('autoSave', v)} label="Auto Save" description="Automatically save entries" /></div>
               <SettingsItem icon="upload" title="Export Data" description="Download your entries" onClick={() => {}} />
               <SettingsItem icon="download" title="Import Data" description="Import from backup" onClick={() => {}} />
@@ -227,7 +227,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Pet" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={settings.showPet} onChange={(v) => handleSettingChange('showPet', v)} label="Show Pet" description="Display your companion on screen" /></div>
               <div className="px-4">
                 <SegmentedRow
@@ -259,7 +259,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Features" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={settings.showQuests} onChange={(v) => handleSettingChange('showQuests', v)} label="Show Quests" description="Display quest progress" /></div>
               <div className="px-4 py-2"><CurioToggle checked={settings.soundEffects} onChange={(v) => handleSettingChange('soundEffects', v)} label="Sound Effects" description="Play sounds on interactions" /></div>
               <div className="px-4 pb-2"><CurioToggle checked={settings.voiceToText} onChange={(v) => handleSettingChange('voiceToText', v)} label="Voice-to-Text" description="Use voice input for entry notes" /></div>
@@ -267,13 +267,13 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Categories" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <SettingsItem icon="category" title="Manage Categories" description="Show, hide and reorder" onClick={() => navigate('/manage-categories')} />
             </div>
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="Experiments" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-nav-pill') === 'true'} onChange={(v) => localStorage.setItem('curio-nav-pill', v ? 'true' : 'false')} label="Nav-style buttons" description="Categories wear the floating pill look" /></div>
               <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-star-zoom-3d') === 'true'} onChange={(v) => localStorage.setItem('curio-star-zoom-3d', v ? 'true' : 'false')} label="3D star zoom" description="Tap a constellation star for a perspective tilt + glow" /></div>
               <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-hero-shadow') === 'true'} onChange={(v) => localStorage.setItem('curio-hero-shadow', v ? 'true' : 'false')} label="Main card shadow" description="Ambient depth below the hero card" /></div>
@@ -283,7 +283,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
           <div className="mb-6">
             <CurioSectionHeader title="About" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <SettingsItem icon="info" title="About Curio" description="Version 1.0.0" onClick={() => {}} />
               <SettingsItem icon="description" title="Changelog" description="What's new" onClick={() => {}} />
               <SettingsItem icon="chat" title="Feedback" description="Share your thoughts" onClick={() => {}} />

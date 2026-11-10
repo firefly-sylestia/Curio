@@ -39,7 +39,7 @@ const OnboardingStep: React.FC<{
       </h1>
       <p
         className="text-lg mb-8 max-w-md"
-        style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)' }}
+        style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(23,27,38,0.7)' }}
       >
         {description}
       </p>
@@ -68,7 +68,7 @@ const CategorySelectionStep: React.FC<{
               style={{
                 background: isSelected 
                   ? `${category.accent}20`
-                  : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)'),
+                  : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)'),
                 border: isSelected 
                   ? `2px solid ${category.accent}`
                   : '2px solid transparent',
@@ -167,8 +167,8 @@ export const OnboardingScreen: React.FC = () => {
               style={{
                 width: index === currentStep ? 24 : 8,
                 background: index === currentStep 
-                  ? '#3B0A17'
-                  : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(59,10,23,0.15)'),
+                  ? '#171B26'
+                  : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(23,27,38,0.15)'),
               }}
             />
           ))}
@@ -176,7 +176,7 @@ export const OnboardingScreen: React.FC = () => {
         <button
           onClick={handleSkip}
           className="text-sm font-medium w-20 text-right"
-          style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
+          style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}
         >
           Skip
         </button>
@@ -216,7 +216,7 @@ export const OnboardingScreen: React.FC = () => {
         {currentStep === steps.length - 1 && selectedCategories.length > 0 && (
           <p
             className="text-center text-sm mt-4"
-            style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}
+            style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}
           >
             {selectedCategories.length} categories selected
           </p>

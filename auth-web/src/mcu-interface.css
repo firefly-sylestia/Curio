@@ -1,12 +1,12 @@
 /* Curio cinematic interface layer.
-   Adapted from the MCU Viewing Order visual language; Curio keeps its own rosewood identity. */
+   Adapted from MCU Viewing Order's mission-control palette and restrained geometry. */
 :root {
-  --curio-glass-dark: rgba(18, 20, 27, .82);
-  --curio-glass-light: rgba(255, 255, 255, .78);
+  --curio-glass-dark: rgba(18, 22, 29, .86);
+  --curio-glass-light: rgba(248, 250, 253, .82);
   --curio-glass-border-dark: rgba(255, 255, 255, .105);
-  --curio-glass-border-light: rgba(59, 10, 23, .10);
-  --curio-accent: #C46B7C;
-  --curio-accent-deep: #8F465A;
+  --curio-glass-border-light: rgba(23, 27, 38, .10);
+  --curio-accent: #DA1E37;
+  --curio-accent-deep: #641220;
   --curio-motion-fast: 180ms;
   --curio-motion-medium: 320ms;
   --curio-motion-slow: 550ms;
@@ -16,16 +16,16 @@ html.dark, html.amoled {
   color-scheme: dark;
   --curio-glass: var(--curio-glass-dark);
   --curio-glass-border: var(--curio-glass-border-dark);
-  --curio-text: #F5F2F4;
-  --curio-muted: rgba(245, 242, 244, .62);
+  --curio-text: #F5F3F4;
+  --curio-muted: rgba(211, 211, 211, .68);
   --curio-shadow: 0 24px 64px -34px rgba(0,0,0,.88), 0 3px 12px rgba(0,0,0,.28);
 }
 html:not(.dark):not(.amoled) {
   color-scheme: light;
   --curio-glass: var(--curio-glass-light);
   --curio-glass-border: var(--curio-glass-border-light);
-  --curio-text: #24191E;
-  --curio-muted: rgba(36,25,30,.62);
+  --curio-text: #171B26;
+  --curio-muted: rgba(23,27,38,.62);
   --curio-shadow: 0 24px 60px -38px rgba(45,20,30,.34), 0 2px 10px rgba(45,20,30,.08);
 }
 html.amoled {
@@ -34,10 +34,10 @@ html.amoled {
 }
 html { scrollbar-color: rgba(150,130,140,.38) transparent; }
 body {
-  background: #f7f0e4;
+  background: #f6f7fb;
   transition: background-color var(--curio-motion-medium) var(--curio-motion-ease), color var(--curio-motion-medium) var(--curio-motion-ease);
 }
-html.dark body { background: #14151b; }
+html.dark body { background: #0b090a; }
 html.amoled body { background: #000; }
 #root { min-height: 100dvh; }
 .curio-web-app {
@@ -53,16 +53,16 @@ html.amoled body { background: #000; }
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(70rem 42rem at 8% -12%, rgba(196,107,124,.15), transparent 66%),
-    radial-gradient(60rem 40rem at 100% 82%, rgba(111,91,160,.10), transparent 68%),
+    radial-gradient(70rem 42rem at 8% -12%, rgba(218,30,55,.10), transparent 66%),
+    radial-gradient(60rem 40rem at 100% 82%, rgba(47,128,237,.075), transparent 68%),
     linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%);
 }
 html.dark .curio-web-app::before { opacity: .92; }
 html.amoled .curio-web-app::before { opacity: .42; }
 .curio-web-app .min-h-screen {
   background-image:
-    radial-gradient(48rem 30rem at 5% 0%, rgba(196,107,124,.075), transparent 70%),
-    radial-gradient(42rem 30rem at 100% 72%, rgba(117,91,159,.055), transparent 72%);
+    radial-gradient(48rem 30rem at 5% 0%, rgba(218,30,55,.055), transparent 70%),
+    radial-gradient(42rem 30rem at 100% 72%, rgba(47,128,237,.045), transparent 72%);
   background-attachment: fixed;
 }
 .curio-web-app button,
@@ -122,7 +122,7 @@ html.amoled .curio-web-app::before { opacity: .42; }
   background: linear-gradient(155deg,
     color-mix(in srgb, var(--curio-accent) 78%, #34313a),
     color-mix(in srgb, var(--curio-accent-deep) 76%, #17191f));
-  box-shadow: 0 12px 26px -14px rgba(196,107,124,.65), inset 0 1px 0 rgba(255,255,255,.17);
+  box-shadow: 0 12px 26px -14px rgba(218,30,55,.48), inset 0 1px 0 rgba(255,255,255,.17);
   transform: translateX(calc(var(--nav-index) * 100%));
   transition: transform var(--curio-motion-slow) cubic-bezier(.32,1.22,.46,1);
   pointer-events: none;
@@ -163,8 +163,8 @@ html.amoled .curio-web-app::before { opacity: .42; }
   box-shadow: 22px 0 64px -30px rgba(0,0,0,.72) !important;
 }
 html:not(.dark):not(.amoled) .curio-drawer-panel {
-  background: rgba(255,250,250,.91) !important;
-  box-shadow: 22px 0 64px -30px rgba(45,20,30,.25) !important;
+  background: rgba(248,250,253,.93) !important;
+  box-shadow: 22px 0 64px -30px rgba(15,23,42,.18) !important;
 }
 .curio-web-app .rounded-2xl,
 .curio-web-app .rounded-3xl {
@@ -311,3 +311,45 @@ html:not(.dark):not(.amoled) .curio-drawer-panel {
   outline: 2px solid rgba(255,255,255,.62);
   outline-offset: 2px;
 }
+
+/* MCU mission-control palette and compact geometry */
+:root {
+  --curio-bg-light: #F6F7FB;
+  --curio-bg-dark: #0B090A;
+  --curio-surface-light: #FFFFFF;
+  --curio-surface-dark: #161A1D;
+  --curio-border-light: rgba(23,27,38,.10);
+  --curio-border-dark: rgba(255,255,255,.085);
+  --curio-radius-control: 12px;
+  --curio-radius-card: 16px;
+}
+html:not(.dark):not(.amoled) {
+  --curio-glass: rgba(248,250,253,.82);
+  --curio-glass-border: var(--curio-border-light);
+}
+html.dark, html.amoled {
+  --curio-glass: rgba(18,22,29,.86);
+  --curio-glass-border: var(--curio-border-dark);
+}
+.curio-web-app .min-h-screen {
+  background-color: var(--curio-bg-light) !important;
+  color: #171B26;
+}
+html.dark .curio-web-app .min-h-screen,
+html.amoled .curio-web-app .min-h-screen {
+  background-color: var(--curio-bg-dark) !important;
+  color: #F5F3F4;
+}
+.curio-bottom-nav { border-radius: 999px; }
+.curio-nav-blob {
+  background: linear-gradient(155deg, #E01E37, #641220);
+  box-shadow: 0 12px 26px -14px rgba(218,30,55,.5), inset 0 1px 0 rgba(255,255,255,.17);
+}
+.curio-web-app .rounded-xl { border-radius: 12px !important; }
+.curio-web-app .rounded-2xl { border-radius: 16px !important; }
+.curio-web-app .rounded-3xl { border-radius: 20px !important; }
+.curio-web-app input,
+.curio-web-app textarea,
+.curio-web-app select { border-radius: var(--curio-radius-control); }
+.curio-web-app .curio-watermark-layer { contain: paint; }
+.curio-web-app .curio-btn-primary { background: #DA1E37 !important; color: #FFFFFF !important; }
