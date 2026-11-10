@@ -52,13 +52,6 @@ const AccountScreen: React.FC = () => {
     setStats({ saved: state.lifetime?.saves || 0, spins: state.lifetime?.spins || 0, streak: state.bestStreak || 0 });
   }, []);
 
-  const readStoredSession = useCallback((): WebSession | null => {
-    try {
-      const value = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null') as WebSession | null;
-      return value?.access_token ? value : null;
-    } catch { return null; }
-  }, []);
-
   const saveSession = useCallback((data: any) => {
     if (!data?.access_token) return null;
     const next: WebSession = {
@@ -96,25 +89,6 @@ const AccountScreen: React.FC = () => {
     }
     return data;
   }, [config]);
-
-  const refreshSession = useCallback(async (current: WebSession) => {
-    if (current.expires_at > Date.now()) return current;
-    if (!current.refresh_token) {
-      localStorage.removeItem(SESSION_KEY);
-      setSession(null);
-      return null;
-    }
-    try {
-      const data = await authRequest('/auth/v1/token', {
-        method: 'POST', query: { grant_type: 'refresh_token' }, body: { refresh_token: current.refresh_token },
-      });
-      return saveSession(data);
-    } catch {
-      localStorage.removeItem(SESSION_KEY);
-      setSession(null);
-      return null;
-    }
-  }, [authRequest, saveSession]);
 
   const loadProfile = useCallback(async (current: WebSession) => {
     if (!config?.configured || !current.user_id) return;
