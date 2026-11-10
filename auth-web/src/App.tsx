@@ -27,7 +27,8 @@ const App: React.FC = () => {
   // where navigate sets localStorage but useState hasn't updated yet.
   const isOnboardingComplete = localStorage.getItem('onboarding_complete') === 'true';
 
-  const isImmersiveRoute = /^\/(reveal|capture|detail)\//.test(location.pathname);
+  const immersiveRoutes = ['/reveal/', '/capture/', '/detail/'];
+  const isImmersiveRoute = immersiveRoutes.some(route => location.pathname.startsWith(route));
   const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding' && !isImmersiveRoute;
   // Force remount of routes when onboarding state changes
   const onboardKey = isOnboardingComplete ? 'done' : 'pending';
