@@ -7,6 +7,7 @@ import BottomNav from './components/BottomNav';
 import HomeScreen from './screens/HomeScreen';
 import AccountScreen from './screens/AccountScreen';
 import HelpSupportScreen from './screens/HelpSupportScreen';
+import LegalScreen from './screens/LegalScreen';
 import { SpinScreen } from './screens/SpinScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TopicRevealScreen } from './screens/TopicRevealScreen';
@@ -30,7 +31,8 @@ const App: React.FC = () => {
 
   const immersiveRoutes = ['/reveal/', '/capture/', '/detail/'];
   const isImmersiveRoute = immersiveRoutes.some(route => location.pathname.startsWith(route));
-  const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding' && !isImmersiveRoute;
+  const isUtilityRoute = ['/support', '/privacy', '/terms', '/settings'].includes(location.pathname);
+  const showBottomNav = isOnboardingComplete && location.pathname !== '/onboarding' && !isImmersiveRoute && !isUtilityRoute;
   // Force remount of routes when onboarding state changes
   const onboardKey = isOnboardingComplete ? 'done' : 'pending';
 
@@ -46,6 +48,8 @@ const App: React.FC = () => {
           <Route path="/profile" element={<AccountScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/support" element={<HelpSupportScreen />} />
+          <Route path="/privacy" element={<LegalScreen type="privacy" />} />
+          <Route path="/terms" element={<LegalScreen type="terms" />} />
           <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
           <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
           <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />

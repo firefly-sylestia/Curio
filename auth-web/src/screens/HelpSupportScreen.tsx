@@ -27,66 +27,75 @@ const HelpSupportScreen: React.FC = () => {
     { q: 'What happens if I delete my online account?', a: 'Your online profile and server-side social data are deleted. Your local journals, photos and saved discoveries on this device are not deleted.' },
   ];
 
-  const card: React.CSSProperties = { background: surface, border: '1px solid ' + border, borderRadius: 18 };
+  const card: React.CSSProperties = { background: surface, border: '1px solid ' + border, borderRadius: 20 };
   return (
-    <main className="min-h-screen px-4 pt-7 pb-32" style={{ background: getBackgroundColor(isDark, isAmoled), color: ink }}>
+    <main className="min-h-screen px-4 pt-24 pb-12" style={{ background: getBackgroundColor(isDark, isAmoled), color: ink }}>
+      <button onClick={() => navigate(-1)} aria-label="Go back"
+        className="fixed left-4 top-[max(14px,env(safe-area-inset-top))] z-50 w-11 h-11 rounded-full flex items-center justify-center shadow-lg"
+        style={{ background: surface, border: '1px solid ' + border, color: ink }}>
+        <MaterialIcon name="arrow_back" size={20} />
+      </button>
       <div className="max-w-2xl mx-auto">
-        <header className="flex items-center gap-3 mb-7">
-          <button onClick={() => navigate(-1)} aria-label="Go back" className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: surface, border: '1px solid ' + border }}><MaterialIcon name="arrow_back" size={19} /></button>
-          <div>
-            <p className="text-[10px] uppercase tracking-[.16em] font-bold" style={{ color: '#DA1E37' }}>Curio care</p>
-            <h1 className="text-2xl font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Help & support</h1>
-          </div>
+        <header className="mb-7">
+          <p className="text-[10px] uppercase tracking-[.2em] font-bold mb-2" style={{ color: '#DA1E37' }}>Curio / Support desk</p>
+          <h1 className="text-[34px] leading-tight font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Help & support<span style={{ color: '#DA1E37' }}>.</span></h1>
+          <p className="mt-2 text-sm leading-relaxed max-w-md" style={{ color: muted }}>A clear answer, a little guidance, or a way to reach us. Your local discoveries remain yours.</p>
         </header>
-        <section className="relative overflow-hidden rounded-[20px] p-5 mb-5"
-          style={{ background: dark ? 'linear-gradient(135deg,#26151B,#171A1D 72%)' : 'linear-gradient(135deg,#FBE9ED,#FFFFFF 78%)', border: '1px solid ' + border }}>
-          <div className="absolute -right-8 -top-10 opacity-[.12] pointer-events-none" style={{ color: '#DA1E37' }} aria-hidden="true">
-            <MaterialIcon name="auto_awesome" size={150} />
+
+        <section className="rounded-[22px] p-5 mb-7" style={{ ...card, background: dark ? '#161A1D' : '#FFFFFF' }}>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="w-11 h-11 rounded-2xl flex items-center justify-center"
+              style={{ background: 'rgba(218,30,55,.11)', color: '#DA1E37' }}>
+              <MaterialIcon name="support_agent" size={23} />
+            </span>
+            <div className="min-w-0">
+              <p className="font-bold text-base">Need a hand?</p>
+              <p className="text-xs mt-0.5" style={{ color: muted }}>We’ll help you find the right direction.</p>
+            </div>
           </div>
-          <div className="relative z-10">
-            <span className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-              style={{ background: 'rgba(218,30,55,.12)', color: '#DA1E37' }}><MaterialIcon name="support_agent" size={22} /></span>
-            <h2 className="text-xl font-bold">A little help goes a long way.</h2>
-            <p className="text-sm leading-relaxed mt-2 max-w-md" style={{ color: muted }}>
-              Find answers about your Curio account, privacy and sign-in. Your local discoveries remain yours.
-            </p>
-            {supportEmail ? (
-              <a href={'mailto:' + supportEmail + '?subject=Curio%20support'} className="inline-flex items-center gap-2 mt-4 rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-                style={{ background: '#DA1E37' }}><MaterialIcon name="mail" size={16} /> Contact support</a>
-            ) : (
-              <a href="https://github.com/firefly-sylestia/Curio/issues" target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-2 mt-4 rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-                style={{ background: '#DA1E37' }}><MaterialIcon name="github" size={16} /> Report an issue</a>
-            )}
-          </div>
+          {supportEmail ? (
+            <a href={'mailto:' + supportEmail + '?subject=Curio%20support'}
+              className="inline-flex items-center gap-2 mt-2 rounded-xl px-4 py-3 text-sm font-bold text-white"
+              style={{ background: '#DA1E37' }}><MaterialIcon name="mail" size={17} /> Contact support</a>
+          ) : (
+            <a href="https://github.com/firefly-sylestia/Curio/issues" target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 mt-2 rounded-xl px-4 py-3 text-sm font-bold text-white"
+              style={{ background: '#DA1E37' }}><MaterialIcon name="bug_report" size={17} /> Report an issue</a>
+          )}
         </section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-lg">Common questions</h2>
-          <span className="text-xs" style={{ color: muted }}>Quick answers</span>
+
+        <div className="flex items-end justify-between mb-3">
+          <div><p className="text-[10px] uppercase tracking-[.18em] font-bold" style={{ color: '#DA1E37' }}>Help centre</p>
+            <h2 className="mt-1 text-xl font-bold">Common questions</h2></div>
+          <span className="text-xs pb-1" style={{ color: muted }}>Quick answers</span>
         </div>
-        <section className="overflow-hidden mb-5" style={card}>
+        <section className="overflow-hidden mb-7" style={card}>
           {faqs.map((faq, index) => (
             <div key={faq.q} style={{ borderBottom: index === faqs.length - 1 ? 'none' : '1px solid ' + border }}>
-              <button onClick={() => setOpen(open === index ? null : index)} className="w-full flex items-center gap-3 p-4 text-left">
-                <span className="flex-1 text-sm font-semibold">{faq.q}</span>
-                <MaterialIcon name={open === index ? 'expand_less' : 'expand_more'} size={19} />
+              <button onClick={() => setOpen(open === index ? null : index)} aria-expanded={open === index}
+                className="w-full flex items-center gap-3 p-4 text-left">
+                <span className="flex-1 text-sm font-semibold leading-snug">{faq.q}</span>
+                <MaterialIcon name={open === index ? 'remove' : 'add'} size={19} />
               </button>
-              {open === index && <p className="px-4 pb-4 text-sm leading-relaxed" style={{ color: muted }}>{faq.a}</p>}
+              {open === index && <p className="px-4 pb-5 pr-8 text-sm leading-[1.75]" style={{ color: muted }}>{faq.a}</p>}
             </div>
           ))}
         </section>
-        <section className="rounded-[18px] p-4" style={card}>
-          <h2 className="font-bold text-sm mb-3">Useful places</h2>
+
+        <div className="mb-3"><p className="text-[10px] uppercase tracking-[.18em] font-bold" style={{ color: '#DA1E37' }}>More information</p>
+          <h2 className="mt-1 text-xl font-bold">Your Curio essentials</h2></div>
+        <section className="overflow-hidden" style={card}>
           {[
             { label: 'Your account', detail: 'Sign in or manage your account', icon: 'person', action: () => navigate('/profile') },
             { label: 'Preferences', detail: 'Appearance and experience', icon: 'tune', action: () => navigate('/settings') },
-            { label: 'Privacy notice', detail: 'Understand how your data is handled', icon: 'shield', action: () => window.open('/privacy', '_self') },
-            { label: 'Terms', detail: 'The rules for using Curio', icon: 'description', action: () => window.open('/terms', '_self') },
-          ].map(item => (
-            <button key={item.label} onClick={item.action} className="w-full flex items-center gap-3 py-3 text-left">
-              <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: dark ? 'rgba(255,255,255,.06)' : '#F5F5F7', color: '#DA1E37' }}>
-                <MaterialIcon name={item.icon} size={18} />
+            { label: 'Privacy notice', detail: 'How Online Mode handles information', icon: 'shield', action: () => navigate('/privacy') },
+            { label: 'Terms of use', detail: 'Rules for using Curio Online Mode', icon: 'description', action: () => navigate('/terms') },
+          ].map((item, index) => (
+            <button key={item.label} onClick={item.action} className="w-full flex items-center gap-3 p-4 text-left"
+              style={{ borderBottom: index === 3 ? 'none' : '1px solid ' + border }}>
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: dark ? 'rgba(255,255,255,.06)' : '#F4F5F7', color: '#DA1E37' }}>
+                <MaterialIcon name={item.icon} size={19} />
               </span>
               <span className="flex-1"><strong className="block text-sm">{item.label}</strong><small className="text-xs" style={{ color: muted }}>{item.detail}</small></span>
               <MaterialIcon name="chevron_right" size={18} />

@@ -8,11 +8,7 @@ import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
-import { TornHero, HOME_HERO_SYMBOLS } from '../components/TornHero';
 import { ScreenEntrance, usePressable } from '../animations';
-
-const HOME_HERO_HEIGHT = 300;
-const HOME_TEAR_SEED = 0xC0FEE; // Fixed seed — matches Android
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -51,60 +47,56 @@ const HomeScreen: React.FC = () => {
     navigate(`/spin/${pick.id.toLowerCase()}`);
   };
 
-  const heroAccent = '#DA1E37'; // MCU crimson
-  const heroFill = isDark || isAmoled ? '#161A1D' : '#171B26';
+  const heroAccent = '#DA1E37'; // Curio crimson
+  const heroFill = isDark || isAmoled ? '#161A1D' : '#111820';
   const heroInk = '#fff';
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <CurioWatermarkBackdrop topClearance={HOME_HERO_HEIGHT + 30} />
-
-      {/* ── 1. Torn Hero Banner ────────────────────────────────────────── */}
-      <TornHero
-        height={HOME_HERO_HEIGHT}
-        fill={heroFill}
-        ink={heroInk}
-        tearSeed={HOME_TEAR_SEED}
-        bold={true}
-        symbols={HOME_HERO_SYMBOLS}
-        isDark={isDark}
-        sheetColor={isDark || isAmoled ? '#10141A' : '#F6F7FB'}
-      >
-        <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px]">
-          {/* Greeting + Name */}
-          <p className="text-white/90 text-[20px] font-extrabold leading-tight"
-            style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{greeting}</p>
-          <h1 className="text-[36px] font-extrabold text-white leading-[44px] mt-1"
-            style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{displayName}</h1>
-
-          <div className="flex-1" />
-
-          {/* Streak · Saved · Topics stat bar */}
-          <div className="rounded-[20px] border border-white/25" style={{
-            background: 'linear-gradient(180deg, rgba(218,30,55,0.16) 0%, rgba(218,30,55,0.035) 100%)',
-          }}>
-            <div className="flex items-center px-1.5 py-2.5">
-              <div className="flex flex-col items-center flex-1 gap-0.5">
-                <MaterialIcon name="local_fire_department" size={18} style={{ color: 'rgba(255,255,255,0.9)' }} />
-                <span className="text-sm font-extrabold text-white">{stats.streak}</span>
-                <span className="text-[10px] text-white/80">Streak</span>
+      {/* Editorial home header, sharing Explore's visual language */}
+      <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-5xl mx-auto">
+        <header className="relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white"
+          style={{ background: heroFill, boxShadow: '0 20px 48px -30px rgba(0,0,0,.65)' }}>
+          <div className="absolute -right-7 -top-9 w-48 h-48 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(218,30,55,.24), transparent 68%)' }} />
+          <div className="absolute right-5 top-8 opacity-[.10] rotate-[-12deg] pointer-events-none" aria-hidden="true">
+            <MaterialIcon name="auto_awesome" size={116} />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase text-white/55">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} />
+                Curio / Your space
               </div>
-              <div className="w-px h-[34px] bg-white/20" />
-              <div className="flex flex-col items-center flex-1 gap-0.5">
-                <MaterialIcon name="bookmark" size={18} style={{ color: 'rgba(255,255,255,0.9)' }} />
-                <span className="text-sm font-extrabold text-white">{stats.saved}</span>
-                <span className="text-[10px] text-white/80">Saved</span>
+              <span className="text-[10px] tracking-widest uppercase text-white/45">01 / Home</span>
+            </div>
+            <p className="text-sm font-semibold text-white/65">{greeting || 'Welcome back'}</p>
+            <h1 className="mt-1 text-[38px] sm:text-[46px] leading-[1.05] font-extrabold tracking-tight"
+              style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
+              {displayName}<span style={{ color: '#F05265' }}>.</span>
+            </h1>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/60">
+              A little curiosity goes a long way. Pick up where you left off, or find something new.
+            </p>
+            <div className="mt-7 flex items-end gap-6">
+              <div>
+                <div className="text-2xl font-bold tabular-nums">{stats.streak}</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Streak</div>
               </div>
-              <div className="w-px h-[34px] bg-white/20" />
-              <div className="flex flex-col items-center flex-1 gap-0.5">
-                <MaterialIcon name="auto_awesome" size={18} style={{ color: 'rgba(255,255,255,0.9)' }} />
-                <span className="text-sm font-extrabold text-white">{stats.topics}</span>
-                <span className="text-[10px] text-white/80">Topics</span>
+              <div className="h-8 w-px bg-white/15" />
+              <div>
+                <div className="text-2xl font-bold tabular-nums">{stats.saved}</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Saved</div>
+              </div>
+              <div className="h-8 w-px bg-white/15" />
+              <div>
+                <div className="text-2xl font-bold tabular-nums">{stats.topics}</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Topics</div>
               </div>
             </div>
           </div>
-        </div>
-      </TornHero>
+        </header>
+      </div>
 
       <ScreenEntrance>
         {/* ── 2. Quest Block ─────────────────────────────────────────────── */}
