@@ -1,5 +1,5 @@
 // Curio Web App - Bottom Navigation
-// Home · Explore · Shuffle · Cabinet — discovery-first navigation
+// Home · Explore · Shuffle · Account — focused discovery navigation
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,7 +10,7 @@ const tabs = [
   { path: '/', label: 'Home', icon: 'cottage' },
   { path: '/browse', label: 'Explore', icon: 'explore' },
   { path: '/spin', label: 'Shuffle', icon: 'auto_awesome' },
-  { path: '/cabinet', label: 'Cabinet', icon: 'inventory_2' },
+  { path: '/profile', label: 'Account', icon: 'person' },
 ];
 
 const BottomNav: React.FC = () => {

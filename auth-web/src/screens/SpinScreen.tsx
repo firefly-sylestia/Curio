@@ -111,7 +111,7 @@ const HeroTicket: React.FC<{
 
   return (
     <button onClick={onClick} disabled={isSpinning}
-      className="relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
+      className="curio-shuffle-hero relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
       style={{
         background: `linear-gradient(180deg, ${topColor} 0%, ${botColor} 100%)`,
         boxShadow: hasLanded
@@ -191,9 +191,9 @@ const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: Cur
   const { isDark } = useTheme();
   if (!topic) return null;
   // Match Android near-peek: 360×116dp, corner 19dp
-  const w = 360; const h = 116; const corner = 19;
-  // Android yOff: -134 for top near, +146 for bottom near
-  const yOff = slot === -1 ? -134 : 146;
+  const w = 174; const h = 286; const corner = 26;
+  // Side cards peek from behind the central hero, like a cinematic carousel.
+  const xOff = slot === -1 ? -172 : 172;
 
   const [r, g, b] = hexToRgb(category.accent);
   const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
@@ -211,8 +211,9 @@ const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: Cur
     <div className="absolute left-1/2 flex items-center overflow-hidden"
       style={{
         width: w, height: h, borderRadius: corner,
-        top: `calc(50% + ${yOff}px)`,
-        transform: 'translate(-50%, -50%)',
+        top: '50%',
+        left: `calc(50% + ${xOff}px)`,
+        transform: 'translate(-50%, -50%) scale(.88)',
         background: `linear-gradient(180deg, rgb(${dr},${dg},${db}), rgb(${dr2},${dg2},${db2}))`,
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         border: isDark ? `1px solid ${category.accent}18` : `1px solid ${category.accent}10`,
@@ -441,11 +442,17 @@ export const SpinScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-shuffle-screen min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
-      {/* ── 1. Fan Deck Section (Android: 444dp container) ──────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ paddingTop: 'env(safe-area-inset-top, 8px)', paddingBottom: '20px' }}>
+      <div className="curio-shuffle-heading px-5 pt-8 pb-2 text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[.24em] opacity-55">The Curio deck</p>
+        <h1 className="mt-2 text-2xl font-extrabold tracking-tight" style={{ color: getTextColor(isDark), fontFamily: "Geom, Inter, sans-serif" }}>A new thread to follow.</h1>
+        <p className="mt-1 text-xs opacity-55">One roll. One unexpected discovery.</p>
+      </div>
+
+      {/* ── 1. Cinematic hero carousel ───────────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '104px' }}>
         <div className="relative flex items-center justify-center" style={{ width: 380, height: 444 }}>
           {/* Top peek (slot -1) fanned above hero */}
           <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
@@ -465,7 +472,7 @@ export const SpinScreen: React.FC = () => {
       </div>
 
       {/* ── 3. Floating Bottom Bar: Categories · Filter ─────────────── */}
-      <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center gap-3 px-4"
+      <div className="curio-shuffle-controls fixed bottom-[92px] left-0 right-0 z-40 flex justify-center gap-3 px-4"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
         <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />

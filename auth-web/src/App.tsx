@@ -4,11 +4,9 @@
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeContext';
 import BottomNav from './components/BottomNav';
-import { FloatingPet } from './components/FloatingPet';
 import HomeScreen from './screens/HomeScreen';
+import AccountScreen from './screens/AccountScreen';
 import { SpinScreen } from './screens/SpinScreen';
-import { CabinetScreen } from './screens/CabinetScreen';
-import { ProfileScreen } from './screens/ProfileScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TopicRevealScreen } from './screens/TopicRevealScreen';
 import { SaveCaptureScreen } from './screens/SaveCaptureScreen';
@@ -41,8 +39,8 @@ const App: React.FC = () => {
           <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
           <Route path="/spin" element={<SpinScreen />} />
           <Route path="/spin/:categorySlug" element={<SpinScreen />} />
-          <Route path="/cabinet" element={<CabinetScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/cabinet" element={<Navigate to="/profile" replace />} />
+          <Route path="/profile" element={<AccountScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
           <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
@@ -55,7 +53,6 @@ const App: React.FC = () => {
         </Routes>
 
         {showBottomNav && <BottomNav />}
-        {showBottomNav && <FloatingPet />}
       </div>
     </ThemeProvider>
   );

@@ -10,7 +10,6 @@ import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedCompon
 import { captureRepository } from '../db/database';
 import { TornHero, HOME_HERO_SYMBOLS } from '../components/TornHero';
 import { ScreenEntrance, usePressable } from '../animations';
-import { MenuDrawer } from '../components/MenuDrawer';
 
 const HOME_HERO_HEIGHT = 300;
 const HOME_TEAR_SEED = 0xC0FEE; // Fixed seed — matches Android
@@ -23,7 +22,6 @@ const HomeScreen: React.FC = () => {
   const [recents, setRecents] = useState<Array<{ id: string; name: string; categoryId: string; subtype: string; daysAgo: number }>>([]);
   const [greeting, setGreeting] = useState('');
   const [displayName] = useState(() => localStorage.getItem('curio-display-name') || 'Explorer');
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -91,9 +89,9 @@ const HomeScreen: React.FC = () => {
               </div>
               <div className="w-px h-[34px] bg-white/20" />
               <div className="flex flex-col items-center flex-1 gap-0.5">
-                <MaterialIcon name="inventory_2" size={18} style={{ color: 'rgba(255,255,255,0.9)' }} />
+                <MaterialIcon name="bookmark" size={18} style={{ color: 'rgba(255,255,255,0.9)' }} />
                 <span className="text-sm font-extrabold text-white">{stats.saved}</span>
-                <span className="text-[10px] text-white/80">Cabinet</span>
+                <span className="text-[10px] text-white/80">Saved</span>
               </div>
               <div className="w-px h-[34px] bg-white/20" />
               <div className="flex flex-col items-center flex-1 gap-0.5">
@@ -138,14 +136,6 @@ const HomeScreen: React.FC = () => {
         <div className="px-4 mt-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold" style={{ color: getTextColor(isDark) }}>Recents</h3>
-            {recents.length > 0 && (
-              <button onClick={() => navigate('/history')}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold"
-                style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.04)', color: getTextColor(isDark) }}>
-                View all
-                <MaterialIcon name="chevron_right" size={14} />
-              </button>
-            )}
           </div>
 
           {recents.length === 0 ? (
@@ -176,14 +166,6 @@ const HomeScreen: React.FC = () => {
       {/* ── Sticky top bar — menu (top-left) + profile (top-right) ────── */}
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-between px-4 items-center"
         style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
-        <button onClick={() => setMenuOpen(true)}
-          className="curio-quick-action w-[42px] h-[42px] rounded-full flex items-center justify-center"
-          style={{
-            background: `${heroAccent}CC`,
-            border: `1px solid rgba(255,255,255,0.35)`,
-          }}>
-          <MaterialIcon name="menu" size={22} style={{ color: '#fff' }} />
-        </button>
         <button onClick={() => navigate('/profile')}
           className="curio-quick-action w-[42px] h-[42px] rounded-full flex items-center justify-center"
           style={{
@@ -194,8 +176,6 @@ const HomeScreen: React.FC = () => {
         </button>
       </div>
 
-      {/* Menu Drawer */}
-      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   );
 };
