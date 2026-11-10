@@ -353,3 +353,11 @@ html.amoled .curio-web-app .min-h-screen {
 .curio-web-app select { border-radius: var(--curio-radius-control); }
 .curio-web-app .curio-watermark-layer { contain: paint; }
 .curio-web-app .curio-btn-primary { background: #DA1E37 !important; color: #FFFFFF !important; }
+
+/* Shuffle discovery draw: controls live in document flow, never under fixed navigation. */
+.curio-draw-screen { min-height: 100dvh; overflow-x: clip; }
+.curio-draw-screen .curio-draw-primary { transition: transform 180ms ease, filter 180ms ease, opacity 180ms ease; }
+.curio-draw-screen .curio-draw-primary:not(:disabled):active { transform: scale(.985); filter: brightness(.96); }
+@media (min-width: 768px) {
+  .curio-draw-screen .curio-draw-stage { max-width: 620px; margin-inline: auto; }
+}

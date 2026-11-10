@@ -1,493 +1,282 @@
-// Curio Web App - Spin Screen
-// Matches Android: 2 peek cards (above/below hero), receding deck colors, bottom Categories·Filter
+// Curio Web App - Shuffle
+// A calm, card-based discovery draw. No wheel, dice, or carousel mechanics.
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme, getBackgroundColor, getTextColor, getPastelCardFill } from '../theme/ThemeContext';
+import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
-import { getRandomTopic } from '../data/topics';
+import { loadTopicsForCategory } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
 import type { CurioCategory, CurioTopic } from '../types';
 import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
-import { usePressable } from '../animations';
 
-const ORBIT_DOTS = 12;
-const SPIN_MIN = 2200;
-const SPIN_MAX = 3000;
+const ACCENT = '#DA1E37';
 
-const hexToRgb = (hex: string): [number, number, number] => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return [r, g, b];
-};
-
-// ─── CSS Dice ─────────────────────────────────────────────────────────
-const CssDice: React.FC<{ size: number; tumbling: boolean; ink: string }> = ({ size, tumbling, ink }) => {
-  const pipSize = size * 0.16; const gap = size * 0.22; const mid = size * 0.39;
-  const pip = (x: number, y: number) => (
-    <div key={`${x}-${y}`} className="absolute rounded-full"
-      style={{ width: pipSize, height: pipSize, left: x - pipSize / 2, top: y - pipSize / 2,
-        background: tumbling ? 'rgba(255,255,255,0.9)' : ink, transition: 'background 0.3s' }} />
-  );
-  return (
-    <div className="relative rounded-[18%]" style={{ width: size, height: size,
-      background: tumbling ? 'rgba(255,255,255,0.15)' : `${ink}10`,
-      border: tumbling ? '2px solid rgba(255,255,255,0.25)' : `2px solid ${ink}30`,
-      animation: tumbling ? 'curio-dice-tumble 1.6s linear infinite' : 'curio-dice-breathe 3s ease-in-out infinite' }}>
-      {pip(gap, gap)}{pip(size - gap, gap)}{pip(mid, mid)}{pip(gap, size - gap)}{pip(size - gap, size - gap)}
-    </div>
-  );
-};
-
-// ─── Confetti ─────────────────────────────────────────────────────────
-const ConfettiBurst: React.FC<{ trigger: number; color: string }> = ({ trigger, color }) => {
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; rot: number; size: number; delay: number }>>([]);
-  useEffect(() => {
-    if (trigger === 0) return;
-    const p = Array.from({ length: 20 }, (_, i) => ({
-      id: i, x: (Math.random() - 0.5) * 280, y: (Math.random() - 0.5) * 280 - 50,
-      rot: Math.random() * 720 - 360, size: 4 + Math.random() * 7, delay: Math.random() * 0.12,
-    }));
-    setParticles(p);
-    setTimeout(() => setParticles([]), 1100);
-  }, [trigger]);
-  if (particles.length === 0) return null;
-  return (
-    <div className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center">
-      {particles.map(p => (
-        <div key={p.id} className="absolute rounded-sm"
-          style={{ width: p.size, height: p.size * 1.6,
-            background: p.id % 3 === 0 ? '#FFD700' : p.id % 3 === 1 ? color : '#FFFFFF',
-            left: '50%', top: '50%', opacity: 0,
-            animation: `curio-confetti-fly 0.7s ease-out ${p.delay}s forwards`,
-            '--tx': `${p.x}px`, '--ty': `${p.y}px`, '--rot': `${p.rot}deg`,
-          } as React.CSSProperties} />
-      ))}
-    </div>
-  );
-};
-
-// ─── Hero Ticket Card ─────────────────────────────────────────────────
-const HeroTicket: React.FC<{
-  topic: CurioTopic | null; category: CurioCategory;
-  isSpinning: boolean; spinPhase: 'idle' | 'spinning' | 'landed' | 'opening';
-  onClick: () => void;
-}> = ({ topic, category, isSpinning, spinPhase, onClick }) => {
-  const { isDark, pastelColors } = useTheme();
-  const [contentKey, setContentKey] = useState(0);
-  const [shimmerPos, setShimmerPos] = useState(-100);
-
-  useEffect(() => {
-    if (spinPhase !== 'spinning') return;
-    const iv = setInterval(() => setContentKey(k => k + 1), 260);
-    return () => clearInterval(iv);
-  }, [spinPhase]);
-
-  useEffect(() => {
-    if (spinPhase === 'spinning') return;
-    const iv = setInterval(() => setShimmerPos(p => (p >= 200 ? -100 : p + 1.2)), 35);
-    return () => clearInterval(iv);
-  }, [spinPhase]);
-
-  const baseAccent = pastelColors && !isDark ? getPastelCardFill(category.accent, isDark) : category.accent;
-  const [r, g, b] = hexToRgb(baseAccent);
-  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
-
-  // Android cardGradient: 2-stop vertical gradient
-  // Stop 1 (top): categoryCardFill → lerp(accent, Black, dark?0.28:0.10)
-  const deepen = isDark ? 0.28 : 0.10;
-  const s1r = Math.round(r * (1 - deepen));
-  const s1g = Math.round(g * (1 - deepen));
-  const s1b = Math.round(b * (1 - deepen));
-  // Stop 2 (bottom): lerp(stop1, surface, 0.30)
-  const s2r = Math.round(s1r * 0.70 + surfaceRgb[0] * 0.30);
-  const s2g = Math.round(s1g * 0.70 + surfaceRgb[1] * 0.30);
-  const s2b = Math.round(s1b * 0.70 + surfaceRgb[2] * 0.30);
-  const topColor = `rgb(${s1r},${s1g},${s1b})`;
-  const botColor = `rgb(${s2r},${s2g},${s2b})`;
-
-  const hasLanded = spinPhase === 'landed' || spinPhase === 'opening';
-
-  return (
-    <button onClick={onClick} disabled={isSpinning}
-      className="curio-shuffle-hero relative w-[286px] h-[310px] rounded-[28px] overflow-hidden text-left flex-shrink-0"
-      style={{
-        background: `linear-gradient(180deg, ${topColor} 0%, ${botColor} 100%)`,
-        boxShadow: hasLanded
-          ? `0 8px 32px ${category.accent}40, 0 2px 8px rgba(0,0,0,0.12)`
-          : '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)',
-        cursor: isSpinning ? 'default' : 'pointer',
-        border: isDark ? `1px solid ${category.accent}30` : `1px solid ${category.accent}1A`,
-        transform: spinPhase === 'opening' ? 'scale(1.03)' : isSpinning ? 'scale(0.97)' : 'scale(1)',
-        transition: 'transform 0.4s cubic-bezier(0.2,0.8,0.3,1), box-shadow 0.4s ease',
-      }}>
-      {/* Accent rule */}
-      <div className="absolute top-0 left-3 right-3 h-[2px] rounded-full" style={{ background: category.accent, opacity: 0.45 }} />
-      {/* Top-lit crown — matching Android's enhanced diagonal crown lift */}
-      <div className="absolute top-0 left-0 right-0 h-[80px] pointer-events-none"
-        style={{ background: isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(255,255,255,0.16) 0%, transparent 100%)' }} />
-      {/* Shimmer */}
-      {spinPhase !== 'spinning' && (
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.05) 48%, transparent 61%)', transform: `translateX(${shimmerPos}%)` }} />
-      )}
-      {/* Watermark glyph */}
-      <div className="absolute right-2 bottom-2 pointer-events-none select-none"
-        style={{ color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}>
-        <MaterialIcon name={category.iconGlyph} size={130} />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center justify-center h-full p-5 text-center">
-        {spinPhase === 'spinning' ? (
-          <div className="flex flex-col items-center gap-3 animate-reelFade" key={contentKey}>
-            <div className="flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase"
-              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', backdropFilter: 'blur(4px)' }}>
-              <MaterialIcon name={category.iconGlyph} size={11} /> {topic?.subtype || 'Topic'}
-            </div>
-            <div className="text-[19px] font-extrabold text-white leading-tight px-2"
-              style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{topic?.name || '...'}</div>
-            <div className="w-12 h-1 rounded-full bg-white/20" />
-            <p className="text-white/45 text-[10px] tracking-widest uppercase">Spinning</p>
-          </div>
-        ) : topic ? (
-          <>
-            <div className="flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase mb-4"
-              style={{ background: 'rgba(255,255,255,0.15)', color: 'white', backdropFilter: 'blur(4px)' }}>
-              <MaterialIcon name={category.iconGlyph} size={11} /> {topic.subtype}
-            </div>
-            {spinPhase === 'opening' ? (
-              <div className="flex flex-col items-center gap-3">
-                <h2 className="text-[20px] font-extrabold text-white leading-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{topic.name}</h2>
-                <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
-                  style={{ borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'transparent' }} />
-                <p className="text-white/60 text-xs">Opening...</p>
-              </div>
-            ) : (
-              <>
-                <h2 className="text-[20px] font-extrabold text-white leading-tight mb-1.5 px-2"
-                  style={{ fontFamily: 'Geom, Inter, sans-serif', textShadow: '0 1px 6px rgba(0,0,0,0.12)' }}>{topic.name}</h2>
-                <p className="text-[12px] text-white/70 leading-relaxed line-clamp-3 px-1">{topic.teaser}</p>
-                <div className="mt-4 flex items-center gap-1.5 text-[10px] text-white/45 tracking-wide uppercase">
-                  <MaterialIcon name="touch_app" size={13} /> Tap to open
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <MaterialIcon name="casino" size={42} className="text-white/50 mb-3" />
-            <h2 className="text-xl font-bold text-white mb-1" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>{category.displayName}</h2>
-            <p className="text-[12px] text-white/55">Tap the dice to spin</p>
-          </>
-        )}
-      </div>
-    </button>
-  );
-};
-
-// ─── Peek Card (matching Android: 360×116dp near, 19dp corner, receding) ─
-const PeekCard: React.FC<{ slot: -1 | 1; topic: CurioTopic | null; category: CurioCategory; isSpinning: boolean }> = ({ slot, topic, category, isSpinning }) => {
-  const { isDark } = useTheme();
-  if (!topic) return null;
-  // Match Android near-peek: 360×116dp, corner 19dp
-  const w = 174; const h = 286; const corner = 26;
-  // Side cards peek from behind the central hero, like a cinematic carousel.
-  const xOff = slot === -1 ? -172 : 172;
-
-  const [r, g, b] = hexToRgb(category.accent);
-  const surfaceRgb = isDark ? [26, 26, 46] : [247, 240, 245];
-  // Level-darkened: near peeks step one shade down from the hero (0.40 blend)
-  const depth = 0.40;
-  const dr = Math.round(r * (1 - depth) + surfaceRgb[0] * depth);
-  const dg = Math.round(g * (1 - depth) + surfaceRgb[1] * depth);
-  const db = Math.round(b * (1 - depth) + surfaceRgb[2] * depth);
-  // Subtle second stop for gradient depth
-  const dr2 = Math.round(dr * 0.78 + surfaceRgb[0] * 0.22);
-  const dg2 = Math.round(dg * 0.78 + surfaceRgb[1] * 0.22);
-  const db2 = Math.round(db * 0.78 + surfaceRgb[2] * 0.22);
-
-  return (
-    <div className="absolute left-1/2 flex items-center overflow-hidden"
-      style={{
-        width: w, height: h, borderRadius: corner,
-        top: '50%',
-        left: `calc(50% + ${xOff}px)`,
-        transform: 'translate(-50%, -50%) scale(.88)',
-        background: `linear-gradient(180deg, rgb(${dr},${dg},${db}), rgb(${dr2},${dg2},${db2}))`,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        border: isDark ? `1px solid ${category.accent}18` : `1px solid ${category.accent}10`,
-        opacity: isSpinning ? 0.35 : 0.55,
-        transition: 'opacity 0.35s ease',
-        zIndex: slot === -1 ? 2 : 5,
-      }}>
-      {/* Left accent strip */}
-      <div className="absolute left-[12px] top-0 bottom-0 w-[3px] rounded-full" style={{ background: category.accent, opacity: 0.18 }} />
-      <div className="flex items-center gap-3 px-5 flex-1 min-w-0 pl-7">
-        <MaterialIcon name={category.iconGlyph} size={24} className="flex-shrink-0"
-          style={{ color: isDark ? 'rgba(255,255,255,0.42)' : 'rgba(59,10,23,0.38)' }} />
-        <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-semibold truncate leading-tight"
-            style={{ color: isDark ? 'rgba(255,255,255,0.68)' : 'rgba(59,10,23,0.68)' }}>{topic.name}</div>
-          <div className="text-[12px] truncate mt-0.5"
-            style={{ color: isDark ? 'rgba(255,255,255,0.30)' : 'rgba(59,10,23,0.28)' }}>{topic.subtype}</div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Orbit Ring ───────────────────────────────────────────────────────
-const OrbitRing: React.FC<{ active: boolean; color: string }> = ({ active, color }) => {
-  const [rotation, setRotation] = useState(0);
-  const frameRef = useRef<number>(0);
-  useEffect(() => {
-    if (!active) { setRotation(0); return; }
-    let last = performance.now();
-    const tick = (now: number) => { setRotation(r => (r + (now - last) * 0.15) % 360); last = now; frameRef.current = requestAnimationFrame(tick); };
-    frameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [active]);
-  return (
-    <div className="absolute inset-0 pointer-events-none" style={{ transform: `rotate(${rotation}deg)` }}>
-      {Array.from({ length: ORBIT_DOTS }).map((_, i) => {
-        const a = (i / ORBIT_DOTS) * Math.PI * 2;
-        return <div key={i} className="absolute rounded-full"
-          style={{ left: `${50 + Math.cos(a) * 47}%`, top: `${50 + Math.sin(a) * 47}%`,
-            width: active ? 4 : 2.5, height: active ? 4 : 2.5, transform: 'translate(-50%,-50%)',
-            background: color, opacity: active ? 0.6 : 0.08,
-            animation: active ? `curio-orbit-pulse 1.3s ease-in-out ${i * 0.09}s infinite` : 'none' }} />;
-      })}
-    </div>
-  );
-};
-
-// ─── Spin Button (solid opaque fill, orbit ring wraps around it) ──────
-const SpinButton: React.FC<{ isSpinning: boolean; hasLanded: boolean; onClick: () => void; color: string }> = ({ isSpinning, hasLanded, onClick, color }) => {
-  const { handlers, pressStyle } = usePressable(0.88);
-  const btnSize = isSpinning ? 90 : 108;
-  const diceSize = isSpinning ? 48 : 56;
-  const [r, g, b] = hexToRgb(color);
-  const darkR = Math.round(r * 0.55);
-  const darkG = Math.round(g * 0.55);
-  const darkB = Math.round(b * 0.55);
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: btnSize + 28, height: btnSize + 28 }}>
-      {/* Orbit ring — wraps the spin button, matching Android */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
-        <OrbitRing active={isSpinning} color={color} />
-      </div>
-      {/* Glow pulse when landed */}
-      {hasLanded && !isSpinning && (
-        <div className="absolute inset-0 rounded-full pointer-events-none"
-          style={{ zIndex: 0, boxShadow: `0 0 22px ${color}44, 0 0 48px ${color}20`, animation: 'curio-breathe 1.8s ease-in-out infinite' }} />
-      )}
-      {/* The button itself */}
-      <button onClick={onClick} disabled={isSpinning} {...handlers}
-        className="relative flex items-center justify-center rounded-full touch-action-manipulation"
-        style={{ width: btnSize, height: btnSize, zIndex: 1,
-          background: `radial-gradient(circle at 40% 32%, rgb(${Math.round(r*1.15)},${Math.round(g*1.15)},${Math.round(b*1.15)}) 0%, ${color} 50%, rgb(${darkR},${darkG},${darkB}) 100%)`,
-          boxShadow: isSpinning ? `0 4px 16px ${color}40, inset 0 0 0 1px rgba(255,255,255,0.08)`
-            : `0 8px 32px ${color}50, 0 2px 8px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(255,255,255,0.12)`,
-          cursor: isSpinning ? 'default' : 'pointer', ...pressStyle }}>
-        <CssDice size={diceSize} tumbling={isSpinning} ink="white" />
-      </button>
-    </div>
-  );
-};
-
-// ─── Bottom Control Pill (nav-pill style) ──────────────────────────
-// Matches Android's floating nav-bar look: capsule shape, calmed accent
-// active fill, elevated container. Expands to show label when active.
-const BottomPill: React.FC<{ icon: string; label: string; isActive: boolean; accent: string; onClick: () => void }> = ({ icon, label, isActive, accent, onClick }) => {
-  const { isDark } = useTheme();
-  const { handlers, pressStyle } = usePressable(0.96);
-  const containerBg = isDark ? 'rgba(30,30,50,0.92)' : 'rgba(255,253,249,0.92)';
-  return (
-    <button onClick={onClick} {...handlers}
-      className="flex items-center justify-center gap-2 rounded-full font-semibold text-sm touch-action-manipulation transition-all duration-300"
-      style={{
-        height: 52,
-        width: isActive ? 160 : 64,
-        background: isActive ? accent : containerBg,
-        color: isActive ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)',
-        boxShadow: isActive ? `0 4px 16px ${accent}44` : '0 2px 8px rgba(0,0,0,0.08)',
-        transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        ...pressStyle,
-      }}>
-      <MaterialIcon name={icon} size={22} />
-      {isActive && (
-        <span className="whitespace-nowrap" style={{
-          fontFamily: 'Changa One, Inter, sans-serif',
-          opacity: isActive ? 1 : 0,
-          transition: 'opacity 0.3s ease 0.1s',
-        }}>{label}</span>
-      )}
-    </button>
-  );
-};
-
-// ─── Filter Sheet ─────────────────────────────────────────────────────
-const FilterSheet: React.FC<{
-  isOpen: boolean; onClose: () => void; category: CurioCategory;
-  subtypes: string[]; sel: string | null; setSel: (s: string | null) => void;
-}> = ({ isOpen, onClose, category, subtypes, sel, setSel }) => {
-  const { isDark } = useTheme();
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-t-3xl p-5 max-h-[60vh] overflow-y-auto"
-        style={{ background: isDark ? '#1a1a2e' : 'white' }} onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Filter</h3>
-          <button onClick={onClose} className="text-2xl" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)' }}>×</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => { setSel(null); onClose(); }} className="px-3.5 py-2 rounded-full text-sm font-medium"
-            style={{ background: !sel ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-              color: !sel ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>All</button>
-          {subtypes.map(st => (
-            <button key={st} onClick={() => { setSel(st === sel ? null : st); onClose(); }} className="px-3.5 py-2 rounded-full text-sm font-medium"
-              style={{ background: sel === st ? category.accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                color: sel === st ? 'white' : isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>{st}</button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Category Picker Sheet ────────────────────────────────────────────
-const CatPickerSheet: React.FC<{ isOpen: boolean; onClose: () => void; activeId: string; onSelect: (c: CurioCategory) => void }> = ({ isOpen, onClose, activeId, onSelect }) => {
-  const { isDark } = useTheme();
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-t-3xl p-5 max-h-[65vh] overflow-y-auto"
-        style={{ background: isDark ? '#1a1a2e' : 'white' }} onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold mb-4" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>What are we exploring?</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {ALL_CATEGORIES.filter(c => c.isReady).map(cat => (
-            <button key={cat.id} onClick={() => { onSelect(cat); onClose(); }}
-              className="flex items-center gap-2.5 p-3 rounded-2xl text-left"
-              style={{ background: cat.id === activeId ? `${cat.accent}18` : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                border: cat.id === activeId ? `1px solid ${cat.accent}40` : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` }}>
-              <MaterialIcon name={cat.iconGlyph} size={28} style={{ color: cat.accent }} />
-              <span className="text-sm font-semibold" style={{ color: getTextColor(isDark) }}>{cat.displayName}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
 export const SpinScreen: React.FC = () => {
   const navigate = useNavigate();
   const { categorySlug } = useParams();
   const { isDark, isAmoled } = useTheme();
   const [questSystem] = useState(() => getQuestSystem());
-
-  const [activeCategory, setActiveCategory] = useState<CurioCategory>(ALL_CATEGORIES[0]);
-  const [deckHand, setDeckHand] = useState<CurioTopic[]>([]);
-  const [deckIndex, setDeckIndex] = useState(0);
-  const [currentTopic, setCurrentTopic] = useState<CurioTopic | null>(null);
-  const [spinPhase, setSpinPhase] = useState<'idle' | 'spinning' | 'landed' | 'opening'>('idle');
-  const [confettiTrigger, setConfettiTrigger] = useState(0);
-
-  const [showFilter, setShowFilter] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<CurioCategory>(() =>
+    (categorySlug && getCategoryBySlug(categorySlug)) || ALL_CATEGORIES[0]
+  );
+  const [topics, setTopics] = useState<CurioTopic[]>([]);
+  const [topic, setTopic] = useState<CurioTopic | null>(null);
+  const [previousId, setPreviousId] = useState<string | null>(null);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
-  const [subtypes, setSubtypes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [drawing, setDrawing] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [drawCount, setDrawCount] = useState(0);
 
-  useEffect(() => { if (categorySlug) { const c = getCategoryBySlug(categorySlug); if (c) setActiveCategory(c); } }, [categorySlug]);
-
-  const buildHand = useCallback(async (catId: string) => {
-    const topics: CurioTopic[] = [];
-    for (let i = 0; i < 4; i++) { const t = await getRandomTopic(catId as any); if (t && !topics.find(x => x.id === t.id)) topics.push(t); }
-    setSubtypes(Array.from(new Set(topics.map(t => t.subtype))).sort().slice(0, 20));
-    return topics;
-  }, []);
-
-  useEffect(() => { setDeckIndex(0); setCurrentTopic(null); setSpinPhase('idle'); setSelectedSubtype(null); buildHand(activeCategory.id).then(setDeckHand); }, [activeCategory.id, buildHand]);
+  const dark = isDark || isAmoled;
+  const ink = getTextColor(isDark);
+  const muted = dark ? 'rgba(245,243,244,.58)' : 'rgba(23,27,38,.58)';
+  const subtle = dark ? 'rgba(245,243,244,.36)' : 'rgba(23,27,38,.38)';
+  const surface = dark ? '#161A1D' : '#FFFFFF';
+  const border = dark ? 'rgba(255,255,255,.09)' : 'rgba(23,27,38,.09)';
 
   useEffect(() => {
-    if (spinPhase !== 'landed' || !currentTopic) return;
-    const t = setTimeout(() => { setSpinPhase('opening'); setTimeout(() => navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`), 400); }, 1200);
-    return () => clearTimeout(t);
-  }, [spinPhase, currentTopic, navigate]);
+    if (!categorySlug) return;
+    const category = getCategoryBySlug(categorySlug);
+    if (category) setActiveCategory(category);
+  }, [categorySlug]);
 
-  const handleSpin = useCallback(async () => {
-    if (spinPhase === 'spinning' || spinPhase === 'opening') return;
-    setSpinPhase('spinning'); setCurrentTopic(null);
-    const dur = SPIN_MIN + Math.random() * (SPIN_MAX - SPIN_MIN);
-    const start = performance.now();
-    const reel = () => { const e = performance.now() - start; if (e >= dur) return; const p = e / dur; setTimeout(() => { setDeckIndex(i => (i + 1) % (deckHand.length || 1)); reel(); }, 150 + 320 * Math.sin(p * Math.PI / 2)); };
-    reel();
-    await new Promise(r => setTimeout(r, dur));
-    const topic = await getRandomTopic(activeCategory.id as any);
-    if (topic) { setDeckHand(p => [topic, ...p.filter(t => t.id !== topic.id)].slice(0, 4)); setDeckIndex(0); }
-    setCurrentTopic(topic); setSpinPhase('landed'); setConfettiTrigger(c => c + 1);
-    if (topic) questSystem.onSpin(activeCategory.id);
-  }, [spinPhase, deckHand, activeCategory, questSystem, navigate]);
+  useEffect(() => {
+    let current = true;
+    setLoading(true);
+    setTopics([]);
+    setTopic(null);
+    setPreviousId(null);
+    setSelectedSubtype(null);
+    loadTopicsForCategory(activeCategory.id).then(result => {
+      if (!current) return;
+      setTopics(result);
+      setLoading(false);
+    });
+    return () => { current = false; };
+  }, [activeCategory.id]);
 
-  const handleTopicOpen = () => {
-    if (currentTopic && (spinPhase === 'landed' || spinPhase === 'idle')) { setSpinPhase('opening'); setTimeout(() => navigate(`/reveal/${currentTopic.categoryId.toLowerCase()}/${currentTopic.id}`), 400); }
+  const subtypes = useMemo(
+    () => Array.from(new Set(topics.map(item => item.subtype).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [topics],
+  );
+  const eligibleTopics = useMemo(
+    () => selectedSubtype ? topics.filter(item => item.subtype === selectedSubtype) : topics,
+    [topics, selectedSubtype],
+  );
+
+  const drawDiscovery = useCallback(() => {
+    if (drawing || loading || eligibleTopics.length === 0) return;
+    setDrawing(true);
+    const pool = eligibleTopics.length > 1
+      ? eligibleTopics.filter(item => item.id !== (topic?.id || previousId))
+      : eligibleTopics;
+    const choice = pool[Math.floor(Math.random() * pool.length)] || eligibleTopics[0];
+    window.setTimeout(() => {
+      setPreviousId(topic?.id || previousId);
+      setTopic(choice);
+      setDrawCount(count => count + 1);
+      setDrawing(false);
+      questSystem.onSpin(activeCategory.id);
+    }, 360);
+  }, [drawing, loading, eligibleTopics, topic, previousId, questSystem, activeCategory.id]);
+
+  const chooseCategory = (category: CurioCategory) => {
+    setActiveCategory(category);
+    setShowCategories(false);
   };
 
-  const getFanTopic = (slot: number): CurioTopic | null => {
-    if (deckHand.length === 0) return null;
-    return deckHand[((deckIndex + slot) % deckHand.length + deckHand.length) % deckHand.length] || null;
+  const chooseSubtype = (subtype: string | null) => {
+    setSelectedSubtype(subtype);
+    setTopic(null);
+    setPreviousId(null);
+    setShowFilters(false);
+  };
+
+  const openTopic = () => {
+    if (topic) navigate(`/reveal/${topic.categoryId.toLowerCase()}/${topic.id}`);
   };
 
   return (
-    <div className="curio-shuffle-screen min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-shuffle-screen curio-draw-screen min-h-screen relative pb-32"
+      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop activeCatId={activeCategory.id} />
 
-      <div className="curio-shuffle-heading px-5 pt-8 pb-2 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[.24em] opacity-55">The Curio deck</p>
-        <h1 className="mt-2 text-2xl font-extrabold tracking-tight" style={{ color: getTextColor(isDark), fontFamily: "Geom, Inter, sans-serif" }}>A new thread to follow.</h1>
-        <p className="mt-1 text-xs opacity-55">One roll. One unexpected discovery.</p>
-      </div>
-
-      {/* ── 1. Cinematic hero carousel ───────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '104px' }}>
-        <div className="relative flex items-center justify-center" style={{ width: 380, height: 444 }}>
-          {/* Top peek (slot -1) fanned above hero */}
-          <PeekCard slot={-1} topic={getFanTopic(-1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
-          {/* Hero card (slot 0) at center, z-index above peeks */}
-          <div className="relative" style={{ zIndex: 10 }}>
-            <ConfettiBurst trigger={confettiTrigger} color={activeCategory.accent} />
-            <HeroTicket topic={currentTopic || getFanTopic(0)} category={activeCategory}
-              isSpinning={spinPhase === 'spinning'} spinPhase={spinPhase} onClick={handleTopicOpen} />
+      <div className="relative z-10 max-w-2xl mx-auto px-5 pt-7 sm:pt-10">
+        <header className="mb-7">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase" style={{ color: muted }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT }} />
+              Curio / Random discovery
+            </div>
+            <span className="text-[10px] uppercase tracking-widest" style={{ color: subtle }}>02 — Shuffle</span>
           </div>
-          {/* Bottom peek (slot +1) fanned below hero */}
-          <PeekCard slot={1} topic={getFanTopic(1)} category={activeCategory} isSpinning={spinPhase === 'spinning'} />
-        </div>
-        {/* ── 2. Spin Button ─────────────────────────────────────────── */}
-        <div className="mb-4">
-          <SpinButton isSpinning={spinPhase === 'spinning'} hasLanded={spinPhase === 'landed'} onClick={handleSpin} color={activeCategory.accent} />
-        </div>
+          <h1 className="mt-5 text-[34px] sm:text-[40px] leading-none font-extrabold tracking-tight"
+            style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>
+            Follow a thread<span style={{ color: ACCENT }}>.</span>
+          </h1>
+          <p className="mt-3 max-w-md text-sm leading-relaxed" style={{ color: muted }}>
+            Let curiosity choose the subject. One small discovery can lead somewhere unexpected.
+          </p>
+        </header>
+
+        <section className="rounded-2xl p-4 mb-5" style={{ background: surface, border: `1px solid ${border}` }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-[.18em]" style={{ color: ACCENT }}>Your discovery space</div>
+              <div className="mt-1 text-sm font-bold truncate" style={{ color: ink }}>{activeCategory.displayName}</div>
+              <div className="mt-0.5 text-[11px]" style={{ color: muted }}>
+                {loading ? 'Preparing topics…' : `${eligibleTopics.length.toLocaleString()} topics in this draw`}
+              </div>
+            </div>
+            <button onClick={() => setShowCategories(true)}
+              className="shrink-0 flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold"
+              style={{ background: dark ? 'rgba(255,255,255,.07)' : 'rgba(23,27,38,.045)', color: ink, border: `1px solid ${border}` }}>
+              <MaterialIcon name="layers" size={16} /> Change lane
+            </button>
+          </div>
+          <div className="mt-4 pt-3 flex items-center justify-between gap-3" style={{ borderTop: `1px solid ${border}` }}>
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-[.15em] font-bold" style={{ color: muted }}>Topic filter</div>
+              <div className="text-xs mt-1 truncate" style={{ color: ink }}>{selectedSubtype || 'All types in this lane'}</div>
+            </div>
+            <button onClick={() => setShowFilters(true)} disabled={loading || subtypes.length === 0}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold disabled:opacity-40"
+              style={{ color: ACCENT, background: 'rgba(218,30,55,.08)' }}>
+              <MaterialIcon name="sliders_horizontal" size={15} /> Filter
+            </button>
+          </div>
+        </section>
+
+        <section className="curio-draw-stage" aria-live="polite">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="text-[10px] uppercase tracking-[.18em] font-bold" style={{ color: muted }}>The next discovery</span>
+            <span className="text-[10px] tabular-nums" style={{ color: subtle }}>{drawCount > 0 ? `Draw ${drawCount}` : 'Ready when you are'}</span>
+          </div>
+
+          <div key={topic?.id || 'empty'} className="curio-draw-card relative overflow-hidden rounded-[24px] p-6 sm:p-8"
+            style={{ background: surface, border: `1px solid ${border}`, boxShadow: '0 20px 50px -38px rgba(0,0,0,.55)' }}>
+            <div className="absolute -right-10 -top-12 w-44 h-44 rounded-full pointer-events-none"
+              style={{ background: `radial-gradient(circle, ${activeCategory.accent}20, transparent 70%)` }} />
+            <div className="absolute right-4 bottom-2 pointer-events-none" style={{ color: dark ? 'rgba(255,255,255,.045)' : 'rgba(23,27,38,.035)' }}>
+              <MaterialIcon name={activeCategory.iconGlyph} size={150} />
+            </div>
+            <div className="relative z-10 min-h-[230px] flex flex-col">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[.12em]"
+                  style={{ background: `${activeCategory.accent}18`, color: activeCategory.accent }}>
+                  <MaterialIcon name={activeCategory.iconGlyph} size={13} /> {activeCategory.displayName}
+                </span>
+                {topic && <span className="text-[10px] uppercase tracking-widest" style={{ color: subtle }}>{topic.subtype}</span>}
+              </div>
+
+              {drawing ? (
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="curio-draw-skeleton w-3/4 h-7 rounded-lg" />
+                  <div className="curio-draw-skeleton w-full h-3 rounded mt-4" />
+                  <div className="curio-draw-skeleton w-5/6 h-3 rounded mt-2" />
+                  <p className="mt-5 text-[10px] uppercase tracking-[.2em]" style={{ color: muted }}>Finding a thread…</p>
+                </div>
+              ) : topic ? (
+                <div className="flex-1 flex flex-col justify-center py-8">
+                  <div className="text-[10px] font-bold uppercase tracking-[.18em] mb-3" style={{ color: ACCENT }}>A little something to explore</div>
+                  <h2 className="text-[28px] sm:text-[34px] font-extrabold leading-tight tracking-tight"
+                    style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>{topic.name}</h2>
+                  <p className="mt-3 text-sm leading-relaxed max-w-md" style={{ color: muted }}>
+                    {topic.teaser || topic.actionPrompt.instruction || 'Take a moment and see where this subject leads.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col justify-center py-8">
+                  <div className="text-[10px] font-bold uppercase tracking-[.18em] mb-3" style={{ color: muted }}>A blank page, for now</div>
+                  <h2 className="text-[27px] sm:text-[32px] font-extrabold leading-tight tracking-tight"
+                    style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>Something new is waiting.</h2>
+                  <p className="mt-3 text-sm leading-relaxed max-w-md" style={{ color: muted }}>
+                    Draw a topic from {activeCategory.displayName.toLowerCase()} and give your curiosity somewhere to go.
+                  </p>
+                </div>
+              )}
+
+              <div className="pt-4 flex items-center justify-between gap-3" style={{ borderTop: `1px solid ${border}` }}>
+                <span className="text-[10px] uppercase tracking-[.13em]" style={{ color: subtle }}>
+                  {topic ? 'Picked for you, at random' : 'No pressure. Just curiosity.'}
+                </span>
+                {topic && <span className="text-[10px] font-bold" style={{ color: activeCategory.accent }}>DISCOVERY FOUND</span>}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-col sm:flex-row gap-3">
+            <button onClick={drawDiscovery} disabled={loading || drawing || eligibleTopics.length === 0}
+              className="curio-draw-primary flex-1 h-14 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold text-white disabled:opacity-45"
+              style={{ background: 'linear-gradient(135deg, #E12640, #A9132B)', boxShadow: '0 12px 26px -15px rgba(218,30,55,.7)' }}>
+              <MaterialIcon name={drawing ? 'hourglass_top' : 'auto_awesome'} size={19} />
+              {loading ? 'Loading topics…' : drawing ? 'Finding a discovery…' : topic ? 'Find another discovery' : 'Surprise me'}
+            </button>
+            {topic && (
+              <button onClick={openTopic}
+                className="h-14 px-5 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold"
+                style={{ color: ink, background: dark ? 'rgba(255,255,255,.07)' : '#FFFFFF', border: `1px solid ${border}` }}>
+                Explore topic <MaterialIcon name="arrow_up_right" size={17} />
+              </button>
+            )}
+          </div>
+          <p className="mt-3 text-center text-[10px]" style={{ color: subtle }}>
+            {selectedSubtype ? `Only ${selectedSubtype.toLowerCase()} topics will be drawn.` : 'Each draw avoids repeating the previous topic when possible.'}
+          </p>
+        </section>
       </div>
 
-      {/* ── 3. Floating Bottom Bar: Categories · Filter ─────────────── */}
-      <div className="curio-shuffle-controls fixed bottom-[92px] left-0 right-0 z-40 flex justify-center gap-3 px-4"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
-        <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />
-      </div>
+      {showCategories && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-5" onClick={() => setShowCategories(false)}>
+          <div className="w-full max-w-xl max-h-[82dvh] overflow-hidden rounded-t-[24px] sm:rounded-[24px] p-5"
+            style={{ background: surface, border: `1px solid ${border}` }} onClick={event => event.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div><div className="text-[10px] uppercase tracking-[.18em] font-bold" style={{ color: ACCENT }}>Discovery lanes</div><h3 className="text-lg font-bold mt-1" style={{ color: ink }}>Choose a subject area</h3></div>
+              <button onClick={() => setShowCategories(false)} aria-label="Close categories" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: dark ? 'rgba(255,255,255,.08)' : 'rgba(23,27,38,.06)', color: ink }}><MaterialIcon name="close" size={18} /></button>
+            </div>
+            <div className="overflow-y-auto max-h-[65dvh] grid grid-cols-2 gap-2 pb-2">
+              {ALL_CATEGORIES.filter(category => category.isReady && !category.isHidden).map(category => (
+                <button key={category.id} onClick={() => chooseCategory(category)}
+                  className="flex items-center gap-2.5 p-3 rounded-xl text-left"
+                  style={{ background: activeCategory.id === category.id ? `${category.accent}18` : (dark ? 'rgba(255,255,255,.045)' : 'rgba(23,27,38,.035)'), border: `1px solid ${activeCategory.id === category.id ? `${category.accent}55` : border}` }}>
+                  <MaterialIcon name={category.iconGlyph} size={20} style={{ color: category.accent }} />
+                  <span className="text-xs font-semibold" style={{ color: ink }}>{category.displayName}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-      <FilterSheet isOpen={showFilter} onClose={() => setShowFilter(false)} category={activeCategory} subtypes={subtypes} sel={selectedSubtype} setSel={setSelectedSubtype} />
-      <CatPickerSheet isOpen={showPicker} onClose={() => setShowPicker(false)} activeId={activeCategory.id} onSelect={setActiveCategory} />
+      {showFilters && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-5" onClick={() => setShowFilters(false)}>
+          <div className="w-full max-w-lg max-h-[78dvh] overflow-hidden rounded-t-[24px] sm:rounded-[24px] p-5"
+            style={{ background: surface, border: `1px solid ${border}` }} onClick={event => event.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div><div className="text-[10px] uppercase tracking-[.18em] font-bold" style={{ color: ACCENT }}>Refine the draw</div><h3 className="text-lg font-bold mt-1" style={{ color: ink }}>Choose a topic type</h3></div>
+              <button onClick={() => setShowFilters(false)} aria-label="Close filters" className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: dark ? 'rgba(255,255,255,.08)' : 'rgba(23,27,38,.06)', color: ink }}><MaterialIcon name="close" size={18} /></button>
+            </div>
+            <div className="overflow-y-auto max-h-[58dvh] flex flex-wrap gap-2 pb-2">
+              <button onClick={() => chooseSubtype(null)} className="px-3.5 py-2.5 rounded-xl text-xs font-semibold"
+                style={{ background: !selectedSubtype ? ACCENT : (dark ? 'rgba(255,255,255,.06)' : 'rgba(23,27,38,.045)'), color: !selectedSubtype ? '#FFFFFF' : ink }}>All types</button>
+              {subtypes.map(subtype => (
+                <button key={subtype} onClick={() => chooseSubtype(subtype)} className="px-3.5 py-2.5 rounded-xl text-xs font-semibold"
+                  style={{ background: selectedSubtype === subtype ? ACCENT : (dark ? 'rgba(255,255,255,.06)' : 'rgba(23,27,38,.045)'), color: selectedSubtype === subtype ? '#FFFFFF' : ink }}>{subtype}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
-        @keyframes curio-dice-tumble { 0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg)} 25%{transform:rotateX(90deg) rotateY(45deg) rotateZ(180deg)} 50%{transform:rotateX(180deg) rotateY(90deg) rotateZ(360deg)} 75%{transform:rotateX(270deg) rotateY(135deg) rotateZ(540deg)} 100%{transform:rotateX(360deg) rotateY(180deg) rotateZ(720deg)} }
-        @keyframes curio-dice-breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-        @keyframes curio-orbit-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.4} 50%{transform:translate(-50%,-50%) scale(1.6);opacity:0.95} }
-        @keyframes curio-confetti-fly { 0%{opacity:1;transform:translate(0,0) rotate(0deg)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot))} }
-        @keyframes reelFade { 0%{opacity:0.5;transform:translateY(4px)} 100%{opacity:1;transform:translateY(0)} }
-        .animate-reelFade { animation: reelFade 0.35s ease-out; }
+        .curio-draw-card { animation: curio-draw-enter 360ms cubic-bezier(.2,.75,.25,1) both; }
+        @keyframes curio-draw-enter { from { opacity: .55; transform: translateY(9px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .curio-draw-skeleton { background: linear-gradient(90deg, rgba(120,120,120,.10), rgba(120,120,120,.18), rgba(120,120,120,.10)); background-size: 200% 100%; animation: curio-draw-shimmer 1.1s linear infinite; }
+        @keyframes curio-draw-shimmer { to { background-position: -200% 0; } }
+        @media (prefers-reduced-motion: reduce) { .curio-draw-card, .curio-draw-skeleton { animation: none; } }
       `}</style>
     </div>
   );
