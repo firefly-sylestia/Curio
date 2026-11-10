@@ -6,6 +6,7 @@ import { ThemeProvider } from './theme/ThemeContext';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './screens/HomeScreen';
 import AccountScreen from './screens/AccountScreen';
+import HelpSupportScreen from './screens/HelpSupportScreen';
 import { SpinScreen } from './screens/SpinScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TopicRevealScreen } from './screens/TopicRevealScreen';
@@ -44,6 +45,7 @@ const App: React.FC = () => {
           <Route path="/cabinet" element={<Navigate to="/profile" replace />} />
           <Route path="/profile" element={<AccountScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/support" element={<HelpSupportScreen />} />
           <Route path="/reveal/:categorySlug/:topicName" element={<TopicRevealScreen />} />
           <Route path="/detail/:entryId" element={<EntryDetailScreen />} />
           <Route path="/capture/:categorySlug/:topicName" element={<SaveCaptureScreen />} />

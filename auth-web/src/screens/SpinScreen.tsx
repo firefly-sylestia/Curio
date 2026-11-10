@@ -138,14 +138,29 @@ export const SpinScreen: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              background: surface,
-              border: `1px solid ${border}`,
-              boxShadow: dark ? '0 18px 44px -34px rgba(0,0,0,.9)' : '0 18px 44px -34px rgba(35,24,28,.28)',
+              background: dark
+                ? `linear-gradient(138deg, ${surface} 0%, ${activeCategory.accent}16 58%, ${ACCENT}0B 100%)`
+                : `linear-gradient(138deg, #FFFFFF 0%, ${activeCategory.accent}0D 62%, #F9F0F2 100%)`,
+              backdropFilter: 'blur(18px)',
+              WebkitBackdropFilter: 'blur(18px)',
+              border: `1px solid ${activeCategory.accent}35`,
+              boxShadow: dark ? `0 24px 70px -38px ${activeCategory.accent}55, inset 0 1px 0 rgba(255,255,255,.055)` : `0 24px 64px -38px ${activeCategory.accent}55, inset 0 1px 0 rgba(255,255,255,.9)`,
             }}>
-            <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: activeCategory.accent, opacity: .82 }} />
-            <div className="absolute right-6 top-6 pointer-events-none" aria-hidden="true"
-              style={{ color: activeCategory.accent, opacity: .16 }}>
-              <MaterialIcon name={activeCategory.iconGlyph} size={64} />
+            <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+              <div className="absolute -top-28 -right-20 h-72 w-72 rounded-full blur-3xl"
+                style={{ background: activeCategory.accent, opacity: dark ? .22 : .16 }} />
+              <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full blur-3xl"
+                style={{ background: ACCENT, opacity: dark ? .12 : .09 }} />
+              <div className="absolute right-5 top-2 select-none"
+                style={{ color: activeCategory.accent, opacity: dark ? .13 : .105, transform: 'rotate(-9deg)' }}>
+                <MaterialIcon name={activeCategory.iconGlyph} size={150} />
+              </div>
+              <div className="absolute right-28 bottom-12 select-none"
+                style={{ color: activeCategory.accent, opacity: dark ? .055 : .045, transform: 'rotate(12deg)' }}>
+                <MaterialIcon name={activeCategory.iconGlyph} size={76} />
+              </div>
+              <div className="absolute left-0 top-0 bottom-0 w-1"
+                style={{ background: 'linear-gradient(180deg, ' + activeCategory.accent + ', ' + ACCENT + '88, transparent)', opacity: .9 }} />
             </div>
             <div className="relative z-10 flex items-center justify-between gap-3">
               <span className="text-[11px] font-bold tracking-[.12em] uppercase"

@@ -439,10 +439,10 @@ const AccountScreen: React.FC = () => {
             <MaterialIcon name="chevron_right" size={18} />
           </a>
           <div style={{ height: 1, background: border }} />
-          <a href="/support" className="flex items-center gap-3 p-4">
+          <button onClick={() => navigate('/support')} className="w-full flex items-center gap-3 p-4 text-left">
             <span className="flex-1"><strong className="block text-sm">Help & support</strong><small className="text-xs" style={{ color: muted }}>Account and sign-in help</small></span>
             <MaterialIcon name="chevron_right" size={18} />
-          </a>
+          </button>
         </section>
       </div>
     </main>
