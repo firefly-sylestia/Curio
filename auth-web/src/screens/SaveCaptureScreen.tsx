@@ -1,602 +1,39 @@
-// Curio Web App - Save Capture Screen
-// Matches Android: mood chips, real voice recording (MediaRecorder), waveform, paper cards
+// Curio Web App - Journal
+// One quiet page for writing freely and attaching photographs.
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
-import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
-import type { CurioCategory, CurioTopic, CaptureFormat, CaptureData, JournalMood } from '../types';
-import { JOURNAL_MOODS } from '../types';
+import { MaterialIcon } from '../components/SharedComponents';
+import type { CurioCategory, CurioTopic } from '../types';
 import { captureRepository, generateId, serializeTags } from '../db/database';
-import { ScreenEntrance } from '../animations';
 
-// ─── Paper ink & font ────────────────────────────────────────────────
-const paperFont = "'Patrick Hand', cursive";
-const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
-const paperInputClass = "w-full bg-transparent resize-none outline-none placeholder:opacity-30";
-const CAPTURE_DRAFT_KEY = '__curioCaptureDraft';
-const setCaptureDraft = (format: CaptureFormat, data: CaptureData) => {
-  (window as any)[CAPTURE_DRAFT_KEY] = { format, data };
-};
+const ACCENT = '#DA1E37';
+const MAX_IMAGE_EDGE = 1800;
+const MAX_PHOTOS = 8;
 
-// ─── Paper color palette ─────────────────────────────────────────────
-const PAPER_COLORS: Record<string, { bg: string; bgDark: string; ink: string; inkDark: string }> = {
-  cream: { bg: '#FDF8F0', bgDark: '#2A2520', ink: '#2D140F', inkDark: '#E4D2BC' },
-  white: { bg: '#FFFFFF', bgDark: '#1E1E24', ink: '#1A1A1A', inkDark: '#E0E0E0' },
-  kraft: { bg: '#E8D5B7', bgDark: '#3A3028', ink: '#2D140F', inkDark: '#DBC8A8' },
-};
-
-// ─── Format Glyphs ───────────────────────────────────────────────────
-const FORMAT_OPTIONS: Array<{ id: CaptureFormat; label: string; icon: string }> = [
-  { id: 'SoundBite', label: 'Sound Bite', icon: 'mic' },
-  { id: 'ReelNotes', label: 'Reel Notes', icon: 'movie' },
-  { id: 'Marginalia', label: 'Marginalia', icon: 'edit_note' },
-  { id: 'GalleryWall', label: 'Gallery Wall', icon: 'image' },
-  { id: 'FieldNotes', label: 'Field Notes', icon: 'description' },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// WAVEFORM — live animated bars while recording, static after stop
-// ═══════════════════════════════════════════════════════════════════════════
-
-const LiveWaveform: React.FC<{ isRecording: boolean; isPaused: boolean; accent: string; barCount?: number }> = ({ isRecording, isPaused, accent, barCount = 40 }) => {
-  const [bars, setBars] = useState<number[]>(() => Array.from({ length: barCount }, () => 0.12 + Math.random() * 0.08));
-  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-
-  useEffect(() => {
-    if (isRecording && !isPaused) {
-      intervalRef.current = setInterval(() => {
-        setBars(prev => prev.map((b, i) => {
-          const target = 0.1 + Math.random() * 0.8;
-          return b + (target - b) * (0.3 + (i / barCount) * 0.4);
-        }));
-      }, 80);
-    } else if (!isRecording) {
-      clearInterval(intervalRef.current);
-      setBars(prev => prev.map(() => 0.12 + Math.random() * 0.08));
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [isRecording, isPaused, barCount]);
-
-  return (
-    <div className="flex items-end justify-center gap-[2px] h-12">
-      {bars.map((h, i) => (
-        <div key={i} className="flex-1 rounded-full transition-all duration-75"
-          style={{
-            height: `${Math.max(4, h * 100)}%`,
-            background: accent,
-            opacity: isRecording && !isPaused ? 0.7 + h * 0.3 : 0.25,
-            minWidth: 2,
-          }} />
-      ))}
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// VOICE RECORDER — MediaRecorder API with timer, waveform, controls
-// ═══════════════════════════════════════════════════════════════════════════
-
-type RecorderState = 'IDLE' | 'RECORDING' | 'PAUSED' | 'STOPPED';
-
-const VoiceRecorder: React.FC<{
-  accent: string; isDark: boolean;
-  onStateChange: (state: RecorderState) => void;
-  onAudioReady: (data: { blob: Blob; dataUrl: string; durationSeconds: number; fileSizeBytes: number }) => void;
-  initialState?: RecorderState;
-}> = ({ accent, isDark, onStateChange, onAudioReady, initialState = 'IDLE' }) => {
-  const [state, setState] = useState<RecorderState>(initialState);
-  const [seconds, setSeconds] = useState(0);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-  const startTimeRef = useRef(0);
-  const pausedMsRef = useRef(0);
-
-  const setRecorderState = useCallback((s: RecorderState) => { setState(s); onStateChange(s); }, [onStateChange]);
-
-  // Timer
-  useEffect(() => {
-    if (state === 'RECORDING') {
-      startTimeRef.current = Date.now();
-      timerRef.current = setInterval(() => {
-        setSeconds(Math.floor((Date.now() - startTimeRef.current + pausedMsRef.current) / 1000));
-      }, 200);
-    } else {
-      clearInterval(timerRef.current);
-      if (state === 'PAUSED') pausedMsRef.current += Date.now() - startTimeRef.current;
-    }
-    return () => clearInterval(timerRef.current);
-  }, [state]);
-
-  const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm' });
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
-        const dataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
-        const dur = Math.floor((Date.now() - startTimeRef.current + pausedMsRef.current) / 1000);
-        onAudioReady({ blob, dataUrl, durationSeconds: dur, fileSizeBytes: blob.size });
-        setRecorderState('STOPPED');
-      };
-
-      mediaRecorder.start(250);
-      pausedMsRef.current = 0;
-      setSeconds(0);
-      setRecorderState('RECORDING');
-    } catch (err) {
-      console.error('Mic access denied:', err);
-    }
+const compressPhoto = (file: File): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onerror = () => reject(new Error('Could not read this photo.'));
+  reader.onload = () => {
+    const image = new Image();
+    image.onerror = () => reject(new Error('This photo could not be opened.'));
+    image.onload = () => {
+      const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(image.width, image.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) { resolve(String(reader.result)); return; }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.84));
+    };
+    image.src = String(reader.result);
   };
-
-  const pauseRecording = () => {
-    mediaRecorderRef.current?.pause();
-    setRecorderState('PAUSED');
-  };
-
-  const resumeRecording = () => {
-    mediaRecorderRef.current?.resume();
-    setRecorderState('RECORDING');
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current?.state !== 'inactive') {
-      mediaRecorderRef.current?.stop();
-    }
-  };
-
-  const discardRecording = () => {
-    clearInterval(timerRef.current);
-    mediaRecorderRef.current?.stream?.getTracks().forEach(t => t.stop());
-    chunksRef.current = [];
-    pausedMsRef.current = 0;
-    setSeconds(0);
-    setRecorderState('IDLE');
-  };
-
-  return (
-    <div className="space-y-4">
-      {/* Waveform + timer */}
-      <div className="relative">
-        <LiveWaveform isRecording={state === 'RECORDING'} isPaused={state === 'PAUSED'} accent={accent} />
-        {(state === 'RECORDING' || state === 'PAUSED') && (
-          <div className="text-center mt-2">
-            <span className="text-2xl font-bold tracking-wider font-mono" style={{ color: accent }}>
-              {formatTime(seconds)}
-            </span>
-            {state === 'PAUSED' && (
-              <span className="ml-2 text-sm font-medium opacity-60" style={{ color: accent }}>Paused</span>
-            )}
-          </div>
-        )}
-        {state === 'STOPPED' && (
-          <div className="text-center mt-1">
-            <span className="text-sm font-semibold opacity-50" style={{ color: getPaperInk(isDark) }}>
-              {formatTime(seconds)} recorded
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-4">
-        {state === 'IDLE' && (
-          <button onClick={startRecording}
-            className="w-16 h-16 rounded-full flex items-center justify-center transition-transform active:scale-90"
-            style={{ background: accent, boxShadow: `0 4px 20px ${accent}40` }}>
-            <MaterialIcon name="mic" size={28} style={{ color: 'white' }} />
-          </button>
-        )}
-        {state === 'RECORDING' && (
-          <>
-            <button onClick={pauseRecording}
-              className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
-              style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
-              <MaterialIcon name="pause" size={24} style={{ color: accent }} />
-            </button>
-            <button onClick={stopRecording}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all animate-pulse"
-              style={{ background: accent, boxShadow: `0 0 24px ${accent}60` }}>
-              <MaterialIcon name="stop" size={24} style={{ color: 'white' }} />
-            </button>
-            <button onClick={discardRecording}
-              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90"
-              style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}>
-              <MaterialIcon name="delete" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }} />
-            </button>
-          </>
-        )}
-        {state === 'PAUSED' && (
-          <>
-            <button onClick={discardRecording}
-              className="w-10 h-10 rounded-full flex items-center justify-center active:scale-90"
-              style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}>
-              <MaterialIcon name="delete" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }} />
-            </button>
-            <button onClick={resumeRecording}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all"
-              style={{ background: accent, boxShadow: `0 4px 20px ${accent}40` }}>
-              <MaterialIcon name="mic" size={28} style={{ color: 'white' }} />
-            </button>
-            <button onClick={stopRecording}
-              className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
-              style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
-              <MaterialIcon name="stop" size={22} style={{ color: accent }} />
-            </button>
-          </>
-        )}
-        {state === 'STOPPED' && (
-          <>
-            <button onClick={discardRecording}
-              className="px-4 py-2 rounded-full text-xs font-semibold active:scale-95"
-              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: getPaperInk(isDark) }}>
-              Discard
-            </button>
-            <button onClick={startRecording}
-              className="px-4 py-2 rounded-full text-xs font-semibold active:scale-95 flex items-center gap-1.5"
-              style={{ background: accent, color: 'white' }}>
-              <MaterialIcon name="mic" size={14} /> Re-record
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MOOD CHIPS — "How did it make you feel?"
-// ═══════════════════════════════════════════════════════════════════════════
-
-const MoodChips: React.FC<{
-  mood: JournalMood | null; onChange: (m: JournalMood | null) => void; accent: string; isDark: boolean;
-}> = ({ mood, onChange, accent, isDark }) => (
-  <div className="space-y-2">
-    <p className="text-xs font-semibold opacity-50 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>
-      How did it make you feel?
-    </p>
-    <div className="flex flex-wrap gap-2">
-      {JOURNAL_MOODS.map(m => (
-        <button key={m.id} onClick={() => onChange(mood === m.id ? null : m.id)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
-          style={{
-            background: mood === m.id ? accent : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-            color: mood === m.id ? 'white' : isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)',
-            border: mood === m.id ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-          }}>
-          <MaterialIcon name={m.icon} size={14} /> {m.label}
-        </button>
-      ))}
-    </div>
-  </div>
-);
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PAPER CARD — styled like the Android paper cards with Patrick Hand
-// ═══════════════════════════════════════════════════════════════════════════
-
-const PaperCard: React.FC<{
-  children: React.ReactNode; isDark: boolean; accent: string;
-  paperColor?: 'cream' | 'white' | 'kraft'; paperStyle?: 'ruled' | 'torn' | 'tornRuled';
-}> = ({ children, isDark, accent, paperColor = 'cream', paperStyle = 'ruled' }) => {
-  const pc = PAPER_COLORS[paperColor];
-  const bg = isDark ? pc.bgDark : pc.bg;
-  const ink = isDark ? pc.inkDark : pc.ink;
-
-  return (
-    <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: bg, border: `1px solid ${accent}18` }}>
-      {/* Category accent at the top-left */}
-      <div className="absolute top-0 left-4 w-8 h-[2px] rounded-full" style={{ background: accent, opacity: 0.6 }} />
-      {/* Ruled lines for 'ruled' style */}
-      {paperStyle !== 'torn' && (
-        <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
-          style={{
-            backgroundImage: `repeating-linear-gradient(transparent, transparent 27px, ${ink} 27px, ${ink} 28px)`,
-            backgroundPosition: '0 38px',
-          }} />
-      )}
-      <div className="relative" style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.75 }}>
-        {children}
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SOUND BITE EDITOR — voice recorder + title + note + mood + quotes
-// ═══════════════════════════════════════════════════════════════════════════
-
-const SoundBiteEditor: React.FC<{
-  accent: string; isDark: boolean; onCanSave: (v: boolean) => void;
-}> = ({ accent, isDark, onCanSave }) => {
-  const [title, setTitle] = useState('');
-  const [note, setNote] = useState('');
-  const [mood, setMood] = useState<JournalMood | null>(null);
-  const [quotes, setQuotes] = useState<Array<{ text: string; context?: string }>>([]);
-  const [newQuote, setNewQuote] = useState('');
-  const [recorderState, setRecorderState] = useState<RecorderState>('IDLE');
-  const [audioData, setAudioData] = useState<{ blob: Blob; dataUrl: string; durationSeconds: number; fileSizeBytes: number } | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const canSave = (recorderState === 'STOPPED' && !!audioData) || !!note.trim();
-  useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
-  useEffect(() => { setCaptureDraft('SoundBite', dataRef.current as CaptureData); }, [audioData, title, note, mood, quotes]);
-
-  // Expose data to parent
-  const dataRef = useRef<any>(null);
-  dataRef.current = {
-    durationSeconds: audioData?.durationSeconds || 0,
-    title, note, mood,
-    audioFilePath: audioData ? `recording-${Date.now()}.webm` : null,
-    audioDataUrl: audioData?.dataUrl || null,
-    fileSizeBytes: audioData?.fileSizeBytes || 0,
-    quotes,
-    titleStyle: 'ruled' as const, noteStyle: 'ruled' as const,
-    titleColor: 'cream' as const, noteColor: 'cream' as const,
-  };
-
-  // Store dataRef on window so parent can access it
-  useEffect(() => { (window as any).__soundBiteData = dataRef; return () => { delete (window as any).__soundBiteData; }; }, []);
-
-  const addQuote = () => {
-    if (newQuote.trim()) { setQuotes([...quotes, { text: newQuote.trim() }]); setNewQuote(''); }
-  };
-
-  const ink = getPaperInk(isDark);
-
-  return (
-    <div className="space-y-5">
-      {/* Voice Recorder — standalone, no paper card */}
-      <VoiceRecorder accent={accent} isDark={isDark}
-        onStateChange={setRecorderState}
-        onAudioReady={setAudioData} />
-
-      {/* Audio preview after stop */}
-      {recorderState === 'STOPPED' && audioData && (
-        <div className="flex items-center gap-3">
-          <button onClick={() => audioRef.current?.play()}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: accent }}>
-            <MaterialIcon name="play_arrow" size={22} style={{ color: 'white' }} />
-          </button>
-          <div className="flex-1 h-1.5 rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-            <div className="h-full rounded-full transition-all" style={{ width: '100%', background: accent }} />
-          </div>
-          <span className="text-xs font-mono opacity-60" style={{ color: getTextColor(isDark) }}>
-            {String(Math.floor(audioData.durationSeconds / 60)).padStart(2, '0')}:{String(audioData.durationSeconds % 60).padStart(2, '0')}
-          </span>
-        </div>
-      )}
-      <audio ref={audioRef} src={audioData?.dataUrl} className="hidden" />
-
-      {/* Title + Note — in paper card with Patrick Hand */}
-      <PaperCard isDark={isDark} accent={accent}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Title</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-              placeholder="What's this recording about?"
-              className={`${paperInputClass} text-lg font-semibold`}
-              style={{ fontFamily: paperFont, color: ink, borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Note</label>
-            <textarea value={note} onChange={e => setNote(e.target.value)}
-              placeholder="Write down your thoughts..."
-              rows={4} className={paperInputClass} style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-          </div>
-        </div>
-      </PaperCard>
-
-      {/* Mood — standalone */}
-      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-
-      {/* Quotes */}
-      <div>
-        <label className="block text-xs font-semibold mb-1.5 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>
-          <MaterialIcon name="format_quote" size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Quotes
-        </label>
-        {quotes.length > 0 && (
-          <div className="space-y-2 mb-3">
-            {quotes.map((q, i) => (
-              <div key={i} className="flex items-start gap-2 pl-3 border-l-2 rounded" style={{ borderColor: accent, background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
-                <span className="text-lg leading-none opacity-40">&ldquo;</span>
-                <p className="flex-1 text-sm leading-relaxed" style={{ color: getTextColor(isDark) }}>{q.text}</p>
-                <button onClick={() => setQuotes(quotes.filter((_, j) => j !== i))}
-                  className="text-red-400/60 hover:text-red-400 text-lg leading-none">&times;</button>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-2">
-          <input type="text" value={newQuote} onChange={e => setNewQuote(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addQuote()}
-            placeholder="Add a quote..." className={`${paperInputClass} flex-1 text-sm`}
-            style={{ fontFamily: paperFont, color: ink, borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />
-          <button onClick={addQuote}
-            className="px-3 py-1 rounded-full text-xs font-semibold active:scale-95"
-            style={{ background: accent, color: 'white' }}>Add</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// OTHER FORMAT EDITORS (simplified, matching Android)
-// ═══════════════════════════════════════════════════════════════════════════
-
-const ReelNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v: boolean) => void }> = ({ accent, isDark, onCanSave }) => {
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
-  const [mood, setMood] = useState<JournalMood | null>(null);
-  const canSave = rating > 0 || !!review.trim();
-  useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
-  useEffect(() => { setCaptureDraft('ReelNotes', { rating, review, mood } as CaptureData); }, [rating, review, mood]);
-  const ink = getPaperInk(isDark);
-  return (
-    <div className="space-y-5">
-      {/* Stars — standalone, not in paper card */}
-      <div>
-        <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>Rating</label>
-        <div className="flex gap-1.5">
-          {[1, 2, 3, 4, 5].map(star => (
-            <button key={star} onClick={() => setRating(star)}
-              className="transition-transform hover:scale-115 active:scale-90">
-              <MaterialIcon name="star" size={32} filled={star <= rating}
-                style={{ color: star <= rating ? '#E8A838' : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }} />
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Review — in paper card with Patrick Hand */}
-      <PaperCard isDark={isDark} accent={accent}>
-        <div>
-          <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Review</label>
-          <textarea value={review} onChange={e => setReview(e.target.value)}
-            placeholder="Write your review here..." rows={5} className={paperInputClass}
-            style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-        </div>
-      </PaperCard>
-      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-    </div>
-  );
-};
-
-const MarginaliaEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v: boolean) => void }> = ({ accent, isDark, onCanSave }) => {
-  const [journalEntry, setJournalEntry] = useState('');
-  const [quotes, setQuotes] = useState<Array<{ text: string; context?: string }>>([]);
-  const [newQuote, setNewQuote] = useState('');
-  const [mood, setMood] = useState<JournalMood | null>(null);
-  const canSave = !!journalEntry.trim() || quotes.length > 0;
-  useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
-  useEffect(() => { setCaptureDraft('Marginalia', { journalEntry, quotes, mood } as CaptureData); }, [journalEntry, quotes, mood]);
-  const addQuote = () => { if (newQuote.trim()) { setQuotes([...quotes, { text: newQuote.trim() }]); setNewQuote(''); } };
-  const ink = getPaperInk(isDark);
-  return (
-    <div className="space-y-5">
-      <PaperCard isDark={isDark} accent={accent}>
-        <div>
-          <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Journal Entry</label>
-          <textarea value={journalEntry} onChange={e => setJournalEntry(e.target.value)}
-            placeholder="Write your thoughts about this topic..." rows={5} className={paperInputClass}
-            style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-        </div>
-        <div className="mt-4">
-          <label className="block text-xs font-semibold mb-1.5 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Favorite Quotes</label>
-          {quotes.length > 0 && (
-            <div className="space-y-2 mb-3">
-              {quotes.map((q, i) => (
-                <div key={i} className="flex items-start gap-2 pl-3 border-l-2" style={{ borderColor: accent }}>
-                  <span className="text-lg leading-none opacity-40">&ldquo;</span>
-                  <p className="flex-1 text-sm leading-relaxed" style={{ fontFamily: paperFont, color: ink }}>{q.text}</p>
-                  <button onClick={() => setQuotes(quotes.filter((_, j) => j !== i))} className="text-red-400/60 text-lg">&times;</button>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="flex gap-2">
-            <input type="text" value={newQuote} onChange={e => setNewQuote(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addQuote()} placeholder="Add a quote..."
-              className={`${paperInputClass} flex-1 text-sm`}
-              style={{ fontFamily: paperFont, color: ink, borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }} />
-            <button onClick={addQuote} className="px-3 py-1 rounded-full text-xs font-semibold active:scale-95"
-              style={{ background: accent, color: 'white' }}>Add</button>
-          </div>
-        </div>
-      </PaperCard>
-      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-    </div>
-  );
-};
-
-const GalleryWallEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v: boolean) => void }> = ({ accent, isDark, onCanSave }) => {
-  const [caption, setCaption] = useState('');
-  const [mood, setMood] = useState<JournalMood | null>(null);
-  const canSave = !!caption.trim();
-  useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
-  useEffect(() => { setCaptureDraft('GalleryWall', { caption, images: [], mood } as CaptureData); }, [caption, mood]);
-  const ink = getPaperInk(isDark);
-  return (
-    <div className="space-y-5">
-      <PaperCard isDark={isDark} accent={accent}>
-        <div>
-          <label className="block text-xs font-semibold mb-1 opacity-40 uppercase tracking-wider" style={{ fontFamily: paperFont, color: ink }}>Caption</label>
-          <textarea value={caption} onChange={e => setCaption(e.target.value)}
-            placeholder="Describe your mood board..." rows={3} className={paperInputClass}
-            style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-        </div>
-      </PaperCard>
-      <div>
-        <label className="block text-xs font-semibold mb-2 opacity-40 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>Images</label>
-        <div className="grid grid-cols-3 gap-2">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
-              style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-              <MaterialIcon name="image" size={28} style={{ color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }} />
-            </div>
-          ))}
-          <div className="aspect-square rounded-lg border-2 border-dashed flex items-center justify-center"
-            style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
-            <MaterialIcon name="add" size={24} style={{ color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
-          </div>
-        </div>
-      </div>
-      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-    </div>
-  );
-};
-
-const FieldNotesEditor: React.FC<{ accent: string; isDark: boolean; onCanSave: (v: boolean) => void }> = ({ accent, isDark, onCanSave }) => {
-  const [observed, setObserved] = useState('');
-  const [surprised, setSurprised] = useState('');
-  const [learnNext, setLearnNext] = useState('');
-  const [mood, setMood] = useState<JournalMood | null>(null);
-  const canSave = !!observed.trim() || !!surprised.trim() || !!learnNext.trim();
-  useEffect(() => { onCanSave(canSave); }, [canSave, onCanSave]);
-  useEffect(() => { setCaptureDraft('FieldNotes', { observed, surprised, learnNext, mood } as CaptureData); }, [observed, surprised, learnNext, mood]);
-  const ink = getPaperInk(isDark);
-  const fields = [
-    { k: 'observed', v: observed, set: setObserved, icon: 'visibility', label: 'Observed', ph: 'What did you observe?' },
-    { k: 'surprised', v: surprised, set: setSurprised, icon: 'sentiment_surprised', label: 'Surprised Me', ph: 'What surprised you?' },
-    { k: 'learnNext', v: learnNext, set: setLearnNext, icon: 'menu_book', label: 'Want to Learn Next', ph: 'What do you want to learn more about?' },
-  ];
-  return (
-    <div className="space-y-4">
-      {fields.map(f => (
-        <div key={f.k}>
-          <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-50 uppercase tracking-wider" style={{ color: getTextColor(isDark) }}>
-            <MaterialIcon name={f.icon} size={14} /> {f.label}
-          </div>
-          <PaperCard isDark={isDark} accent={accent}>
-            <textarea value={f.v} onChange={e => f.set(e.target.value)}
-              placeholder={f.ph} rows={3} className={paperInputClass}
-              style={{ fontFamily: paperFont, color: ink, fontSize: '1.1rem', lineHeight: 1.7 }} />
-          </PaperCard>
-        </div>
-      ))}
-      <MoodChips mood={mood} onChange={setMood} accent={accent} isDark={isDark} />
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN SCREEN
-// ═══════════════════════════════════════════════════════════════════════════
+  reader.readAsDataURL(file);
+});
 
 export const SaveCaptureScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -604,233 +41,191 @@ export const SaveCaptureScreen: React.FC = () => {
   const { isDark, isAmoled } = useTheme();
   const [category, setCategory] = useState<CurioCategory | null>(null);
   const [topic, setTopic] = useState<CurioTopic | null>(null);
-  const [sessionStartedAt] = useState(() => Date.now());
-  const [selectedFormat, setSelectedFormat] = useState<CaptureFormat>('SoundBite');
-  const [canSave, setCanSave] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [formatKey, setFormatKey] = useState(0);
+  const [note, setNote] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const dark = isDark || isAmoled;
+  const ink = getTextColor(isDark);
+  const muted = dark ? 'rgba(245,243,244,.56)' : 'rgba(23,27,38,.56)';
+  const surface = dark ? '#161A1D' : '#FFFFFF';
+  const border = dark ? 'rgba(255,255,255,.10)' : 'rgba(23,27,38,.10)';
+  const topicTitle = topic?.name || topicName?.replace(/-/g, ' ') || 'A new discovery';
 
   useEffect(() => {
-    const loadTopic = async () => {
-      if (!categorySlug) return;
-      const found = getCategoryBySlug(categorySlug);
-      if (!found) return;
+    let active = true;
+    const load = async () => {
+      setLoading(true);
+      const found = categorySlug ? getCategoryBySlug(categorySlug) : null;
+      if (!found) { if (active) setLoading(false); return; }
+      const allTopics = await loadTopicsForCategory(found.id);
+      if (!active) return;
       setCategory(found);
-      setSelectedFormat(found.defaultFormat);
-      const topics = await loadTopicsForCategory(found.id);
-      setTopic(topics.find(t => t.id === topicName) || null);
+      setTopic(allTopics.find(item => item.id === topicName) || null);
+      setLoading(false);
     };
-    loadTopic();
+    load();
+    return () => { active = false; };
   }, [categorySlug, topicName]);
 
-  // Reset canSave on format change
-  useEffect(() => { setCanSave(false); }, [selectedFormat]);
-
-  const handleAddTag = () => {
-    const clean = tagInput.trim().replace(/^#/, '');
-    if (clean && clean.length <= 24 && tags.length < 12 && !tags.includes(clean)) {
-      setTags([...tags, clean]); setTagInput('');
+  const importPhotos = async (files: FileList | null) => {
+    if (!files) return;
+    setError('');
+    const remaining = MAX_PHOTOS - photos.length;
+    const selected = Array.from(files).filter(file => file.type.startsWith('image/')).slice(0, remaining);
+    if (!selected.length) {
+      if (remaining <= 0) setError(`You can add up to ${MAX_PHOTOS} photos.`);
+      return;
     }
-  };
-
-  const buildCaptureData = (): CaptureData => {
-    const draft = (window as any)[CAPTURE_DRAFT_KEY];
-    if (draft?.format === selectedFormat) return draft.data as CaptureData;
-    const sbData = (window as any).__soundBiteData?.current;
-    switch (selectedFormat) {
-      case 'SoundBite': return {
-        durationSeconds: sbData?.durationSeconds || 0,
-        title: sbData?.title || '',
-        note: sbData?.note || '',
-        audioFilePath: sbData?.audioFilePath || null,
-        audioDataUrl: sbData?.audioDataUrl || null,
-        fileSizeBytes: sbData?.fileSizeBytes || 0,
-        mood: sbData?.mood || null,
-        quotes: sbData?.quotes || [],
-        titleStyle: 'ruled', noteStyle: 'ruled',
-        titleColor: 'cream', noteColor: 'cream',
-      } as CaptureData;
-      default: return {} as CaptureData;
-    }
-  };
-
-  const handleSave = async () => {
-    if (!category) return;
-    setIsSaving(true);
     try {
-      const topicDisplayName = topic?.name || topicName?.replace(/-/g, ' ') || 'Unknown Topic';
-      const captureData = buildCaptureData();
+      const imported = await Promise.all(selected.map(compressPhoto));
+      setPhotos(current => [...current, ...imported].slice(0, MAX_PHOTOS));
+    } catch {
+      setError('One of those photos could not be imported. Please try another image.');
+    }
+    if (fileInput.current) fileInput.current.value = '';
+  };
+
+  const saveJournal = async () => {
+    if (!category || saving || (!note.trim() && photos.length === 0)) return;
+    setSaving(true);
+    setError('');
+    try {
       const entry = {
         id: generateId(),
         topicId: topic?.id || `${category.id.toLowerCase()}-${Date.now()}`,
         categoryId: category.id,
-        topicName: topicDisplayName,
+        topicName: topicTitle,
         topicSubtype: topic?.subtype || 'Topic',
-        topicTeaser: topic?.teaser || 'A fascinating topic to explore.',
-        format: selectedFormat,
+        topicTeaser: topic?.teaser || 'A discovery worth remembering.',
+        format: 'GalleryWall' as const,
         capturedAtMillis: Date.now(),
-        title: topicDisplayName,
-        formatDataJson: JSON.stringify(captureData),
-        tagsJson: serializeTags(tags),
+        title: topicTitle,
+        formatDataJson: JSON.stringify({ caption: note.trim(), images: photos, mood: null }),
+        tagsJson: serializeTags([]),
         isLegacy: false,
-        sessionTimeMillis: Date.now() - sessionStartedAt,
+        sessionTimeMillis: 0,
       };
       await captureRepository.insert(entry);
-      const prev = parseInt(localStorage.getItem('curio-total-topics') || '0');
-      localStorage.setItem('curio-total-topics', String(prev + 1));
-      const xp = parseInt(localStorage.getItem('curio-xp') || '0');
+      const total = Number.parseInt(localStorage.getItem('curio-total-topics') || '0', 10);
+      localStorage.setItem('curio-total-topics', String(total + 1));
+      const xp = Number.parseInt(localStorage.getItem('curio-xp') || '0', 10);
       localStorage.setItem('curio-xp', String(xp + 50));
-      setShowSuccess(true);
-      setTimeout(() => navigate(`/detail/${entry.id}`), 1500);
-    } catch (err) { console.error('Save failed:', err); }
-    finally { setIsSaving(false); }
+      setSaved(true);
+      window.setTimeout(() => navigate(`/detail/${entry.id}`), 900);
+    } catch (saveError) {
+      console.error('Journal save failed:', saveError);
+      setError('Your page could not be saved. Try removing a photo and saving again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (!category) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#DA1E37', borderTopColor: 'transparent' }} />
-    </div>
-  );
-
-  const tintBg = `${category.accent}0E`;
+  if (loading || !category) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: getBackgroundColor(isDark, isAmoled) }}>
+        {loading ? <div className="w-7 h-7 rounded-full border-[3px] border-t-transparent animate-spin" style={{ borderColor: ACCENT, borderTopColor: 'transparent' }} /> :
+          <p className="text-sm" style={{ color: muted }}>This journal page is unavailable.</p>}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ background: isDark ? `linear-gradient(180deg, ${tintBg}, ${getBackgroundColor(isDark, isAmoled)})` : `linear-gradient(180deg, ${category.tint || tintBg}, ${getBackgroundColor(isDark, isAmoled)})` }}>
-      <CurioWatermarkBackdrop activeCatId={category.id} alphaScale={0.35} />
-
-      <div className="relative z-10">
-        {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-1" style={{ paddingTop: 'env(safe-area-inset-top, 16px)' }}>
-          <button onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)' }}>
-            <MaterialIcon name="arrow_back" size={22} style={{ color: getTextColor(isDark) }} />
+    <div className="curio-journal-screen min-h-screen relative pb-10" style={{ background: getBackgroundColor(isDark, isAmoled), color: ink }}>
+      <div className="max-w-2xl mx-auto px-5 relative z-10">
+        <header className="flex items-center justify-between pt-4 pb-7" style={{ paddingTop: 'max(16px, env(safe-area-inset-top))' }}>
+          <button onClick={() => navigate(-1)} aria-label="Go back" className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: dark ? 'rgba(255,255,255,.07)' : 'rgba(23,27,38,.055)', border: `1px solid ${border}` }}>
+            <MaterialIcon name="arrow_back" size={20} />
           </button>
-          <h1 className="text-base font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>
-            Save your take
-          </h1>
+          <div className="text-[10px] uppercase tracking-[.2em] font-bold" style={{ color: muted }}>Curio journal</div>
           <div className="w-10" />
+        </header>
+
+        <div className="mb-5">
+          <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: muted }}>
+            <span className="w-2 h-2 rounded-full" style={{ background: category.accent }} />
+            {category.displayName}{topic ? ` · ${topic.subtype}` : ''}
+          </div>
+          <h1 className="mt-3 text-[30px] sm:text-[36px] leading-tight font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
+            Keep this thought<span style={{ color: ACCENT }}>.</span>
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: muted }}>A page for your words, with room for a photograph.</p>
         </div>
 
-        <ScreenEntrance>
-        {/* ── Topic reminder strip ─────────────────────────────────── */}
-        <div className="px-4 pb-4">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-            style={{ background: `${category.accent}14`, border: `1px solid ${category.accent}22` }}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${category.accent}20` }}>
-              <MaterialIcon name={category.iconGlyph} size={22} style={{ color: category.accent }} />
-            </div>
+        <section className="rounded-[22px] overflow-hidden" style={{ background: surface, border: `1px solid ${border}`, boxShadow: '0 20px 50px -42px rgba(0,0,0,.65)' }}>
+          <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${border}` }}>
             <div>
-              <p className="text-sm font-bold" style={{ color: getTextColor(isDark) }}>
-                {topic?.name || topicName?.replace(/-/g, ' ') || 'Unknown Topic'}
-              </p>
-              <p className="text-xs opacity-60" style={{ color: getTextColor(isDark) }}>{category.displayName}</p>
+              <div className="text-[10px] uppercase tracking-[.17em] font-bold" style={{ color: ACCENT }}>Today's page</div>
+              <div className="mt-1 text-sm font-bold" style={{ color: ink }}>{topicTitle}</div>
+            </div>
+            <MaterialIcon name="edit_note" size={22} style={{ color: muted }} />
+          </div>
+          <div className="p-5">
+            <textarea value={note} onChange={event => setNote(event.target.value)}
+              placeholder="Start anywhere… What caught your attention? What did it make you think or feel?"
+              rows={12} autoFocus={false}
+              className="w-full min-h-[280px] resize-y outline-none bg-transparent text-[16px] leading-[1.9]"
+              style={{ color: ink, caretColor: ACCENT }}
+            />
+            <div className="flex items-center justify-between pt-3 text-[10px]" style={{ borderTop: `1px solid ${border}`, color: muted }}>
+              <span>{note.trim() ? `${note.trim().split(/\\s+/).length} words` : 'Your private space to write'}</span>
+              <span>{new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* ── "How do you want to capture this one?" ────────────────── */}
-        <div className="px-4 pb-3">
-          <p className="text-sm font-semibold mb-2.5" style={{ color: getTextColor(isDark) }}>
-            How do you want to capture this one?
-          </p>
-          {/* Format chips */}
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {FORMAT_OPTIONS.map(({ id, label, icon }) => (
-              <button key={id} onClick={() => { setSelectedFormat(id); setFormatKey(k => k + 1); }}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all active:scale-95"
-                style={{
-                  background: selectedFormat === id ? category.accent : `${category.accent}18`,
-                  color: selectedFormat === id ? 'white' : category.accent,
-                  border: selectedFormat === id ? 'none' : `1px solid ${category.accent}30`,
-                }}>
-                <MaterialIcon name={icon} size={16} /> {label}
-              </button>
-            ))}
+        <section className="mt-5 rounded-[22px] p-5" style={{ background: surface, border: `1px solid ${border}` }}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold" style={{ color: ink }}>Photographs</h2>
+              <p className="mt-1 text-xs" style={{ color: muted }}>Add up to {MAX_PHOTOS} images to this page.</p>
+            </div>
+            <button onClick={() => fileInput.current?.click()} disabled={photos.length >= MAX_PHOTOS}
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-40"
+              style={{ background: 'rgba(218,30,55,.10)', color: ACCENT }}>
+              <MaterialIcon name="add_photo_alternate" size={17} /> Add photos
+            </button>
+            <input ref={fileInput} type="file" accept="image/*" multiple className="hidden" onChange={event => importPhotos(event.target.files)} />
           </div>
-        </div>
-
-        {/* ── Format Body ──────────────────────────────────────────── */}
-        <div className="px-4 py-2 max-w-lg mx-auto" key={formatKey}>
-          {selectedFormat === 'SoundBite' && (
-            <SoundBiteEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-          )}
-          {selectedFormat === 'ReelNotes' && (
-            <ReelNotesEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-          )}
-          {selectedFormat === 'Marginalia' && (
-            <MarginaliaEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-          )}
-          {selectedFormat === 'GalleryWall' && (
-            <GalleryWallEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-          )}
-          {selectedFormat === 'FieldNotes' && (
-            <FieldNotesEditor accent={category.accent} isDark={isDark} onCanSave={setCanSave} />
-          )}
-        </div>
-
-        {/* ── Tags ─────────────────────────────────────────────────── */}
-        <div className="px-4 py-2 max-w-lg mx-auto">
-          <p className="text-xs font-semibold mb-2 opacity-60" style={{ color: getTextColor(isDark) }}>Tags</p>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {tags.map(tag => (
-                <span key={tag} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={{ background: `${category.accent}18`, color: category.accent }}>
-                  #{tag}
-                  <button onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:opacity-70">&times;</button>
-                </span>
+          {photos.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {photos.map((photo, index) => (
+                <div key={index} className="relative aspect-square rounded-xl overflow-hidden" style={{ background: dark ? '#242A30' : '#EEF0F4' }}>
+                  <img src={photo} alt={`Journal attachment ${index + 1}`} className="w-full h-full object-cover" />
+                  <button onClick={() => setPhotos(current => current.filter((_, i) => i !== index))}
+                    aria-label={`Remove photo ${index + 1}`} className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center text-white"
+                    style={{ background: 'rgba(0,0,0,.62)' }}>
+                    <MaterialIcon name="close" size={16} />
+                  </button>
+                </div>
               ))}
             </div>
           )}
-          <div className="flex gap-2">
-            <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddTag()}
-              placeholder="Add a tag…" maxLength={24}
-              className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
-              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: getTextColor(isDark),
-                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
-            <button onClick={handleAddTag}
-              className="px-4 py-2 rounded-full text-xs font-semibold active:scale-95"
-              style={{ background: category.accent, color: 'white' }}>Add</button>
-          </div>
-        </div>
+        </section>
 
-        {/* ── Save CTA ─────────────────────────────────────────────── */}
-        <div className="px-4 py-4 max-w-lg mx-auto">
-          <button onClick={handleSave} disabled={!canSave || isSaving}
-            className="w-full py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-40 active:scale-[0.98]"
-            style={{
-              background: canSave ? category.accent : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-              color: canSave ? 'white' : getTextColor(isDark),
-            }}>
-            {isSaving ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.6)', borderTopColor: 'transparent' }} />
-                Saving…
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                <MaterialIcon name="check" size={20} /> Save entry
-              </span>
-            )}
-          </button>
-        </div>
-        </ScreenEntrance>
+        {error && <p className="mt-4 text-sm" role="alert" style={{ color: ACCENT }}>{error}</p>}
+
+        <button onClick={saveJournal} disabled={saving || saved || (!note.trim() && photos.length === 0)}
+          className="mt-6 w-full h-14 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold text-white disabled:opacity-40"
+          style={{ background: 'linear-gradient(135deg, #E12640, #A9132B)', boxShadow: '0 12px 26px -16px rgba(218,30,55,.75)' }}>
+          <MaterialIcon name={saved ? 'check' : 'bookmark'} size={19} />
+          {saving ? 'Saving page…' : saved ? 'Saved' : 'Save journal page'}
+        </button>
       </div>
 
-      {/* Success */}
-      {showSuccess && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
-          <div className="p-8 rounded-3xl text-center mx-6" style={{ background: isDark ? '#1a1a2e' : 'white' }}>
-            <MaterialIcon name="celebration" size={64} style={{ color: '#DA1E37' }} />
-            <h2 className="text-xl font-bold mt-3 mb-1" style={{ color: getTextColor(isDark) }}>Saved!</h2>
-            <p className="text-sm opacity-60" style={{ color: getTextColor(isDark) }}>
-              Your entry has been added to your cabinet.
-            </p>
+      {saved && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-6">
+          <div className="w-full max-w-xs rounded-3xl p-7 text-center" style={{ background: surface, color: ink }}>
+            <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center" style={{ background: 'rgba(218,30,55,.10)', color: ACCENT }}>
+              <MaterialIcon name="check" size={28} />
+            </div>
+            <h2 className="mt-4 text-lg font-bold">Page saved</h2>
+            <p className="mt-1 text-sm" style={{ color: muted }}>Your thought has a place in Curio.</p>
           </div>
         </div>
       )}
