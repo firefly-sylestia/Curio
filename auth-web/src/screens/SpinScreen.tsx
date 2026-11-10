@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
+import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
