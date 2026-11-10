@@ -21,6 +21,7 @@ import { TopicHistoryScreen } from './screens/TopicHistoryScreen';
 import { ManageCategoriesScreen } from './screens/ManageCategoriesScreen';
 import React from 'react';
 import './index.css';
+import './mcu-interface.css';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -34,7 +35,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen" key={onboardKey}>
+      <div className="curio-web-app min-h-screen" key={onboardKey}>
         <Routes>
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />

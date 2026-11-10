@@ -1,0 +1,217 @@
+/* Curio cinematic interface layer.
+   Adapted from the MCU Viewing Order visual language; Curio keeps its own rosewood identity. */
+:root {
+  --curio-glass-dark: rgba(18, 20, 27, .82);
+  --curio-glass-light: rgba(255, 255, 255, .78);
+  --curio-glass-border-dark: rgba(255, 255, 255, .105);
+  --curio-glass-border-light: rgba(59, 10, 23, .10);
+  --curio-accent: #C46B7C;
+  --curio-accent-deep: #8F465A;
+  --curio-motion-fast: 180ms;
+  --curio-motion-medium: 320ms;
+  --curio-motion-slow: 550ms;
+  --curio-motion-ease: cubic-bezier(.22, 1, .36, 1);
+}
+html.dark, html.amoled {
+  color-scheme: dark;
+  --curio-glass: var(--curio-glass-dark);
+  --curio-glass-border: var(--curio-glass-border-dark);
+  --curio-text: #F5F2F4;
+  --curio-muted: rgba(245, 242, 244, .62);
+  --curio-shadow: 0 24px 64px -34px rgba(0,0,0,.88), 0 3px 12px rgba(0,0,0,.28);
+}
+html:not(.dark):not(.amoled) {
+  color-scheme: light;
+  --curio-glass: var(--curio-glass-light);
+  --curio-glass-border: var(--curio-glass-border-light);
+  --curio-text: #24191E;
+  --curio-muted: rgba(36,25,30,.62);
+  --curio-shadow: 0 24px 60px -38px rgba(45,20,30,.34), 0 2px 10px rgba(45,20,30,.08);
+}
+html.amoled {
+  --curio-glass: rgba(8,8,10,.9);
+  --curio-glass-border: rgba(255,255,255,.10);
+}
+html { scrollbar-color: rgba(150,130,140,.38) transparent; }
+body {
+  background: #f7f0e4;
+  transition: background-color var(--curio-motion-medium) var(--curio-motion-ease), color var(--curio-motion-medium) var(--curio-motion-ease);
+}
+html.dark body { background: #14151b; }
+html.amoled body { background: #000; }
+#root { min-height: 100dvh; }
+.curio-web-app {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  color: var(--curio-text);
+}
+.curio-web-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70rem 42rem at 8% -12%, rgba(196,107,124,.15), transparent 66%),
+    radial-gradient(60rem 40rem at 100% 82%, rgba(111,91,160,.10), transparent 68%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%);
+}
+html.dark .curio-web-app::before { opacity: .92; }
+html.amoled .curio-web-app::before { opacity: .42; }
+.curio-web-app .min-h-screen {
+  background-image:
+    radial-gradient(48rem 30rem at 5% 0%, rgba(196,107,124,.075), transparent 70%),
+    radial-gradient(42rem 30rem at 100% 72%, rgba(117,91,159,.055), transparent 72%);
+  background-attachment: fixed;
+}
+.curio-web-app button,
+.curio-web-app a,
+.curio-web-app input { -webkit-tap-highlight-color: transparent; }
+.curio-web-app button:focus-visible,
+.curio-web-app a:focus-visible,
+.curio-web-app input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--curio-accent) 78%, transparent);
+  outline-offset: 3px;
+}
+.curio-web-app button { transition-timing-function: var(--curio-motion-ease); }
+.curio-web-app button:active { transform: translateY(1px) scale(.99); }
+.curio-web-app input,
+.curio-web-app textarea,
+.curio-web-app select {
+  transition: background-color var(--curio-motion-fast) var(--curio-motion-ease),
+    border-color var(--curio-motion-fast) var(--curio-motion-ease),
+    box-shadow var(--curio-motion-fast) var(--curio-motion-ease);
+}
+.curio-web-app input:focus,
+.curio-web-app textarea:focus,
+.curio-web-app select:focus {
+  border-color: color-mix(in srgb, var(--curio-accent) 58%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--curio-accent) 17%, transparent);
+}
+.curio-bottom-nav {
+  --nav-index: 0;
+  --nav-count: 4;
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 28px));
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: repeat(var(--nav-count), minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0;
+  padding: 6px;
+  border: 1px solid var(--curio-glass-border);
+  border-radius: 999px;
+  background: var(--curio-glass);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: var(--curio-shadow);
+  overflow: hidden;
+  z-index: 100;
+}
+.curio-nav-blob {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px) / var(--nav-count));
+  border-radius: 999px;
+  background: linear-gradient(155deg,
+    color-mix(in srgb, var(--curio-accent) 78%, #34313a),
+    color-mix(in srgb, var(--curio-accent-deep) 76%, #17191f));
+  box-shadow: 0 12px 26px -14px rgba(196,107,124,.65), inset 0 1px 0 rgba(255,255,255,.17);
+  transform: translateX(calc(var(--nav-index) * 100%));
+  transition: transform var(--curio-motion-slow) cubic-bezier(.32,1.22,.46,1);
+  pointer-events: none;
+  z-index: 0;
+}
+.curio-bottom-nav button {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--curio-muted);
+  font-size: 10px;
+  font-weight: 700;
+  transition: color var(--curio-motion-medium) var(--curio-motion-ease), transform var(--curio-motion-fast) var(--curio-motion-ease);
+}
+.curio-bottom-nav button.active { color: #fff; }
+.curio-bottom-nav button svg { width: 21px; height: 21px; }
+.curio-drawer-backdrop {
+  background: rgba(4,5,9,.62) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.curio-drawer-panel {
+  border: 1px solid var(--curio-glass-border);
+  border-left: 0;
+  border-radius: 0 28px 28px 0;
+  background: color-mix(in srgb, var(--curio-glass) 92%, #181920) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(26px) saturate(150%);
+  box-shadow: 22px 0 64px -30px rgba(0,0,0,.72) !important;
+}
+html:not(.dark):not(.amoled) .curio-drawer-panel {
+  background: rgba(255,250,250,.91) !important;
+  box-shadow: 22px 0 64px -30px rgba(45,20,30,.25) !important;
+}
+.curio-web-app .rounded-2xl,
+.curio-web-app .rounded-3xl {
+  transition: border-color var(--curio-motion-medium) var(--curio-motion-ease),
+    box-shadow var(--curio-motion-medium) var(--curio-motion-ease),
+    transform var(--curio-motion-fast) var(--curio-motion-ease);
+}
+@media (min-width: 900px) {
+  .curio-bottom-nav { bottom: 24px; }
+}
+@media (max-width: 520px) {
+  .curio-bottom-nav { width: calc(100% - 24px); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 62px; }
+  .curio-web-app .min-h-screen { background-attachment: scroll; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .curio-bottom-nav button,
+  .curio-nav-blob,
+  .curio-web-app button,
+  .curio-web-app input,
+  .curio-web-app textarea,
+  .curio-web-app select {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+.curio-quick-action {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  background: color-mix(in srgb, var(--curio-glass) 82%, var(--curio-accent)) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 12px 28px -18px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.18);
+  transition: transform var(--curio-motion-fast) var(--curio-motion-ease),
+    background-color var(--curio-motion-medium) var(--curio-motion-ease),
+    box-shadow var(--curio-motion-medium) var(--curio-motion-ease);
+}
+.curio-quick-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px -18px rgba(0,0,0,.78), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.curio-drawer-panel > div:not(:first-child) button {
+  border: 1px solid color-mix(in srgb, var(--curio-glass-border) 76%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  backdrop-filter: blur(12px) saturate(125%);
+}
+.curio-web-app .rounded-2xl,
+.curio-web-app .rounded-3xl {
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  backdrop-filter: blur(12px) saturate(125%);
+}

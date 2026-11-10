@@ -99,11 +99,11 @@ export const MenuDrawer: React.FC<{
       style={{ opacity: isOpen ? 1 : 0 }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="curio-drawer-backdrop absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Drawer sheet */}
       <div
-        className="absolute top-0 left-0 bottom-0 w-[336px] max-w-[85vw] flex flex-col transition-transform duration-350"
+        className="curio-drawer-panel absolute top-0 left-0 bottom-0 w-[336px] max-w-[85vw] flex flex-col transition-transform duration-350"
         style={{
           transform: `translateX(${slideX}px)`,
           background: isDark ? '#1a1a2e' : '#FFFBF5',
@@ -162,6 +162,8 @@ export const MenuDrawer: React.FC<{
             <div className="my-2 mx-3 border-t"
               style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
 
+            <MenuRow icon="account_circle" label="Online account" subtitle="Sign in, profile and account settings"
+              iconColor="#C46B7C" onClick={() => { window.location.assign('/account'); }} />
             <MenuRow icon="info" label="About" subtitle="App info & more"
               iconColor="#C46B7C" onClick={() => handleNavigate('/settings')} />
           </div>

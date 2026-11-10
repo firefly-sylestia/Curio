@@ -1,11 +1,18 @@
-# Local Vercel state (created by `vercel dev` / `vercel link`; the project id is
-# per-developer and never belongs in the repo).
+# Vercel local state
 .vercel/
 
-# The site ships no dependencies, but a local preview tool may leave these.
+# Node dependencies and Vite output
 node_modules/
-package-lock.json
+dist/
+dist-ssr/
 
-# Local environment copies. The real values live in the Vercel project.
+# Local environment files
 .env
-.env.local
+.env.*
+!.env.example
+
+# Logs and editor files
+*.log
+.DS_Store
+.vscode/
+.idea/

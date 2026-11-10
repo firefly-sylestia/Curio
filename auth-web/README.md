@@ -1,8 +1,12 @@
-# Curio Account Web (`auth-web/`)
+# Curio Website (`auth-web/`)
 
-The web side of Curio's online accounts: the pages Supabase email links land on,
-plus a small account desk. It is a **static site with two tiny serverless
-functions** (no build step, no framework, no npm dependencies).
+This is the **single Curio website**: the React discovery experience, online account
+flows, Supabase serverless functions and installable PWA. The existing Vercel
+project name and Root Directory (`auth-web`) stay unchanged.
+
+The discovery app provides Home, Explore, Shuffle, Cabinet, Profile and Settings.
+The account pages below remain on the same origin, so email confirmations,
+magic links and password recovery keep their existing URLs.
 
 Accounts are created on `/signup` with an email and a password, the same way
 the app creates them, and the confirmation link lands on `/confirm`. A sign-in
@@ -21,8 +25,8 @@ set or an account deleted without touching the app.
 
 | URL | What it does |
 | --- | --- |
-| `/` | Landing page: every flow, one tap away. |
-| `/signup` | **Create an account with a password.** Email, password twice, terms; then the confirmation email is sent and `/confirm` finishes the job. |
+| `/` | Curio discovery app: Home, Explore, Shuffle, Cabinet and the rest of the web experience. |
+| `/browse` | Browse and search the Curio topic catalogue. |\n| `/spin` | Shuffle topics and discover something new. |\n| `/cabinet` | Open locally saved discoveries. |\n| `/signup` | **Create an account with a password.** Email, password twice, terms; then the confirmation email is sent and `/confirm` finishes the job. |
 | `/confirm` | Where a **signup confirmation** email lands. Verifies the token, says so, offers a new link when it expired. |
 | `/link` | Where a **sign-in link** (magic link) lands. Consumes the token and hands you to `/account`. |
 | `/reset` | Two modes: request a reset email, and set the new password from that email's link. |
@@ -47,9 +51,12 @@ a committed file.
 | `APP_DOWNLOAD_URL` | optional | The "Get Curio" link. Defaults to the latest GitHub release. |
 | `SITE_NAME` | optional | Defaults to `Curio`. |
 
-Vercel: **New Project → import the repo → Root Directory `auth-web`** → add the
-variables above (Production and Preview) → Deploy. There is no build command and
-no output directory to configure; Vercel serves the folder and picks up `api/`.
+Vercel: keep the **existing Curio project**, its **existing name**, and Root
+Directory `auth-web`. Keep the environment variables above (Production and
+Preview). The project now runs `npm ci`, then `npm run build`, and serves the
+Vite output directory `dist/`. The existing `api/` serverless functions remain
+at the same project root. Do not create a second project or change the root
+folder as part of this merge.
 
 ## One domain for the links
 
@@ -100,16 +107,40 @@ fixing the three values above makes the mailed links stable regardless.
 3. **Authentication → Providers → Email**: keep "Confirm email" on if you want
    new accounts to prove the address before signing in.
 
-## Local preview
+## Local development and preview
 
 ```bash
-npx vercel dev --cwd auth-web     # or: cd auth-web && npx vercel dev
+cd auth-web
+npm ci
+npm run dev
 ```
+
+For a production-like local Vercel preview (including the existing `/api/*`
+functions), use `npx vercel dev` from this directory. Run `npm run check`,
+`npm run lint` and `npm run build` before shipping.
 
 A plain static server (`npx serve auth-web`) serves the pages but **not**
 `/api/config`, so the pages would report that the site is not configured yet.
 That is the designed behaviour when the variables are missing: every page keeps
 working and explains itself instead of failing.
+
+## Install Curio
+
+The web manifest, app icons and service worker enable browser installation.
+On Android Chrome, choose **Install app** or **Add to Home screen**. On iOS
+Safari, choose **Share → Add to Home Screen**. The installed website opens in
+its own app window where supported.
+
+The service worker caches the app shell and same-origin static assets for
+repeat visits. It bypasses API requests, Supabase traffic and authentication
+callback URLs. Offline access is limited to content and assets previously
+cached by visiting them online.
+
+## Discovery data
+
+Saved topics, topic history and cabinet entries remain local-first in the
+browser. Signing into an online Curio account does not upload or sync local
+discoveries. Do not describe account sign-in as a cloud backup.
 
 ## Notes
 

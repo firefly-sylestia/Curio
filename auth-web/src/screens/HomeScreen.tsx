@@ -177,7 +177,7 @@ const HomeScreen: React.FC = () => {
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-between px-4 items-center"
         style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
         <button onClick={() => setMenuOpen(true)}
-          className="w-[42px] h-[42px] rounded-full flex items-center justify-center"
+          className="curio-quick-action w-[42px] h-[42px] rounded-full flex items-center justify-center"
           style={{
             background: `${heroAccent}CC`,
             border: `1px solid rgba(255,255,255,0.35)`,
@@ -185,7 +185,7 @@ const HomeScreen: React.FC = () => {
           <MaterialIcon name="menu" size={22} style={{ color: '#fff' }} />
         </button>
         <button onClick={() => navigate('/profile')}
-          className="w-[42px] h-[42px] rounded-full flex items-center justify-center"
+          className="curio-quick-action w-[42px] h-[42px] rounded-full flex items-center justify-center"
           style={{
             background: `${heroAccent}CC`,
             border: `1px solid rgba(255,255,255,0.35)`,

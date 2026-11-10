@@ -6,7 +6,7 @@
 graph TB
     MASTER["master.md\nDOX framework"] --> ROOT["AGENTS.md\nProject-wide rail"]
     ROOT --> APP["app/AGENTS.md\nActive Curio Android app"]
-    ROOT --> AUTHWEB["auth-web/AGENTS.md\nAccount web (email links, reset)"]
+    ROOT --> AUTHWEB["auth-web/AGENTS.md\nUnified discovery + accounts + PWA"]
     ROOT --> GRADLE["gradle/AGENTS.md\nBuild configuration"]
     ROOT --> FASTLANE["fastlane/AGENTS.md\nStore metadata"]
     ROOT --> GITHUB[".github/AGENTS.md\nCI/CD and issues"]
@@ -31,10 +31,12 @@ app/
   src/main/                     Curio source, resources, and topic assets
 
 auth-web/
-  AGENTS.md                     Account web contract
-  index.html, */index.html      Supabase email landings, account desk, legal
-  assets/                       theme.css + curio.js (no build step)
+  AGENTS.md                     Unified website contract
+  src/                          React discovery app and local data
+  public/                       Account routes, PWA manifest, icons and service worker
+  assets/                       Account styles and auth client
   api/                          Vercel functions: public config, delete account
+  package.json                  Vite build; Vercel root remains auth-web
 
 .agents/skills/
   AGENTS.md                     Skills catalogue + the load-the-match rule

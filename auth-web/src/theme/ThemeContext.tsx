@@ -47,6 +47,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     
     // Apply theme to document
     const root = document.documentElement;
+    root.dataset.curioTheme = settings.isDark ? (settings.style === 'amoled' ? 'amoled' : 'dark') : 'light';
     root.classList.remove('dark', 'amoled', 'material', 'pastel');
     
     if (settings.isDark) {
