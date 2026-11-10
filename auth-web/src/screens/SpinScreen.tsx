@@ -4,6 +4,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
+import { MaterialIcon } from '../components/SharedComponents';
 import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
@@ -141,8 +142,11 @@ export const SpinScreen: React.FC = () => {
               border: `1px solid ${border}`,
               boxShadow: dark ? '0 18px 44px -34px rgba(0,0,0,.9)' : '0 18px 44px -34px rgba(35,24,28,.28)',
             }}>
-            <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full pointer-events-none"
-              style={{ background: `radial-gradient(circle, ${activeCategory.accent}20, transparent 70%)` }} />
+            <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: activeCategory.accent, opacity: .82 }} />
+            <div className="absolute right-6 top-6 pointer-events-none" aria-hidden="true"
+              style={{ color: activeCategory.accent, opacity: .16 }}>
+              <MaterialIcon name={activeCategory.iconGlyph} size={64} />
+            </div>
             <div className="relative z-10 flex items-center justify-between gap-3">
               <span className="text-[11px] font-bold tracking-[.12em] uppercase"
                 style={{ color: activeCategory.accent }}>{activeCategory.displayName}</span>
