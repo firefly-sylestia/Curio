@@ -2,6 +2,7 @@
 // Premium components matching Android app's design system
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import type { CurioCategory } from '../types';
@@ -65,21 +66,18 @@ export const CurioBackButton: React.FC<{
   const txtColor = contentColor || (isDark ? 'rgba(255,255,255,0.9)' : '#171B26');
   
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center justify-center transition-all duration-200"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: bgColor,
-        color: txtColor,
-      }}
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-    </button>
+    <>
+      <span className="curio-back-button-slot" style={{ width: size, height: size }} aria-hidden="true" />
+      {createPortal(
+        <button type="button" onClick={onClick} className="curio-back-button" aria-label="Go back" title="Go back"
+          style={{ width: size, height: size, background: bgColor, color: txtColor }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>,
+        document.body
+      )}
+    </>
   );
 };
 

@@ -45,8 +45,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     
-    // Apply theme to document
+    // Apply theme to document and keep installed PWA chrome in sync.
     const root = document.documentElement;
+    const themeColor = settings.isDark ? (settings.style === 'amoled' ? '#000000' : '#0B090A') : '#F6F7FB';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+    document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', settings.isDark ? 'black-translucent' : 'default');
+    root.style.colorScheme = settings.isDark ? 'dark' : 'light';
     root.dataset.curioTheme = settings.isDark ? (settings.style === 'amoled' ? 'amoled' : 'dark') : 'light';
     root.classList.remove('dark', 'amoled', 'material', 'pastel');
     

@@ -982,3 +982,28 @@ html.dark .curio-explore-topic,html.amoled .curio-explore-topic{box-shadow:0 18p
 .curio-image-viewer img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:8px}
 .curio-image-viewer-close{position:absolute;top:max(16px,env(safe-area-inset-top));right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);z-index:1}
 .curio-gallery-image{width:100%;padding:0;border:0;cursor:zoom-in}
+
+
+/* Floating, portal-mounted back control. */
+.curio-back-button-slot{display:inline-block;flex:0 0 auto;visibility:hidden;pointer-events:none}
+.curio-back-button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:calc(env(safe-area-inset-left,0px) + 16px);z-index:950;display:grid;place-items:center;padding:0;border:1px solid rgba(255,255,255,.46);border-radius:50%;-webkit-backdrop-filter:blur(30px) saturate(185%);backdrop-filter:blur(30px) saturate(185%);box-shadow:0 12px 34px -17px rgba(12,16,24,.38),0 3px 10px rgba(12,16,24,.10),inset 0 1px 0 rgba(255,255,255,.72),inset 0 -1px 0 rgba(255,255,255,.12);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 220ms ease,box-shadow 220ms ease,transform 220ms var(--curio-motion-ease)}
+.curio-back-button:hover{transform:translateY(-1px) scale(1.035)}
+.curio-back-button:active{transform:scale(.94)}
+html:not(.dark):not(.amoled) .curio-back-button{background:rgba(250,252,255,.58)!important;border-color:rgba(255,255,255,.76);box-shadow:0 13px 32px -18px rgba(26,36,54,.34),0 3px 9px rgba(26,36,54,.10),inset 0 1px 0 rgba(255,255,255,.88)}
+html.dark .curio-back-button{background:rgba(31,36,46,.62)!important;border-color:rgba(255,255,255,.16);box-shadow:0 14px 36px -18px rgba(0,0,0,.82),0 3px 10px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.18)}
+html.amoled .curio-back-button{background:rgba(16,18,22,.72)!important;border-color:rgba(255,255,255,.14)}
+@media(max-width:520px){.curio-back-button{top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px)}}
+@media(prefers-reduced-motion:reduce){.curio-back-button{transition-duration:.01ms!important}}
+
+/* Refractive Liquid Glass navigation: translucent surface, soft inner light and depth. */
+.curio-bottom-nav{isolation:isolate;overflow:hidden;border:1px solid rgba(255,255,255,.42)!important;-webkit-backdrop-filter:blur(36px) saturate(185%) brightness(1.035)!important;backdrop-filter:blur(36px) saturate(185%) brightness(1.035)!important;box-shadow:0 22px 56px -27px rgba(15,22,34,.34),0 5px 16px -9px rgba(15,22,34,.16),inset 0 1px 0 rgba(255,255,255,.68),inset 0 -1px 0 rgba(255,255,255,.16)!important}
+.curio-bottom-nav::before{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.045) 42%,transparent 74%)}
+.curio-nav-blob{z-index:1;background:rgba(218,30,55,.16)!important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);border:1px solid rgba(218,30,55,.12);box-shadow:0 7px 20px -15px rgba(218,30,55,.36),inset 0 1px 0 rgba(255,255,255,.68)!important}
+.curio-bottom-nav button{z-index:2;text-shadow:none!important}
+.curio-bottom-nav button.active{color:#A71931!important}
+html.dark .curio-bottom-nav{background:rgba(22,26,34,.58)!important;border-color:rgba(255,255,255,.16)!important;box-shadow:0 24px 58px -26px rgba(0,0,0,.82),0 5px 16px -8px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.035)!important}
+html.dark .curio-bottom-nav::before,html.amoled .curio-bottom-nav::before{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.025) 44%,transparent 78%)}
+html.dark .curio-nav-blob,html.amoled .curio-nav-blob{background:rgba(218,30,55,.23)!important;border-color:rgba(255,145,160,.18);box-shadow:0 8px 22px -15px rgba(218,30,55,.56),inset 0 1px 0 rgba(255,255,255,.22)!important}
+html.dark .curio-bottom-nav button.active,html.amoled .curio-bottom-nav button.active{color:#FF9AA9!important}
+html.amoled .curio-bottom-nav{background:rgba(10,11,14,.70)!important}
+@media(max-width:520px){.curio-bottom-nav{bottom:calc(env(safe-area-inset-bottom,0px) + 8px)!important}}
