@@ -317,13 +317,12 @@ const AccountScreen: React.FC = () => {
         </section>
 
         <section className="curio-account-progress">
-          <div className="curio-account-section-heading"><div><span className="curio-account-label">YOUR JOURNEY</span><h2>A curious life, counted.</h2></div><MaterialIcon name="auto_awesome" size={19} /></div>
+          <div className="curio-account-section-heading"><div><h2>Your journey</h2></div><MaterialIcon name="auto_awesome" size={17} /></div>
           <div className="curio-account-stats">
             {[{ label: 'Discoveries saved', value: stats.saved, icon: 'bookmark' }, { label: 'Curiosity draws', value: stats.spins, icon: 'shuffle' }, { label: 'Best streak', value: stats.streak, icon: 'local_fire_department' }].map((item, index) => (
-              <div key={item.label} className="curio-account-stat" style={{ '--stat-index': index } as React.CSSProperties}>
-                <span className="curio-account-stat-icon"><MaterialIcon name={item.icon} size={18} /></span>
+              <div key={item.label} className="curio-account-stat" aria-label={`${item.label}: ${item.value}`} title={item.label} style={{ '--stat-index': index } as React.CSSProperties}>
+                <span className="curio-account-stat-icon"><MaterialIcon name={item.icon} size={17} /></span>
                 <strong>{item.value.toLocaleString()}</strong>
-                <small>{item.label}</small>
               </div>
             ))}
           </div>

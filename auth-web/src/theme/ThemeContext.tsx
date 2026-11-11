@@ -39,7 +39,10 @@ const defaultSettings: ThemeSettings = {
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<ThemeSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    if (!saved) return defaultSettings;
+    const restored = { ...defaultSettings, ...JSON.parse(saved) };
+    if (restored.style === 'amoled') restored.isDark = true;
+    return restored;
   });
 
   useEffect(() => {
@@ -67,13 +70,13 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [settings]);
 
-  const setStyle = (style: ThemeStyle) => setSettings((s: ThemeSettings) => ({ ...s, style }));
-  const setDark = (isDark: boolean) => setSettings((s: ThemeSettings) => ({ ...s, isDark }));
-  const setDarkMode = (isDark: boolean) => setSettings((s: ThemeSettings) => ({ ...s, isDark }));
+  const setStyle = (style: ThemeStyle) => setSettings((s: ThemeSettings) => ({ ...s, style, isDark: style === 'amoled' ? true : s.isDark }));
+  const setDark = (isDark: boolean) => setSettings((s: ThemeSettings) => ({ ...s, isDark: s.style === 'amoled' ? true : isDark }));
+  const setDarkMode = (isDark: boolean) => setSettings((s: ThemeSettings) => ({ ...s, isDark: s.style === 'amoled' ? true : isDark }));
   const setPastelColors = (pastelColors: boolean) => setSettings((s: ThemeSettings) => ({ ...s, pastelColors }));
   const setTintWash = (tintWash: boolean) => setSettings((s: ThemeSettings) => ({ ...s, tintWash }));
   const setHeroGradient = (heroGradient: boolean) => setSettings((s: ThemeSettings) => ({ ...s, heroGradient }));
-  const setThemeStyle = (style: string) => setSettings((s: ThemeSettings) => ({ ...s, style: style as ThemeStyle }));
+  const setThemeStyle = (style: string) => setSettings((s: ThemeSettings) => ({ ...s, style: style as ThemeStyle, isDark: style === 'amoled' ? true : s.isDark }));
 
   return (
     <ThemeContext.Provider value={{

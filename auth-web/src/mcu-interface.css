@@ -1007,3 +1007,32 @@ html.dark .curio-nav-blob,html.amoled .curio-nav-blob{background:rgba(218,30,55,
 html.dark .curio-bottom-nav button.active,html.amoled .curio-bottom-nav button.active{color:#FF9AA9!important}
 html.amoled .curio-bottom-nav{background:rgba(10,11,14,.70)!important}
 @media(max-width:520px){.curio-bottom-nav{bottom:calc(env(safe-area-inset-bottom,0px) + 8px)!important}}
+
+
+/* Compact journey counters: bring the section closer to the profile and let icons do the talking. */
+.curio-account-screen .curio-account-progress { margin-top: -9px; margin-bottom: 21px; }
+.curio-account-screen .curio-account-section-heading { margin-bottom: 9px; align-items:center; }
+.curio-account-screen .curio-account-section-heading h2 { margin:0; font-size:17px; letter-spacing:-.025em; }
+.curio-account-screen .curio-account-stats { gap:9px; }
+.curio-account-screen .curio-account-stat {
+  min-height:84px;
+  height:84px;
+  padding:11px 13px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  border-radius:18px;
+}
+.curio-account-screen .curio-account-stat-icon { width:29px; height:29px; border-radius:10px; }
+.curio-account-screen .curio-account-stat strong { margin-top:0; font-size:21px; line-height:1; }
+.curio-account-screen .curio-account-stat small { display:none !important; }
+@media(max-width:520px) {
+  .curio-account-screen .curio-account-progress { margin-top:-12px; margin-bottom:18px; }
+  .curio-account-screen .curio-account-section-heading { margin-bottom:8px; }
+  .curio-account-screen .curio-account-section-heading h2 { font-size:16px; }
+  .curio-account-screen .curio-account-stats { gap:7px; }
+  .curio-account-screen .curio-account-stat { min-height:76px; height:76px; padding:9px 10px; border-radius:16px; }
+  .curio-account-screen .curio-account-stat-icon { width:26px; height:26px; border-radius:9px; }
+  .curio-account-screen .curio-account-stat-icon svg { width:15px; height:15px; }
+  .curio-account-screen .curio-account-stat strong { font-size:19px; }
+}
