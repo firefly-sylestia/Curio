@@ -27,9 +27,7 @@ const AccountScreen: React.FC = () => {
   const { isDark, isAmoled } = useTheme();
   const dark = isDark || isAmoled;
   const ink = getTextColor(isDark);
-  const muted = dark ? 'rgba(255,255,255,.58)' : 'rgba(23,27,38,.58)';
   const surface = dark ? '#161A1D' : '#FFFFFF';
-  const border = dark ? 'rgba(255,255,255,.10)' : 'rgba(23,27,38,.09)';
   const [displayName, setDisplayName] = useState(() => localStorage.getItem('curio-display-name') || 'Explorer');
   const [stats, setStats] = useState({ saved: 0, spins: 0, streak: 0 });
   const [config, setConfig] = useState<AuthConfig | null>(null);
