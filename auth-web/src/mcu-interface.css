@@ -612,3 +612,29 @@ html.amoled .curio-account-screen { --account-panel:rgba(14,15,19,.94); --accoun
 @media (prefers-reduced-motion:reduce) {
  .curio-account-screen *, .curio-account-screen *::before, .curio-account-screen *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+
+/* Settings dashboard */
+.curio-settings-screen { --settings-ink:#171B26; --settings-muted:rgba(23,27,38,.56); --settings-panel:rgba(255,255,255,.82); --settings-soft:rgba(20,27,42,.045); --settings-shadow:0 15px 36px -27px rgba(22,29,44,.22),0 4px 12px -9px rgba(22,29,44,.10),inset 0 1px 0 rgba(255,255,255,.94); color:var(--settings-ink); isolation:isolate; }
+html.dark .curio-settings-screen,html.amoled .curio-settings-screen { --settings-ink:#F5F3F4; --settings-muted:rgba(245,243,244,.56); --settings-panel:rgba(24,27,34,.88); --settings-soft:rgba(255,255,255,.055); --settings-shadow:0 19px 42px -27px rgba(0,0,0,.78),0 5px 15px -9px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.085); }
+html.amoled .curio-settings-screen { --settings-panel:rgba(14,15,19,.94); }
+.curio-settings-content { width:min(100%,900px); margin:0 auto; padding-top:calc(env(safe-area-inset-top,0px) + 22px); }
+.curio-settings-heading { display:flex; align-items:center; gap:15px; margin:0 0 32px; }
+.curio-settings-back,.curio-settings-mark { width:46px; height:46px; flex:none; display:grid; place-items:center; border-radius:16px; color:var(--settings-ink); background:var(--settings-panel); box-shadow:var(--settings-shadow); }
+.curio-settings-heading > div { flex:1; min-width:0; }
+.curio-settings-kicker { color:#DA1E37; font-size:9px; font-weight:850; letter-spacing:.19em; }
+.curio-settings-heading h1 { margin:6px 0 0; color:var(--settings-ink); font:850 clamp(30px,6vw,43px)/1 Geom,Inter,sans-serif; letter-spacing:-.055em; }
+.curio-settings-heading h1 span { color:#DA1E37; }
+.curio-settings-heading p { margin:8px 0 0; color:var(--settings-muted); font-size:12px; line-height:1.5; }
+.curio-settings-group { margin:0 0 25px; }
+.curio-settings-panel { overflow:hidden; border:0 !important; border-radius:23px; background:var(--settings-panel) !important; box-shadow:var(--settings-shadow); -webkit-backdrop-filter:blur(22px) saturate(140%); backdrop-filter:blur(22px) saturate(140%); }
+.curio-settings-panel > div { border-color:transparent !important; }
+.curio-settings-panel button { transition:background 180ms ease,transform 180ms ease; }
+.curio-settings-panel button:active { transform:scale(.99); }
+@media (min-width:768px) { .curio-settings-content { padding-top:48px; } .curio-settings-heading { margin-bottom:38px; } }
+@media (max-width:520px) { .curio-settings-heading { gap:11px; margin-bottom:26px; } .curio-settings-back,.curio-settings-mark { width:41px; height:41px; border-radius:14px; } .curio-settings-heading h1 { font-size:31px; } .curio-settings-heading p { font-size:11px; } .curio-settings-panel { border-radius:20px; } }
+/* Translucent crimson active navigation pill */
+.curio-nav-blob { background:rgba(218,30,55,.30) !important; -webkit-backdrop-filter:blur(16px) saturate(155%); backdrop-filter:blur(16px) saturate(155%); border:1px solid rgba(218,30,55,.13); box-shadow:0 8px 22px -16px rgba(218,30,55,.34),inset 0 1px 0 rgba(255,255,255,.22) !important; }
+.curio-bottom-nav button.active { color:#B91632 !important; }
+html.dark .curio-bottom-nav button.active,html.amoled .curio-bottom-nav button.active { color:#FF6B80 !important; }
+html.dark .curio-nav-blob,html.amoled .curio-nav-blob { background:rgba(218,30,55,.30) !important; border-color:rgba(255,125,145,.14); box-shadow:0 9px 25px -17px rgba(218,30,55,.55),inset 0 1px 0 rgba(255,255,255,.14) !important; }

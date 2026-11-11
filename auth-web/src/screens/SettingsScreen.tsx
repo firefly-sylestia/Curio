@@ -5,12 +5,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import {
-  CurioWatermarkBackdrop,
   CurioToggle,
   CurioSectionHeader,
   MaterialIcon,
 } from '../components/SharedComponents';
-import { TornHero, SETTINGS_HERO_SYMBOLS } from '../components/TornHero';
 import { ScreenEntrance } from '../animations';
 
 // ─── Segmented Row (matching Android's segmented control) ─────────────
@@ -47,9 +45,6 @@ const SegmentedRow: React.FC<{
   );
 };
 
-const SETTINGS_HERO_HEIGHT = 180;
-const SETTINGS_TEAR_SEED = 0x5EED; // Android's SETTINGS_HERO_TEAR_SEED
-const ROSE_WOOD = '#161A1D';
 
 const SettingsItem: React.FC<{
   icon: string; title: string; description?: string; onClick?: () => void; rightContent?: React.ReactNode;
@@ -155,37 +150,18 @@ export const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <CurioWatermarkBackdrop topClearance={SETTINGS_HERO_HEIGHT + 30} alphaScale={0.45} />
-
-      {/* ── Torn Hero Banner ──────────────────────────────────────── */}
-      <TornHero
-        height={SETTINGS_HERO_HEIGHT}
-        fill={ROSE_WOOD}
-        ink="#fff"
-        tearSeed={SETTINGS_TEAR_SEED}
-        bold={true}
-        symbols={SETTINGS_HERO_SYMBOLS}
-        isDark={isDark}
-      >
-        <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px] justify-end">
-          {/* Back pill */}
-          <button onClick={() => navigate(-1)} className="absolute top-0 left-5 w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', marginTop: 'env(safe-area-inset-top, 12px)' }}>
-            <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
-          </button>
-          <h1 className="text-xl font-extrabold text-white text-center" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-            Settings
-          </h1>
-          <p className="text-xs text-white/70 text-center mt-0.5">Customize your experience</p>
-        </div>
-      </TornHero>
-
+    <main className="curio-settings-screen min-h-screen pb-32 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <ScreenEntrance>
+        <div className="curio-settings-content relative z-10 px-4">
+          <header className="curio-settings-heading">
+            <button onClick={() => navigate(-1)} className="curio-settings-back" aria-label="Go back"><MaterialIcon name="arrow_back" size={19} /></button>
+            <div><span className="curio-settings-kicker">CURIO / PREFERENCES</span><h1>Make it yours<span>.</span></h1><p>Shape a quieter, more personal discovery space.</p></div>
+            <span className="curio-settings-mark"><MaterialIcon name="tune" size={22} /></span>
+          </header>      <ScreenEntrance>
         <div className="relative z-10 px-4">
-          <div className="mb-6">
+          <div className="curio-settings-group">
             <CurioSectionHeader title="Appearance" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
+            <div className="curio-settings-panel" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
               <div className="p-4"><ThemePicker selected={style} onSelect={setThemeStyle} /></div>
               <div className="px-4 pb-2"><CurioToggle checked={settings.darkMode} onChange={(v) => handleSettingChange('darkMode', v)} label="Dark Mode" description="Use dark color scheme" /></div>
               <div className="px-4 pb-2"><CurioToggle checked={settings.pastelColors} onChange={(v) => handleSettingChange('pastelColors', v)} label="Pastel Colors" description="Use softer color palette" /></div>
@@ -292,7 +268,7 @@ export const SettingsScreen: React.FC = () => {
           </div>
         </div>
       </ScreenEntrance>
-    </div>
+    </main>
   );
 };
 
