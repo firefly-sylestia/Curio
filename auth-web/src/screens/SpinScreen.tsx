@@ -73,28 +73,38 @@ export const SpinScreen: React.FC = () => {
 
   const drawDiscovery = useCallback(() => {
     if (drawing || loading || eligibleTopics.length === 0) return;
+    if (intervalRef.current !== null) window.clearTimeout(intervalRef.current);
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
     setDrawing(true);
     setRollingTopic(null);
     const pool = eligibleTopics.length > 1 ? eligibleTopics.filter(item => item.id !== (topic?.id || previousId)) : eligibleTopics;
     const candidates = pool.length ? pool : eligibleTopics;
     const choice = candidates[Math.floor(Math.random() * candidates.length)] || eligibleTopics[0];
-    intervalRef.current = window.setInterval(() => {
+    const startedAt = Date.now();
+    const rollFor = 4100;
+    const tick = () => {
+      const progress = Math.min(1, (Date.now() - startedAt) / rollFor);
+      if (progress >= 1) {
+        intervalRef.current = null;
+        setRollingTopic(null);
+        timeoutRef.current = window.setTimeout(() => {
+          setPreviousId(topic?.id || previousId);
+          setTopic(choice);
+          setDrawing(false);
+          timeoutRef.current = null;
+          questSystem.onSpin(activeCategory.id);
+        }, 760);
+        return;
+      }
       setRollingTopic(eligibleTopics[Math.floor(Math.random() * eligibleTopics.length)]);
-    }, 82);
-    timeoutRef.current = window.setTimeout(() => {
-      if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      setRollingTopic(null);
-      setPreviousId(topic?.id || previousId);
-      setTopic(choice);
-      setDrawing(false);
-      timeoutRef.current = null;
-      questSystem.onSpin(activeCategory.id);
-    }, 1180);
+      const easedProgress = progress * progress * progress;
+      intervalRef.current = window.setTimeout(tick, 58 + 560 * easedProgress);
+    };
+    intervalRef.current = window.setTimeout(tick, 58);
   }, [drawing, loading, eligibleTopics, topic, previousId, questSystem, activeCategory.id]);
 
   useEffect(() => () => {
-    if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
+    if (intervalRef.current !== null) window.clearTimeout(intervalRef.current);
     if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
   }, []);
 
@@ -122,104 +132,60 @@ export const SpinScreen: React.FC = () => {
   return (
     <div className="curio-shuffle-screen curio-draw-screen min-h-screen relative pb-32"
       style={{ background: backdrop, color: ink }}>
-      <main className="relative z-10 max-w-xl mx-auto px-5 pt-6 sm:pt-9">
-        <header className="mb-6">
-          <h1 className="text-[30px] sm:text-[34px] leading-tight font-extrabold tracking-tight"
-            style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>
-            Shuffle<span style={{ color: ACCENT }}>.</span>
-          </h1>
+      <main className="curio-shuffle-layout relative z-10 mx-auto px-5 pt-7 sm:pt-10">
+        <header className="curio-shuffle-header">
+          <div>
+            <p className="curio-shuffle-kicker">A LITTLE ROOM FOR THE UNEXPECTED</p>
+            <h1 className="curio-shuffle-title">Shuffle<span>.</span></h1>
+            <p className="curio-shuffle-intro">Let curiosity choose what you explore next.</p>
+          </div>
+          <div className="curio-shuffle-index" aria-hidden="true"><span>CURIO</span><strong>01</strong><i /></div>
         </header>
-
-        <section className="flex gap-2 mb-5">
-          <button onClick={() => setShowCategories(true)}
-            className="min-w-0 flex-1 rounded-xl px-4 py-3 text-left"
-            style={{ background: surface, border: `1px solid ${border}` }}>
-            <span className="block text-[10px] uppercase tracking-[.13em] font-bold mb-1" style={{ color: muted }}>Lane</span>
-            <span className="block text-sm font-semibold truncate" style={{ color: ink }}>{activeCategory.displayName}</span>
-          </button>
-          <button onClick={() => setShowFilters(true)} disabled={loading || subtypes.length === 0}
-            className="min-w-0 flex-1 rounded-xl px-4 py-3 text-left disabled:opacity-50"
-            style={{ background: surface, border: `1px solid ${border}` }}>
-            <span className="block text-[10px] uppercase tracking-[.13em] font-bold mb-1" style={{ color: muted }}>Filter</span>
-            <span className="block text-sm font-semibold truncate" style={{ color: ink }}>{selectedSubtype || 'All topics'}</span>
-          </button>
-        </section>
-
-        <section className="curio-draw-stage" aria-live="polite">
-          <div key={topic?.id || (drawing ? 'drawing' : 'ready')}
-            className={"curio-draw-card relative overflow-hidden rounded-[22px] p-6 sm:p-8 " + (drawing ? "is-drawing" : topic ? "has-result" : "")}
-            style={{
-              minHeight: 'clamp(290px, 43vh, 390px)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              background: surface,
-              border: `1px solid ${border}`,
-              boxShadow: dark ? '0 18px 42px -34px rgba(0,0,0,.85)' : '0 16px 38px -32px rgba(23,27,38,.32)',
-            }}>
-            <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-              <div className="absolute right-5 top-5 select-none pointer-events-none"
-                style={{ color: activeCategory.accent, opacity: dark ? .075 : .055, transform: 'rotate(-9deg)' }}>
-                <MaterialIcon name={activeCategory.iconGlyph} size={132} />
-              </div>
-              <div className="absolute left-0 top-7 bottom-7 w-[3px] rounded-r-full"
-                style={{ background: activeCategory.accent, opacity: .72 }} />
+        <section className="curio-shuffle-workspace" aria-live="polite">
+          <div className="curio-shuffle-toolbar">
+            <button onClick={() => setShowCategories(true)} className="curio-shuffle-select">
+              <span className="curio-shuffle-select-icon"><MaterialIcon name={activeCategory.iconGlyph} size={19} /></span>
+              <span className="curio-shuffle-select-copy"><small>YOUR LANE</small><strong>{activeCategory.displayName}</strong></span>
+              <MaterialIcon name="expand_more" size={19} />
+            </button>
+            <button onClick={() => setShowFilters(true)} disabled={loading || subtypes.length === 0} className="curio-shuffle-filter">
+              <MaterialIcon name="filter_list" size={18} /><span>{selectedSubtype || 'All topics'}</span><MaterialIcon name="expand_more" size={17} />
+            </button>
+          </div>
+          <div className={"curio-shuffle-canvas " + (drawing ? "is-drawing" : topic ? "has-result" : "is-idle")}>
+            <div className="curio-shuffle-canvas-top">
+              <span><i />{drawing ? 'SEARCHING THE DECK' : topic ? 'YOUR DISCOVERY' : 'THE DAILY DRAW'}</span>
+              <span>{eligibleTopics.length.toLocaleString()} TOPICS</span>
             </div>
-            <div className="relative z-10 flex items-center justify-between gap-3">
-              <span className="text-[11px] font-bold tracking-[.12em] uppercase"
-                style={{ color: activeCategory.accent }}>{activeCategory.displayName}</span>
-              {topic?.subtype && <span className="text-xs truncate" style={{ color: muted }}>{topic.subtype}</span>}
+            <div className="curio-shuffle-art" aria-hidden="true">
+              <div className="curio-shuffle-orbit orbit-one" /><div className="curio-shuffle-orbit orbit-two" />
+              <div className="curio-shuffle-glyph"><MaterialIcon name={activeCategory.iconGlyph} size={112} /></div>
+              <div className="curio-shuffle-cross cross-one" /><div className="curio-shuffle-cross cross-two" />
             </div>
-
-            <div className="relative z-10 py-10">
+            <div className="curio-shuffle-copy">
               {loading ? (
-                <p className="text-base font-medium" style={{ color: muted }}>Loading topics…</p>
+                <><p className="curio-shuffle-overline">PREPARING YOUR DECK</p><h2>Gathering curiosities<span>…</span></h2><p className="curio-shuffle-description">A moment. Good discoveries are worth the wait.</p></>
               ) : drawing ? (
-                <div className="curio-rolling-wrap" aria-label="Shuffling through topics">
-                  <p className="text-[10px] font-bold uppercase tracking-[.16em] mb-3" style={{ color: muted }}>Finding your next curiosity</p>
-                  <h2 key={rollingTopic?.id || "rolling"} className="curio-rolling-title text-[28px] sm:text-[34px] font-extrabold leading-tight tracking-tight" style={{ color: ink, fontFamily: "Geom, Inter, sans-serif" }}>{rollingTopic?.name || "Mixing the deck…"}</h2>
-                  <div className="curio-shuffle-track mt-6" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /></div>
-                </div>
+                <><p className="curio-shuffle-overline">SOMETHING IS TAKING SHAPE</p><h2 key={rollingTopic?.id || 'rolling'} className="curio-shuffle-rolling-title">{rollingTopic?.name || 'Turning the pages…'}</h2><p className="curio-shuffle-description">{rollingTopic?.subtype || 'The next discovery is almost here.'}</p></>
               ) : topic ? (
-                <>
-                  <h2 className="text-[30px] sm:text-[36px] font-extrabold leading-tight tracking-tight"
-                    style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>{topic.name}</h2>
-                  {topic.teaser && <p className="mt-4 text-sm leading-relaxed max-w-md" style={{ color: muted }}>{topic.teaser}</p>}
-                </>
+                <><p className="curio-shuffle-overline">PICKED JUST FOR THIS MOMENT</p><h2>{topic.name}</h2>{topic.teaser && <p className="curio-shuffle-description">{topic.teaser}</p>}</>
               ) : (
-                <>
-                  <p className="text-[11px] font-bold uppercase tracking-[.14em] mb-3" style={{ color: muted }}>Your next topic</p>
-                  <h2 className="text-[28px] sm:text-[34px] font-extrabold leading-tight tracking-tight"
-                    style={{ color: ink, fontFamily: 'Geom, Inter, sans-serif' }}>Ready to discover?</h2>
-                </>
+                <><p className="curio-shuffle-overline">A WORLD OF IDEAS, ONE DRAW AWAY</p><h2>Where will curiosity take you?</h2><p className="curio-shuffle-description">No endless scrolling. Just one unexpected thing to discover.</p></>
               )}
             </div>
-
-            <div className="relative z-10 pt-4 flex items-center justify-between gap-3"
-              style={{ borderTop: `1px solid ${border}` }}>
-              <span className="text-xs" style={{ color: muted }}>
-                {loading ? ' ' : `${eligibleTopics.length.toLocaleString()} topics available`}
-              </span>
-              <span className="text-[10px] uppercase tracking-[.12em] font-bold" style={{ color: muted }}>
-                {drawing ? 'Shuffling' : topic ? 'Selected' : 'Random draw'}
-              </span>
+            <div className="curio-shuffle-canvas-bottom">
+              <span>{topic?.subtype || activeCategory.displayName}</span><span>{drawing ? 'LET IT UNFOLD' : topic ? 'READY WHEN YOU ARE' : 'FOLLOW THE THREAD'}</span>
             </div>
+            {drawing && <div className="curio-shuffle-progress" aria-hidden="true"><span /></div>}
           </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-2">
-            <button onClick={drawDiscovery} disabled={loading || drawing || eligibleTopics.length === 0}
-              className="curio-draw-primary w-full h-14 rounded-xl flex items-center justify-center text-sm font-bold text-white disabled:opacity-45"
-              style={{ background: ACCENT, boxShadow: '0 10px 24px -16px rgba(218,30,55,.75)' }}>
-              {loading ? 'Loading…' : drawing ? 'Choosing…' : topic ? 'Shuffle again' : 'Shuffle'}
+          <div className="curio-shuffle-actions">
+            <button onClick={drawDiscovery} disabled={loading || drawing || eligibleTopics.length === 0} className="curio-shuffle-draw-button">
+              <span>{drawing ? 'Finding your curiosity' : topic ? 'Draw again' : 'Surprise me'}</span>
+              <span className="curio-shuffle-button-icon"><MaterialIcon name={drawing ? 'hourglass_top' : 'arrow_forward'} size={20} /></span>
             </button>
-            {topic && (
-              <button onClick={openTopic}
-                className="w-full h-12 rounded-xl text-sm font-semibold"
-                style={{ color: ink, background: surface, border: `1px solid ${border}` }}>
-                Explore topic
-              </button>
-            )}
+            {topic && !drawing && <button onClick={openTopic} className="curio-shuffle-open-button">Explore this topic <MaterialIcon name="north_east" size={17} /></button>}
           </div>
+          <p className="curio-shuffle-footnote"><MaterialIcon name="auto_awesome" size={14} /> {(selectedSubtype ? 'A focused draw from ' + selectedSubtype : 'A fresh draw from ' + activeCategory.displayName) + '. No repeats until you change your lane.'}</p>
         </section>
       </main>
 
