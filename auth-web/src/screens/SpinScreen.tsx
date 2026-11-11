@@ -185,7 +185,7 @@ export const SpinScreen: React.FC = () => {
             </button>
             {topic && !drawing && <button onClick={openTopic} className="curio-shuffle-open-button">Explore this topic <MaterialIcon name="north_east" size={17} /></button>}
           </div>
-          <p className="curio-shuffle-footnote"><MaterialIcon name="auto_awesome" size={14} /> {(selectedSubtype ? 'A focused draw from ' + selectedSubtype : 'A fresh draw from ' + activeCategory.displayName) + '. No repeats until you change your lane.'}</p>
+          <p className="curio-shuffle-footnote"><MaterialIcon name="auto_awesome" size={14} /> {(selectedSubtype ? 'A focused draw from ' + selectedSubtype : 'A fresh draw from ' + activeCategory.displayName) + '. One fresh pick at a time.'}</p>
         </section>
       </main>
 
