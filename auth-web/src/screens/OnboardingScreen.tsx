@@ -97,7 +97,6 @@ export const OnboardingScreen: React.FC = () => {
   
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const steps = [
     {
@@ -123,19 +122,13 @@ export const OnboardingScreen: React.FC = () => {
   ];
 
   const handleNext = () => {
-    if (isAnimating) return;
-    
-    setIsAnimating(true);
-    
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      // Complete onboarding
-      localStorage.setItem('onboarding_complete', 'true');
-      navigate('/');
+    if (currentStep < steps.length) {
+      setCurrentStep(current => current + 1);
+      return;
     }
-    
-    setTimeout(() => setIsAnimating(false), 500);
+    localStorage.setItem('curio-onboarding-categories', JSON.stringify(selectedCategories));
+    localStorage.setItem('onboarding_complete', 'true');
+    navigate('/', { replace: true });
   };
 
   const handleSkip = () => {
@@ -210,10 +203,10 @@ export const OnboardingScreen: React.FC = () => {
           onClick={handleNext}
           className="w-full"
         >
-          {currentStep < steps.length - 1 ? 'Continue' : 'Get Started'}
+          {currentStep < steps.length ? 'Continue' : 'Get Started'}
         </CurioButton>
         
-        {currentStep === steps.length - 1 && selectedCategories.length > 0 && (
+        {currentStep === steps.length && selectedCategories.length > 0 && (
           <p
             className="text-center text-sm mt-4"
             style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}

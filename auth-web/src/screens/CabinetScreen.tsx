@@ -6,15 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import { ScreenEntrance, usePressable } from '../animations';
-import { CurioChip, CurioEmptyState, CurioSectionHeader, CurioWatermarkBackdrop, MaterialIcon } from '../components/SharedComponents';
+import { CurioChip, CurioEmptyState, CurioSectionHeader, MaterialIcon } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
-import { TornHero, CABINET_HERO_SYMBOLS } from '../components/TornHero';
 
-const CABINET_HERO_HEIGHT = 180;
-const CABINET_TEAR_SEED = 0xCAB1E; // Android's CABINET_TEAR_SEED
-const ROSE_WOOD = '#161A1D';
 
-interface CurioCapture { id: string; title: string; content: string; categoryId: string; topicName?: string; format?: string; createdAt: string; }
+interface CurioCapture { id: string; title: string; content: string; categoryId: string; topicName?: string; format?: string; createdAt: string; images: string[]; }
 const getCategoryByIdSafe = (id: string) => ALL_CATEGORIES.find(c => c.id === id) || null;
 
 const EntryCard: React.FC<{ entry: CurioCapture; onClick: () => void }> = ({ entry, onClick }) => {
@@ -24,7 +20,7 @@ const EntryCard: React.FC<{ entry: CurioCapture; onClick: () => void }> = ({ ent
   return (
     <button onClick={onClick} {...handlers} className="w-full text-left rounded-2xl overflow-hidden"
       style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', ...pressStyle }}>
-      <div className="h-1" style={{ background: category?.accent || '#171B26' }} />
+      {entry.images.length > 0 && <div className="grid grid-cols-3 gap-1 h-28 overflow-hidden">{entry.images.slice(0,3).map((image,index) => <img key={index} src={image} alt="Saved journal attachment" loading="lazy" className="h-full w-full object-cover" />)}</div>}
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${category?.accent || '#171B26'}15` }}>
@@ -80,6 +76,7 @@ export const CabinetScreen: React.FC = () => {
           id: e.id, title: e.title || e.topicName || 'Untitled', content: e.topicTeaser || '',
           categoryId: e.categoryId, topicName: e.topicName, format: e.format,
           createdAt: new Date(e.capturedAtMillis).toISOString(),
+          images: (() => { try { const data = JSON.parse(e.formatDataJson || '{}'); return Array.isArray(data.images) ? data.images : []; } catch { return []; } })(),
         })).reverse());
       } catch { setEntries([]); }
       finally { setIsLoading(false); }
@@ -101,33 +98,15 @@ export const CabinetScreen: React.FC = () => {
     return acc;
   }, {} as Record<string, CurioCapture[]>);
 
-  // Category-matched hero fill
-  const activeCat = selectedCategory ? getCategoryByIdSafe(selectedCategory) : null;
-  const heroFill = activeCat?.accent || ROSE_WOOD;
 
   return (
     <div className="curio-library-screen min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <CurioWatermarkBackdrop topClearance={CABINET_HERO_HEIGHT + 30} alphaScale={0.45} />
-
-      {/* ── Torn Hero Banner ──────────────────────────────────────── */}
-      <TornHero
-        height={CABINET_HERO_HEIGHT}
-        fill={heroFill}
-        ink="#fff"
-        tearSeed={CABINET_TEAR_SEED}
-        bold={true}
-        symbols={CABINET_HERO_SYMBOLS}
-        isDark={isDark}
-      >
-        <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px] justify-end">
-          <h1 className="text-xl font-extrabold text-white text-center" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-            Cabinet
-          </h1>
-          <p className="text-xs text-white/70 text-center mt-0.5">{entries.length} entries saved</p>
-        </div>
-      </TornHero>
-
       <ScreenEntrance>
+        <header className="curio-library-heading">
+          <div><p className="curio-screen-kicker">YOUR COLLECTION</p><h1>Saved entries<span>.</span></h1><p>{entries.length} pieces in your personal archive</p></div>
+          <button onClick={() => navigate('/explore')} aria-label="Explore topics"><MaterialIcon name="add" size={22} /></button>
+        </header>
+
         <div className="relative z-10">
           {/* Sticky search + filter bar */}
           <div className="sticky top-0 z-20 px-4 pt-4 pb-3"
@@ -171,7 +150,6 @@ export const CabinetScreen: React.FC = () => {
             )}
           </div>
         </div>
-      </ScreenEntrance>
     </div>
   );
 };

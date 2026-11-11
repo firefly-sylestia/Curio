@@ -6,16 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES, DEFAULT_ORDER } from '../data/categories';
 import {
-  CurioWatermarkBackdrop,
   MaterialIcon,
 } from '../components/SharedComponents';
-import { TornHero, SETTINGS_HERO_SYMBOLS } from '../components/TornHero';
 import { ScreenEntrance } from '../animations';
 import type { CategoryId } from '../types';
 
-const SETTINGS_HERO_HEIGHT = 180;
-const SETTINGS_TEAR_SEED = 0x5EED;
-const ROSE_WOOD = '#161A1D';
 
 const STORAGE_KEY_ORDER = 'curio-category-order';
 const STORAGE_KEY_HIDDEN = 'curio-hidden-categories';
@@ -89,41 +84,15 @@ export const ManageCategoriesScreen: React.FC = () => {
   };
 
   return (
-    <div className="curio-manage-categories-screen min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
-      <CurioWatermarkBackdrop topClearance={SETTINGS_HERO_HEIGHT + 30} alphaScale={0.45} />
-
-      <TornHero
-        height={SETTINGS_HERO_HEIGHT}
-        fill={ROSE_WOOD}
-        ink="#fff"
-        tearSeed={SETTINGS_TEAR_SEED}
-        bold={true}
-        symbols={SETTINGS_HERO_SYMBOLS}
-        isDark={isDark}
-      >
-        <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px] justify-end">
-          <button onClick={() => navigate(-1)} className="absolute top-0 left-5 w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', marginTop: 'env(safe-area-inset-top, 12px)' }}>
-            <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
-          </button>
-          <h1 className="text-xl font-extrabold text-white text-center" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-            Manage Categories
-          </h1>
-          <p className="text-xs text-white/70 text-center mt-0.5">Show, hide and reorder your lanes</p>
-        </div>
-      </TornHero>
+    <div className="curio-manage-categories-screen min-h-screen pb-32 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+      <header className="curio-manage-heading">
+        <button onClick={() => navigate(-1)} aria-label="Go back"><MaterialIcon name="arrow_back" size={20} /></button>
+        <div><p className="curio-screen-kicker">PERSONALISE YOUR DECK</p><h1>Manage categories<span>.</span></h1><p>Choose the subjects you want to see, and put them in your preferred order.</p></div>
+        <button className="curio-manage-reset" onClick={resetToDefault}>Reset</button>
+      </header>
 
       <ScreenEntrance>
-        <div className="relative z-10 px-4 pt-4">
-          {/* Reset button */}
-          <div className="flex justify-end mb-3">
-            <button onClick={resetToDefault}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-              style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }}>
-              Reset to default
-            </button>
-          </div>
-
+        <div className="curio-manage-content relative z-10">
           {/* Category list */}
           <div className="space-y-1.5">
             {order.map((catId, index) => {
@@ -133,13 +102,13 @@ export const ManageCategoriesScreen: React.FC = () => {
 
               return (
                 <div key={catId}
-                  className="flex items-center gap-3 p-3 rounded-xl"
+                  className="curio-category-row flex items-center gap-3 p-4 rounded-2xl"
                   style={{
                     background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)',
                     opacity: isVisible ? 1 : 0.45,
                   }}>
                   {/* Category icon */}
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  <div className="curio-category-icon w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
                     style={{ background: `${cat.accent}20` }}>
                     <MaterialIcon name={cat.iconGlyph} size={20} style={{ color: cat.accent }} />
                   </div>
@@ -152,7 +121,7 @@ export const ManageCategoriesScreen: React.FC = () => {
 
                   {/* Move up */}
                   <button onClick={() => moveUp(index)} disabled={index === 0}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    className="curio-category-move w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ opacity: index === 0 ? 0.25 : 1 }}>
                     <MaterialIcon name="keyboard_arrow_up" size={20} style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(23,27,38,0.6)' }} />
                   </button>
@@ -166,7 +135,7 @@ export const ManageCategoriesScreen: React.FC = () => {
 
                   {/* Toggle visibility */}
                   <button onClick={() => toggleVisibility(catId)}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    className="curio-category-visibility w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0">
                     <MaterialIcon name={isVisible ? 'visibility' : 'visibility_off'} size={20}
                       style={{ color: isVisible ? cat.accent : (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(23,27,38,0.3)') }} />
                   </button>

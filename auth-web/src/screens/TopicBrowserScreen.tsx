@@ -86,7 +86,7 @@ export const TopicBrowserScreen: React.FC = () => {
   return (
     <div className="curio-explore-screen min-h-screen relative pb-32" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <ScreenEntrance>
-        <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-5xl mx-auto">
+        <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-none w-full mx-auto">
           <header className="relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white"
             style={{
               background: 'linear-gradient(125deg, #111820 0%, #202831 58%, #38151D 100%)',
@@ -108,7 +108,7 @@ export const TopicBrowserScreen: React.FC = () => {
               <h1 className="text-[34px] sm:text-[42px] leading-none font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
                 Explore<span style={{ color: '#F05265' }}>.</span>
               </h1>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/65">
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
                 Follow a curiosity. Find a new favourite. There is always something worth discovering.
               </p>
               <div className="mt-6 flex items-end gap-6">

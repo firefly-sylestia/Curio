@@ -5,17 +5,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
-import { MaterialIcon, CurioWatermarkBackdrop } from '../components/SharedComponents';
+import { MaterialIcon } from '../components/SharedComponents';
 import type { CurioCategory, CaptureFormat, CaptureData, JournalMood } from '../types';
 import { JOURNAL_MOODS } from '../types';
 import { captureRepository, deserializeTags } from '../db/database';
 import { ScreenEntrance } from '../animations';
-import { TornHero, makeDetailHeroSymbols } from '../components/TornHero';
 
 // ─── Paper ink & font ────────────────────────────────────────────────
 const paperFont = "'Patrick Hand', cursive";
 const getPaperInk = (isDark: boolean) => isDark ? '#E4D2BC' : '#2D140F';
-const HERO_H = 400;
 
 // ─── Paper card for saved views ───────────────────────────────────────
 const SavedPaperCard: React.FC<{ children: React.ReactNode; isDark: boolean; accent: string }> = ({ children, isDark, accent }) => (
@@ -251,12 +249,11 @@ const GalleryWallRender: React.FC<{ data: CaptureData; isDark: boolean; accent: 
     <div className="space-y-4">
       <SavedPaperCard isDark={isDark} accent={accent}>
         {d.caption && <p className="whitespace-pre-wrap mb-4">{d.caption}</p>}
-        <div className="grid grid-cols-2 gap-2">
-          {Array.from({ length: Math.min(d.images?.length || 2, 4) }).map((_, i) => (
-            <div key={i} className="aspect-square rounded-lg flex items-center justify-center"
-              style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}>
-              <MaterialIcon name="image" size={28} style={{ color: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }} />
-            </div>
+        <div className="curio-gallery-grid">
+          {(Array.isArray(d.images) ? d.images : []).map((image: string, i: number) => (
+            <a key={i} href={image} target="_blank" rel="noreferrer" className="curio-gallery-image">
+              <img src={image} alt={`Saved image ${i + 1}`} loading="lazy" />
+            </a>
           ))}
         </div>
       </SavedPaperCard>
@@ -318,9 +315,6 @@ export const EntryDetailScreen: React.FC = () => {
   const captureData = entry.formatDataJson ? JSON.parse(entry.formatDataJson) : {};
   const tags = entry.tagsJson ? deserializeTags(entry.tagsJson) : [];
   const format = (entry.format || 'Marginalia') as CaptureFormat;
-  const heroFill = category.accent;
-  const heroInk = '#fff';
-  const tearSeed = (entry.id || 'detail').split('').reduce((a: number, c: string) => a * 31 + c.charCodeAt(0), 0x0BADC0DE);
 
   const formatDate = (millis: number) => {
     const d = new Date(millis);
@@ -330,60 +324,23 @@ export const EntryDetailScreen: React.FC = () => {
   const tiny = daysAgo === 0 ? new Date(entry.capturedAtMillis).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : daysAgo === 1 ? 'yesterday' : `${daysAgo}d ago`;
 
   return (
-    <div className="curio-entry-detail-screen min-h-screen pb-24 relative" style={{ background: `${category.accent}0A` }}>
-      <CurioWatermarkBackdrop activeCatId={category.id} topClearance={HERO_H + 30} alphaScale={0.45} />
-
-      {/* ── Torn Hero Banner ──────────────────────────────────────── */}
-      <TornHero
-        height={HERO_H}
-        fill={heroFill}
-        ink={heroInk}
-        tearSeed={tearSeed}
-        detail={true}
-        symbols={makeDetailHeroSymbols(category.iconGlyph)}
-        isDark={isDark}
-      >
-        <div className="flex flex-col items-center justify-center h-full px-7" style={{ paddingTop: 80, paddingBottom: 16 }}>
-          <MaterialIcon name={category.iconGlyph} size={64} style={{ color: 'rgba(255,255,255,0.92)' }} />
-          <div className="h-3" />
-          <h1 className="text-2xl font-extrabold text-center leading-tight px-4"
-            style={{ color: heroInk, fontFamily: 'Geom, Inter, sans-serif', maxWidth: 300 }}>
-            {entry.topicName || 'Untitled'}
-          </h1>
-          <div className="h-4" />
-          <div className="flex items-center rounded-2xl px-4 py-2.5 gap-3"
-            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.22)' }}>
-            <FrostedSegment icon="calendar_today" title={formatDate(entry.capturedAtMillis)} subtitle="Date" tiny={tiny} />
-            <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
-            <FrostedSegment icon="category" title={format} subtitle="Type" />
-          </div>
-        </div>
-      </TornHero>
-
-      {/* Sticky back + actions */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex justify-between px-4"
-        style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-          <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
-        </button>
+    <div className="curio-entry-detail-screen min-h-screen pb-32 relative" style={{ background: getBackgroundColor(isDark, isAmoled) }}>
+      <header className="curio-entry-toolbar">
+        <button onClick={() => navigate(-1)} aria-label="Go back"><MaterialIcon name="arrow_back" size={20} /></button>
         <div className="flex gap-2">
-          <button onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${(entry.topicName || 'topic').replace(/\s+/g, '-')}`)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-            <MaterialIcon name="edit" size={20} style={{ color: '#fff' }} />
-          </button>
-          <button onClick={() => setDeleteVisible(true)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)' }}>
-            <MaterialIcon name="delete" size={20} style={{ color: '#FF6B6B' }} />
-          </button>
+          <button onClick={() => navigate(`/capture/${category.id.toLowerCase()}/${(entry.topicName || 'topic').replace(/\\s+/g, '-')}`)} aria-label="Edit entry"><MaterialIcon name="edit" size={19} /></button>
+          <button onClick={() => setDeleteVisible(true)} aria-label="Delete entry"><MaterialIcon name="delete" size={19} /></button>
         </div>
-      </div>
+      </header>
+      <section className="curio-entry-heading">
+        <p className="curio-screen-kicker">{category.displayName.toUpperCase()} / SAVED ENTRY</p>
+        <h1>{entry.topicName || 'Untitled'}<span>.</span></h1>
+        <div className="curio-entry-meta"><span>{formatDate(entry.capturedAtMillis)}</span><span>{format}</span><span>{tiny}</span></div>
+      </section>
 
       {/* ── Body ──────────────────────────────────────────────────── */}
       <ScreenEntrance>
-      <div className="relative z-10 px-5 max-w-lg mx-auto">
+      <div className="curio-entry-content relative z-10 px-5 mx-auto">
         {/* Category label */}
         <div className="flex items-center gap-2.5 py-3 mt-1">
           <MaterialIcon name={category.iconGlyph} size={22} style={{ color: category.accent }} />
