@@ -150,6 +150,7 @@ export const CabinetScreen: React.FC = () => {
             )}
           </div>
         </div>
+      </ScreenEntrance>
     </div>
   );
 };
