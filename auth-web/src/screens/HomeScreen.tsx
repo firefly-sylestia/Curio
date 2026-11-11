@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, getBackgroundColor } from '../theme/ThemeContext';
+import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon } from '../components/SharedComponents';
