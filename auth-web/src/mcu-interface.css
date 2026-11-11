@@ -490,8 +490,8 @@ html.amoled .curio-bottom-nav { background: rgba(8,9,12,.66) !important; }
   --account-panel:rgba(255,255,255,.82);
   --account-panel-strong:#fff;
   --account-soft:rgba(20,27,42,.045);
-  --account-shadow:0 24px 60px -34px rgba(22,29,44,.24),0 8px 22px -16px rgba(22,29,44,.16),inset 0 1px 0 rgba(255,255,255,.88);
-  --account-shadow-hover:0 28px 66px -34px rgba(22,29,44,.30),0 12px 26px -16px rgba(22,29,44,.18),inset 0 1px 0 rgba(255,255,255,.9);
+  --account-shadow:0 12px 26px -21px rgba(22,29,44,.19),0 3px 9px -7px rgba(22,29,44,.10),inset 0 1px 0 rgba(255,255,255,.96);
+  --account-shadow-hover:0 16px 30px -20px rgba(22,29,44,.23),0 5px 12px -8px rgba(22,29,44,.12),inset 0 1px 0 rgba(255,255,255,.98);
   --account-accent:#DA1E37;
   isolation:isolate;
   overflow-x:clip;
@@ -502,8 +502,8 @@ html.dark .curio-account-screen,html.amoled .curio-account-screen {
   --account-panel:rgba(24,27,34,.88);
   --account-panel-strong:#1A1D24;
   --account-soft:rgba(255,255,255,.065);
-  --account-shadow:0 26px 68px -34px rgba(0,0,0,.82),0 9px 24px -16px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.075);
-  --account-shadow-hover:0 30px 76px -34px rgba(0,0,0,.9),0 14px 30px -16px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,255,255,.09);
+  --account-shadow:0 18px 38px -25px rgba(0,0,0,.78),0 5px 14px -9px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.09);
+  --account-shadow-hover:0 22px 44px -25px rgba(0,0,0,.84),0 8px 18px -10px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12);
 }
 html.amoled .curio-account-screen { --account-panel:rgba(14,15,19,.94); --account-panel-strong:#111216; }
 .curio-account-content { position:relative; z-index:1; width:min(100%,900px); }
@@ -531,7 +531,7 @@ html.amoled .curio-account-screen { --account-panel:rgba(14,15,19,.94); --accoun
 .curio-account-section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:0 2px 14px; color:var(--account-accent); }
 .curio-account-section-heading h2 { margin:5px 0 0; color:var(--account-ink); font:800 20px/1.15 Geom,Inter,sans-serif; letter-spacing:-.035em; }
 .curio-account-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.curio-account-stat { min-width:0; min-height:132px; padding:16px; border-radius:22px; background:var(--account-panel); box-shadow:var(--account-shadow); transition:transform 200ms ease,box-shadow 200ms ease; }
+.curio-account-stat { min-width:0; min-height:132px; padding:16px; border-radius:22px; background:var(--account-panel); box-shadow:var(--account-shadow); transform:translateZ(0); transition:transform 200ms ease,box-shadow 200ms ease; }
 .curio-account-stat:hover { transform:translateY(-3px); box-shadow:var(--account-shadow-hover); }
 .curio-account-stat-icon { width:35px; height:35px; display:grid; place-items:center; border-radius:12px; color:var(--account-accent); background:rgba(218,30,55,.085); box-shadow:inset 0 1px 0 rgba(255,255,255,.45); }
 .curio-account-stat strong { display:block; margin-top:13px; color:var(--account-ink); font:850 clamp(22px,3vw,28px)/1 Geom,Inter,sans-serif; letter-spacing:-.045em; font-variant-numeric:tabular-nums; }
