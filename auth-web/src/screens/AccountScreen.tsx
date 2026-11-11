@@ -295,158 +295,137 @@ const AccountScreen: React.FC = () => {
   };
 
   return (
-    <main className="curio-account-screen min-h-screen px-4 pt-7 pb-32 relative"
+    <main className="curio-account-screen min-h-screen px-4 pt-6 pb-32 relative"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled), color: ink }}>
       <div className="max-w-2xl mx-auto">
-        <header className="flex items-center justify-between mb-6">
+        <header className="flex items-center justify-between mb-7">
           <div>
-            <h1 className="text-3xl font-extrabold" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Account</h1>
-            <p className="text-sm mt-1" style={{ color: muted }}>Your profile and online account.</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.2em] mb-2" style={{ color: '#DA1E37' }}>CURIO / PERSONAL</p>
+            <h1 className="text-[34px] leading-none font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Your account</h1>
+            <p className="text-sm mt-2" style={{ color: muted }}>Profile, progress and sign-in.</p>
           </div>
           <button onClick={() => navigate('/settings')} className="w-11 h-11 rounded-full flex items-center justify-center"
             style={{ background: surface, border: '1px solid ' + border }} aria-label="Settings"><MaterialIcon name="settings" size={20} /></button>
         </header>
 
-        <section className="rounded-[18px] p-5 mb-4" style={{ ...cardStyle, background: dark ? '#191719' : '#FFF9FA' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-              style={{ color: '#fff', background: 'linear-gradient(145deg,#DA1E37,#8F172B)' }}>
-              {displayName.trim().charAt(0).toUpperCase() || 'C'}
-            </div>
+        <section className="rounded-[22px] p-5 mb-4 overflow-hidden relative" style={{ ...cardStyle, background: dark ? '#171A1F' : '#FFFFFF' }}>
+          <div className="absolute right-0 top-0 w-28 h-28 rounded-full pointer-events-none" style={{ background: 'rgba(218,30,55,.055)', filter: 'blur(22px)', transform: 'translate(25%,-35%)' }} />
+          <div className="relative flex items-center gap-4">
+            <div className="w-[62px] h-[62px] rounded-[19px] flex items-center justify-center text-2xl font-extrabold text-white"
+              style={{ background: '#DA1E37' }}>{displayName.trim().charAt(0).toUpperCase() || 'C'}</div>
             <div className="min-w-0 flex-1">
-              <p className="font-bold text-lg truncate">{displayName || 'Explorer'}</p>
-              <p className="text-xs" style={{ color: muted }}>Local profile · This device</p>
+              <p className="text-lg font-bold truncate">{displayName || 'Explorer'}</p>
+              <p className="text-xs mt-1" style={{ color: muted }}>Local profile · Stored on this device</p>
             </div>
+            <span className="text-[10px] font-bold px-2.5 py-1.5 rounded-full" style={{ color: '#168653', background: 'rgba(22,134,83,.09)' }}>LOCAL</span>
           </div>
-          <label htmlFor="curio-display-name" className="block text-xs font-semibold mt-5 mb-2" style={{ color: muted }}>Display name</label>
+          <label htmlFor="curio-display-name" className="block text-[11px] font-bold uppercase tracking-wider mt-6 mb-2" style={{ color: muted }}>Display name</label>
           <input id="curio-display-name" value={displayName} onChange={event => {
             setDisplayName(event.target.value);
             localStorage.setItem('curio-display-name', event.target.value);
           }} style={fieldStyle} maxLength={40} />
         </section>
 
-        <section className="grid grid-cols-3 gap-2.5 mb-5">
-          {[{ label: 'Saved', value: stats.saved }, { label: 'Shuffles', value: stats.spins }, { label: 'Best streak', value: stats.streak }].map(item => (
-            <div key={item.label} className="rounded-2xl p-3 text-center" style={cardStyle}>
-              <p className="text-xl font-extrabold">{item.value}</p>
-              <p className="text-[11px] mt-1" style={{ color: muted }}>{item.label}</p>
+        <section className="grid grid-cols-3 gap-2.5 mb-6">
+          {[{ label: 'Saved', value: stats.saved, icon: 'bookmark' }, { label: 'Shuffles', value: stats.spins, icon: 'shuffle' }, { label: 'Best streak', value: stats.streak, icon: 'local_fire_department' }].map(item => (
+            <div key={item.label} className="rounded-[18px] p-3.5" style={cardStyle}>
+              <MaterialIcon name={item.icon} size={17} style={{ color: '#DA1E37' }} />
+              <p className="text-[22px] font-extrabold mt-2 tabular-nums">{item.value}</p>
+              <p className="text-[10px] mt-1 font-semibold" style={{ color: muted }}>{item.label}</p>
             </div>
           ))}
         </section>
 
-        <section className="rounded-[18px] p-5 mb-4" style={cardStyle}>
-          <div className="flex items-center justify-between gap-3 mb-3">
+        <section className="rounded-[22px] p-5 mb-4" style={cardStyle}>
+          <div className="flex items-start justify-between gap-3 mb-5">
             <div>
-              <h2 className="font-bold text-lg">Online account</h2>
-              <p className="text-xs mt-1" style={{ color: muted }}>Optional account access across Curio.</p>
+              <p className="text-[10px] font-bold uppercase tracking-[.18em] mb-2" style={{ color: '#DA1E37' }}>ONLINE IDENTITY</p>
+              <h2 className="text-xl font-extrabold">Curio account</h2>
+              <p className="text-xs mt-1.5 leading-relaxed" style={{ color: muted }}>Optional sign-in for your Curio identity.</p>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+            <span className="text-[10px] font-bold px-2.5 py-1.5 rounded-full whitespace-nowrap"
               style={{ color: session ? '#168653' : muted, background: session ? 'rgba(22,134,83,.10)' : (dark ? 'rgba(255,255,255,.07)' : 'rgba(23,27,38,.05)') }}>
-              {authLoading ? 'Checking…' : session ? 'Signed in' : 'Signed out'}
+              {authLoading ? 'Checking' : session ? 'Connected' : 'Not connected'}
             </span>
           </div>
 
           {authLoading ? (
-            <p className="text-sm py-3" style={{ color: muted }}>Checking your online account…</p>
+            <div className="py-5 flex items-center gap-3 text-sm" style={{ color: muted }}><span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />Checking account…</div>
           ) : session ? (
             <div>
-              <div className="rounded-xl p-4 mb-4" style={{ background: dark ? 'rgba(255,255,255,.045)' : '#F7F7F9' }}>
-                <p className="text-sm font-semibold break-all">{session.email}</p>
-                {(onlineName || username) && <p className="text-xs mt-1" style={{ color: muted }}>{onlineName || '@' + username}</p>}
+              <div className="rounded-[16px] p-4 mb-4" style={{ background: dark ? 'rgba(255,255,255,.045)' : '#F6F7F9' }}>
+                <p className="text-sm font-bold break-all">{session.email}</p>
+                {(onlineName || username) && <p className="text-xs mt-1.5" style={{ color: muted }}>{onlineName || '@' + username}</p>}
                 {memberSince && <p className="text-xs mt-1" style={{ color: muted }}>Member since {memberSince}</p>}
               </div>
-              <p className="text-xs leading-relaxed mb-4" style={{ color: muted }}>
-                Your online identity is connected. Saved topics, journals and photos remain local and are not uploaded by signing in.
-              </p>
-              <div className="flex flex-col gap-2">
-                <button onClick={signOut} disabled={busy} className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-                  style={{ color: ink, background: dark ? 'rgba(255,255,255,.07)' : '#F1F1F3' }}>
-                  {busy ? 'Please wait…' : 'Sign out'}
-                </button>
-                {config?.deletionEnabled && <button onClick={deleteAccount} disabled={busy}
-                  className="w-full rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-                  style={{ color: '#C53045', background: 'rgba(218,30,55,.07)' }}>Delete online account</button>}
-              </div>
+              <p className="text-xs leading-relaxed mb-4" style={{ color: muted }}>Your online identity is connected. Your saved topics, journals and photos stay on this device and are not uploaded by signing in.</p>
+              <button onClick={signOut} disabled={busy} className="w-full rounded-xl py-3.5 text-sm font-bold disabled:opacity-50"
+                style={{ color: ink, background: dark ? 'rgba(255,255,255,.07)' : '#F0F1F3' }}>{busy ? 'Please wait…' : 'Sign out'}</button>
+              {config?.deletionEnabled && <button onClick={deleteAccount} disabled={busy} className="w-full mt-2 rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
+                style={{ color: '#C53045', background: 'rgba(218,30,55,.07)' }}>Delete online account</button>}
             </div>
           ) : (
             <div>
               {!config?.configured ? (
-                <p className="text-sm leading-relaxed py-2" style={{ color: muted }}>
-                  {config?.problem || 'The online account service is not configured on this deployment.'}
-                </p>
+                <p className="text-sm leading-relaxed py-2" style={{ color: muted }}>{config?.problem || 'The online account service is not configured on this deployment.'}</p>
               ) : (
                 <>
-                  <div className="flex rounded-xl p-1 mb-4" style={{ background: dark ? 'rgba(255,255,255,.06)' : '#F1F1F3' }}>
-                    <button onClick={() => { setMode('signin'); setNotice(''); }} className="flex-1 rounded-lg py-2.5 text-sm font-semibold"
-                      style={{ background: mode === 'signin' ? surface : 'transparent', color: ink, boxShadow: mode === 'signin' ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>Sign in</button>
-                    <button onClick={() => { setMode('signup'); setNotice(''); }} className="flex-1 rounded-lg py-2.5 text-sm font-semibold"
-                      style={{ background: mode === 'signup' ? surface : 'transparent', color: ink, boxShadow: mode === 'signup' ? '0 1px 4px rgba(0,0,0,.08)' : 'none' }}>Create account</button>
+                  <div className="flex gap-1 p-1 rounded-xl mb-5" style={{ background: dark ? 'rgba(255,255,255,.06)' : '#F0F1F3' }}>
+                    <button onClick={() => { setMode('signin'); setNotice(''); }} className="flex-1 rounded-[9px] py-2.5 text-sm font-bold"
+                      style={{ background: mode === 'signin' ? surface : 'transparent', color: ink, boxShadow: mode === 'signin' ? '0 1px 5px rgba(0,0,0,.09)' : 'none' }}>Sign in</button>
+                    <button onClick={() => { setMode('signup'); setNotice(''); }} className="flex-1 rounded-[9px] py-2.5 text-sm font-bold"
+                      style={{ background: mode === 'signup' ? surface : 'transparent', color: ink, boxShadow: mode === 'signup' ? '0 1px 5px rgba(0,0,0,.09)' : 'none' }}>Create account</button>
                   </div>
-                  <form onSubmit={handleAuth} className="flex flex-col gap-3">
+                  <form onSubmit={handleAuth} className="flex flex-col gap-3.5">
                     <label className="text-xs font-semibold" style={{ color: muted }}>Email address
-                      <input type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)}
-                        placeholder="you@example.com" style={{ ...fieldStyle, marginTop: 7 }} />
+                      <input type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" style={{ ...fieldStyle, marginTop: 7 }} />
                     </label>
                     <label className="text-xs font-semibold" style={{ color: muted }}>Password
-                      <input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6}
-                        value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters"
-                        style={{ ...fieldStyle, marginTop: 7 }} />
+                      <input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" style={{ ...fieldStyle, marginTop: 7 }} />
                     </label>
-                    {mode === 'signup' && (
-                      <>
-                        <label className="text-xs font-semibold" style={{ color: muted }}>Repeat password
-                          <input type="password" autoComplete="new-password" required minLength={6} value={repeatPassword}
-                            onChange={event => setRepeatPassword(event.target.value)} placeholder="Enter it again"
-                            style={{ ...fieldStyle, marginTop: 7 }} />
-                        </label>
-                        <label className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: muted }}>
-                          <input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} className="mt-0.5" />
-                          <span>I agree to the <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Privacy Notice</a>.</span>
-                        </label>
-                      </>
-                    )}
+                    {mode === 'signup' && <>
+                      <label className="text-xs font-semibold" style={{ color: muted }}>Repeat password
+                        <input type="password" autoComplete="new-password" required minLength={6} value={repeatPassword} onChange={event => setRepeatPassword(event.target.value)} placeholder="Enter it again" style={{ ...fieldStyle, marginTop: 7 }} />
+                      </label>
+                      <label className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: muted }}>
+                        <input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} className="mt-0.5" />
+                        <span>I agree to the <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Privacy Notice</a>.</span>
+                      </label>
+                    </>}
                     <button type="submit" disabled={busy} className="w-full rounded-xl py-3.5 text-sm font-bold text-white disabled:opacity-50"
-                      style={{ background: 'linear-gradient(135deg,#DA1E37,#A9132B)' }}>
-                      {busy ? 'Please wait…' : mode === 'signup' ? 'Create my account' : 'Sign in'}
-                    </button>
+                      style={{ background: '#DA1E37' }}>{busy ? 'Please wait…' : mode === 'signup' ? 'Create my account' : 'Sign in'}</button>
                   </form>
-                  {mode === 'signin' && (
-                    <div className="flex flex-wrap gap-3 mt-3">
-                      <button onClick={sendMagicLink} disabled={busy} className="text-xs font-semibold" style={{ color: '#DA1E37' }}>Email me a sign-in link</button>
-                      <button onClick={sendRecovery} disabled={busy} className="text-xs font-semibold" style={{ color: muted }}>Forgot password?</button>
-                    </div>
-                  )}
+                  {mode === 'signin' && <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4">
+                    <button onClick={sendMagicLink} disabled={busy} className="text-xs font-bold" style={{ color: '#DA1E37' }}>Email me a sign-in link</button>
+                    <button onClick={sendRecovery} disabled={busy} className="text-xs font-semibold" style={{ color: muted }}>Forgot password?</button>
+                  </div>}
                 </>
               )}
             </div>
           )}
-
           {status && <p role="status" aria-live="polite" className="mt-4 rounded-xl px-3.5 py-3 text-xs leading-relaxed"
             style={{ color: statusKind === 'error' ? '#C53045' : statusKind === 'success' ? '#168653' : muted,
-              background: statusKind === 'error' ? 'rgba(197,48,69,.08)' : statusKind === 'success' ? 'rgba(22,134,83,.08)' : (dark ? 'rgba(255,255,255,.05)' : '#F7F7F9') }}>
-            {status}
-          </p>}
+              background: statusKind === 'error' ? 'rgba(197,48,69,.08)' : statusKind === 'success' ? 'rgba(22,134,83,.08)' : (dark ? 'rgba(255,255,255,.05)' : '#F7F7F9') }}>{status}</p>}
         </section>
 
-        <section className="rounded-[18px] overflow-hidden mb-4" style={cardStyle}>
-          <button onClick={() => navigate('/settings')} className="w-full flex items-center gap-3 p-4 text-left">
-            <span className="flex-1"><strong className="block text-sm">Preferences</strong><small className="text-xs" style={{ color: muted }}>Appearance and experience</small></span>
-            <MaterialIcon name="chevron_right" size={18} />
+        <section className="rounded-[22px] overflow-hidden" style={cardStyle}>
+          <div className="px-5 pt-5 pb-3"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{ color: '#DA1E37' }}>YOUR CURIO</p><h2 className="text-lg font-extrabold mt-1">Account settings</h2></div>
+          <button onClick={() => navigate('/settings')} className="w-full flex items-center gap-3 px-5 py-4 text-left">
+            <MaterialIcon name="tune" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Preferences</strong><small className="text-xs" style={{ color: muted }}>Appearance and experience</small></span><MaterialIcon name="chevron_right" size={18} />
           </button>
           <div style={{ height: 1, background: border }} />
-          <a href="/privacy" className="flex items-center gap-3 p-4">
-            <span className="flex-1"><strong className="block text-sm">Privacy</strong><small className="text-xs" style={{ color: muted }}>How online account data is handled</small></span>
-            <MaterialIcon name="chevron_right" size={18} />
+          <a href="/privacy" className="flex items-center gap-3 px-5 py-4">
+            <MaterialIcon name="shield" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Privacy</strong><small className="text-xs" style={{ color: muted }}>How your account data is handled</small></span><MaterialIcon name="chevron_right" size={18} />
           </a>
           <div style={{ height: 1, background: border }} />
-          <button onClick={() => navigate('/support')} className="w-full flex items-center gap-3 p-4 text-left">
-            <span className="flex-1"><strong className="block text-sm">Help & support</strong><small className="text-xs" style={{ color: muted }}>Account and sign-in help</small></span>
-            <MaterialIcon name="chevron_right" size={18} />
+          <button onClick={() => navigate('/support')} className="w-full flex items-center gap-3 px-5 py-4 text-left">
+            <MaterialIcon name="help_outline" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Help & support</strong><small className="text-xs" style={{ color: muted }}>Account and sign-in help</small></span><MaterialIcon name="chevron_right" size={18} />
           </button>
         </section>
       </div>
     </main>
   );
+};
 };
 
 export default AccountScreen;
