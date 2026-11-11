@@ -285,143 +285,108 @@ const AccountScreen: React.FC = () => {
     } finally { setBusy(false); }
   };
 
-  const fieldStyle: React.CSSProperties = {
-    width: '100%', borderRadius: 12, padding: '13px 14px', fontSize: 14,
-    color: ink, background: dark ? 'rgba(255,255,255,.055)' : '#F7F7F9',
-    border: '1px solid ' + border, outline: 'none',
-  };
-  const cardStyle: React.CSSProperties = {
-    background: surface, border: '1px solid ' + border, borderRadius: 18,
-  };
+  const fieldStyle: React.CSSProperties = { width: '100%', borderRadius: 14, padding: '14px 15px', fontSize: 14, color: ink, background: dark ? 'rgba(255,255,255,.055)' : 'rgba(20,27,42,.045)', border: 0, outline: 'none' };
+  const cardStyle: React.CSSProperties = { background: surface, border: 0, borderRadius: 24 };
 
   return (
-    <main className="curio-account-screen min-h-screen px-4 pt-6 pb-32 relative"
-      style={{ backgroundColor: getBackgroundColor(isDark, isAmoled), color: ink }}>
-      <div className="max-w-2xl mx-auto">
-        <header className="flex items-center justify-between mb-7">
+    <main className="curio-account-screen min-h-screen px-4 pt-7 pb-32 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled), color: ink }}>
+      <div className="curio-account-content mx-auto">
+        <header className="curio-account-heading">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[.2em] mb-2" style={{ color: '#DA1E37' }}>CURIO / PERSONAL</p>
-            <h1 className="text-[34px] leading-none font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Your account</h1>
-            <p className="text-sm mt-2" style={{ color: muted }}>Profile, progress and sign-in.</p>
+            <p className="curio-account-eyebrow">CURIO / YOUR SPACE</p>
+            <h1>Your account<span>.</span></h1>
+            <p className="curio-account-subtitle">A little record of what keeps you curious.</p>
           </div>
-          <button onClick={() => navigate('/settings')} className="w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ background: surface, border: '1px solid ' + border }} aria-label="Settings"><MaterialIcon name="settings" size={20} /></button>
+          <button onClick={() => navigate('/settings')} className="curio-account-settings" aria-label="Settings"><MaterialIcon name="settings" size={20} /></button>
         </header>
 
-        <section className="rounded-[22px] p-5 mb-4 overflow-hidden relative" style={{ ...cardStyle, background: dark ? '#171A1F' : '#FFFFFF' }}>
-          <div className="absolute right-0 top-0 w-28 h-28 rounded-full pointer-events-none" style={{ background: 'rgba(218,30,55,.055)', filter: 'blur(22px)', transform: 'translate(25%,-35%)' }} />
-          <div className="relative flex items-center gap-4">
-            <div className="w-[62px] h-[62px] rounded-[19px] flex items-center justify-center text-2xl font-extrabold text-white"
-              style={{ background: '#DA1E37' }}>{displayName.trim().charAt(0).toUpperCase() || 'C'}</div>
-            <div className="min-w-0 flex-1">
-              <p className="text-lg font-bold truncate">{displayName || 'Explorer'}</p>
-              <p className="text-xs mt-1" style={{ color: muted }}>Local profile · Stored on this device</p>
+        <section className="curio-account-profile" style={cardStyle}>
+          <div className="curio-account-profile-glow" />
+          <div className="curio-account-profile-top">
+            <div className="curio-account-avatar">{displayName.trim().charAt(0).toUpperCase() || 'C'}</div>
+            <div className="curio-account-profile-copy">
+              <span className="curio-account-label">YOUR LOCAL PROFILE</span>
+              <h2>{displayName.trim() || 'Explorer'}</h2>
+              <p><MaterialIcon name="lock" size={13} /> Private to this device</p>
             </div>
-            <span className="text-[10px] font-bold px-2.5 py-1.5 rounded-full" style={{ color: '#168653', background: 'rgba(22,134,83,.09)' }}>LOCAL</span>
+            <span className="curio-account-local-mark"><i /> LOCAL</span>
           </div>
-          <label htmlFor="curio-display-name" className="block text-[11px] font-bold uppercase tracking-wider mt-6 mb-2" style={{ color: muted }}>Display name</label>
-          <input id="curio-display-name" value={displayName} onChange={event => {
+          <label htmlFor="curio-display-name" className="curio-account-field-label">What should we call you?</label>
+          <input id="curio-display-name" className="curio-account-input" value={displayName} onChange={event => {
             setDisplayName(event.target.value);
             localStorage.setItem('curio-display-name', event.target.value);
-          }} style={fieldStyle} maxLength={40} />
+          }} maxLength={40} placeholder="Your name" />
         </section>
 
-        <section className="grid grid-cols-3 gap-2.5 mb-6">
-          {[{ label: 'Saved', value: stats.saved, icon: 'bookmark' }, { label: 'Shuffles', value: stats.spins, icon: 'shuffle' }, { label: 'Best streak', value: stats.streak, icon: 'local_fire_department' }].map(item => (
-            <div key={item.label} className="rounded-[18px] p-3.5" style={cardStyle}>
-              <MaterialIcon name={item.icon} size={17} style={{ color: '#DA1E37' }} />
-              <p className="text-[22px] font-extrabold mt-2 tabular-nums">{item.value}</p>
-              <p className="text-[10px] mt-1 font-semibold" style={{ color: muted }}>{item.label}</p>
-            </div>
-          ))}
+        <section className="curio-account-progress">
+          <div className="curio-account-section-heading"><div><span className="curio-account-label">YOUR JOURNEY</span><h2>A curious life, counted.</h2></div><MaterialIcon name="auto_awesome" size={19} /></div>
+          <div className="curio-account-stats">
+            {[{ label: 'Discoveries saved', value: stats.saved, icon: 'bookmark' }, { label: 'Curiosity draws', value: stats.spins, icon: 'shuffle' }, { label: 'Best streak', value: stats.streak, icon: 'local_fire_department' }].map((item, index) => (
+              <div key={item.label} className="curio-account-stat" style={{ '--stat-index': index } as React.CSSProperties}>
+                <span className="curio-account-stat-icon"><MaterialIcon name={item.icon} size={18} /></span>
+                <strong>{item.value.toLocaleString()}</strong>
+                <small>{item.label}</small>
+              </div>
+            ))}
+          </div>
         </section>
 
-        <section className="rounded-[22px] p-5 mb-4" style={cardStyle}>
-          <div className="flex items-start justify-between gap-3 mb-5">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.18em] mb-2" style={{ color: '#DA1E37' }}>ONLINE IDENTITY</p>
-              <h2 className="text-xl font-extrabold">Curio account</h2>
-              <p className="text-xs mt-1.5 leading-relaxed" style={{ color: muted }}>Optional sign-in for your Curio identity.</p>
-            </div>
-            <span className="text-[10px] font-bold px-2.5 py-1.5 rounded-full whitespace-nowrap"
-              style={{ color: session ? '#168653' : muted, background: session ? 'rgba(22,134,83,.10)' : (dark ? 'rgba(255,255,255,.07)' : 'rgba(23,27,38,.05)') }}>
-              {authLoading ? 'Checking' : session ? 'Connected' : 'Not connected'}
-            </span>
+        <section className="curio-account-online" style={cardStyle}>
+          <div className="curio-account-online-heading">
+            <div className="curio-account-online-symbol"><MaterialIcon name="cloud" size={21} /></div>
+            <div className="curio-account-online-copy"><span className="curio-account-label">OPTIONAL CONNECTION</span><h2>Curio online account</h2><p>Your identity beyond this device.</p></div>
+            <span className={"curio-account-status " + (session ? 'is-connected' : '')}>{authLoading ? 'Checking' : session ? 'Connected' : 'Offline'}</span>
           </div>
 
           {authLoading ? (
-            <div className="py-5 flex items-center gap-3 text-sm" style={{ color: muted }}><span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />Checking account…</div>
+            <div className="curio-account-loading"><span className="curio-account-spinner" />Checking your account…</div>
           ) : session ? (
-            <div>
-              <div className="rounded-[16px] p-4 mb-4" style={{ background: dark ? 'rgba(255,255,255,.045)' : '#F6F7F9' }}>
-                <p className="text-sm font-bold break-all">{session.email}</p>
-                {(onlineName || username) && <p className="text-xs mt-1.5" style={{ color: muted }}>{onlineName || '@' + username}</p>}
-                {memberSince && <p className="text-xs mt-1" style={{ color: muted }}>Member since {memberSince}</p>}
+            <div className="curio-account-connected">
+              <div className="curio-account-identity">
+                <strong>{session.email}</strong>
+                {(onlineName || username) && <span>{onlineName || '@' + username}</span>}
+                {memberSince && <small>Member since {memberSince}</small>}
               </div>
-              <p className="text-xs leading-relaxed mb-4" style={{ color: muted }}>Your online identity is connected. Your saved topics, journals and photos stay on this device and are not uploaded by signing in.</p>
-              <button onClick={signOut} disabled={busy} className="w-full rounded-xl py-3.5 text-sm font-bold disabled:opacity-50"
-                style={{ color: ink, background: dark ? 'rgba(255,255,255,.07)' : '#F0F1F3' }}>{busy ? 'Please wait…' : 'Sign out'}</button>
-              {config?.deletionEnabled && <button onClick={deleteAccount} disabled={busy} className="w-full mt-2 rounded-xl py-3 text-sm font-semibold disabled:opacity-50"
-                style={{ color: '#C53045', background: 'rgba(218,30,55,.07)' }}>Delete online account</button>}
+              <p className="curio-account-privacy-note"><MaterialIcon name="shield_lock" size={16} /> Your journals, saved topics and photos remain on this device. Signing in does not upload them.</p>
+              <button onClick={signOut} disabled={busy} className="curio-account-secondary-action">{busy ? 'Please wait…' : 'Sign out'} <MaterialIcon name="logout" size={17} /></button>
+              {config?.deletionEnabled && <button onClick={deleteAccount} disabled={busy} className="curio-account-danger-action">Delete online account</button>}
             </div>
           ) : (
-            <div>
+            <div className="curio-account-auth">
               {!config?.configured ? (
-                <p className="text-sm leading-relaxed py-2" style={{ color: muted }}>{config?.problem || 'The online account service is not configured on this deployment.'}</p>
+                <p className="curio-account-unavailable">{config?.problem || 'The online account service is not configured on this deployment.'}</p>
               ) : (
                 <>
-                  <div className="flex gap-1 p-1 rounded-xl mb-5" style={{ background: dark ? 'rgba(255,255,255,.06)' : '#F0F1F3' }}>
-                    <button onClick={() => { setMode('signin'); setNotice(''); }} className="flex-1 rounded-[9px] py-2.5 text-sm font-bold"
-                      style={{ background: mode === 'signin' ? surface : 'transparent', color: ink, boxShadow: mode === 'signin' ? '0 1px 5px rgba(0,0,0,.09)' : 'none' }}>Sign in</button>
-                    <button onClick={() => { setMode('signup'); setNotice(''); }} className="flex-1 rounded-[9px] py-2.5 text-sm font-bold"
-                      style={{ background: mode === 'signup' ? surface : 'transparent', color: ink, boxShadow: mode === 'signup' ? '0 1px 5px rgba(0,0,0,.09)' : 'none' }}>Create account</button>
+                  <div className="curio-account-auth-switch">
+                    <button onClick={() => { setMode('signin'); setNotice(''); }} className={mode === 'signin' ? 'active' : ''}>Sign in</button>
+                    <button onClick={() => { setMode('signup'); setNotice(''); }} className={mode === 'signup' ? 'active' : ''}>Create account</button>
                   </div>
-                  <form onSubmit={handleAuth} className="flex flex-col gap-3.5">
-                    <label className="text-xs font-semibold" style={{ color: muted }}>Email address
-                      <input type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" style={{ ...fieldStyle, marginTop: 7 }} />
-                    </label>
-                    <label className="text-xs font-semibold" style={{ color: muted }}>Password
-                      <input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" style={{ ...fieldStyle, marginTop: 7 }} />
-                    </label>
+                  <form onSubmit={handleAuth} className="curio-account-auth-form">
+                    <label>Email address<input type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" style={fieldStyle} /></label>
+                    <label>Password<input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} required minLength={6} value={password} onChange={event => setPassword(event.target.value)} placeholder="At least 6 characters" style={fieldStyle} /></label>
                     {mode === 'signup' && <>
-                      <label className="text-xs font-semibold" style={{ color: muted }}>Repeat password
-                        <input type="password" autoComplete="new-password" required minLength={6} value={repeatPassword} onChange={event => setRepeatPassword(event.target.value)} placeholder="Enter it again" style={{ ...fieldStyle, marginTop: 7 }} />
-                      </label>
-                      <label className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: muted }}>
-                        <input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} className="mt-0.5" />
-                        <span>I agree to the <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#DA1E37' }}>Privacy Notice</a>.</span>
-                      </label>
+                      <label>Repeat password<input type="password" autoComplete="new-password" required minLength={6} value={repeatPassword} onChange={event => setRepeatPassword(event.target.value)} placeholder="Enter it again" style={fieldStyle} /></label>
+                      <label className="curio-account-terms"><input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} /><span>I agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Notice</a>.</span></label>
                     </>}
-                    <button type="submit" disabled={busy} className="w-full rounded-xl py-3.5 text-sm font-bold text-white disabled:opacity-50"
-                      style={{ background: '#DA1E37' }}>{busy ? 'Please wait…' : mode === 'signup' ? 'Create my account' : 'Sign in'}</button>
+                    <button type="submit" disabled={busy} className="curio-account-primary-action">{busy ? 'Please wait…' : mode === 'signup' ? 'Create my account' : 'Sign in'} <MaterialIcon name="arrow_forward" size={18} /></button>
                   </form>
-                  {mode === 'signin' && <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4">
-                    <button onClick={sendMagicLink} disabled={busy} className="text-xs font-bold" style={{ color: '#DA1E37' }}>Email me a sign-in link</button>
-                    <button onClick={sendRecovery} disabled={busy} className="text-xs font-semibold" style={{ color: muted }}>Forgot password?</button>
-                  </div>}
+                  {mode === 'signin' && <div className="curio-account-auth-links"><button onClick={sendMagicLink} disabled={busy}>Email me a sign-in link</button><button onClick={sendRecovery} disabled={busy}>Forgot password?</button></div>}
                 </>
               )}
             </div>
           )}
-          {status && <p role="status" aria-live="polite" className="mt-4 rounded-xl px-3.5 py-3 text-xs leading-relaxed"
-            style={{ color: statusKind === 'error' ? '#C53045' : statusKind === 'success' ? '#168653' : muted,
-              background: statusKind === 'error' ? 'rgba(197,48,69,.08)' : statusKind === 'success' ? 'rgba(22,134,83,.08)' : (dark ? 'rgba(255,255,255,.05)' : '#F7F7F9') }}>{status}</p>}
+          {status && <p role="status" aria-live="polite" className={"curio-account-notice is-" + statusKind}>{status}</p>}
         </section>
 
-        <section className="rounded-[22px] overflow-hidden" style={cardStyle}>
-          <div className="px-5 pt-5 pb-3"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{ color: '#DA1E37' }}>YOUR CURIO</p><h2 className="text-lg font-extrabold mt-1">Account settings</h2></div>
-          <button onClick={() => navigate('/settings')} className="w-full flex items-center gap-3 px-5 py-4 text-left">
-            <MaterialIcon name="tune" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Preferences</strong><small className="text-xs" style={{ color: muted }}>Appearance and experience</small></span><MaterialIcon name="chevron_right" size={18} />
-          </button>
-          <div style={{ height: 1, background: border }} />
-          <a href="/privacy" className="flex items-center gap-3 px-5 py-4">
-            <MaterialIcon name="shield" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Privacy</strong><small className="text-xs" style={{ color: muted }}>How your account data is handled</small></span><MaterialIcon name="chevron_right" size={18} />
-          </a>
-          <div style={{ height: 1, background: border }} />
-          <button onClick={() => navigate('/support')} className="w-full flex items-center gap-3 px-5 py-4 text-left">
-            <MaterialIcon name="help_outline" size={19} style={{ color: muted }} /><span className="flex-1"><strong className="block text-sm">Help & support</strong><small className="text-xs" style={{ color: muted }}>Account and sign-in help</small></span><MaterialIcon name="chevron_right" size={18} />
-          </button>
+        <section className="curio-account-preferences">
+          <div className="curio-account-section-heading"><div><span className="curio-account-label">THE DETAILS</span><h2>Make Curio yours.</h2></div></div>
+          <div className="curio-account-menu">
+            <button onClick={() => navigate('/settings')}><span className="curio-account-menu-icon"><MaterialIcon name="tune" size={19} /></span><span><strong>Preferences</strong><small>Appearance and experience</small></span><MaterialIcon name="chevron_right" size={19} /></button>
+            <a href="/privacy"><span className="curio-account-menu-icon"><MaterialIcon name="shield" size={19} /></span><span><strong>Privacy</strong><small>How your account data is handled</small></span><MaterialIcon name="chevron_right" size={19} /></a>
+            <button onClick={() => navigate('/support')}><span className="curio-account-menu-icon"><MaterialIcon name="help_outline" size={19} /></span><span><strong>Help & support</strong><small>Answers when you need them</small></span><MaterialIcon name="chevron_right" size={19} /></button>
+          </div>
         </section>
+        <p className="curio-account-footer">CURIO · MADE FOR THE CURIOUS</p>
       </div>
     </main>
   );
