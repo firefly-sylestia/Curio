@@ -922,3 +922,18 @@ html.dark .curio-library-screen .sticky.top-0,html.amoled .curio-library-screen 
 .curio-category-row .curio-category-move, .curio-category-row button:not(.curio-category-visibility) { background:color-mix(in srgb,var(--curio-text) 5%,transparent); }
 .curio-category-row .curio-category-move:disabled { opacity:.2!important; }
 @media(min-width:768px) { .curio-library-screen .curio-library-heading { padding-top:64px; } .curio-manage-heading { padding-top:56px; } }
+
+
+/* Consistent route entry motion */
+.curio-route-transition {
+  min-height:100vh;
+  animation:curio-route-enter 260ms cubic-bezier(.2,.72,.25,1) both;
+  transform-origin:50% 12%;
+}
+@keyframes curio-route-enter {
+  from { opacity:0; transform:translate3d(0,9px,0); }
+  to { opacity:1; transform:translate3d(0,0,0); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .curio-route-transition { animation:none; }
+}

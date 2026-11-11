@@ -19,12 +19,27 @@ import { OnboardingScreen } from './screens/OnboardingScreen';
 import { PetDesignerScreen } from './screens/PetDesignerScreen';
 import { TopicHistoryScreen } from './screens/TopicHistoryScreen';
 import { ManageCategoriesScreen } from './screens/ManageCategoriesScreen';
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import './index.css';
 import './mcu-interface.css';
 
 const App: React.FC = () => {
   const location = useLocation();
+
+  // Navigation should always open a page at its beginning, even when returning
+  // to a route whose previous DOM state was scrolled near the bottom.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    document.querySelectorAll<HTMLElement>('*').forEach(element => {
+      const overflowY = window.getComputedStyle(element).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight) {
+        element.scrollTop = 0;
+      }
+    });
+  }, [location.pathname, location.search, location.key]);
   // Read localStorage directly during render — avoids stale-state race condition
   // where navigate sets localStorage but useState hasn't updated yet.
   const isOnboardingComplete = localStorage.getItem('onboarding_complete') === 'true';
@@ -39,6 +54,7 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <div className="curio-web-app min-h-screen" key={onboardKey}>
+        <div className="curio-route-transition" key={`${location.pathname}${location.search}`}>
         <Routes>
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/" element={isOnboardingComplete ? <HomeScreen /> : <Navigate to="/onboarding" replace />} />
@@ -59,6 +75,7 @@ const App: React.FC = () => {
           <Route path="/history" element={<TopicHistoryScreen />} />
           <Route path="/manage-categories" element={<ManageCategoriesScreen />} />
         </Routes>
+        </div>
 
         {showBottomNav && <BottomNav />}
       </div>
