@@ -1,271 +1,136 @@
-// Curio Web App - Settings Screen
-// Matches Android: compact torn hero (SETTINGS_TEAR_SEED), watermark collage, back pill, themed sections
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
-import {
-  CurioToggle,
-  CurioSectionHeader,
-  MaterialIcon,
-} from '../components/SharedComponents';
+import { CurioSectionHeader, MaterialIcon } from '../components/SharedComponents';
 import { ScreenEntrance } from '../animations';
 
-// ─── Segmented Row (matching Android's segmented control) ─────────────
-const SegmentedRow: React.FC<{
-  label: string;
-  description?: string;
-  options: { value: string; label: string }[];
-  selected: string;
-  onChange: (value: string) => void;
-}> = ({ label, description, options, selected, onChange }) => {
+const engines = [
+  { value: 'google', label: 'Google' },
+  { value: 'duckduckgo', label: 'DuckDuckGo' },
+  { value: 'bing', label: 'Bing' },
+  { value: 'brave', label: 'Brave' },
+  { value: 'ecosia', label: 'Ecosia' },
+  { value: 'startpage', label: 'Startpage' },
+  { value: 'yahoo', label: 'Yahoo' },
+];
+const musicServices = [
+  { value: 'youtube_music', label: 'YouTube Music' },
+  { value: 'apple_music', label: 'Apple Music' },
+  { value: 'spotify', label: 'Spotify' },
+];
+
+const ToggleRow: React.FC<{ label: string; description: string; checked: boolean; onChange: (value: boolean) => void }> = ({ label, description, checked, onChange }) => {
   const { isDark } = useTheme();
   return (
-    <div className="py-3">
-      {(label || description) && (
-        <div className="mb-2.5">
-          {label && <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{label}</div>}
-          {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{description}</div>}
-        </div>
-      )}
-      <div className="flex rounded-xl p-0.5" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(23,27,38,0.04)' }}>
-        {options.map(opt => (
-          <button key={opt.value} onClick={() => onChange(opt.value)}
-            className="flex-1 py-2 px-3 rounded-[10px] text-xs font-semibold transition-all"
-            style={{
-              background: selected === opt.value ? (isDark ? 'rgba(255,255,255,0.15)' : '#fff') : 'transparent',
-              color: selected === opt.value ? getTextColor(isDark) : (isDark ? 'rgba(255,255,255,0.45)' : 'rgba(23,27,38,0.45)'),
-              boxShadow: selected === opt.value ? (isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.08)') : 'none',
-            }}>
-            {opt.label}
-          </button>
-        ))}
+    <div className="flex items-center justify-between py-3">
+      <div className="flex-1 mr-4">
+        <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{label}</div>
+        <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,.54)' : 'rgba(23,27,38,.56)' }}>{description}</div>
       </div>
+      <button type="button" role="switch" aria-checked={checked} aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={'relative flex-none w-12 h-7 rounded-full p-[3px] transition-all duration-200 ' + (checked ? 'bg-[#DA1E37] shadow-md shadow-red-900/20' : (isDark ? 'bg-white/20' : 'bg-slate-900/15'))}>
+        <span className={'block w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-transform duration-200 ' + (checked ? 'translate-x-5' : 'translate-x-0')} />
+      </button>
     </div>
   );
 };
 
-
-const SettingsItem: React.FC<{
-  icon: string; title: string; description?: string; onClick?: () => void; rightContent?: React.ReactNode;
-}> = ({ icon, title, description, onClick, rightContent }) => {
+const SelectRow: React.FC<{ label: string; description: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void }> = ({ label, description, value, options, onChange }) => {
   const { isDark } = useTheme();
-  const [isPressed, setIsPressed] = useState(false);
   return (
-    <button onClick={onClick} onMouseDown={() => setIsPressed(true)} onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      className="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left"
-      style={{ background: isPressed ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(23,27,38,0.05)') : 'transparent' }}
-      disabled={!onClick}>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)' }}>
-        <MaterialIcon name={icon} size={20} style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(23,27,38,0.7)' }} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium" style={{ color: getTextColor(isDark) }}>{title}</div>
-        {description && <div className="text-xs mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(23,27,38,0.5)' }}>{description}</div>}
-      </div>
-      {rightContent || (onClick && <MaterialIcon name="chevron_right" size={18} style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(23,27,38,0.4)' }} />)}
-    </button>
-  );
-};
-
-const SEARCH_ENGINES = [
-  { id: 'google', label: 'Google' },
-  { id: 'duckduckgo', label: 'DuckDuckGo' },
-  { id: 'bing', label: 'Bing' },
-  { id: 'brave', label: 'Brave' },
-  { id: 'ecosia', label: 'Ecosia' },
-  { id: 'startpage', label: 'Startpage' },
-  { id: 'yahoo', label: 'Yahoo' },
-];
-
-const MUSIC_SERVICES = [
-  { id: 'youtube_music', label: 'YouTube Music' },
-  { id: 'apple_music', label: 'Apple Music' },
-  { id: 'spotify', label: 'Spotify' },
-];
-
-const ThemePicker: React.FC<{ selected: string; onSelect: (theme: string) => void }> = ({ selected, onSelect }) => {
-  const { isDark } = useTheme();
-  const themes = [
-    { id: 'curio', name: 'Curio', color: '#DA1E37' },
-    { id: 'material', name: 'Material', color: '#4338CA' },
-    { id: 'amoled', name: 'AMOLED', color: '#000000' },
-  ];
-  return (
-    <div className="flex gap-3">
-      {themes.map(t => (
-        <button key={t.id} onClick={() => onSelect(t.id)} className="flex-1 p-3 rounded-xl text-center transition-all"
-          style={{
-            background: selected === t.id ? `${t.color}20` : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)'),
-            border: selected === t.id ? `2px solid ${t.color}` : '2px solid transparent',
-          }}>
-          <div className="w-8 h-8 rounded-full mx-auto mb-2" style={{ background: t.color }} />
-          <div className="text-xs font-medium" style={{ color: getTextColor(isDark) }}>{t.name}</div>
-        </button>
-      ))}
-    </div>
+    <label className="flex items-center justify-between gap-3 py-4">
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <strong className="text-sm font-semibold" style={{ color: getTextColor(isDark) }}>{label}</strong>
+        <small className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,.5)' : 'rgba(23,27,38,.52)' }}>{description}</small>
+      </span>
+      <select value={value} onChange={event => onChange(event.target.value)}
+        className="max-w-[145px] rounded-xl px-3 py-2 text-xs font-semibold outline-none"
+        style={{ background: isDark ? 'rgba(255,255,255,.09)' : 'rgba(23,27,38,.06)', color: getTextColor(isDark), border: 0 }}>
+        {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
+    </label>
   );
 };
 
 export const SettingsScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { isDark, isAmoled, style, setThemeStyle, setDarkMode, setPastelColors } = useTheme();
-  const [settings, setSettings] = useState({
-    darkMode: isDark, pastelColors: false, heroGradient: true,
-    notifications: true, soundEffects: true, autoSave: true, showPet: true, showQuests: true,
-    voiceToText: localStorage.getItem('curio-voice-to-text') === 'true',
-  });
-  const [petChatter, setPetChatter] = useState(localStorage.getItem('curio-pet-chatter') || 'cozy');
-  const [petGames, setPetGames] = useState(localStorage.getItem('curio-pet-games') || 'normal');
-  const [searchEngine, setSearchEngine] = useState(localStorage.getItem('curio-search-engine') || 'google');
-  const [musicService, setMusicService] = useState(localStorage.getItem('curio-music-service') || 'youtube_music');
-
-  const handleSettingChange = (key: string, value: boolean) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    if (key === 'darkMode') setDarkMode(value);
-    else if (key === 'pastelColors') setPastelColors(value);
-    else if (key === 'voiceToText') localStorage.setItem('curio-voice-to-text', value ? 'true' : 'false');
+  const { isDark, isAmoled, style, pastelColors, setThemeStyle, setDarkMode, setPastelColors } = useTheme();
+  const [searchEngine, setSearchEngine] = useState(() => localStorage.getItem('curio-search-engine') || 'google');
+  const [musicService, setMusicService] = useState(() => localStorage.getItem('curio-music-service') || 'youtube_music');
+  const saveSearch = (value: string) => { setSearchEngine(value); localStorage.setItem('curio-search-engine', value); };
+  const saveMusic = (value: string) => { setMusicService(value); localStorage.setItem('curio-music-service', value); };
+  const panelStyle: React.CSSProperties = {
+    background: isDark ? 'rgba(24,27,34,.78)' : 'rgba(255,255,255,.78)',
+    boxShadow: isDark ? '0 20px 46px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.07)' : '0 18px 42px -32px rgba(25,35,55,.34), 0 3px 12px -9px rgba(25,35,55,.18), inset 0 1px 0 rgba(255,255,255,.8)',
+    backdropFilter: 'blur(22px) saturate(140%)',
+    WebkitBackdropFilter: 'blur(22px) saturate(140%)',
+    borderRadius: 22,
   };
-
-  const handlePetChatter = (val: string) => {
-    setPetChatter(val);
-    localStorage.setItem('curio-pet-chatter', val);
-  };
-
-  const handlePetGames = (val: string) => {
-    setPetGames(val);
-    localStorage.setItem('curio-pet-games', val);
-  };
-
-  const handleSearchEngine = (val: string) => {
-    setSearchEngine(val);
-    localStorage.setItem('curio-search-engine', val);
-  };
-
-  const handleMusicService = (val: string) => {
-    setMusicService(val);
-    localStorage.setItem('curio-music-service', val);
-  };
-
+  const themeOptions = [
+    { id: 'curio', title: 'Curio', subtitle: 'Signature', colors: ['#DA1E37','#F6F7FB','#171B26'] },
+    { id: 'material', title: 'Material', subtitle: 'Indigo', colors: ['#4338CA','#EEF0FF','#171B26'] },
+    { id: 'amoled', title: 'AMOLED', subtitle: 'Pure black', colors: ['#000000','#242424','#DA1E37'] },
+  ];
   return (
     <main className="curio-settings-screen min-h-screen pb-32 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <ScreenEntrance>
-        <div className="curio-settings-content relative z-10 px-4">
-          <header className="curio-settings-heading">
-            <button onClick={() => navigate(-1)} className="curio-settings-back" aria-label="Go back"><MaterialIcon name="arrow_back" size={19} /></button>
-            <div><span className="curio-settings-kicker">CURIO / PREFERENCES</span><h1>Make it yours<span>.</span></h1><p>Shape a quieter, more personal discovery space.</p></div>
-            <span className="curio-settings-mark"><MaterialIcon name="tune" size={22} /></span>
-          </header>      <ScreenEntrance>
-        <div className="relative z-10 px-4">
-          <div className="curio-settings-group">
+        <div className="relative z-10 mx-auto w-full max-w-[760px] px-4 pt-8 pb-12">
+          <header className="flex items-start gap-4 mb-9">
+            <button onClick={() => navigate(-1)} aria-label="Go back" className="w-11 h-11 flex-none grid place-items-center rounded-2xl" style={panelStyle}>
+              <MaterialIcon name="arrow_back" size={19} />
+            </button>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[9px] font-extrabold tracking-[.2em] mb-2" style={{ color: '#DA1E37' }}>CURIO / PREFERENCES</span>
+              <h1 className="text-[clamp(36px,7vw,48px)] leading-none font-extrabold tracking-[-.06em]" style={{ color: getTextColor(isDark) }}>Make it yours<span style={{ color: '#DA1E37' }}>.</span></h1>
+              <p className="text-sm mt-3" style={{ color: isDark ? 'rgba(255,255,255,.55)' : 'rgba(23,27,38,.58)' }}>A few thoughtful choices for your discovery space.</p>
+            </div>
+            <span className="w-11 h-11 flex-none grid place-items-center rounded-2xl" style={{ ...panelStyle, color: '#DA1E37' }}><MaterialIcon name="tune" size={21} /></span>
+          </header>
+
+          <section className="mb-7">
             <CurioSectionHeader title="Appearance" />
-            <div className="curio-settings-panel" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="p-4"><ThemePicker selected={style} onSelect={setThemeStyle} /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={settings.darkMode} onChange={(v) => handleSettingChange('darkMode', v)} label="Dark Mode" description="Use dark color scheme" /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={settings.pastelColors} onChange={(v) => handleSettingChange('pastelColors', v)} label="Pastel Colors" description="Use softer color palette" /></div>
-              <div className="px-4 pb-4"><CurioToggle checked={settings.heroGradient} onChange={(v) => handleSettingChange('heroGradient', v)} label="Hero Gradient" description="Show gradient on hero cards" /></div>
-            </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Notifications" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={settings.notifications} onChange={(v) => handleSettingChange('notifications', v)} label="Enable Notifications" description="Receive reminders and updates" /></div>
-              <div className="px-4 pb-3">
-                <SegmentedRow
-                  label="Search engine"
-                  description="Used by Explore in browser"
-                  options={SEARCH_ENGINES.map(e => ({ value: e.id, label: e.label }))}
-                  selected={searchEngine}
-                  onChange={handleSearchEngine}
-                />
-                <div className="pt-3">
-                  <SegmentedRow
-                    label="Music service"
-                    description="Opened for albums, artists & songs"
-                    options={MUSIC_SERVICES.map(s => ({ value: s.id, label: s.label }))}
-                    selected={musicService}
-                    onChange={handleMusicService}
-                  />
-                </div>
+            <div className="p-3" style={panelStyle}>
+              <div className="grid grid-cols-3 gap-2">
+                {themeOptions.map(theme => {
+                  const selected = style === theme.id;
+                  return <button type="button" key={theme.id} onClick={() => setThemeStyle(theme.id)} aria-pressed={selected}
+                    className="relative flex flex-col items-start gap-2 rounded-2xl p-3 text-left transition-all"
+                    style={{ background: selected ? 'rgba(218,30,55,.09)' : (isDark ? 'rgba(255,255,255,.045)' : 'rgba(23,27,38,.035)'), color: getTextColor(isDark), outline: selected ? '1.5px solid rgba(218,30,55,.5)' : '1.5px solid transparent' }}>
+                    <span className="flex w-full h-9 overflow-hidden rounded-xl">{theme.colors.map((color,index) => <i key={index} className="flex-1" style={{ background: color }} />)}</span>
+                    <strong className="text-xs font-bold">{theme.title}</strong>
+                    <small className="text-[10px]" style={{ color: isDark ? 'rgba(255,255,255,.5)' : 'rgba(23,27,38,.52)' }}>{theme.subtitle}</small>
+                    {selected && <span className="absolute top-2 right-2 grid place-items-center w-5 h-5 rounded-full text-white" style={{ background: '#DA1E37' }}><MaterialIcon name="check" size={13} /></span>}
+                  </button>;
+                })}
+              </div>
+              <div className="h-px my-2 mx-1" style={{ background: isDark ? 'rgba(255,255,255,.09)' : 'rgba(23,27,38,.08)' }} />
+              <div className="px-1">
+                <ToggleRow label="Dark appearance" description="Use a darker interface in low light" checked={isDark} onChange={setDarkMode} />
+                <div className="h-px" style={{ background: isDark ? 'rgba(255,255,255,.07)' : 'rgba(23,27,38,.06)' }} />
+                <ToggleRow label="Soft category colours" description="Tone down category accents throughout Curio" checked={pastelColors} onChange={setPastelColors} />
               </div>
             </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Data" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={settings.autoSave} onChange={(v) => handleSettingChange('autoSave', v)} label="Auto Save" description="Automatically save entries" /></div>
-              <SettingsItem icon="upload" title="Export Data" description="Download your entries" onClick={() => {}} />
-              <SettingsItem icon="download" title="Import Data" description="Import from backup" onClick={() => {}} />
-              <SettingsItem icon="delete_forever" title="Clear All Data" description="Remove all entries and settings" onClick={() => {}} />
+          </section>
+
+          <section className="mb-7">
+            <CurioSectionHeader title="Discovery" />
+            <div className="px-4" style={panelStyle}>
+              <SelectRow label="Search engine" description="Opens when you research a topic" value={searchEngine} options={engines} onChange={saveSearch} />
+              <div className="h-px" style={{ background: isDark ? 'rgba(255,255,255,.08)' : 'rgba(23,27,38,.07)' }} />
+              <SelectRow label="Music service" description="Used for artists, albums and songs" value={musicService} options={musicServices} onChange={saveMusic} />
             </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Pet" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={settings.showPet} onChange={(v) => handleSettingChange('showPet', v)} label="Show Pet" description="Display your companion on screen" /></div>
-              <div className="px-4">
-                <SegmentedRow
-                  label="Pet Chatter"
-                  description="How often your pet speaks"
-                  options={[
-                    { value: 'quiet', label: 'Quiet' },
-                    { value: 'cozy', label: 'Cozy' },
-                    { value: 'talkative', label: 'Talkative' },
-                  ]}
-                  selected={petChatter}
-                  onChange={handlePetChatter}
-                />
-              </div>
-              <div className="px-4 pb-2">
-                <SegmentedRow
-                  label="Pet Games"
-                  description="How often your pet wants to play"
-                  options={[
-                    { value: 'relaxed', label: 'Relaxed' },
-                    { value: 'normal', label: 'Normal' },
-                    { value: 'eager', label: 'Eager' },
-                  ]}
-                  selected={petGames}
-                  onChange={handlePetGames}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Features" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={settings.showQuests} onChange={(v) => handleSettingChange('showQuests', v)} label="Show Quests" description="Display quest progress" /></div>
-              <div className="px-4 py-2"><CurioToggle checked={settings.soundEffects} onChange={(v) => handleSettingChange('soundEffects', v)} label="Sound Effects" description="Play sounds on interactions" /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={settings.voiceToText} onChange={(v) => handleSettingChange('voiceToText', v)} label="Voice-to-Text" description="Use voice input for entry notes" /></div>
-            </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Categories" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <SettingsItem icon="category" title="Manage Categories" description="Show, hide and reorder" onClick={() => navigate('/manage-categories')} />
-            </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="Experiments" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-nav-pill') === 'true'} onChange={(v) => localStorage.setItem('curio-nav-pill', v ? 'true' : 'false')} label="Nav-style buttons" description="Categories wear the floating pill look" /></div>
-              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-star-zoom-3d') === 'true'} onChange={(v) => localStorage.setItem('curio-star-zoom-3d', v ? 'true' : 'false')} label="3D star zoom" description="Tap a constellation star for a perspective tilt + glow" /></div>
-              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-hero-shadow') === 'true'} onChange={(v) => localStorage.setItem('curio-hero-shadow', v ? 'true' : 'false')} label="Main card shadow" description="Ambient depth below the hero card" /></div>
-              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-paper-header') !== 'false'} onChange={(v) => localStorage.setItem('curio-paper-header', v ? 'true' : 'false')} label="Paper stat card" description="Soft rose paper card on stat panes" /></div>
-              <div className="px-4 pb-2"><CurioToggle checked={localStorage.getItem('curio-torn-hero-sheet') === 'true'} onChange={(v) => localStorage.setItem('curio-torn-hero-sheet', v ? 'true' : 'false')} label="Torn hero under-sheet" description="White paper lip below torn heroes" /></div>
-            </div>
-          </div>
-          <div className="mb-6">
-            <CurioSectionHeader title="About" />
-            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(23,27,38,0.03)' }}>
-              <SettingsItem icon="info" title="About Curio" description="Version 1.0.0" onClick={() => {}} />
-              <SettingsItem icon="description" title="Changelog" description="What's new" onClick={() => {}} />
-              <SettingsItem icon="chat" title="Feedback" description="Share your thoughts" onClick={() => {}} />
-              <SettingsItem icon="star" title="Rate Curio" description="Help us grow" onClick={() => {}} />
-            </div>
-          </div>
+          </section>
+
+          <section className="mb-7">
+            <CurioSectionHeader title="Your library" />
+            <button onClick={() => navigate('/manage-categories')} className="w-full flex items-center gap-3 p-4 text-left" style={panelStyle}>
+              <span className="w-10 h-10 rounded-xl grid place-items-center" style={{ color: '#DA1E37', background: 'rgba(218,30,55,.1)' }}><MaterialIcon name="category" size={20} /></span>
+              <span className="flex-1 min-w-0"><strong className="block text-sm" style={{ color: getTextColor(isDark) }}>Manage categories</strong><small className="block text-xs mt-1" style={{ color: isDark ? 'rgba(255,255,255,.5)' : 'rgba(23,27,38,.52)' }}>Choose what appears in your discovery deck</small></span>
+              <MaterialIcon name="chevron_right" size={19} />
+            </button>
+          </section>
+          <p className="text-center text-[11px] mt-8" style={{ color: isDark ? 'rgba(255,255,255,.4)' : 'rgba(23,27,38,.42)' }}>Your journal and saved discoveries stay on this device.</p>
         </div>
       </ScreenEntrance>
     </main>
