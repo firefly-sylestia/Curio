@@ -1,4 +1,4 @@
-const CACHE_NAME = 'curio-shell-v1';
+const CACHE_NAME = 'curio-shell-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/curio-192.svg', '/icons/curio-512.svg'];
 
 self.addEventListener('install', event => {

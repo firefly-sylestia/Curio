@@ -9,6 +9,7 @@ import { getQuestSystem } from '../data/QuestSystem';
 import { MaterialIcon } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
 import { ScreenEntrance, usePressable } from '../animations';
+import InstallAppCard from '../components/InstallAppCard';
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -96,6 +97,7 @@ const HomeScreen: React.FC = () => {
         </header>
       </div>
 
+      <InstallAppCard />
       <ScreenEntrance>
         {/* ── 2. Quest Block ─────────────────────────────────────────────── */}
         <div className="px-4 pt-6">

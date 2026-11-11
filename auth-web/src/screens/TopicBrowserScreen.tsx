@@ -86,7 +86,7 @@ export const TopicBrowserScreen: React.FC = () => {
   return (
     <div className="curio-explore-screen min-h-screen relative pb-32" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <ScreenEntrance>
-        <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-none w-full mx-auto">
+        <div className="curio-explore-content w-full mx-auto px-4 pt-4 sm:px-6 sm:pt-7">
           <header className="relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white"
             style={{
               background: 'linear-gradient(125deg, #111820 0%, #202831 58%, #38151D 100%)',
@@ -187,7 +187,7 @@ export const TopicBrowserScreen: React.FC = () => {
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                 {Array.from({ length: 6 }, (_, index) => <div key={index} className="h-32 rounded-2xl animate-pulse"
                   style={{ background: isDark ? 'rgba(255,255,255,.055)' : 'rgba(23,27,38,.055)' }} />)}
               </div>

@@ -46,7 +46,7 @@ const BottomNav: React.FC = () => {
             className={active ? 'active' : ''}
             aria-current={active ? 'page' : undefined}
           >
-            <span className={`curio-nav-icon ${tab.path === '/' ? 'curio-nav-home-icon' : ''}`}><MaterialIcon name={tab.icon} size={23} filled={active} /></span>
+            <span className={`curio-nav-icon ${tab.path === '/' ? 'curio-nav-home-icon' : ''}`}>{tab.path === '/' ? <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M3.5 10.7 12 3.8l8.5 6.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.8 9.5v9.1c0 .9.7 1.6 1.6 1.6h3.1v-5.6h3v5.6h3.1c.9 0 1.6-.7 1.6-1.6V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M9.8 7.4h4.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".55"/></svg> : <MaterialIcon name={tab.icon} size={23} filled={active} /> }</span>
             <span>{tab.label}</span>
           </button>
         );
