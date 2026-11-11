@@ -426,6 +426,5 @@ const AccountScreen: React.FC = () => {
     </main>
   );
 };
-};
 
 export default AccountScreen;
