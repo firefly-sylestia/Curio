@@ -58,7 +58,8 @@ export const TopicBrowserScreen: React.FC = () => {
           topic.name.toLocaleLowerCase().includes(needle) ||
           topic.subtype.toLocaleLowerCase().includes(needle) ||
           topic.teaser.toLocaleLowerCase().includes(needle) ||
-          topic.aliases.some(alias => alias.toLocaleLowerCase().includes(needle));
+          topic.aliases.some(alias => alias.toLocaleLowerCase().includes(needle)) ||
+          (topic.tags || []).some(tag => tag.toLocaleLowerCase().includes(needle));
         if (matches) rows.push({ topic, category });
       });
     });

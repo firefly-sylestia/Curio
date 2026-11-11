@@ -60,6 +60,7 @@ export interface CurioTopic {
   // display byline (e.g. album artist) and difficulty tier.
   byline?: string;
   tier?: number;
+  tags?: string[];
   imageUrl: string;
   actionPrompt: ExploreAction;
   aliases: string[];

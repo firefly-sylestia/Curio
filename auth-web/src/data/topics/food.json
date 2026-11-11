@@ -4,7 +4,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pizza Margherita (1889)",
-    "teaser": "Named for Queen Margherita of Savoy, who supposedly chose the tomato, mozzarella and basil pie as her favorite in 1889 — the three colors of the Italian flag in edible form. The royal story is almost certainly marketing, dreamt up decades later, but the pie itself is real and eternal: a blistered crust, bright sauce, molten cheese. Whether or not a queen ever ate it, Naples' great gift conquered the world.",
+    "teaser": "Named for Queen Margherita of Savoy — the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real.",
     "imageUrl": "",
     "byline": "Naples, Italy",
     "exploreAction": {
@@ -26,7 +26,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Sushi",
-    "teaser": "Sushi began as a way to preserve fish: raw fish packed in salted rice fermented for months, the rice thrown away. Modern nigiri — a slice of raw fish over hand-pressed rice — only appeared in 19th-century Edo (Tokyo) as fast street food. The word itself means 'sour' from that fermented origin. What looks ancient is actually one of the world's great fast-food innovations.",
+    "teaser": "Originally a fermentation method — fish preserved in rice for months — the modern nigiri (raw fish on rice) is a 19th-century street food from Tokyo.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -47,7 +47,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Ramen (1910)",
-    "teaser": "Ramen is Chinese in ancestry but Japanese in perfection. A good tonkotsu broth simmers pork bones for eighteen hours or more until milky and rich; the wavy noodles are alkaline, the toppings a small ceremony. The dish reached Japan around 1910 and became a postwar national comfort food, so beloved that a whole museum, a movie and countless midnight cravings orbit a single bowl.",
+    "teaser": "The noodle soup is Chinese in origin but Japan perfected it — the 'tonkotsu' broth is simmered for 18+ hours, and a ramen shop's broth is its secret recipe.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -69,7 +69,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Tacos al Pastor (1960)",
-    "teaser": "Tacos al pastor are the delicious result of globalization: Lebanese immigrants brought the vertical spit-roast shawarma to Mexico, and Mexicans swapped the lamb for pork, marinated it in achiote and pineapple, and roasted it on a spinning trompo. Served on small corn tortillas with onion, cilantro and a charred pineapple slice, it is Mexico City's most beloved late-night street food.",
+    "teaser": "Lebanese immigrants brought shawarma to Mexico — the pork version, marinated in achiote and roasted on a vertical spit, is the fusion dish that became Mexico's national street food.",
     "imageUrl": "",
     "byline": "Mexico City",
     "exploreAction": {
@@ -91,7 +91,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pad Thai (1938)",
-    "teaser": "Pad Thai is a national dish with a birth certificate: it was invented in the late 1930s as part of a Thai nationalist campaign to build a unified identity — rice noodles stir-fried with tamarind, fish sauce, egg, peanuts and dried shrimp. It borrowed from Chinese noodle culture and returned it transformed. Today it is the world's best-known Thai export, a sweet-sour-savory tangle that travels everywhere.",
+    "teaser": "The 'national dish' was invented in the 1930s as part of a nationalist campaign — the stir-fried rice noodles were a government PR project that became a global classic.",
     "imageUrl": "",
     "byline": "Thailand",
     "exploreAction": {
@@ -113,7 +113,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Croissant (1839)",
-    "teaser": "The croissant's crescent shape comes from Austria's kipferl, not from Vienna's 1683 battle with the Ottomans — that story is a myth. The flaky, laminated butter version is a French achievement: an Austrian baker, August Zang, opened a Parisian bakery in 1839 and the French perfected the technique of folding butter into dough. The result: golden, shattering layers that made the crescent a global breakfast icon.",
+    "teaser": "The crescent is Austrian in origin (the kipferl) — the 'Austrian bakery' myth about Vienna is false, but the laminated dough is a French triumph of technique.",
     "imageUrl": "",
     "byline": "France",
     "exploreAction": {
@@ -135,7 +135,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "French Fries",
-    "teaser": "The French fry is probably Belgian: historians trace the fried potato to the Meuse valley, where villagers fried fish in the 1600s and, when the river froze, turned to potatoes cut in fish shapes. The double-fry method — once to cook, once to crisp — is the craft. Americans renamed them 'French' during World War I out of affection for their ally, and a global love affair was sealed.",
+    "teaser": "The 'French' fry is Belgian — historians date the fried potato to the Meuse valley, and the double-fry method (blanch, rest, fry) is the difference between good and great.",
     "imageUrl": "",
     "byline": "Belgium",
     "exploreAction": {
@@ -156,7 +156,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pasta Carbonara",
-    "teaser": "Carbonara is Rome's pride and a lesson in restraint: no cream, no garlic, just eggs, pecorino, guanciale (cured pork cheek) and black pepper, tossed off the heat so the egg sets into a silky sauce. The name may come from carbonari, the charcoal workers, or from the black-pepper specks that look like coal dust. Every Roman insists theirs is the only true version.",
+    "teaser": "The Roman classic has no cream — egg, pecorino, guanciale, pepper — and the 'carbonara' name may come from coal miners (carbonai) who made it with their campfire provisions.",
     "imageUrl": "",
     "byline": "Rome, Italy",
     "exploreAction": {
@@ -177,7 +177,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Risotto",
-    "teaser": "Risotto is a lesson in patience: short-grain rice is toasted in butter, then coaxed with hot broth, added a ladle at a time, while the cook stirs and stirs until the starch releases and the grains turn creamy. The Milanese classic is stained yellow with saffron; 'all'onda' — wavy enough to flow like a wave — is the perfect texture. Undercooked, it's crunchy; overcooked, it's porridge. The window is narrow.",
+    "teaser": "The Milanese rice dish is a lesson in patience — the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master.",
     "imageUrl": "",
     "byline": "Milan, Italy",
     "exploreAction": {
@@ -198,7 +198,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Paella",
-    "teaser": "Paella began as a farmhouse meal in Valencia: rice cooked over an open fire in a wide, shallow pan with whatever the land offered — rabbit, chicken, snails, green beans. The socarrat, the caramelized crust on the bottom, is the mark of authenticity; a real paella is eaten straight from the pan. Seafood versions came later and travel better, but Valencia insists the original never touches chorizo.",
+    "teaser": "The Valencian rice dish was a farmhouse meal — the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients.",
     "imageUrl": "",
     "byline": "Valencia, Spain",
     "exploreAction": {
@@ -219,7 +219,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pho (1900)",
-    "teaser": "Pho is a 20th-century invention born of collision: French colonial beef scraps met Chinese noodle culture in northern Vietnam, and the result simmered into a national bowl. The broth is the soul — beef bones, charred onion and ginger, star anise, cinnamon — clarified for hours. Pho arrived in the south around 1954, fled with refugees to the world, and became the noodle soup everyone claims as their own.",
+    "teaser": "The Vietnamese noodle soup is a 20th-century invention — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul.",
     "imageUrl": "",
     "byline": "Vietnam",
     "exploreAction": {
@@ -241,7 +241,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Biryani",
-    "teaser": "Biryani is the layered rice dish of the Mughal courts: basmati and spiced meat cooked together under a sealed lid, the dum method, so the steam perfumes every grain. The word comes from the Persian 'biryan', to fry or roast. Every region of India and Pakistan claims its own — Lucknow's delicate, Hyderabad's fiery, Kolkata's subtle — but the ritual of the sealed pot and the moment it's opened are universal.",
+    "teaser": "The layered rice dish of the Mughal courts — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity.",
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
@@ -262,7 +262,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Butter Chicken (1950)",
-    "teaser": "Butter chicken was an accident that became a legend: in 1950s Delhi, leftover tandoori chicken was simmered in a rich tomato-butter-cream sauce at the Moti Mahal restaurant, and the result was so good it created its own genre. Tandoori chicken is the smoky backbone; the sauce is the velvet. Today it is arguably the most-ordered Indian dish on earth, mild enough for everyone, beloved everywhere.",
+    "teaser": "Invented by accident — leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world.",
     "imageUrl": "",
     "byline": "Delhi, India",
     "exploreAction": {
@@ -284,7 +284,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Dim Sum",
-    "teaser": "Dim sum means 'touch the heart' in Cantonese — small dishes meant to touch the heart, not fill the belly. The tradition began along the Silk Road when teahouses served snacks to travelers, and grew into the weekend ritual of bamboo steamers: har gow, siu mai, char siu bao. The trolleys, the clatter, the endless small plates — it is a meal that is really a social event.",
+    "teaser": "The Cantonese 'touch the heart' — small dishes served with tea, originally from teahouses on the Silk Road — and the pushcart tradition is the social ritual.",
     "imageUrl": "",
     "byline": "Guangdong, China",
     "exploreAction": {
@@ -305,7 +305,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Peking Duck (1330)",
-    "teaser": "Peking duck is an imperial dish with a history reaching back to the Yuan dynasty: the duck is air-puffed, lacquered with maltose, and roasted until the skin is crackling and burnished like lacquer. The skin is the star — carved tableside, wrapped in thin pancakes with hoisin and scallions. The meat goes into a second course, the bones into soup. Nothing is wasted; everything is ceremony.",
+    "teaser": "The imperial duck — the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique.",
     "imageUrl": "",
     "byline": "Beijing, China",
     "exploreAction": {
@@ -327,7 +327,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Hot Pot",
-    "teaser": "Hot pot is a communal boiling pot — a tabletop broth in which everyone cooks their own morsels of meat, seafood and vegetables. The great divide is the broth: a fiery Sichuan 'mala' side, numb with Sichuan peppercorn, versus a clear, savory side for the timid. It is as much a social ritual as a meal — hours at the table, dipping sauces, steam on the glasses, and friendships deepened one slice of lamb at a time.",
+    "teaser": "The communal boiling pot — the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China.",
     "imageUrl": "",
     "byline": "China",
     "exploreAction": {
@@ -348,7 +348,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Mapo Tofu",
-    "teaser": "Mapo tofu is named for its inventor: 'pockmarked grandmother's tofu', from a 19th-century Chengdu eatery run by a woman whose face was marked by smallpox. Silken tofu swims in a fiery sauce of doubanjiang (fermented broad bean paste), ground beef or pork, and the signature numbing Sichuan peppercorns — ma la, the numbing-spicy tingle that makes the dish electric. It's rustic, incendiary and irresistible.",
+    "teaser": "The 'pockmarked grandmother's tofu' — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature.",
     "imageUrl": "",
     "byline": "Sichuan, China",
     "exploreAction": {
@@ -369,7 +369,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Kimchi",
-    "teaser": "Kimchi is Korea's national food, and 'kimchi' is really a whole family: over 200 varieties, from the famous napa-cabbage baechu kimchi to radish, cucumber and mustard-leaf versions. Fermentation is the science — salt, chili, garlic and time create the tang and the good bacteria. Kimchi is made in bulk every winter, buried in jars, and eaten with nearly every meal. It is preservation turned into an art form.",
+    "teaser": "The Korean staple with 200+ varieties — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar.",
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
@@ -390,7 +390,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Bibimbap",
-    "teaser": "Bibimbap means 'mixed rice' — a bowl of warm rice topped with colorful vegetables, seasoned meat, a fried egg and gochujang chili paste, all stirred together at the table. The five colors of the vegetables represent the five elements of Korean cosmology. The dolsot version comes in a sizzling stone bowl that crisps the rice at the bottom into a prized crust. Simple to make, endlessly satisfying to mix.",
+    "teaser": "The 'mixed rice' bowl — the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus.",
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
@@ -411,7 +411,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Bulgogi",
-    "teaser": "Bulgogi means 'fire meat' — thin slices of beef marinated in soy sauce, sugar, garlic, sesame and, crucially, grated pear or kiwi, whose enzymes tenderize the meat. It is grilled quickly over high heat, often at the table, and wrapped in lettuce with rice and ssamjang. The sweet-savory marinade is the whole trick: a dish that tastes of smoke, caramel and celebration.",
+    "teaser": "The 'fire meat' — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor.",
     "imageUrl": "",
     "byline": "Korea",
     "exploreAction": {
@@ -432,7 +432,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Sashimi",
-    "teaser": "Sashimi is raw fish, and nothing but: no rice, no sauce beyond a touch of soy and wasabi — the fish IS the dish. The craft is the cut, angled against the grain to expose the flesh's texture, and the freshness, which makes all else unnecessary. A great sashimi chef treats the knife like a surgeon's scalpel. The word means 'pierced body'; the philosophy is total respect for the ingredient.",
+    "teaser": "The sliced raw fish — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -453,7 +453,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Tempura",
-    "teaser": "Tempura arrived in Japan with Portuguese missionaries in the 16th century — the word likely comes from the Latin 'tempora', the Lenten days when Catholics ate fried vegetables and fish. The Japanese turned it into an art: a feather-light batter of ice-cold water and flour, fried in clean oil for seconds, so the coating shatters and the inside barely cooks. Crisp, greaseless, and gone in a breath.",
+    "teaser": "The 'batter-fried' dish came from Portuguese missionaries in the 16th century — the cold-batter technique and the 'kakiage' style are the craft.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -474,7 +474,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Miso Soup",
-    "teaser": "Miso soup is Japan's daily bowl, built from just two things: dashi, a stock of kelp and bonito flakes, and miso, fermented soybean paste — stirred in at the very end so its fragrance survives. Served with tofu, wakame and spring onion, it opens nearly every Japanese meal. The dashi is the quiet genius; the miso brings depth and salt and umami. Simple enough for breakfast, subtle enough to study for a lifetime.",
+    "teaser": "The daily soup of Japan — the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -495,7 +495,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Katsu Curry",
-    "teaser": "Katsu curry is Japan's great comfort meal: a panko-breaded pork cutlet, deep-fried until golden, laid on a bed of rice and flooded with a thick, mildly sweet curry sauce. The chain reaction is imperial: curry came to Japan via the British navy, and the cutlet was a Western import too — Japan combined them into a dish neither culture invented. Today it is the school-lunch and after-work staple of millions.",
+    "teaser": "The British navy brought curry to Japan — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -516,7 +516,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Okonomiyaki",
-    "teaser": "Okonomiyaki means 'as you like it' — a savory griddle pancake of cabbage, batter, egg and whatever you add: pork, shrimp, cheese, even noodles. Cooked on a tabletop iron griddle, flipped with spatulas, and finished with a crisscross of sauce, mayonnaise and dancing bonito flakes, it is part dinner, part performance, part party. Every region has its own style, and every table argues about the toppings.",
+    "teaser": "The 'as-you-like-it' griddle pancake — the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -537,7 +537,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Takoyaki (1935)",
-    "teaser": "Takoyaki — octopus balls — were born in Osaka in 1935, the invention of a street vendor who adapted a round cake mold. A thin batter is poured into the half-sphere wells, filled with a chunk of octopus, then spun and folded with a pick until each ball turns golden and crisp outside, molten inside. Painted with takoyaki sauce, mayonnaise and bonito flakes, they're the soul of Osaka's street food.",
+    "teaser": "The octopus balls were invented in Osaka in the 1930s — the special pan and the batter's dance are the craft, and the dish is the city's soul.",
     "imageUrl": "",
     "byline": "Osaka, Japan",
     "exploreAction": {
@@ -559,7 +559,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Yakitori",
-    "teaser": "Yakitori is grilled chicken on skewers, and the Japanese use every part of the bird: thigh, breast, skin, liver, heart, even cartilage and gizzard. The two great styles are shio (salt) and tare — a sweet soy glaze brushed on repeatedly until it lacquers the meat. Cooked over hot binchotan charcoal, the smoke does half the work. A whole evening can pass skewer by skewer at a tiny counter.",
+    "teaser": "The grilled chicken skewers — every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -580,7 +580,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Onigiri",
-    "teaser": "Onigiri is the Japanese rice ball: hand-pressed, lightly salted rice with a filling of umeboshi plum, salmon, or tuna mayo, wrapped in a sheet of nori. It is older than sushi and simpler — portable food for travelers and workers, the original bento. The seaweed wrapper is a modern convenience added at the last moment so it stays crisp. One of the most comforting foods ever invented, eaten everywhere from convenience stores to mountain trails.",
+    "teaser": "The rice ball — a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -601,7 +601,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Curry Rice",
-    "teaser": "Japanese curry rice is a roux-based dish, thick, mildly spiced and sweet with grated apple or honey — nothing like Indian curry, and proud of it. It arrived through the British navy, who brought their own colonial curry to Japan in the Meiji era, and the Japanese turned it into a national comfort food served over rice. It is so beloved that 'curry Thursday' is a school-lunch tradition across the country.",
+    "teaser": "The Japanese curry is a roux-based dish adapted from British navy curry — the 'curry rice' is the most popular home-cooked meal in Japan.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -622,7 +622,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Wagyu",
-    "teaser": "Wagyu means 'Japanese cow' — a group of breeds raised for extreme intramuscular marbling, the fat woven through the meat like frost on a window. The famous A5 grade is the top of a grading system that weighs marbling above all else. Cooked properly — hot pan, short time — the fat melts into the lean and the steak becomes almost buttery. It is the most luxurious beef in the world, and the most imitated.",
+    "teaser": "The 'Japanese cow' — the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience.",
     "imageUrl": "",
     "byline": "Japan",
     "exploreAction": {
@@ -643,7 +643,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Poutine (1950)",
-    "teaser": "Poutine is Quebec's gift to late-night eaters: hot french fries topped with cheese curds that squeak against the teeth, drowned in hot brown gravy that melts them into stretchy strands. Born in rural Quebec in the 1950s, the story goes, when a customer asked for his fries and cheese curds with gravy on top. The name may come from a slang word for 'mess'. It is messy, salty, and perfect.",
+    "teaser": "The fries, curds and gravy dish was born in rural Quebec in the 1950s — the cheese curds must squeak, and the 'poutine' has become Canada's national dish.",
     "imageUrl": "",
     "byline": "Quebec, Canada",
     "exploreAction": {
@@ -665,7 +665,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Fish and Chips (1860)",
-    "teaser": "Fish and chips is Britain's national dish: beer-battered fish, flaky inside and shattering outside, with thick-cut chips, served wrapped in paper with salt and vinegar. The pairing emerged in the 1860s when railways made fresh fish cheap in inland cities, and fried-shop culture exploded. It fed factory workers through two world wars and never fell from grace. Crisp, comforting, and still the taste of a seaside Friday.",
+    "teaser": "The British national dish — the fried fish in beer batter and the chips, wrapped in paper — has fed the working class since the 1860s.",
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
@@ -687,7 +687,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Sunday Roast",
-    "teaser": "The Sunday roast is Britain's weekly ritual: a joint of beef (or lamb, pork, chicken) roasted for hours, served with Yorkshire pudding, roast potatoes, vegetables and a lake of gravy. The Yorkshire pudding, a batter popover that soaks the drippings, is the essential side. Rooted in a time when servants had Sunday afternoons off, it survives as the family meal that still brings everyone to one table.",
+    "teaser": "The Sunday roast — beef, Yorkshire pudding, roast potatoes, gravy — is the British family ritual, and the 'Yorkshire pudding' was originally a cheap filler.",
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
@@ -708,7 +708,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Full English Breakfast",
-    "teaser": "The full English — eggs, bacon, sausage, baked beans, grilled tomato, mushrooms, toast and a fried slice — is a plate built for serious mornings. Its roots are Victorian working-class fuel, and it earned the nickname 'the fry-up'. Every pub and cafe has its own version, and the arguments (beans on or off the plate, brown or white sauce) are endless. It is the hangover cure, the holiday treat, and a national identity on a plate.",
+    "teaser": "The fry-up — eggs, bacon, sausage, beans, toast — is the hangover cure of a nation, and the 'full English' is a 19th-century invention from the Victorian boarding house.",
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
@@ -729,7 +729,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Shepherd's Pie",
-    "teaser": "Shepherd's pie is minced lamb under a blanket of mashed potato — 'shepherd' because shepherds tend sheep, and 'cottage pie' is the beef version for cottagers. It began as a thrifty way to use leftover roast meat, and its comfort status has never faded: golden potato crust, rich gravy filling, a hug in a dish. The mash-topping technique was perfected by Victorian cooks who called it 'cottage pie' well into the 20th century.",
+    "teaser": "The minced lamb dish with mashed potato topping — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin.",
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
@@ -750,7 +750,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Cornish Pasty",
-    "teaser": "The Cornish pasty is a miner's lunch: a crimped pastry half-moon of beef, potato, swede and onion, with the thick crimp serving as a handle for grimy fingers to hold, then throw away. Cornish tin miners carried them underground for centuries, and the pasty's D-shape had a practical meaning — the crimp kept the filling clean. Protected by EU law, only pasties made in Cornwall may officially bear the name.",
+    "teaser": "The miner's lunch — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish.",
     "imageUrl": "",
     "byline": "Cornwall, England",
     "exploreAction": {
@@ -771,7 +771,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Haggis",
-    "teaser": "Haggis is Scotland's great humble dish: sheep's heart, liver and lungs, minced with oatmeal, onion and spices, and boiled in a stomach casing. Burns Night, honoring the poet Robert Burns, makes it a ceremonial centerpiece, addressed in verse before it's cut open. To the uninitiated it sounds alarming; to the Scots it is deeply loved comfort food, served with neeps and tatties (turnips and potatoes) and a dram of whisky.",
+    "teaser": "The sheep's pluck (heart, liver, lungs) with oats in a stomach casing — the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece.",
     "imageUrl": "",
     "byline": "Scotland",
     "exploreAction": {
@@ -792,7 +792,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Scotch Egg",
-    "teaser": "The Scotch egg — a hard-boiled egg wrapped in sausage meat, breaded and deep-fried — is a British picnic staple with a disputed pedigree. The 'Scotch' may be a corruption of 'scorched', or a nod to the sauce, or pure marketing from London's Fortnum & Mason, which claims to have invented it in 1738. Whatever the truth, the combination of crisp shell, savory meat and soft center is genius.",
+    "teaser": "The boiled egg wrapped in sausage and breadcrumbs — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic.",
     "imageUrl": "",
     "byline": "England",
     "exploreAction": {
@@ -813,7 +813,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Chicken Tikka Masala (1960)",
-    "teaser": "Chicken tikka masala is often called Britain's national dish: chunks of tandoori chicken simmered in a creamy, mildly spiced tomato sauce. The origin story — a Glaswegian chef, a dry tikka, a tin of tomato soup — is probably apocryphal, but it captures the truth: the dish was born in British Indian restaurants adapting to local tastes in the 1960s. It is curry, reimagined by its adopted country, and loved by both.",
+    "teaser": "The 'British national dish' — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food.",
     "imageUrl": "",
     "byline": "Glasgow, Scotland",
     "exploreAction": {
@@ -835,7 +835,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Naan",
-    "teaser": "Naan is the pillowy, teardrop flatbread baked against the blazing wall of a clay tandoor oven, where it blisters and puffs in seconds. It was the bread of the Mughal courts — the word is Persian — and long a luxury before it became the universal companion to curry. Brushed with butter or ghee, sometimes stuffed with garlic or cheese, it is the soft, smoky sponge that mops up every last drop of sauce.",
+    "teaser": "The tandoor-baked flatbread — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister.",
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
@@ -856,7 +856,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Samosa",
-    "teaser": "The samosa is a triangular fried pastry with a deep ancestry: it traveled from Central Asia as the 'sambosa' with the Persian and Mughal courts, and every region it touched made it its own. In India the classic filling is spiced potato and peas; in Central Asia it's meat; in East Africa it's lentil. Golden, crisp, and engineered to be eaten with one hand, it is the world's great street-corner snack.",
+    "teaser": "The triangular fried pastry — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard.",
     "imageUrl": "",
     "byline": "India",
     "exploreAction": {
@@ -877,7 +877,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Dosa",
-    "teaser": "The dosa is a South Indian crepe made from rice and black lentils soaked, ground and fermented overnight — the tang of the batter is the soul, and the fermentation does the leavening. Poured paper-thin on a hot griddle, it turns golden and lacy-crisp, folded around spiced potato masala, and served with coconut chutney and sambar. It is breakfast, lunch and dinner, and one of the great fermentation cuisines on earth.",
+    "teaser": "The fermented rice-lentil crepe — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic.",
     "imageUrl": "",
     "byline": "South India",
     "exploreAction": {
@@ -898,7 +898,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Biryani (Hyderabadi) (1857)",
-    "teaser": "Hyderabadi biryani is the regal version: the Nizam's biryani, born in the kitchens of Hyderabad's royal court. In the kacchi style, raw marinated meat is layered with rice and sealed under a dum lid, so both cook together in their own steam, the saffron and fried onions perfuming every grain. The result is intensely aromatic, gently spicy and profoundly luxurious — a dish that took a royal court to invent.",
+    "teaser": "The Nizam's biryani — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method.",
     "imageUrl": "",
     "byline": "Hyderabad, India",
     "exploreAction": {
@@ -920,7 +920,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Kebab",
-    "teaser": "Kebab — skewered meat — is one of the world's oldest ways of cooking, with two great families: shish, chunks of marinated meat grilled on a skewer, and doner, meat stacked and roasted on a vertical spit, shaved off as it turns. From Turkish street stalls to Persian gardens to the kebab shops of Europe's late nights, the idea is the same: fire, meat, and the simplest seasoning. Civilization's original fast food.",
+    "teaser": "The skewered meat of the Ottoman world — the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food.",
     "imageUrl": "",
     "byline": "Middle East",
     "exploreAction": {
@@ -941,7 +941,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Shawarma",
-    "teaser": "Shawarma is the Levant's great street meat: layers of marinated lamb, chicken or turkey stacked on a vertical spit, roasted slowly as it turns, and shaved off in thin, crisp-edged ribbons. It is the cousin of Turkish doner and Greek gyros, all descended from a shared Ottoman idea. The magic is the marinade — spices, garlic, lemon — and the ritual of assembly: warm flatbread, pickles, garlic sauce, and the shaved meat at its smoky peak.",
+    "teaser": "The vertical-spit roasted meat — the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual.",
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
@@ -962,7 +962,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Falafel",
-    "teaser": "Falafel is a fried ball of ground chickpeas (or fava beans) — one of the world's great vegan inventions, though it was born of necessity, not ideology. Its roots are disputed between Egypt, where a version called ta'amiya still exists, and the wider Levant, where it is wrapped in pita with salad and tahini. Crisp outside, fluffy inside, and deep-fried democracy in every mouthful.",
+    "teaser": "The fried chickpea ball — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini.",
     "imageUrl": "",
     "byline": "Egypt",
     "exploreAction": {
@@ -983,7 +983,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Hummus",
-    "teaser": "Hummus — chickpeas, tahini, lemon, garlic, olive oil — is a dip so ancient that its earliest written recipes appear in medieval Cairo cookbooks. The blend is the whole trick: silky, nutty, bright, with the tahini and lemon balanced to a perfect hum. It has sparked the 'hummus wars' between Lebanon, Israel, Palestine and Syria, each claiming the crown. The argument may never end; the appetite certainly won't.",
+    "teaser": "The chickpea-tahini dip — the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves.",
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
@@ -1004,7 +1004,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Baklava",
-    "teaser": "Baklava is the layered dessert of the old Ottoman world: paper-thin sheets of filo pastry, buttered and stacked with chopped nuts, baked until golden, then soaked in honey or syrup until the whole thing glistens. The filo technique — rolled so thin you can read through it — is the craft. Greeks, Turks, Arabs and Persians all claim it; the Ottomans perfected it; everyone agrees on seconds.",
+    "teaser": "The layered filo pastry with nuts and honey — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it.",
     "imageUrl": "",
     "byline": "Ottoman",
     "exploreAction": {
@@ -1025,7 +1025,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Kunafa",
-    "teaser": "Kunafa is the Middle East's great dessert of Ramadan: a bed of shredded kataifi pastry or semolina, filled with sweet cheese, baked until golden, then soaked in rose-scented sugar syrup and finished with crushed pistachios. The cheese — stretchy, salty-sweet — is the surprise inside the crisp crust. Served warm, when the syrup and the cheese are at their most dramatic, it is a celebration on a plate.",
+    "teaser": "The shredded-phyllo cheese dessert soaked in syrup — the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment.",
     "imageUrl": "",
     "byline": "Levant",
     "exploreAction": {
@@ -1046,7 +1046,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Arepas",
-    "teaser": "Arepas are the corn cakes of Venezuela and Colombia — ground maize dough griddled until golden, split open and stuffed with cheese, shredded beef, black beans or eggs. They predate the Spanish: indigenous peoples made them from maize for thousands of years, and the word comes from the indigenous 'erepa'. Crisp outside, soft inside, and infinitely fillable, they are the daily bread of two nations and a beloved diaspora staple.",
+    "teaser": "The corn cakes of Venezuela and Colombia — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich.",
     "imageUrl": "",
     "byline": "Venezuela/Colombia",
     "exploreAction": {
@@ -1067,7 +1067,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Ceviche",
-    "teaser": "Ceviche is raw fish 'cooked' by citrus: fresh fish is cured in lime juice, whose acid firms the flesh without heat, then tossed with onion, chili and cilantro. The marinade — leche de tigre, 'tiger's milk' — is prized enough to drink on its own. Peru claims it as national treasure, and the cevicheria, with its ceviche, sweet potato and choclo corn, is a coastal ritual. Bright, fresh, and gone in minutes.",
+    "teaser": "The raw fish 'cooked' in citrus — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure.",
     "imageUrl": "",
     "byline": "Peru",
     "exploreAction": {
@@ -1088,7 +1088,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Empanadas",
-    "teaser": "Empanadas — from the Spanish 'empanar', to wrap in bread — are filled pastries that every Latin American country has made its own. Argentina's are baked and hand-crimped, filled with beef, olive and hard-boiled egg; Colombia's are golden fried corn pockets; Chile's can be huge. The idea traveled from Spain to the Americas and was remade everywhere it landed. Golden, hand-held, and impossible to eat just one.",
+    "teaser": "The filled pastry — from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried.",
     "imageUrl": "",
     "byline": "Spain/Latin America",
     "exploreAction": {
@@ -1109,7 +1109,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Feijoada",
-    "teaser": "Feijoada is Brazil's national dish: a slow, rich stew of black beans with pork — ribs, sausage, ears and tails — simmered for hours until the beans collapse into gravy. It is served feijoada completa, with rice, collard greens, farofa (toasted cassava flour) and orange slices, and traditionally eaten on Saturdays as a leisurely, all-afternoon affair. Born of the colonial era, it became the great gathering dish of a whole country.",
+    "teaser": "The black bean and pork stew — the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual.",
     "imageUrl": "",
     "byline": "Brazil",
     "exploreAction": {
@@ -1130,7 +1130,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Churros",
-    "teaser": "Churros are ridged, deep-fried dough sticks rolled in sugar, made for dunking in thick hot chocolate. Their origin is debated — a popular theory traces them to Chinese youtiao, brought to Iberia by Portuguese sailors — but Spain made them an icon: a breakfast and late-night ritual at churrerías across the country. The ridges, pressed through a star nozzle, are the point: maximum crunch and maximum surface for the sugar.",
+    "teaser": "The fried dough sticks with sugar and chocolate — the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast.",
     "imageUrl": "",
     "byline": "Spain",
     "exploreAction": {
@@ -1151,7 +1151,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Gazpacho",
-    "teaser": "Gazpacho is Andalusia's summer survival soup: tomatoes, cucumber, pepper, garlic and bread blended cold with olive oil and vinegar. It began long before tomatoes — a humble bread-and-garlic mash that Moorish farmhands ate to beat the heat — and only became the tomato soup we know after the Columbian exchange. Served ice-cold with a drizzle of oil and chopped garnish, it is the taste of a Spanish summer.",
+    "teaser": "The cold tomato soup of Andalusia — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin.",
     "imageUrl": "",
     "byline": "Andalusia, Spain",
     "exploreAction": {
@@ -1172,7 +1172,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Tiramisu (1960)",
-    "teaser": "Tiramisu means 'pick me up' — and with espresso-soaked ladyfingers, mascarpone cream and a dusting of cocoa, it delivers. Invented in the Veneto in the 1960s (the exact restaurant is hotly disputed), it was a dessert for its time: no baking, coffee energy, and elegance in a glass or a slab. The layers are the genius — bitter coffee against sweet cream — and the world has never stopped copying it.",
+    "teaser": "The 'pick-me-up' dessert was invented in the 1960s in the Veneto — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute.",
     "imageUrl": "",
     "byline": "Treviso, Italy",
     "exploreAction": {
@@ -1194,7 +1194,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Cheesecake",
-    "teaser": "Cheesecake is ancient: Greeks served a simple cheese cake at weddings four thousand years ago, and the Romans spread it across Europe. The modern versions split into two families — the baked, dense New York style, and the unbaked, light and gelatin-set style of many European tables. New York's, with its cream cheese and buttery crust, became the icon. Same name, thousands of years, endless variations.",
+    "teaser": "The cheesecake is ancient — the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard.",
     "imageUrl": "",
     "byline": "Ancient Greece",
     "exploreAction": {
@@ -1215,7 +1215,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Ice Cream",
-    "teaser": "Ice cream's history begins in Tang-dynasty China, where milk mixed with ice was a royal treat, then moves through the sorbets of the Arab world and the frozen desserts of Renaissance Italy. Modern ice cream — churned, creamy, egg-custard-based — took shape in 19th-century America and Europe. Gelato is denser, Japanese mochi ice cream is chewy, and the cone is a 1904 invention. Cold, sweet, and universal.",
+    "teaser": "The frozen dessert was invented in Tang-dynasty China — milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it.",
     "imageUrl": "",
     "byline": "China",
     "exploreAction": {
@@ -1236,7 +1236,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Chocolate (3000)",
-    "teaser": "Chocolate was a drink for three thousand years before it became a bar: the Maya and Aztecs made a bitter, spiced beverage from ground cacao, served cold and frothed, and the beans were valuable enough to use as currency. The Spanish brought cacao to Europe and sweetened it, and only in the 19th century did chocolate become the solid, creamy confection we know. Sweetness is the late addition; the obsession is ancient.",
+    "teaser": "The cacao drink of the Maya and Aztecs was bitter and spiced — the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847.",
     "imageUrl": "",
     "byline": "Mesoamerica",
     "exploreAction": {
@@ -1258,7 +1258,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Bread (Sourdough)",
-    "teaser": "Sourdough is the oldest bread: a living culture of wild yeast and bacteria that leavens the loaf without commercial yeast. The first leavened bread was likely an Egyptian accident thousands of years ago — dough left out, naturally fermented, baked. The culture is the secret: feed it, and it lasts for decades, passed between bakers like a family heirloom. The tang, the crust, the patience — all from a jar of flour and water.",
+    "teaser": "The fermented bread — the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades.",
     "imageUrl": "",
     "byline": "Ancient Egypt",
     "exploreAction": {
@@ -1279,7 +1279,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Bagel",
-    "teaser": "The bagel is boiled, then baked — the boil gives it that dense, chewy, shiny crust. It traveled to New York with Jewish immigrants from Poland in the late 19th century and became a city icon, with hand-rolled, kettle-boiled, wood-fired versions treated as a craft. The lox-and-cream-cheese combination is an American invention. A great bagel should have a blistered outside and a soft, resilient interior — and a hole, obviously.",
+    "teaser": "The boiled-then-baked bread ring — the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust.",
     "imageUrl": "",
     "byline": "Poland",
     "exploreAction": {
@@ -1300,7 +1300,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pretzel",
-    "teaser": "The pretzel's knotted shape is said to represent arms crossed in prayer — the German 'brezel' has been a symbol of good luck for centuries. The essential technique is the lye bath: a dip in food-grade caustic solution gives the deep brown, glossy crust and distinctive flavor that baking soda cannot replicate. Soft pretzels with mustard are the beer-hall classic; the hard versions are the snack aisle's oldest resident.",
+    "teaser": "The knotted bread — the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend.",
     "imageUrl": "",
     "byline": "Germany",
     "exploreAction": {
@@ -1321,7 +1321,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Macaron",
-    "teaser": "The macaron is a sandwich cookie of two almond-meringue shells with a smooth filling — and the 'foot', the ruffled base where the shell spreads, is the mark of a master. Ladurée's Parisian patisserie made it a 20th-century icon, though the shells trace back to Italian meringues. Pastel colors, crisp edges, chewy centers: the macaron is France's most photogenic confection, and its technical demands make it a baker's rite of passage.",
+    "teaser": "The meringue-almond sandwich cookie — the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master.",
     "imageUrl": "",
     "byline": "France",
     "exploreAction": {
@@ -1342,7 +1342,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Pancakes",
-    "teaser": "Nearly every culture has a griddle cake: the French crêpe, the Japanese dorayaki, the Ethiopian injera, the American stack. American pancakes became the icon — fluffy, leavened with baking powder, served with butter and maple syrup — and the weekend-morning ritual. The batter's chemistry (don't overmix!) is the difference between clouds and rubber. Whether thin or thick, sweet or savory, the pancake is humanity's friendliest breakfast.",
+    "teaser": "The griddle cake exists in every culture — from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard.",
     "imageUrl": "",
     "byline": "Global",
     "exploreAction": {
@@ -1363,7 +1363,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Hamburger (1900)",
-    "teaser": "The hamburger — a ground-beef patty in a bun — is an American icon with a disputed pedigree: Hamburg, Germany gave it the name, and late-19th-century American vendors (a 1900 Connecticut lunch wagon is one claimant) gave it the bun. The fast-food era made it global, and the burger became the most imitated sandwich on earth. Simple, customizable, and culturally loaded — the patty in a bun is a world cuisine.",
+    "teaser": "The ground-beef patty in a bun — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food.",
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
@@ -1385,7 +1385,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Hot Dog",
-    "teaser": "The hot dog is a sausage in a bun: the frankfurter is German, the bun is American, and the name came from a 1901 cartoonist's joke about dachshund sausages. Coney Island vendors made it a street-food legend, and its assembly — mustard, relish, onions — is treated with ritual seriousness in Chicago and New York alike. Grilled, boiled or steamed, it remains the great democratic picnic food.",
+    "teaser": "The sausage in a bun — the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke.",
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
@@ -1406,7 +1406,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Fried Chicken",
-    "teaser": "Fried chicken is the pride of the American South: chicken soaked in buttermilk, dredged in seasoned flour, and fried until the crust shatters and the meat stays juicy. The buttermilk brine is the moisture secret; the double dredge, the crunch. Scottish frying met West African seasonings in the American South to create the dish, and it has since circled the globe — from Korean fried chicken to Nashville's spice-caked hot version.",
+    "teaser": "The buttermilk-soaked, seasoned, fried chicken of the American South — the 'brine' is the moisture, and the dish's roots include West African frying techniques.",
     "imageUrl": "",
     "byline": "American South",
     "exploreAction": {
@@ -1427,7 +1427,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Buffalo Wings (1964)",
-    "teaser": "Buffalo wings were invented in 1964 at the Anchor Bar in Buffalo, New York, when the owner's son brought in leftover chicken wings and his mother fried them and tossed them in Frank's hot sauce and butter. The celery and blue cheese came as cooling companions, and a late-night bar snack became a sports-bar institution. Super Bowl Sunday now moves more wings than any other day of the year.",
+    "teaser": "Invented at the Anchor Bar in Buffalo in 1964 — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual.",
     "imageUrl": "",
     "byline": "Buffalo, NY",
     "exploreAction": {
@@ -1449,7 +1449,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Mac and Cheese",
-    "teaser": "Mac and cheese is pasta in a cheese sauce, and its American story starts with Thomas Jefferson, who brought back 'macaroni pie' from Europe and served it at the White House. The baked version with a breadcrumb crust became the family classic, and the boxed version — powdered cheese, elbow noodles — made it a pantry staple after World War II. Simple, creamy, and the ultimate comfort food.",
+    "teaser": "The baked pasta and cheese — Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation.",
     "imageUrl": "",
     "byline": "USA",
     "exploreAction": {
@@ -1470,7 +1470,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Chili",
-    "teaser": "Texas chili is 'a bowl of red': beef, chiles and cumin, simmered for hours — and, in the classic version, no beans, no tomatoes, no onions. It began as a frontier and chuck-wagon staple, became a San Antonio institution, and turned competitive: the chili cook-off is a Texas ritual with national championships. Whether beanless purist or bean-loving rebel, everyone agrees it must be red, hearty and slow.",
+    "teaser": "The Texas chili is 'a bowl of red' — no beans in the classic version, and the 'chili cook-off' is a Texas institution.",
     "imageUrl": "",
     "byline": "Texas",
     "exploreAction": {
@@ -1491,7 +1491,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Gumbo",
-    "teaser": "Gumbo is Louisiana's great melting-pot stew: a dark roux base, the 'holy trinity' of onion, celery and pepper, okra, and a protein mix from andouille sausage and chicken to shrimp and crab. Its name comes from an African word for okra, and its roots braid French, Spanish, African and Native American cooking. Served over rice, thickened with roux and file powder, it is New Orleans in a bowl.",
+    "teaser": "The Louisiana stew with a roux base — the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking.",
     "imageUrl": "",
     "byline": "Louisiana",
     "exploreAction": {
@@ -1512,7 +1512,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Jambalaya",
-    "teaser": "Jambalaya is Louisiana's answer to paella: rice cooked with the 'holy trinity' and whatever meat or seafood is at hand — andouille sausage, chicken, shrimp — in one pot. The Creole version gets tomatoes; the Cajun version, born of the bayou, usually does not. The name likely blends 'jambon' (ham) and the Provençal 'jambalaia'. One pot, a whole culture's history, and a festival named after it.",
+    "teaser": "The Creole rice dish with sausage, chicken and shrimp — the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base.",
     "imageUrl": "",
     "byline": "Louisiana",
     "exploreAction": {
@@ -1533,7 +1533,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Tacos",
-    "teaser": "The taco — a folded tortilla around a filling — is older than the Spanish: indigenous Mexicans ate filled tortillas for centuries, and the word likely comes from the Nahuatl for the folded tortilla. The taco stand, with its trompo, comal and salsa bar, is the street food of Mexico, and every region has its style: pastor in Mexico City, barbacoa in the north, cochinita in Yucatán. Simple, perfect, and endlessly varied.",
+    "teaser": "The folded tortilla with filling — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City.",
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
@@ -1554,7 +1554,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Burrito",
-    "teaser": "The burrito — a flour tortilla wrapped around a filling — got its name, legend says, from a street vendor in northern Mexico whose donkey (burrito) was the only delivery vehicle. The mission-style burrito, enormous and foil-wrapped with rice, beans and meat, was born in San Francisco in the 1960s. From a border-town wrap to a global fast food, the burrito is one tortilla, infinite possibilities.",
+    "teaser": "The wrapped tortilla — the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention.",
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
@@ -1575,7 +1575,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Guacamole",
-    "teaser": "Guacamole comes from the Aztec ahuacamolli — 'avocado sauce' — and has been mashed for centuries. The modern version is a study in restraint: ripe avocado, lime, salt, onion, chili and cilantro, with the lime's acid keeping the green bright and the technique never over-mashing (chunky is right). Served with chips, on tacos, or on toast, it went from indigenous staple to the world's favorite dip.",
+    "teaser": "The word comes from Nahuatl 'āhuacamōlli' — avocado sauce. The Aztecs mashed avocados with tomatoes and chili peppers, but modern guacamole's lime-and-salt technique evolved after the Spanish introduced citrus to Mexico in the 16th century.",
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
@@ -1596,7 +1596,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Mole",
-    "teaser": "Mole is Mexico's most complex sauce: mole poblano alone can count over twenty ingredients, from dried chiles and chocolate to nuts, seeds, spices and day-old bread. It simmers for hours into a deep, dark, sweet-spicy masterpiece, traditionally served over turkey or chicken and poured with ceremony. The legend of a nun inventing it by accident is charming and false — mole is a slow accumulation of centuries. It is the national dish with a hundred faces.",
+    "teaser": "The complex sauce with 20+ ingredients including chocolate — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual.",
     "imageUrl": "",
     "byline": "Mexico",
     "exploreAction": {
@@ -1617,7 +1617,7 @@
     "categoryId": "FOOD",
     "subtype": "Dish",
     "name": "Chiles en Nogada (1821)",
-    "teaser": "Chiles en nogada was created to celebrate Mexico's independence in 1821: a roasted poblano stuffed with picadillo — ground meat, fruit and nuts — draped in a creamy walnut sauce and scattered with pomegranate seeds. The green, white and red of the dish mirror the Mexican flag, deliberately. Served in late summer when pomegranates and walnuts are at their peak, it is patriotic, seasonal, and one of Mexico's most celebrated plates.",
+    "teaser": "The stuffed poblano with walnut sauce and pomegranate — created for Mexico's independence in 1821, and the dish's colors are the flag.",
     "imageUrl": "",
     "byline": "Puebla, Mexico",
     "exploreAction": {
@@ -1633,5 +1633,1706 @@
       "1820s"
     ],
     "tier": 1
+  },
+  {
+    "name": "Bánh Mì (1950s)",
+    "teaser": "Vietnam's French-Vietnamese sandwich — crispy baguette, pâté, pickled daikon, cilantro, and chili. Born from French colonial bread-making and Vietnamese fillings, it's the world's best fusion street food — and costs $1 in Saigon.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "vietnam",
+      "sandwich"
+    ],
+    "id": "food-bánh-mì-1950s",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bánh Mì (1950s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bánh Mì (1950s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Jerk Chicken (Jamaica)",
+    "teaser": "Jamaica's national dish — chicken marinated in Scotch bonnet peppers, allspice, thyme, and smoke-cooked over pimento wood. The jerk technique dates to the Maroons, who escaped slavery and developed the slow-cooking method to avoid detection.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "jamaica",
+      "barbecue"
+    ],
+    "id": "food-jerk-chicken-jamaica",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jerk Chicken (Jamaica) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jerk Chicken (Jamaica) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Sfiha (Lebanon)",
+    "teaser": "Open-faced lamb pies from the Levant — spiced ground meat, pine nuts, and yogurt on thin dough. The Sfiha Lattakia version adds pomegranate molasses. It's the ancestor of pizza in the eastern Mediterranean.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "lebanon",
+      "pizza"
+    ],
+    "id": "food-sfiha-lebanon",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sfiha (Lebanon) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sfiha (Lebanon) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Arepa (Venezuela/Colombia)",
+    "teaser": "Cornmeal cakes split and stuffed with everything — black beans, cheese, avocado, shredded beef. The arepa predates Columbus and is now a $5 billion industry. Venezuelans eat them for breakfast, lunch, and dinner.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "venezuela",
+      "corn"
+    ],
+    "id": "food-arepa-venezuela/colombia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arepa (Venezuela/Colombia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Arepa (Venezuela/Colombia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Baozi (China)",
+    "teaser": "Steamed buns filled with pork, vegetables, or red bean paste. The xiaolongbao (soup dumpling) variant — thin skin, hot broth — is Shanghai's pride. The world record for eating baozi is 28 in 3 minutes.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "china",
+      "dumpling"
+    ],
+    "id": "food-baozi-china",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baozi (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baozi (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Churros (Spain)",
+    "teaser": "Fried dough piped through star-shaped nozzles, dusted in cinnamon sugar, and dipped in thick hot chocolate. The churrería tradition dates to 16th-century Spain, possibly inspired by Portuguese queijadas.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "spain",
+      "dessert"
+    ],
+    "id": "food-churros-spain",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Churros (Spain) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Churros (Spain) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Falafel (Egypt/Israel)",
+    "teaser": "Deep-fried chickpea or fava bean balls — Egypt's ta'ameya uses fava beans, while Levantine falafel uses chickpeas. The debate over origin is heated, but everyone agrees: wrapped in pita with tahini, it's perfect.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "middle-east",
+      "vegetarian"
+    ],
+    "id": "food-falafel-egypt/israel",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Falafel (Egypt/Israel) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Falafel (Egypt/Israel) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Dosa (South India)",
+    "teaser": "Crispy fermented rice-and-lentil crepes from South India, filled with spiced potatoes and served with sambar and chutney. The 2,000-year-old fermentation process creates the perfect tang and crunch.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "india",
+      "fermented"
+    ],
+    "id": "food-dosa-south-india",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dosa (South India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dosa (South India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Elote (Mexico)",
+    "teaser": "Grilled corn on the cob slathered with mayo, cotija cheese, chili powder, and lime. Mexico's street corn is a 4,000-year tradition — maize was domesticated in Oaxaca, and elote vendors are the backbone of Mexican street food culture.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "mexico",
+      "corn"
+    ],
+    "id": "food-elote-mexico",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Elote (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Elote (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Pho (Vietnam)",
+    "teaser": "Vietnam's national soup — rice noodles in beef or chicken broth simmered for hours with star anise, cinnamon, and fish sauce. Born in Hanoi in the early 20th century, it's now eaten for breakfast by 50 million Vietnamese daily.",
+    "categoryId": "FOOD",
+    "subtype": "soup",
+    "tags": [
+      "soup",
+      "vietnam",
+      "noodle"
+    ],
+    "id": "food-pho-vietnam",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pho (Vietnam) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pho (Vietnam) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Bibimbap (Korea)",
+    "teaser": "Korea's mixed rice bowl — vegetables, meat, egg, and gochujang sauce stirred together in a hot stone pot. The sizzle when you mix it is the best part. Each region has its own version: Jeonju's is the most famous.",
+    "categoryId": "FOOD",
+    "subtype": "rice",
+    "tags": [
+      "rice",
+      "korea",
+      "mixed"
+    ],
+    "id": "food-bibimbap-korea",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bibimbap (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bibimbap (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tom Yum Goong (Thailand)",
+    "teaser": "Thailand's hot-and-sour shrimp soup — lemongrass, galangal, kaffir lime, and chili. The balance of sour, salty, spicy, and sweet in one bowl is Thailand's philosophy of cooking made liquid.",
+    "categoryId": "FOOD",
+    "subtype": "soup",
+    "tags": [
+      "soup",
+      "thailand",
+      "spicy"
+    ],
+    "id": "food-tom-yum-goong-thailand",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tom Yum Goong (Thailand) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tom Yum Goong (Thailand) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Dim Sum (China)",
+    "teaser": "Cantonese small plates — har gow, siu mai, char siu bao — served from bamboo steamers. The 'yum cha' tradition of drinking tea with dumplings dates to Guangzhou teahouses in the 10th century. There are over 2,000 varieties.",
+    "categoryId": "FOOD",
+    "subtype": "dim-sum",
+    "tags": [
+      "dim-sum",
+      "china",
+      "cantonese"
+    ],
+    "id": "food-dim-sum-china",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dim Sum (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dim Sum (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Biryani (India)",
+    "teaser": "India's layered rice dish — basmati rice cooked with saffron, spices, and meat, then steamed in a sealed pot (dum). Hyderabadi biryani uses raw meat layered with rice; Lucknowi biryani uses pre-cooked. Both claim supremacy.",
+    "categoryId": "FOOD",
+    "subtype": "rice",
+    "tags": [
+      "rice",
+      "india",
+      "spiced"
+    ],
+    "id": "food-biryani-india",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani (India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Biryani (India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Laksa (Malaysia/Singapore)",
+    "teaser": "A spicy coconut noodle soup — laksa lemak (curry-based) or asam laksa (tamarind-based). Penang's version was voted the world's 7th best food by CNN. The debate between curry and tamarind versions is Malaysia's fiercest food war.",
+    "categoryId": "FOOD",
+    "subtype": "soup",
+    "tags": [
+      "soup",
+      "malaysia",
+      "noodle"
+    ],
+    "id": "food-laksa-malaysia/singapore",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Laksa (Malaysia/Singapore) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Laksa (Malaysia/Singapore) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Jollof Rice (West Africa)",
+    "teaser": "West Africa's one-pot tomato rice — the centerpiece of every celebration. Nigeria, Ghana, and Senegal each claim the best version. The 'Jollof Wars' between Nigeria and Ghana are Africa's most passionate food rivalry.",
+    "categoryId": "FOOD",
+    "subtype": "rice",
+    "tags": [
+      "rice",
+      "west-africa",
+      "one-pot"
+    ],
+    "id": "food-jollof-rice-west-africa",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jollof Rice (West Africa) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jollof Rice (West Africa) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kimchi (Korea)",
+    "teaser": "Fermented vegetables — napa cabbage, radish — with chili, garlic, and fish sauce. Korea's 5,000-year-old tradition produces 200+ varieties. The annual kimjang — families making kimchi together — is UNESCO Intangible Cultural Heritage.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "korea",
+      "vegetable"
+    ],
+    "id": "food-kimchi-korea",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kimchi (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kimchi (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Miso Ramen (Japan)",
+    "teaser": "Sapporo's signature ramen — rich miso broth, wavy noodles, corn, butter, and chashu pork. The miso base was invented in 1955 at Aji no Sanpei restaurant. Sapporo's ramen alley has 17 shops in one narrow passage.",
+    "categoryId": "FOOD",
+    "subtype": "noodle",
+    "tags": [
+      "noodle",
+      "japan",
+      "ramen"
+    ],
+    "id": "food-miso-ramen-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Miso Ramen (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Miso Ramen (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Nasi Goreng (Indonesia)",
+    "teaser": "Indonesia's national dish — fried rice with sweet soy sauce, chili, garlic, and shallots. Every warung (food stall) has its own version. The dish is so central to Indonesian identity that it's served at presidential inaugurations.",
+    "categoryId": "FOOD",
+    "subtype": "rice",
+    "tags": [
+      "rice",
+      "indonesia",
+      "fried"
+    ],
+    "id": "food-nasi-goreng-indonesia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nasi Goreng (Indonesia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nasi Goreng (Indonesia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tiramisu (1960s)",
+    "teaser": "Italy's coffee-soaked dessert — ladyfingers dipped in espresso, layered with mascarpone cream and cocoa. Its exact origin is disputed between Veneto and Friuli, but the name means 'pick me up' — and it does.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "italy",
+      "coffee"
+    ],
+    "id": "food-tiramisu-1960s",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tiramisu (1960s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tiramisu (1960s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Mochi (Japan)",
+    "teaser": "Pounded rice cakes — soft, chewy, and endlessly adaptable. Daifuku mochi stuffed with sweet red bean paste is Japan's most beloved wagashi. The mochi-pounding ceremony (mochitsuki) is a New Year's tradition.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "japan",
+      "rice"
+    ],
+    "id": "food-mochi-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mochi (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mochi (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Baklava (Ottoman Empire)",
+    "teaser": "Layers of phyllo dough, chopped nuts, and honey syrup — the Ottoman Empire's most delicious export. Turkey, Greece, and Lebanon each claim the best version. The secret is the soaking technique: hot syrup on cold pastry.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "ottoman",
+      "nuts"
+    ],
+    "id": "food-baklava-ottoman-empire",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baklava (Ottoman Empire) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baklava (Ottoman Empire) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Churros con Chocolate (Spain)",
+    "teaser": "Spain's most indulgent pairing — crispy churros dipped in thick, dark hot chocolate. In Madrid, churrerías have served this combo since the 19th century. The chocolate is so thick you can stand a spoon in it.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "spain",
+      "chocolate"
+    ],
+    "id": "food-churros-con-chocolate-spain",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Churros con Chocolate (Spain) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Churros con Chocolate (Spain) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kulfi (India)",
+    "teaser": "India's dense, slow-churned ice cream — flavored with cardamom, saffron, pistachios, or mango. Unlike Western ice cream, kulfi doesn't have air whipped in, making it creamier and richer. It dates to the 16th-century Mughal Empire.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "india",
+      "frozen"
+    ],
+    "id": "food-kulfi-india",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kulfi (India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kulfi (India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Cannoli (Sicily)",
+    "teaser": "Sicily's fried pastry tubes filled with sweet ricotta — the dessert that survived the Arab conquest, Norman rule, and Italian unification. The shell must be crispy; the filling must be creamy. Everything else is heresy.",
+    "categoryId": "FOOD",
+    "subtype": "dessert",
+    "tags": [
+      "dessert",
+      "sicily",
+      "pastry"
+    ],
+    "id": "food-cannoli-sicily",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cannoli (Sicily) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cannoli (Sicily) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Maillard Reaction (1912)",
+    "teaser": "The chemical reaction that makes bread crust brown, steak sear, and coffee roast. Named after Louis-Camille Maillard, it's the reason food tastes cooked — amino acids and sugars combine at 140°C to create hundreds of flavor compounds.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "chemistry",
+      "cooking"
+    ],
+    "id": "food-the-maillard-reaction-1912",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maillard Reaction (1912) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Maillard Reaction (1912) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Gluten Development",
+    "teaser": "When flour meets water and gets kneaded, glutenin and gliadin proteins form gluten networks that trap gas — making bread rise. Over-kneading makes bread tough; under-kneading makes it crumbly. The sweet spot is everything.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "baking",
+      "chemistry"
+    ],
+    "id": "food-gluten-development",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gluten Development end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gluten Development — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Emulsification",
+    "teaser": "How oil and water mix — mayonnaise, vinaigrette, hollandaise. Lecithin in egg yolks acts as a surfactant, with one end attracted to water and the other to oil. Break the emulsion and your sauce splits; rescue it with a drop of mustard.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "cooking",
+      "chemistry"
+    ],
+    "id": "food-emulsification",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Emulsification end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Emulsification — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Fermentation Science",
+    "teaser": "Yeast converts sugar to alcohol and CO2 — bread rises, beer ferments, wine ages. Lacto-fermentation makes kimchi, sauerkraut, and yogurt. Every culture independently discovered fermentation because rot and preservation are separated by one microbe.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "fermentation",
+      "biology"
+    ],
+    "id": "food-fermentation-science",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fermentation Science end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fermentation Science — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Umami (1908)",
+    "teaser": "The fifth taste — discovered by Kikunae Ikeda from kombu seaweed broth. Glutamate triggers the same receptors as protein, signaling 'this has nutrition.' Parmesan, tomatoes, soy sauce, and MSG are umami bombs.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "taste",
+      "japan"
+    ],
+    "id": "food-umami-1908",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Umami (1908) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Umami (1908) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Carryover Cooking",
+    "teaser": "Food continues cooking after leaving heat — a steak resting after searing rises 5-10°F internally. Professional chefs pull food early because the residual heat does the rest. Ignore this and your roast chicken is dry.",
+    "categoryId": "FOOD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "cooking",
+      "technique"
+    ],
+    "id": "food-carryover-cooking",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carryover Cooking end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Carryover Cooking — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kombucha (China, 220 BCE)",
+    "teaser": "Fermented tea — sweet tea transformed by SCOBY (symbiotic culture of bacteria and yeast) into a fizzy, slightly alcoholic drink. Originally from China, it's now a $2 billion industry. The SCOBY looks like a alien pancake.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "tea",
+      "probiotic"
+    ],
+    "id": "food-kombucha-china-220-bce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kombucha (China, 220 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kombucha (China, 220 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tempeh (Indonesia)",
+    "teaser": "Fermented soybeans bound by white mold (Rhizopus oligosporus) into a firm cake. Indonesia's protein staple for 300+ years — nutty, meaty, and packed with probiotics. The fermentation increases bioavailability of nutrients.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "indonesia",
+      "soy"
+    ],
+    "id": "food-tempeh-indonesia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tempeh (Indonesia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tempeh (Indonesia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Sourdough (Ancient Egypt)",
+    "teaser": "Wild yeast and bacteria leaven bread — no commercial yeast needed. The starter is a living culture that can survive for decades. San Francisco's Boudin Bakery claims a starter since 1849. The tang comes from lactobacillus.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "bread",
+      "baking"
+    ],
+    "id": "food-sourdough-ancient-egypt",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sourdough (Ancient Egypt) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sourdough (Ancient Egypt) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Miso (Japan, 700 CE)",
+    "teaser": "Fermented soybean paste — the backbone of Japanese cooking. White (shiro) miso is sweet and mild; red (aka) miso is intense and complex. The fermentation ranges from weeks to years, developing hundreds of flavor compounds.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "japan",
+      "soy"
+    ],
+    "id": "food-miso-japan-700-ce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Miso (Japan, 700 CE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Miso (Japan, 700 CE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kefir (Caucasus)",
+    "teaser": "Fermented milk with kefir grains — symbiotic colonies of bacteria and yeast that look like cauliflower. The Caucasus people have made it for 4,000+ years. Unlike yogurt, kefir contains yeasts and a wider range of probiotics.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "dairy",
+      "probiotic"
+    ],
+    "id": "food-kefir-caucasus",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kefir (Caucasus) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kefir (Caucasus) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Injera (Ethiopia)",
+    "teaser": "Ethiopia's sourdough flatbread — spongy, tangy, and used as both plate and utensil. Made from teff flour fermented for 3-5 days, it's the centerpiece of Ethiopian cuisine. Eating from a shared injera is a communal act.",
+    "categoryId": "FOOD",
+    "subtype": "fermented",
+    "tags": [
+      "fermented",
+      "ethiopia",
+      "bread"
+    ],
+    "id": "food-injera-ethiopia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Injera (Ethiopia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Injera (Ethiopia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Columbian Exchange (1492)",
+    "teaser": "Columbus's voyages swapped foods between Old and New Worlds — tomatoes to Italy, potatoes to Ireland, chili peppers to India, wheat to the Americas. It's the single biggest food event in history, reshaping every cuisine on Earth.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "trade",
+      "global"
+    ],
+    "id": "food-the-columbian-exchange-1492",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Columbian Exchange (1492) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Columbian Exchange (1492) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Spice Trade",
+    "teaser": "For 2,000 years, pepper, cinnamon, and cloves were worth more than gold. The spice trade connected India, Arabia, Venice, and Lisbon — inspiring exploration, colonization, and wars. Nutmeg was once worth more than its weight in gold.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "trade",
+      "spice"
+    ],
+    "id": "food-the-spice-trade",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Spice Trade end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Spice Trade — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Invention of Pizza (Naples, 1889)",
+    "teaser": "Queen Margherita visited Naples and tried Raffaele Esposito's pizza — tomato, mozzarella, and basil representing the Italian flag. It was named Pizza Margherita. But flatbreads with toppings existed for millennia in Egypt, Greece, and Rome.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "italy",
+      "pizza"
+    ],
+    "id": "food-the-invention-of-pizza-naples-1889",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Invention of Pizza (Naples, 1889) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Invention of Pizza (Naples, 1889) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The History of Chocolate (3000 BCE)",
+    "teaser": "The Olmecs ground cacao beans into a bitter drink 5,000 years ago. The Aztecs called it 'food of the gods.' Europeans added sugar in the 16th century. The chocolate bar was invented in 1847 by Joseph Fry. It took 4,800 years to go from drink to bar.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "chocolate",
+      "mesoamerica"
+    ],
+    "id": "food-the-history-of-chocolate-3000-bce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Chocolate (3000 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Chocolate (3000 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The History of Salt",
+    "teaser": "Salt was so valuable it was used as currency — Roman soldiers were paid in salt (salarium → salary). Wars were fought over salt mines. The Salt Road connected Africa to Europe. Every civilization is built on salt.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "trade",
+      "preservation"
+    ],
+    "id": "food-the-history-of-salt",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Salt end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Salt — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The History of Coffee (Ethiopia, 850 CE)",
+    "teaser": "Legend says a goat herder named Kaldi noticed his goats dancing after eating coffee berries. By the 15th century, coffeehouses spread from Yemen to Mecca to Istanbul to Vienna. The coffee shop invented the stock market, insurance, and the newspaper.",
+    "categoryId": "FOOD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "coffee",
+      "ethiopia"
+    ],
+    "id": "food-the-history-of-coffee-ethiopia-850-ce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Coffee (Ethiopia, 850 CE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Coffee (Ethiopia, 850 CE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Parmigiano-Reggiano (Italy)",
+    "teaser": "The 'King of Cheeses' — 24+ months of aging in climate-controlled rooms, producing a crystalline, umami-rich masterpiece. Each wheel weighs 38 kg and costs €300+. Italy produces 3.6 million wheels annually.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "italy",
+      "aged"
+    ],
+    "id": "food-parmigiano-reggiano-italy",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Parmigiano-Reggiano (Italy) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Parmigiano-Reggiano (Italy) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Stilton (England)",
+    "teaser": "England's most famous blue cheese — creamy, crumbly, and complex. Only three creameries in Derbyshire, Leicestershire, and Nottinghamshire can legally produce it. Its blue veins come from Penicillium roqueforti.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "england",
+      "blue"
+    ],
+    "id": "food-stilton-england",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Stilton (England) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stilton (England) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Gruyère (Switzerland)",
+    "teaser": "Switzerland's melting cheese — the foundation of fondue and French onion soup. Its nutty, slightly sweet flavor intensifies with aging. True Gruyère AOP must be made in specific Swiss cantons using raw milk.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "switzerland",
+      "fondue"
+    ],
+    "id": "food-gruyère-switzerland",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gruyère (Switzerland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gruyère (Switzerland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Comté (France)",
+    "teaser": "France's best-selling AOP cheese — a Alpine Gruyère-style with caramel and fruit notes. Each wheel requires 450 liters of milk from Montbéliarde cows. The Jura region produces 64,000 tonnes annually.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "france",
+      "alpine"
+    ],
+    "id": "food-comté-france",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Comté (France) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Comté (France) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Feta (Greece)",
+    "teaser": "Greece's brined white cheese — made from sheep's milk or a mix with goat's milk. Protected by EU law since 2002: only cheese made in specific Greek regions can be called Feta. It's been made for 6,000 years.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "greece",
+      "brined"
+    ],
+    "id": "food-feta-greece",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feta (Greece) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Feta (Greece) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Brie de Meaux (France)",
+    "teaser": "The 'Queen of Cheeses' — a soft, bloomy-rind cheese from the Brie region. Napoleon demanded it at his coronation. Its creamy interior and mushroomy rind make it one of the world's most beloved cheeses.",
+    "categoryId": "FOOD",
+    "subtype": "cheese",
+    "tags": [
+      "cheese",
+      "france",
+      "soft"
+    ],
+    "id": "food-brie-de-meaux-france",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brie de Meaux (France) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Brie de Meaux (France) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Matcha (Japan)",
+    "teaser": "Stone-ground green tea powder — shaded for 20+ days to boost chlorophyll and L-theanine. The Japanese tea ceremony (chanoyu) turned matcha into meditation. Today it's a $3 billion industry from lattes to ice cream.",
+    "categoryId": "FOOD",
+    "subtype": "beverage",
+    "tags": [
+      "beverage",
+      "japan",
+      "tea"
+    ],
+    "id": "food-matcha-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Matcha (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Matcha (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Mezcal (Mexico)",
+    "teaser": "Tequila's smokier, artisanal cousin — roasted agave hearts give it a campfire flavor. Oaxaca produces 90% of the world's mezcal. The saying goes: 'Para todo mal, mezcal; para todo bien, también.'",
+    "categoryId": "FOOD",
+    "subtype": "beverage",
+    "tags": [
+      "beverage",
+      "mexico",
+      "agave"
+    ],
+    "id": "food-mezcal-mexico",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mezcal (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mezcal (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kombucha (Fermented Tea)",
+    "teaser": "Sweet tea transformed by a SCOBY (symbiotic culture of bacteria and yeast) into a fizzy, tangy drink. Originating in China 220 BCE, it's now a $2 billion industry. Each batch produces a new baby SCOBY.",
+    "categoryId": "FOOD",
+    "subtype": "beverage",
+    "tags": [
+      "beverage",
+      "fermented",
+      "probiotic"
+    ],
+    "id": "food-kombucha-fermented-tea",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kombucha (Fermented Tea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kombucha (Fermented Tea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Turkish Coffee",
+    "teaser": "Coffee ground to powder, simmered in a cezve with water and sugar, served unfiltered. The grounds settle in your cup — fortunes are read from the patterns. UNESCO recognizes Turkish coffee as Intangible Cultural Heritage.",
+    "categoryId": "FOOD",
+    "subtype": "beverage",
+    "tags": [
+      "beverage",
+      "turkey",
+      "coffee"
+    ],
+    "id": "food-turkish-coffee",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Turkish Coffee end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Turkish Coffee — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Pisco Sour (Peru/Chile)",
+    "teaser": "Grape brandy, lime juice, sugar, egg white, and Angostura bitters — shaken until frothy. Peru and Chile have fought over its origin since the 19th century. Both countries celebrate Pisco Sour Day on the first Saturday of February.",
+    "categoryId": "FOOD",
+    "subtype": "beverage",
+    "tags": [
+      "beverage",
+      "cocktail",
+      "south-america"
+    ],
+    "id": "food-pisco-sour-peru/chile",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pisco Sour (Peru/Chile) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pisco Sour (Peru/Chile) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Fermented Shark (Iceland)",
+    "teaser": "Hákarl — Greenland shark fermented for 4-5 months in urine pits, then hung to dry. Iceland's most infamous dish smells of ammonia and tastes like cheese that went wrong. Anthony Bourdain called it 'the single worst thing I have ever eaten.'",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "iceland",
+      "fermented"
+    ],
+    "id": "food-fermented-shark-iceland",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fermented Shark (Iceland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fermented Shark (Iceland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Cuy (Peru)",
+    "teaser": "Roasted guinea pig — Peru's 5,000-year-old protein source. Served whole with crispy skin and potatoes, it's a delicacy in the Andes. The guinea pig was domesticated in South America before dogs were in Europe.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "peru",
+      "protein"
+    ],
+    "id": "food-cuy-peru",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cuy (Peru) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cuy (Peru) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Escamoles (Mexico)",
+    "teaser": "Ant larvae — Mexico's 'caviar.' Harvested from agave roots, they taste like nutty cottage cheese. At $40-60 per kilogram, escamoles are a luxury ingredient served in tacos, omelets, and guacamole.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "mexico",
+      "insect"
+    ],
+    "id": "food-escamoles-mexico",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Escamoles (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Escamoles (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Century Egg (China)",
+    "teaser": "Duck eggs preserved in clay, ash, salt, quicklime, and rice hulls for weeks to months. The white turns amber, the yolk becomes green-grey, and the flavor is rich and creamy. A 600-year-old Chinese delicacy.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "china",
+      "preserved"
+    ],
+    "id": "food-century-egg-china",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Century Egg (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Century Egg (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Durian (Southeast Asia)",
+    "teaser": "The 'King of Fruits' — spiky, pungent, and banned on public transport. Its custard-like flesh is either ecstasy or revulsion. Southeast Asians pay $20+ per kilogram. The smell is so strong it can be detected from 100 meters.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "southeast-asia",
+      "fruit"
+    ],
+    "id": "food-durian-southeast-asia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Durian (Southeast Asia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Durian (Southeast Asia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Surströmming (Sweden)",
+    "teaser": "Swedish fermented herring — opened outdoors because the smell is unbearable. Canned fish fermented for months produces hydrogen sulfide, butyric acid, and propionic acid. It's traditionally eaten on thin bread with potatoes and onions.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "sweden",
+      "fermented"
+    ],
+    "id": "food-surströmming-sweden",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Surströmming (Sweden) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Surströmming (Sweden) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Balut (Philippines)",
+    "teaser": "Duck egg with a partially developed embryo — boiled and eaten from the shell. The Philippines' most controversial street food — critics call it cruel, lovers praise the rich yolk and crunchy bones. 300 million are consumed annually in Southeast Asia.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "philippines",
+      "egg"
+    ],
+    "id": "food-balut-philippines",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Balut (Philippines) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Balut (Philippines) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Casu Marzu (Sardinia)",
+    "teaser": "Sheep's cheese with live maggots — the larva breaks down fats, creating an extremely soft texture. Illegal in the EU due to health concerns, but Sardinians make it illegally. You eat it with the maggots still wriggling.",
+    "categoryId": "FOOD",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "sardinia",
+      "cheese"
+    ],
+    "id": "food-casu-marzu-sardinia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Casu Marzu (Sardinia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Casu Marzu (Sardinia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Sourdough Bread",
+    "teaser": "Wild yeast and bacteria leaven bread — no commercial yeast needed. The starter is a living culture that can survive for decades. San Francisco's Boudin Bakery claims a starter since 1849. The tang comes from lactobacillus.",
+    "categoryId": "FOOD",
+    "subtype": "baking",
+    "tags": [
+      "baking",
+      "bread",
+      "fermented"
+    ],
+    "id": "food-sourdough-bread",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sourdough Bread end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sourdough Bread — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Babka (Poland/Ukraine)",
+    "teaser": "Braided bread swirled with chocolate or cinnamon — originally a Polish Jewish Easter bread. The name comes from 'baba' (grandmother). Breads Bakery in NYC turned it into a $12 luxury pastry that sells out daily.",
+    "categoryId": "FOOD",
+    "subtype": "baking",
+    "tags": [
+      "baking",
+      "bread",
+      "pastry"
+    ],
+    "id": "food-babka-poland/ukraine",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Babka (Poland/Ukraine) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Babka (Poland/Ukraine) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Croissant (France, 1839)",
+    "teaser": "Austria's kipferl transformed into France's laminated pastry — 27 layers of butter and dough creating the perfect flake. The proofing and folding technique takes 3 days. A proper croissant should shatter when you bite it.",
+    "categoryId": "FOOD",
+    "subtype": "baking",
+    "tags": [
+      "baking",
+      "pastry",
+      "french"
+    ],
+    "id": "food-croissant-france-1839",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Croissant (France, 1839) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Croissant (France, 1839) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Focaccia (Italy)",
+    "teaser": "Genoa's olive oil bread — dimpled, salty, and chewy. The dough is pressed into oiled pans and topped with rosemary, sea salt, and sometimes cherry tomatoes. Ligurian focaccia is thinner and crispier than the thicker Roman version.",
+    "categoryId": "FOOD",
+    "subtype": "baking",
+    "tags": [
+      "baking",
+      "bread",
+      "italian"
+    ],
+    "id": "food-focaccia-italy",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Focaccia (Italy) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Focaccia (Italy) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Rogan Josh (Kashmir)",
+    "teaser": "Kashmir's signature lamb curry — slow-cooked with Kashmiri chilies, yogurt, and aromatic spices. The bright red color comes from the chilies, not food coloring. It's a centerpiece of Kashmiri wazwan feasts.",
+    "categoryId": "FOOD",
+    "subtype": "curry",
+    "tags": [
+      "curry",
+      "india",
+      "kashmir"
+    ],
+    "id": "food-rogan-josh-kashmir",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rogan Josh (Kashmir) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Rogan Josh (Kashmir) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Biryani (Hyderabad)",
+    "teaser": "Hyderabad's signature rice dish — layers of basmati rice and spiced meat, cooked in a sealed pot (dum). The Nizam's kitchen perfected the technique: saffron-infused rice, fried onions, and whole spices create the most aromatic rice on Earth.",
+    "categoryId": "FOOD",
+    "subtype": "rice",
+    "tags": [
+      "rice",
+      "india",
+      "hyderabad"
+    ],
+    "id": "food-biryani-hyderabad",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani (Hyderabad) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Biryani (Hyderabad) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Chole Bhature (Delhi)",
+    "teaser": "Delhi's breakfast of champions — spicy chickpea curry with deep-fried bread. The bhatura must puff like a balloon; the chole must be tangy and spicy. Chandni Chowk's vendors have perfected this combo for generations.",
+    "categoryId": "FOOD",
+    "subtype": "curry",
+    "tags": [
+      "curry",
+      "india",
+      "delhi"
+    ],
+    "id": "food-chole-bhature-delhi",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chole Bhature (Delhi) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Chole Bhature (Delhi) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Omakase Sushi",
+    "teaser": "Chef's choice — you sit at the bar and let the sushi master decide. Each piece is placed directly on the wooden counter in front of you. The best omakase uses fish aged for days (jukusei) to develop umami. Tokyo's Sukiyabashi Jiro waits list is years long.",
+    "categoryId": "FOOD",
+    "subtype": "sushi",
+    "tags": [
+      "sushi",
+      "japan",
+      "fine-dining"
+    ],
+    "id": "food-omakase-sushi",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Omakase Sushi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Omakase Sushi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Wagyu Beef (Japan)",
+    "teaser": "Japan's premium beef — intensely marbled with intramuscular fat that melts at body temperature. Kobe beef is the most famous wagyu, but Matsusaka and Ōmi are equally prized. The fat creates a buttery, umami-rich flavor.",
+    "categoryId": "FOOD",
+    "subtype": "meat",
+    "tags": [
+      "meat",
+      "japan",
+      "luxury"
+    ],
+    "id": "food-wagyu-beef-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wagyu Beef (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wagyu Beef (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tonkotsu Ramen (Japan)",
+    "teaser": "Fukuoka's pork bone ramen — broth simmered for 12-18 hours until milky white. The collagen-rich broth coats every noodle. Hakata-style uses thin noodles, and you can order 'kaedama' (extra noodles) to extend the meal.",
+    "categoryId": "FOOD",
+    "subtype": "noodle",
+    "tags": [
+      "noodle",
+      "japan",
+      "ramen"
+    ],
+    "id": "food-tonkotsu-ramen-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tonkotsu Ramen (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tonkotsu Ramen (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Yakitori (Japan)",
+    "teaser": "Japanese grilled chicken skewers — every part of the bird is used: thigh, skin, heart, liver, cartilage. Tare (sweet soy) or shio (salt) — each yakitori-ya has its own secret blend. The best are from tiny 6-seat counters.",
+    "categoryId": "FOOD",
+    "subtype": "grilled",
+    "tags": [
+      "grilled",
+      "japan",
+      "chicken"
+    ],
+    "id": "food-yakitori-japan",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yakitori (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Yakitori (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Hummus (Levant)",
+    "teaser": "Mashed chickpeas, tahini, lemon, garlic — the Middle East's most universal dish. Lebanon, Israel, and Palestine each claim its origin. The Guinness record for largest hummus is 10,452 kg — made in Lebanon in 2010.",
+    "categoryId": "FOOD",
+    "subtype": "dip",
+    "tags": [
+      "dip",
+      "middle-east",
+      "chickpea"
+    ],
+    "id": "food-hummus-levant",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hummus (Levant) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hummus (Levant) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Shakshuka (North Africa)",
+    "teaser": "Eggs poached in spiced tomato sauce — Tunisia's most famous dish, now beloved worldwide. The name means 'a mixture' in Arabic. Add feta, halloumi, or merguez sausage for variations that span the Mediterranean.",
+    "categoryId": "FOOD",
+    "subtype": "egg",
+    "tags": [
+      "egg",
+      "north-africa",
+      "tomato"
+    ],
+    "id": "food-shakshuka-north-africa",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shakshuka (North Africa) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shakshuka (North Africa) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Baba Ghanoush (Lebanon)",
+    "teaser": "Smoky eggplant dip — fire-roasted eggplant blended with tahini, lemon, and garlic. The secret is charring the eggplant directly over flame until the skin burns away, leaving smoky, creamy flesh.",
+    "categoryId": "FOOD",
+    "subtype": "dip",
+    "tags": [
+      "dip",
+      "lebanon",
+      "eggplant"
+    ],
+    "id": "food-baba-ghanoush-lebanon",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baba Ghanoush (Lebanon) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baba Ghanoush (Lebanon) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Feijoada (Brazil)",
+    "teaser": "Brazil's national dish — black bean stew with pork, served with rice, farofa (toasted cassava flour), and orange slices. Every Saturday is feijoada day in Brazil. The dish traces back to enslaved Africans using leftover pork cuts.",
+    "categoryId": "FOOD",
+    "subtype": "stew",
+    "tags": [
+      "stew",
+      "brazil",
+      "beans"
+    ],
+    "id": "food-feijoada-brazil",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feijoada (Brazil) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Feijoada (Brazil) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Pão de Queijo (Brazil)",
+    "teaser": "Brazilian cheese bread — tapioca flour and queijo minas create chewy, gluten-free puffs. Originated in Minas Gerais in the 18th century. The secret is tapioca — it gives the bread its distinctive stretch and chew.",
+    "categoryId": "FOOD",
+    "subtype": "bread",
+    "tags": [
+      "bread",
+      "brazil",
+      "cheese"
+    ],
+    "id": "food-pão-de-queijo-brazil",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pão de Queijo (Brazil) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pão de Queijo (Brazil) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Korean Fried Chicken",
+    "teaser": "Double-fried for extra crunch — the skin shatters like glass. Yangnyeom sauce (sweet-spicy glaze) or plain with pickled radish. Seoul's fried chicken joints stay open until 4 AM, serving soju and chicken to night owls.",
+    "categoryId": "FOOD",
+    "subtype": "fried",
+    "tags": [
+      "fried",
+      "korea",
+      "chicken"
+    ],
+    "id": "food-korean-fried-chicken",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Korean Fried Chicken end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Korean Fried Chicken — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tteokbokki (Korea)",
+    "teaser": "Chewy rice cakes in spicy gochujang sauce — Korea's favorite comfort food. The street food version is fiery; the royal court version was mild. Every Korean convenience store sells tteokbokki kits.",
+    "categoryId": "FOOD",
+    "subtype": "street-food",
+    "tags": [
+      "street-food",
+      "korea",
+      "spicy"
+    ],
+    "id": "food-tteokbokki-korea",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tteokbokki (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tteokbokki (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Sundubu Jjigae (Korea)",
+    "teaser": "Silky soft tofu stew — bubbling in a stone pot with kimchi, egg, and your choice of seafood or pork. The tofu is so soft it dissolves on your tongue. Korea's ultimate comfort food on cold nights.",
+    "categoryId": "FOOD",
+    "subtype": "stew",
+    "tags": [
+      "stew",
+      "korea",
+      "tofu"
+    ],
+    "id": "food-sundubu-jjigae-korea",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sundubu Jjigae (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sundubu Jjigae (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   }
 ]

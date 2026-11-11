@@ -522,7 +522,8 @@
       "South African",
       "Prehistoric"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "discovery-wheel",
@@ -542,7 +543,8 @@
       "Mesopotamian",
       "Prehistoric"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "discovery-printing-press",
@@ -843,7 +845,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Invention",
     "name": "The Polio Vaccine (1955)",
-    "teaser": "Jonas Salk's inactivated polio vaccine was declared safe on 12 April 1955 — the same day the field trial of 1.8 million children was announced as a success, making Salk an overnight national hero. Asked who owned the patent, he answered: 'Well, the people, I would say. There is no patent. Could you patent the sun?'",
+    "teaser": "Jonas Salk's inactivated polio vaccine was declared safe on 12 April 1955 — the same day the field trial of 1.8 million children was announced as a success, making Salk an overnight national hero. Asked who owned the patent, he answered: 'Well, the people, I would say. There is no patent. Could you patent the sun?'.",
     "imageUrl": "",
     "byline": "Jonas Salk",
     "exploreAction": {
@@ -990,7 +992,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "The God Particle (2012)",
-    "teaser": "On 4 July 2012, CERN announced the discovery of the Higgs boson — the particle predicted in 1964 that gives other particles mass — after a 48-year search at the Large Hadron Collider. The nickname 'God particle' was coined by Nobel laureate Leon Lederman, who reportedly wanted to call it the 'goddamn particle.'",
+    "teaser": "On 4 July 2012, CERN announced the discovery of the Higgs boson — the particle predicted in 1964 that gives other particles mass — after a 48-year search at the Large Hadron Collider. The nickname 'God particle' was coined by Nobel laureate Leon Lederman, who reportedly wanted to call it the 'goddamn particle.'.",
     "imageUrl": "",
     "byline": "Peter Higgs & the CERN teams",
     "exploreAction": {
@@ -1339,7 +1341,8 @@
       "Technology",
       "Prehistory"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-agriculture-10000-bc-148",
@@ -1359,7 +1362,8 @@
       "Agriculture",
       "Prehistory"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-the-printing-press-1440-149",
@@ -1387,7 +1391,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Electricity (1800)",
-    "teaser": "The modern age of electricity began in 1800 when Alessandro Volta built the first battery — the voltaic pile, stacks of zinc and copper discs separated by brine-soaked paper — producing a steady, reliable current for the first time. The discovery grew out of a feud: Volta built it to disprove Galvani's claim that animal tissue generated 'animal electricity.'",
+    "teaser": "The modern age of electricity began in 1800 when Alessandro Volta built the first battery — the voltaic pile, stacks of zinc and copper discs separated by brine-soaked paper — producing a steady, reliable current for the first time. The discovery grew out of a feud: Volta built it to disprove Galvani's claim that animal tissue generated 'animal electricity.'.",
     "imageUrl": "",
     "byline": "Alessandro Volta",
     "exploreAction": {
@@ -1618,7 +1622,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "The Proton (1919)",
-    "teaser": "Ernest Rutherford identified the proton in 1919 by firing alpha particles at nitrogen and knocking hydrogen nuclei out of the atoms — the first artificial transmutation of one element into another, 5,000 years after the alchemists gave up. He named the hydrogen nucleus 'proton' in 1920, from the Greek for 'first.'",
+    "teaser": "Ernest Rutherford identified the proton in 1919 by firing alpha particles at nitrogen and knocking hydrogen nuclei out of the atoms — the first artificial transmutation of one element into another, 5,000 years after the alchemists gave up. He named the hydrogen nucleus 'proton' in 1920, from the Greek for 'first.'.",
     "imageUrl": "",
     "byline": "Ernest Rutherford",
     "exploreAction": {
@@ -2030,7 +2034,8 @@
       "Cosmology",
       "Unified"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-fractals-1975-181",
@@ -2058,7 +2063,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Invention",
     "name": "The Internet Protocol (1974)",
-    "teaser": "TCP/IP — the protocol pair that lets every computer on Earth talk to every other — was designed by Vint Cerf and Bob Kahn in 1974, in a paper titled 'A Protocol for Packet Network Intercommunication.' The internet's birth is usually dated to 1 January 1983, when the ARPANET switched over to the new protocol in a single coordinated 'flag day.'",
+    "teaser": "TCP/IP — the protocol pair that lets every computer on Earth talk to every other — was designed by Vint Cerf and Bob Kahn in 1974, in a paper titled 'A Protocol for Packet Network Intercommunication.' The internet's birth is usually dated to 1 January 1983, when the ARPANET switched over to the new protocol in a single coordinated 'flag day.'.",
     "imageUrl": "",
     "byline": "Vint Cerf & Bob Kahn",
     "exploreAction": {
@@ -2092,7 +2097,8 @@
       "Mobile",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-alphafold-protein-folding-2020-184",
@@ -2259,7 +2265,8 @@
       "Oceans",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-lucy-the-australopithecus-1974-192",
@@ -2321,7 +2328,8 @@
       "History",
       "Prehistory"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-writing-3200-bc-195",
@@ -2341,7 +2349,8 @@
       "Writing",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-the-steam-engine-1712-196",
@@ -2369,7 +2378,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Invention",
     "name": "The Telephone (1876)",
-    "teaser": "Alexander Graham Bell was granted US patent 174,465 for the telephone on 7 March 1876 — and filed it just hours before rival Elisha Gray's caveat for a similar device, one of the most contested patent moments in history. Three days later, Bell spoke the first complete sentence over a wire: 'Mr. Watson, come here, I want to see you.'",
+    "teaser": "Alexander Graham Bell was granted US patent 174,465 for the telephone on 7 March 1876 — and filed it just hours before rival Elisha Gray's caveat for a similar device, one of the most contested patent moments in history. Three days later, Bell spoke the first complete sentence over a wire: 'Mr. Watson, come here, I want to see you.'.",
     "imageUrl": "",
     "byline": "Alexander Graham Bell",
     "exploreAction": {
@@ -2466,7 +2475,8 @@
       "Social Media",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "disc-vaccination-1796-202",
@@ -3017,7 +3027,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Hydrogen Isolated (1766)",
-    "teaser": "Henry Cavendish, the reclusive millionaire chemist, collected the 'inflammable air' produced when metals dissolve in acid — and proved it was a distinct substance by burning it and showing the only product was water. It took Lavoisier to name it hydrogen, 'water-former.'",
+    "teaser": "Henry Cavendish, the reclusive millionaire chemist, collected the 'inflammable air' produced when metals dissolve in acid — and proved it was a distinct substance by burning it and showing the only product was water. It took Lavoisier to name it hydrogen, 'water-former.'.",
     "imageUrl": "",
     "byline": "Henry Cavendish",
     "exploreAction": {
@@ -3657,7 +3667,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Argon Discovered (1894)",
-    "teaser": "Lord Rayleigh found that nitrogen extracted from air weighed a little more than nitrogen from chemicals — a difference so small most scientists dismissed it. He and William Ramsay chased it down and found a whole new unreactive gas. They named it argon, 'the lazy one.'",
+    "teaser": "Lord Rayleigh found that nitrogen extracted from air weighed a little more than nitrogen from chemicals — a difference so small most scientists dismissed it. He and William Ramsay chased it down and found a whole new unreactive gas. They named it argon, 'the lazy one.'.",
     "imageUrl": "",
     "byline": "Rayleigh & Ramsay",
     "exploreAction": {
@@ -3707,7 +3717,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Technetium, the First Synthetic Element (1937)",
-    "teaser": "Mendeleev predicted an element below manganese and named it eka-manganese; nobody could find it because it doesn't exist naturally in useful amounts. Carlo Perrier and Emilio Segrè finally made it in a cyclotron — the first element manufactured by humans, named technetium, 'artificial.'",
+    "teaser": "Mendeleev predicted an element below manganese and named it eka-manganese; nobody could find it because it doesn't exist naturally in useful amounts. Carlo Perrier and Emilio Segrè finally made it in a cyclotron — the first element manufactured by humans, named technetium, 'artificial.'.",
     "imageUrl": "",
     "byline": "Perrier & Segrè",
     "exploreAction": {
@@ -5331,7 +5341,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "The Andromeda Galaxy's Distance (1923)",
-    "teaser": "Edwin Hubble found a Cepheid variable star in the 'Andromeda nebula' and used Leavitt's law to measure its distance: 900,000 light-years — far beyond the Milky Way. The 'nebula' was a whole other galaxy, and the universe became unimaginably larger that night. Hubble marked the discovery on a glass plate with an excited 'VAR!'",
+    "teaser": "Edwin Hubble found a Cepheid variable star in the 'Andromeda nebula' and used Leavitt's law to measure its distance: 900,000 light-years — far beyond the Milky Way. The 'nebula' was a whole other galaxy, and the universe became unimaginably larger that night. Hubble marked the discovery on a glass plate with an excited 'VAR!'.",
     "imageUrl": "",
     "byline": "Edwin Hubble",
     "exploreAction": {
@@ -6152,7 +6162,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "The First Sound Recording (1877)",
-    "teaser": "Thomas Edison, sketching in his lab, conceived a machine that could record sound and play it back: a cylinder wrapped in foil, a diaphragm, a needle. He shouted 'Mary had a little lamb' into it and played it back — and sound, for the first time in history, had been captured. The phonograph made him 'the Wizard of Menlo Park.'",
+    "teaser": "Thomas Edison, sketching in his lab, conceived a machine that could record sound and play it back: a cylinder wrapped in foil, a diaphragm, a needle. He shouted 'Mary had a little lamb' into it and played it back — and sound, for the first time in history, had been captured. The phonograph made him 'the Wizard of Menlo Park.'.",
     "imageUrl": "",
     "byline": "Thomas Edison",
     "exploreAction": {
@@ -6875,7 +6885,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Oral Rehydration Therapy (1968)",
-    "teaser": "Cholera kills by dehydration — patients can lose a gallon of fluid a day. Researchers in Calcutta and Dhaka found that a simple solution of salt, sugar, and water is absorbed even during severe diarrhea. Oral rehydration therapy, cheap as a pinch of salt, has saved tens of millions of lives and was called 'the most important medical discovery of the 20th century.'",
+    "teaser": "Cholera kills by dehydration — patients can lose a gallon of fluid a day. Researchers in Calcutta and Dhaka found that a simple solution of salt, sugar, and water is absorbed even during severe diarrhea. Oral rehydration therapy, cheap as a pinch of salt, has saved tens of millions of lives and was called 'the most important medical discovery of the 20th century.'.",
     "imageUrl": "",
     "byline": "The cholera research teams of Dhaka & Calcutta",
     "exploreAction": {
@@ -9012,7 +9022,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Hepatitis C (1989)",
-    "teaser": "A mysterious 'non-A, non-B' hepatitis agent was finally identified in 1989 by Michael Houghton's team — a virus that silently infected millions through blood transfusions. Its discovery led to blood screening, and two decades later to curative drugs. The 2020 Nobel went to Houghton and two others who 'found a way to fight a blood-borne virus.'",
+    "teaser": "A mysterious 'non-A, non-B' hepatitis agent was finally identified in 1989 by Michael Houghton's team — a virus that silently infected millions through blood transfusions. Its discovery led to blood screening, and two decades later to curative drugs. The 2020 Nobel went to Houghton and two others who 'found a way to fight a blood-borne virus.'.",
     "imageUrl": "",
     "byline": "Michael Houghton & others",
     "exploreAction": {
@@ -9694,7 +9704,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "The First Chain Reaction (1942)",
-    "teaser": "Under the stands of a University of Chicago squash court, Enrico Fermi's team built Chicago Pile-1 — 40,000 graphite blocks and uranium, stacked by hand — and on December 2, 1942, it went critical: the first self-sustaining nuclear chain reaction. The phone call to Washington: 'The Italian navigator has landed in the new world.'",
+    "teaser": "Under the stands of a University of Chicago squash court, Enrico Fermi's team built Chicago Pile-1 — 40,000 graphite blocks and uranium, stacked by hand — and on December 2, 1942, it went critical: the first self-sustaining nuclear chain reaction. The phone call to Washington: 'The Italian navigator has landed in the new world.'.",
     "imageUrl": "",
     "byline": "Enrico Fermi",
     "exploreAction": {
@@ -9914,7 +9924,7 @@
     "categoryId": "DISCOVERIES",
     "subtype": "Discovery",
     "name": "Water on Mars (2015)",
-    "teaser": "NASA announced in 2015 that dark streaks on Martian slopes — recurring slope lineae — were caused by flowing salty water. The discovery upended assumptions about Mars as a dead desert and raised the stakes for finding life. (Later work questioned the streaks; the search for water continues.)",
+    "teaser": "NASA announced in 2015 that dark streaks on Martian slopes — recurring slope lineae — were caused by flowing salty water. The discovery upended assumptions about Mars as a dead desert and raised the stakes for finding life. (Later work questioned the streaks; the search for water continues.).",
     "imageUrl": "",
     "byline": "NASA Mars Reconnaissance Orbiter team",
     "exploreAction": {

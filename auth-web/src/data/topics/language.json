@@ -1,1422 +1,2915 @@
 [
- {
-  "id": "language-what-is-language",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "What Is Language?",
-  "teaser": "A system of symbols and rules that humans use to communicate meaning. Every language — from English to sign language to programming code — follows patterns that linguists are still mapping.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "linguistics",
-   "basics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The building blocks of language",
-   "durationMinutes": 7,
-   "instruction": "Learn about phonemes, morphemes, syntax, and semantics — the levels of linguistic structure — then explain how a toddler learns all of them by age five."
+  {
+    "id": "language-what-is-language",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "What Is Language?",
+    "teaser": "A system of symbols and rules that humans use to communicate meaning. Every language — from English to sign language to programming code — follows patterns that linguists are still mapping.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "linguistics",
+      "basics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The building blocks of language",
+      "durationMinutes": 7,
+      "instruction": "Learn about phonemes, morphemes, syntax, and semantics — the levels of linguistic structure — then explain how a toddler learns all of them by age five."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-phonetics",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Phonetics",
+    "teaser": "The science of speech sounds: how your tongue, lips, and vocal cords create the 40-odd sounds of English. The International Phonetic Alphabet maps every sound in every language on Earth.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "phonetics",
+      "speech"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How speech sounds are produced",
+      "durationMinutes": 7,
+      "instruction": "Learn the difference between stops, fricatives, and nasals using the IPA, then try to identify how many distinct sounds your language uses."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-syntax",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Syntax",
+    "teaser": "The rules that govern how words combine into sentences. English puts the verb in the middle (SVO); Japanese puts it at the end (SOV); Arabic puts it first (VSO). The order reveals the grammar.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "grammar",
+      "structure"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Word order patterns across languages",
+      "durationMinutes": 7,
+      "instruction": "Learn the six possible word orders (SVO, SOV, VSO, VOS, OVS, OSV) and which languages use each, then explain why SVO is the most common."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-semantics",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Semantics",
+    "teaser": "The study of meaning: how words, sentences, and contexts create understanding. 'I saw her duck' has three meanings — semantics explains why ambiguity is a feature, not a bug.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "meaning",
+      "logic"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How meaning works in language",
+      "durationMinutes": 6,
+      "instruction": "Find three meanings of 'I saw her duck' (the animal, the action, the possessive), then explain how context resolves ambiguity in everyday speech."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-pragmatics",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Pragmatics",
+    "teaser": "What you mean vs what you say: pragmatics studies how context, tone, and implication shape communication. 'Can you pass the salt?' isn't a question about ability — it's a request.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "communication",
+      "context"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Grice's maxims and conversational implicature",
+      "durationMinutes": 8,
+      "instruction": "Learn Grice's four maxims (quantity, quality, relevance, manner), then find three examples where you mean something different from what you literally say."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-morphology",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Morphology",
+    "teaser": "The structure of words: prefixes, suffixes, roots, and inflections. 'Unhappiness' contains three morphemes (un- + happy + -ness). Some languages pack entire sentences into a single word.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "words",
+      "structure"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How words are built from morphemes",
+      "durationMinutes": 7,
+      "instruction": "Break down five English words into their morphemes, then compare English (which uses many separate words) with Turkish (which fuses them into single words)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-sapir-whorf",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "The Sapir-Whorf Hypothesis",
+    "teaser": "Does the language you speak shape how you think? Strong Whorf says yes — speakers of different languages perceive reality differently. The evidence is mixed but fascinating.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "cognition",
+      "relativity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Does language shape thought?",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Pirahã language (no numbers), Russian blues (faster color discrimination), and Kuuk Thaayorre (absolute directions), then evaluate the evidence for linguistic relativity."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-universal-grammar",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Universal Grammar",
+    "teaser": "Noam Chomsky's idea that all human languages share a deep structural blueprint. Children don't learn language from scratch — they activate a biological program that's already there.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Chomsky",
+      "nativism"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Chomsky's universal grammar",
+      "durationMinutes": 10,
+      "instruction": "Learn the poverty of the stimulus argument, then explain why some linguists think usage-based learning (not innate grammar) explains language acquisition."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-language-acquisition",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Language Acquisition",
+    "teaser": "How children learn language without formal instruction: by age 3, most kids have mastered grammar they were never taught. The mechanism is one of linguistics' deepest mysteries.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "acquisition",
+      "childhood"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How children acquire language",
+      "durationMinutes": 8,
+      "instruction": "Learn about babbling, one-word stage, telegraphic speech, and the critical period, then explain why adults find second languages harder to learn."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-critical-period",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "The Critical Period",
+    "teaser": "There's a window — roughly before puberty — when children acquire language effortlessly. After it closes, native-level fluency becomes nearly impossible. The case of Genie proves the window is real.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "acquisition",
+      "neuroscience"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The critical period for language",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Genie case and studies of late-exposure sign language, then debate whether the critical period is biological or social."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-creole",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Creoles and Pidgins",
+    "teaser": "When speakers of different languages need to communicate, pidgins form — simplified hybrid languages. When children grow up speaking a pidg, it becomes a creole: a full language born from contact.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "creoles",
+      "contact"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How creole languages form",
+      "durationMinutes": 8,
+      "instruction": "Learn the difference between pidgins and creoles, then find one creole language (Haitian Creole, Tok Pisin, Papiamento) and its linguistic features."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-language-death",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Language Endangerment",
+    "teaser": "Of the world's 7,000 languages, nearly half are endangered. Every two weeks, a language dies — and with it, centuries of accumulated knowledge about the world.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "endangerment",
+      "diversity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why languages die and how to save them",
+      "durationMinutes": 8,
+      "instruction": "Learn about language shift, domains of use, and revitalization efforts (Hebrew, Hawaiian, Welsh), then find one language near you that's endangered."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-revitalization",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Language Revitalization",
+    "teaser": "Hebrew was dead for 1,600 years — now 9 million people speak it. Hawaiian, Welsh, and Māori are all being brought back. Revitalization proves that language death isn't inevitable.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "revitalization",
+      "culture"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Success stories in language revitalization",
+      "durationMinutes": 8,
+      "instruction": "Learn how Hebrew was revived (Eliezer Ben-Yehuda), then compare with modern revitalization efforts in Hawaiian or Māori."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-indo-european",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Indo-European Family",
+    "teaser": "English, Hindi, Russian, Spanish, Persian — all related. Proto-Indo-European, spoken 6,000 years ago on the Eurasian steppe, is the ancestor of the world's most widespread language family.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "families",
+      "history"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How linguists reconstruct Proto-Indo-European",
+      "durationMinutes": 10,
+      "instruction": "Learn about the comparative method (reconstructing ancestors from cognates), then find five cognate words across English, Hindi, and Russian."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-sino-tibetan",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Sino-Tibetan Family",
+    "teaser": "Mandarin Chinese, Cantonese, Tibetan, Burmese: the second-largest language family by speakers. Chinese languages are tonal — the same syllable with different pitches means entirely different things.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Chinese",
+      "tonal"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Chinese tones work",
+      "durationMinutes": 7,
+      "instruction": "Learn the four tones of Mandarin (plus the neutral tone), then try saying 'mā' (mother), 'má' (hemp), 'mǎ' (horse), 'mà' (scold) with different tones."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-niger-congo",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Niger-Congo Family",
+    "teaser": "The world's largest language family by number of languages (1,500+). Swahili, Yoruba, Zulu — spoken across sub-Saharan Africa. Many use complex noun class systems unlike anything in European languages.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Africa",
+      "diversity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Bantu languages and their spread",
+      "durationMinutes": 8,
+      "instruction": "Learn how Bantu languages spread across sub-Saharan Africa through agricultural expansion, then find one Niger-Congo language and its unique features."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-afroasiatic",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Afroasiatic Family",
+    "teaser": "Arabic, Hebrew, Amharic, Somali — one of the oldest language families on Earth. Arabic alone has 400 million speakers, and the family stretches from Morocco to Oman.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Arabic",
+      "Semitic"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Semitic branch of Afroasiatic",
+      "durationMinutes": 8,
+      "instruction": "Learn about the triconsonantal root system (Semitic morphology), then compare Arabic and Hebrew word families built from the same root."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-dravidian",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Dravidian Family",
+    "teaser": "Tamil, Telugu, Kannada, Malayalam — spoken by 250 million people in southern India. Dravidian languages predate Indo-Aryan languages in India and have their own ancient literary tradition.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "India",
+      "Tamil"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dravidian languages of South India",
+      "durationMinutes": 7,
+      "instruction": "Learn about Tamil's classical literary tradition (Sangam literature) and its agglutinative morphology, then compare Dravidian and Indo-Aryan language structures."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-altaic",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Turkic Languages",
+    "teaser": "Turkish, Uzbek, Kazakh, Azerbaijani — languages that stretch from Istanbul to the Chinese border. Turkish reformed its alphabet in 1928, switching from Arabic script to Latin in one dramatic act of modernization.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Turkish",
+      "reform"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Atatürk's language reform",
+      "durationMinutes": 8,
+      "instruction": "Learn how Turkey replaced the Arabic script with Latin letters in 1928, then explain why language reform is always political."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-basque",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Basque: Europe's Mystery Language",
+    "teaser": "Spoken in the Pyrenees for thousands of years, Basque is unrelated to any other known language. It's a language isolate — a reminder that linguistic diversity can defy all patterns.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Basque",
+      "isolate"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why Basque is unique",
+      "durationMinutes": 7,
+      "instruction": "Learn about Basque's ergative-absolutive case system and its mystery origins, then find one other language isolate (Ainu, Zuni, Hadza) and its situation."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-austronesian",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "The Austronesian Family",
+    "teaser": "From Madagascar to Easter Island: the largest language family by geography. Malay, Tagalog, Hawaiian, Māori — spoken across the Pacific and Indian Oceans by Austronesian seafarers.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Pacific",
+      "seafaring"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Austronesian languages spread across the Pacific",
+      "durationMinutes": 10,
+      "instruction": "Learn how Austronesian speakers navigated the Pacific using stars, currents, and linguistic evidence, then find one shared Austronesian word (like 'mata' for eye)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-tonal-languages",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Tonal Languages",
+    "teaser": "In Chinese, Thai, Yoruba, and many others, pitch changes meaning. The word 'ma' in Mandarin has five meanings depending on its tone. Tonal languages use pitch the way English uses consonants and vowels.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "tones",
+      "phonology"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How tones work across languages",
+      "durationMinutes": 7,
+      "instruction": "Compare Mandarin (4 tones), Thai (5 tones), and Yoruba (3 tones), then explain why tonal languages tend to have simpler syllable structures."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-writing-systems",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Writing Systems",
+    "teaser": "Alphabets, syllabaries, logographies, abjads: humans have invented at least six independent writing systems. Each makes different trade-offs between phonetic precision and visual compactness.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "writing",
+      "scripts"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Types of writing systems",
+      "durationMinutes": 8,
+      "instruction": "Learn the difference between alphabets (Latin, Cyrillic), abjads (Arabic, Hebrew), abugidas (Devanagari, Thai), syllabaries (Japanese kana), and logographies (Chinese), then classify your own writing system."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-cuneiform",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Cuneiform",
+    "teaser": "The world's oldest writing system: wedge-shaped marks pressed into clay tablets in Mesopotamia 5,000 years ago. Cuneiform evolved from pictographs to abstract symbols — and most tablets are receipts and school exercises.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "ancient",
+      "Mesopotamia"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How cuneiform developed",
+      "durationMinutes": 8,
+      "instruction": "Learn how Sumerian pictographs evolved into abstract cuneiform signs, then find one cuneiform tablet that reveals something surprising about ancient daily life."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-hieroglyphs",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Egyptian Hieroglyphs",
+    "teaser": "Beautiful pictures that encode language: hieroglyphs combined logographic and alphabetic elements. The Rosetta Stone cracked the code in 1822, unlocking 3,000 years of Egyptian writing.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "ancient",
+      "Egypt"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Champollion decoded hieroglyphs",
+      "durationMinutes": 10,
+      "instruction": "Learn how Jean-François Champollion used the Rosetta Stone to crack hieroglyphs, then try to read three common hieroglyphic signs."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-hanzi",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Chinese Characters (Hanzi)",
+    "teaser": "The world's oldest continuously used writing system: Chinese characters encode meaning directly, not sound. You need 3,000 characters to read a newspaper — and there are 50,000+ in the dictionary.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Chinese",
+      "logography"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Chinese characters work",
+      "durationMinutes": 8,
+      "instruction": "Learn the six categories of Chinese characters (六书), then find three characters that combine simpler components (like 明 = sun + moon = bright)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-korean-hangul",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Hangul: The Perfect Alphabet",
+    "teaser": "Created in 1443 by King Sejong: Hangul is the most scientifically designed writing system on Earth. Each letter mimics the shape of the mouth when making the sound. It's called 'the most perfect phonetic system.'",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Korean",
+      "design"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Hangul was designed",
+      "durationMinutes": 8,
+      "instruction": "Learn how King Sejong's scholars designed Hangul to represent articulatory features (lip shape, tongue position), then compare it with the Latin alphabet's arbitrary letter shapes."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-sanskrit",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Sanskrit",
+    "teaser": "The ancient language of the Vedas and the mathematical precision of Panini's grammar. Sanskrit influenced every Indo-Aryan language and its computational grammar anticipated formal language theory by 2,500 years.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "India",
+      "classical"
+    ],
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Panini's grammar of Sanskrit",
+      "durationMinutes": 10,
+      "instruction": "Learn about Panini's Ashtadhyayi (3,959 rules describing all of Sanskrit), then explain why computer scientists consider it a precursor to programming language theory."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-latin",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Latin",
+    "teaser": "Dead for centuries, yet Latin lives in every Romance language and in the vocabulary of science, law, and medicine. It's the skeleton inside English's body — you just can't see it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Latin",
+      "Romance"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Latin shaped modern languages",
+      "durationMinutes": 8,
+      "instruction": "Learn how Latin evolved into French, Spanish, Italian, Portuguese, and Romanian, then find five English words that come from Latin roots."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-arabic-script",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "The Arabic Script",
+    "teaser": "Written right-to-left, connected, with dots that change meaning: the Arabic script is one of the world's most widely used writing systems, adapted for Persian, Urdu, Malay, and dozens of other languages.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Arabic",
+      "script"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Arabic script works",
+      "durationMinutes": 7,
+      "instruction": "Learn the 28 letters of the Arabic alphabet and how initial/medial/final forms work, then compare with a language that adapted Arabic script (Persian or Urdu)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-devanagari",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Devanagari",
+    "teaser": "The script of Hindi, Sanskrit, Marathi, and Nepali: Devanagari's horizontal line connecting letters makes it one of the most visually distinctive writing systems on Earth.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Hindi",
+      "India"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Devanagari encodes sound",
+      "durationMinutes": 7,
+      "instruction": "Learn about the systematic arrangement of Devanagari consonants (by place and manner of articulation), then compare it with the Latin alphabet's less logical ordering."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-language-love",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "Why 'I Love You' Is Different Everywhere",
+    "teaser": "English has one word for 'love'; Greek has four (eros, philia, storge, agape). Languages carve up emotions differently, revealing cultural priorities and historical assumptions.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "vocabulary",
+      "culture"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How languages express 'love'",
+      "durationMinutes": 6,
+      "instruction": "Find how 'love' is expressed in five different languages, then explain why some languages distinguish types of love with different words."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-untranslatable-words",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "Untranslatable Words",
+    "teaser": "Hygge (Danish comfort), saudade (Portuguese longing), mono no aware (Japanese sensitivity to impermanence): some concepts exist in one language and nowhere else.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "vocabulary",
+      "culture"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Words that don't translate",
+      "durationMinutes": 7,
+      "instruction": "Find five untranslatable words from different languages, then explain what they reveal about the cultures that created them."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-onomatopoeia",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "Onomatopoeia Across Languages",
+    "teaser": "A dog says 'woof' in English, 'wan wan' in Japanese, and 'hav hav' in Hindi. Onomatopoeia — words that imitate sounds — reveals how different cultures hear the same world differently.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "sound",
+      "words"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How different languages spell sounds",
+      "durationMinutes": 5,
+      "instruction": "Find how animal sounds are written in three different languages, then explain why onomatopoeia varies even though the sounds are the same."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-color-words",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "Color Words Across Languages",
+    "teaser": "Russian has two basic words for blue (goluboy and siniy). The Himba people of Namibia have more green terms than English. Languages carve the color spectrum differently — and it affects perception.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "perception",
+      "vocabulary"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How languages name colors",
+      "durationMinutes": 7,
+      "instruction": "Learn Berlin and Kay's color term universals, then find three languages with unusual color distinctions (Russian blues, Japanese whites, Himba greens)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-number-systems",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "How Languages Count",
+    "teaser": "English uses base-10; French has remnants of base-20 (quatre-vingts = 4×20); Maya used base-20; Pirahã has no exact numbers at all. Counting systems reveal a culture's mathematical DNA.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "numbers",
+      "cognition"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Different number systems in languages",
+      "durationMinutes": 7,
+      "instruction": "Compare base-10 (English), base-20 (French/Maya), and base-12 (Yoruba), then explain why the Pirahã language has no exact number words."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-euphemisms",
+    "categoryId": "LANGUAGE",
+    "subtype": "Word",
+    "name": "Euphemisms and Taboo Language",
+    "teaser": "Languages have elaborate systems for avoiding uncomfortable words: 'passed away' instead of 'died,' 'restroom' instead of 'toilet.' Euphemisms reveal what cultures can't bear to say directly.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "taboo",
+      "culture"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How euphemisms work across cultures",
+      "durationMinutes": 6,
+      "instruction": "Find euphemisms for death, toilet, and firing from three different languages, then explain why euphemisms cycle (old ones become offensive, new ones replace them)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-borrowed-words",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Loanwords and Borrowing",
+    "teaser": "English is a language thief: 'tsunami' from Japanese, 'safari' from Swahili, 'guru' from Sanskrit. Every language borrows — and the words it borrows reveal its contact history.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "borrowing",
+      "contact"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why languages borrow words",
+      "durationMinutes": 7,
+      "instruction": "Find ten English words borrowed from other languages, then explain why English borrows so freely while French resists borrowing."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-code-switching",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Code-Switching",
+    "teaser": "Fluent bilinguals naturally switch languages mid-sentence: 'I was going to the tienda but then I saw my amiga.' Code-switching isn't confusion — it's sophisticated linguistic skill.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "bilingualism",
+      "sociolinguistics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The rules of code-switching",
+      "durationMinutes": 7,
+      "instruction": "Learn about grammatical constraints on code-switching (where switches can occur), then find one example of code-switching in music or media."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-slang",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Slang and Language Change",
+    "teaser": "Slang is language in real time: new words emerge, spread, and die within a generation. 'Cool,' 'okay,' and 'jazz' were all slang once. Today's slang is tomorrow's dictionary.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "change",
+      "culture"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How slang shapes language",
+      "durationMinutes": 6,
+      "instruction": "Trace the history of three words that started as slang ('cool,' 'okay,' 'mob'), then explain why some slang sticks and some dies."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-dialect-continuum",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Dialect Continua",
+    "teaser": "The difference between a 'language' and a 'dialect' is politics, not linguistics. Dutch and German are different languages, but their dialects form a continuous spectrum across the border.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "dialects",
+      "politics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "When do dialects become languages?",
+      "durationMinutes": 7,
+      "instruction": "Learn the joke 'a language is a dialect with an army and a navy,' then find two 'languages' that are mutually intelligible (Norwegian/Swedish or Hindi/Urdu)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-pidgin-english",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "English as a Global Lingua Franca",
+    "teaser": "More people speak English as a second language than as a first. It's the world's lingua franca — the language of science, aviation, and the internet — but it's evolving differently in every country.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "English",
+      "globalization"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How English became the world's language",
+      "durationMinutes": 8,
+      "instruction": "Learn about the three waves of English expansion (British Empire, American cultural power, internet age), then compare Global English with British/American English."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-noam-chomsky",
+    "categoryId": "LANGUAGE",
+    "subtype": "Linguist",
+    "name": "Noam Chomsky",
+    "teaser": "The most cited scholar alive: Chomsky revolutionized linguistics with generative grammar and universal grammar, then became one of the world's most prominent political dissidents.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "linguistics",
+      "politics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Chomsky's linguistic revolution",
+      "durationMinutes": 10,
+      "instruction": "Learn about Syntactic Structures (1957) and the poverty of the stimulus argument, then explain why Chomsky's ideas about innate grammar remain controversial."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-ferdinand-de-saussure",
+    "categoryId": "LANGUAGE",
+    "subtype": "Linguist",
+    "name": "Ferdinand de Saussure",
+    "teaser": "The father of modern linguistics: Saussure distinguished signifier from signified, langue from parole, and synchronic from diachronic analysis. His ideas shaped not just linguistics but philosophy and literary theory.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "semiotics",
+      "structuralism"
+    ],
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Saussure's core linguistic ideas",
+      "durationMinutes": 8,
+      "instruction": "Learn the signifier/signified distinction and the arbitrariness of the linguistic sign, then explain how Saussure's ideas influenced Levi-Strauss and Barthes."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-george-lakoff",
+    "categoryId": "LANGUAGE",
+    "subtype": "Linguist",
+    "name": "George Lakoff",
+    "teaser": "The cognitive linguist who showed that metaphors aren't just poetic — they're how we think. 'Argument is war,' 'time is money,' 'ideas are food' — these conceptual metaphors structure our entire worldview.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "metaphor",
+      "cognition"
+    ],
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Metaphors We Live By",
+      "durationMinutes": 8,
+      "instruction": "Read examples from Lakoff and Johnson's Metaphors We Live By, then find three conceptual metaphors you used today without noticing."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-edward-sapir",
+    "categoryId": "LANGUAGE",
+    "subtype": "Linguist",
+    "name": "Edward Sapir",
+    "teaser": "The anthropological linguist who documented Native American languages and proposed that language shapes thought. His student Benjamin Lee Whorf extended the idea — creating the Sapir-Whorf hypothesis.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "anthropology",
+      "relativity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sapir's contributions to linguistics",
+      "durationMinutes": 8,
+      "instruction": "Learn about Sapir's fieldwork on Native American languages and his argument for linguistic relativity, then explain how his ideas connect to modern cognitive linguistics."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-benjamin-lee-whorf",
+    "categoryId": "LANGUAGE",
+    "subtype": "Linguist",
+    "name": "Benjamin Lee Whorf",
+    "teaser": "The fire insurance inspector who revolutionized linguistics: Whorf studied Hopi time concepts and argued that the Hopi language encodes a fundamentally different experience of time.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Hopi",
+      "time"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Whorf's Hopi time hypothesis",
+      "durationMinutes": 8,
+      "instruction": "Learn about Whorf's claims about Hopi and its 'timeless' grammar, then evaluate the criticisms (Hopi does have temporal expressions)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-grammar-of-habit",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Grammar Drift",
+    "teaser": "English once had grammatical gender, case endings, and word order freedom — like German. Over 800 years, English simplified its grammar dramatically. Language change is constant, unstoppable, and invisible.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "change",
+      "English"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How English grammar has changed",
+      "durationMinutes": 8,
+      "instruction": "Compare Old English (Beowulf) with Modern English, then find three grammatical features that changed and one that's currently changing."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-sign-language",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Sign Languages",
+    "teaser": "Full, complex languages expressed through hand gestures, facial expressions, and body movement. Sign languages aren't signed versions of spoken languages — they have their own grammar, poetry, and literature.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "sign",
+      "deaf"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How sign languages work",
+      "durationMinutes": 7,
+      "instruction": "Learn about ASL (American Sign Language) grammar differences from English, then explain why sign languages develop independently in deaf communities worldwide."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-emoticons-internet",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Internet Language",
+    "teaser": "LOL, emoji, memes, ratio'd: the internet is creating new linguistic forms at unprecedented speed. Textspeak, copypasta, and reaction images are legitimate language evolution — just faster.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "internet",
+      "evolution"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How the internet changes language",
+      "durationMinutes": 6,
+      "instruction": "Find three examples of internet language that have entered mainstream use, then debate whether internet communication is enriching or degrading language."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-lingua-franca",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Lingua Francas",
+    "teaser": "Latin in medieval Europe, French in diplomacy, English today: every era has a language of wider communication. Lingua francas enable trade, science, and empire — but they always replace local languages.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "globalization",
+      "history"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The history of lingua francas",
+      "durationMinutes": 8,
+      "instruction": "Trace the succession of lingua francas (Akkadian, Greek, Latin, French, English), then predict whether English will remain dominant or be replaced."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-esperanto",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Esperanto",
+    "teaser": "Created in 1887 as a neutral international language: Esperanto has 2 million speakers but never became the world's second language. Its failure reveals why languages can't be designed by committee.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "constructed",
+      "idealism"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why Esperanto failed to become universal",
+      "durationMinutes": 7,
+      "instruction": "Learn about L.L. Zamenhof's vision and Esperanto's regular grammar, then explain why organic languages beat designed ones."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-constructed-languages",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Conlangs (Constructed Languages)",
+    "teaser": "From Tolkien's Elvish to Klingon to Dothraki: conlangs are full languages created by individuals. Some serve fiction; others (like Lojban) test linguistic theory. Every conlang is a thought experiment.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "fiction",
+      "design"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The art and science of conlanging",
+      "durationMinutes": 8,
+      "instruction": "Learn about three conlangs (Tolkien's Quenya, Klingon, Toki Pona), then explain why the Language Creation Society hosts a biennial conference."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-toki-pona",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Toki Pona: The Minimal Language",
+    "teaser": "120 words. That's all Toki Pona has — yet its speakers can express anything. The constructed language forces simplicity: no word for 'money' (use 'exchange food for work'), no word for 'war.'",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "minimalism",
+      "constructed"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Toki Pona works with only 120 words",
+      "durationMinutes": 7,
+      "instruction": "Learn ten Toki Pona words and try to express a complex idea, then explain how the language's constraints shape thought."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-languages-of-the-internet",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Digital Language Death",
+    "teaser": "The internet is dominated by English, Chinese, and Spanish. Smaller languages have few websites, no autocorrect, and no voice assistants. The digital world may accelerate language death.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "digital",
+      "endangerment"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How technology affects language survival",
+      "durationMinutes": 7,
+      "instruction": "Find what percentage of websites are in English vs how many people speak English, then discuss what Google and Apple are doing to support minority languages."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-japanese-writing",
+    "categoryId": "LANGUAGE",
+    "subtype": "Script",
+    "name": "Japan's Three Scripts",
+    "teaser": "Japanese uses three writing systems simultaneously: hiragana (native), katakana (foreign words), and kanji (Chinese characters). A single sentence can switch scripts four times.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Japanese",
+      "scripts"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How three scripts work together in Japanese",
+      "durationMinutes": 8,
+      "instruction": "Learn the roles of hiragana, katakana, and kanji in a Japanese sentence, then find a Japanese sentence that uses all three."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-vowels-across-languages",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Vowel Systems",
+    "teaser": "English has 15+ vowel sounds; Japanese has 5; the vowel-rich languages of the Caucasus have dozens. The number and type of vowels a language uses shapes its music and rhythm.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "phonology",
+      "vowels"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How vowel systems vary",
+      "durationMinutes": 7,
+      "instruction": "Learn about the vowel triangle and how languages distribute vowels, then compare the vowel systems of English, Spanish, and Japanese."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-polyglots",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Polyglots and Multilingualism",
+    "teaser": "Some people speak 10, 20, or 50+ languages. Polyglots reveal that the brain's language capacity is far greater than most people realize — and that multilingualism reshapes cognition.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "multilingualism",
+      "cognition"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The cognitive benefits of multilingualism",
+      "durationMinutes": 7,
+      "instruction": "Learn about the bilingual advantage (executive function, dementia delay), then find one famous polyglot and their learning method."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-linguistic-relativity",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Color Naming and Perception",
+    "teaser": "Russian speakers distinguish light blue (goluboy) from dark blue (siniy) faster than English speakers. Language doesn't just describe perception — it can sharpen it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "perception",
+      "cognition"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How color words affect color perception",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Winawer et al. Russian blue study, then find one other example where language influences perception."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-future-tense",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Future Tense and Behavior",
+    "teaser": "Speakers of languages without a strong future tense save more money and smoke less. The way a language grammaticalizes the future may shape how speakers plan for it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "grammar",
+      "behavior"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Does grammar affect financial decisions?",
+      "durationMinutes": 7,
+      "instruction": "Learn about Chen's study linking weak-future languages to better health and savings behavior, then evaluate whether grammar really causes these differences."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-translation-impossible",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "The Impossibility of Perfect Translation",
+    "teaser": "Every translation is an interpretation: meaning, rhythm, cultural context, and wordplay can never fully transfer between languages. Poetry is especially untranslatable — yet translators keep trying.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "translation",
+      "meaning"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why perfect translation is impossible",
+      "durationMinutes": 7,
+      "instruction": "Compare three translations of the same poem (or proverb), then explain what gets lost and what can be gained in translation."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-ai-translation",
+    "categoryId": "LANGUAGE",
+    "subtype": "Phenomenon",
+    "name": "Machine Translation and AI",
+    "teaser": "Google Translate, DeepL, and GPT models can translate between 100+ languages. But machine translation still struggles with nuance, idioms, and cultural context — the parts that make language human.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "AI",
+      "translation"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How neural machine translation works",
+      "durationMinutes": 8,
+      "instruction": "Learn how transformer models (like GPT and Google Translate) handle translation, then find one example where machine translation fails humorously or dangerously."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-glottochronology",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Glottochronology",
+    "teaser": "Can you date when languages diverged by counting shared words? Swadesh lists and glottochronology try — but the method is controversial and unreliable beyond a few thousand years.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "historical",
+      "methods"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dating language splits",
+      "durationMinutes": 8,
+      "instruction": "Learn about Swadesh lists (basic vocabulary that changes slowly), then explain why glottochronology is considered less reliable than genetic methods."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-philippine-languages",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Philippine Languages",
+    "teaser": "The Philippines has 120+ languages: Tagalog, Cebuano, Ilocano, Hiligaynon. Filipino (based on Tagalog) is the national language, but every island speaks differently.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Philippines",
+      "diversity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The linguistic diversity of the Philippines",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Philippine language family (Austronesian), the focus system in Tagalog, and how Spanish and American colonization shaped Philippine languages."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-ancient-greek",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Ancient Greek",
+    "teaser": "The language of Homer, Plato, and Aristotle: Ancient Greek gave Western philosophy, science, and democracy its vocabulary. Learning it reveals how the Greeks thought about truth, beauty, and justice.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Greek",
+      "classical"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Ancient Greek shaped Western thought",
+      "durationMinutes": 8,
+      "instruction": "Learn five Greek words that define Western concepts (demokratia, philosophia, logos, aletheia, arete), then explain why their original meanings differ from modern usage."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-old-english",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Old English",
+    "teaser": "Beowulf is unrecognizable to modern English speakers: 'Hwæt! Wē Gār-Dena in gēar-dagum...' Old English had grammatical gender, complex inflections, and a vocabulary half-Germanic, half-Celtic.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "English",
+      "medieval"
+    ],
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The opening of Beowulf in Old English",
+      "durationMinutes": 8,
+      "instruction": "Read the first line of Beowulf in Old English and its modern translation, then explain why English changed so dramatically after the Norman Conquest."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-nahuatl",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Nahuatl: The Language of the Aztecs",
+    "teaser": "Chocolate (xocolātl), tomato (tomatl), avocado (ahuacatl): English is full of Nahuatl loanwords. The Aztec language is still spoken by 1.7 million people in Mexico.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Nahuatl",
+      "Mesoamerica"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Nahuatl's influence on English",
+      "durationMinutes": 7,
+      "instruction": "Find ten English words borrowed from Nahuatl, then learn about Nahuatl's poetic tradition (flower and song poetry)."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-quechua",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Quechua: The Inca Language",
+    "teaser": "Spoken by 8 million people across the Andes: Quechua was the Inca empire's language and survives in Peru, Bolivia, and Ecuador. It has no gender, uses suffixes for everything, and encodes evidence in its grammar.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Quechua",
+      "Andes"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Quechua encodes evidence",
+      "durationMinutes": 7,
+      "instruction": "Learn about Quechua's evidential suffixes (-shi for hearsay, -cha for inference), then explain why obligatory evidence marking changes how speakers report events."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-swahili",
+    "categoryId": "LANGUAGE",
+    "subtype": "Family",
+    "name": "Swahili",
+    "teaser": "East Africa's lingua franca: Swahili is a Bantu language with heavy Arabic influence, spoken by 100+ million people. It's the language of trade, education, and African Union meetings.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "Swahili",
+      "Africa"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Swahili became East Africa's lingua franca",
+      "durationMinutes": 7,
+      "instruction": "Learn about Swahili's Bantu roots and Arabic loanwords, then find five Swahili words that show the Arabic influence."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-language-ideology",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Language Ideology",
+    "teaser": "Some languages are considered 'beautiful,' others 'ugly'; some 'sophisticated,' others 'primitive.' None of this is linguistically true — it's all politics, power, and prejudice.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "prejudice",
+      "politics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How language prejudice works",
+      "durationMinutes": 7,
+      "instruction": "Learn about prescriptivism vs descriptivism, then find one example of language prejudice (against dialects, accents, or multilingualism) and explain its social impact."
+    },
+    "byline": ""
+  },
+  {
+    "id": "language-prescriptivism",
+    "categoryId": "LANGUAGE",
+    "subtype": "Concept",
+    "name": "Prescriptivism vs Descriptivism",
+    "teaser": "Prescriptivists say 'that's wrong'; descriptivists say 'that's how people talk.' The debate between them is really about who owns language — the academy or the speakers.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "language",
+      "grammar",
+      "debate"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The debate about 'correct' grammar",
+      "durationMinutes": 7,
+      "instruction": "Learn the difference between prescriptive and descriptive grammar, then debate whether 'they' as a singular pronoun is correct or not."
+    },
+    "byline": ""
+  },
+  {
+    "name": "Language Death",
+    "teaser": "One language dies every two weeks. Of 7,000 languages spoken today, half will be extinct by 2100. Each loss carries unique knowledge about environment, cognition, and culture.",
+    "categoryId": "LANGUAGE",
+    "subtype": "sociolinguistics",
+    "tags": [
+      "sociolinguistics",
+      "endangered",
+      "diversity"
+    ],
+    "id": "lang-language-death",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Death end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Death — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Proto-Indo-European (PIE)",
+    "teaser": "The ancestor of English, Hindi, Russian, and 400+ languages — spoken 4,500 years ago on the Eurasian steppe. We know it through systematic sound correspondences, not written records.",
+    "categoryId": "LANGUAGE",
+    "subtype": "historical",
+    "tags": [
+      "historical",
+      "proto-language",
+      "reconstruction"
+    ],
+    "id": "lang-proto-indo-european-pie",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Proto-Indo-European (PIE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Proto-Indo-European (PIE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Rosetta Stone (196 BCE)",
+    "teaser": "A trilingual decree in Egyptian hieroglyphs, Demotic, and Greek — the key to deciphering hieroglyphs. Jean-François Champollion cracked it in 1822, unlocking 3,000 years of Egyptian writing.",
+    "categoryId": "LANGUAGE",
+    "subtype": "artifact",
+    "tags": [
+      "artifact",
+      "egypt",
+      "decipherment"
+    ],
+    "id": "lang-the-rosetta-stone-196-bce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Rosetta Stone (196 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Rosetta Stone (196 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Sumerian Cuneiform (3400 BCE)",
+    "teaser": "The first writing system — wedge-shaped marks pressed into clay tablets. Sumerians used it for trade records, literature, and law. The Epic of Gilgamesh is the world's oldest surviving story.",
+    "categoryId": "LANGUAGE",
+    "subtype": "writing-system",
+    "tags": [
+      "writing-system",
+      "ancient",
+      "sumer"
+    ],
+    "id": "lang-sumerian-cuneiform-3400-bce",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sumerian Cuneiform (3400 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sumerian Cuneiform (3400 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Language Families",
+    "teaser": "The 7,000 languages group into ~140 families. Indo-European has 3 billion speakers; some families have just one language. Yuchi, spoken in Oklahoma, is a language isolate with no known relatives.",
+    "categoryId": "LANGUAGE",
+    "subtype": "classification",
+    "tags": [
+      "classification",
+      "diversity",
+      "families"
+    ],
+    "id": "lang-language-families",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Families end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Families — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Constructed Languages (Conlangs)",
+    "teaser": "Esperanto (1887), Klingon (1985), Elvish — humans create new languages deliberately. Esperanto has 2 million speakers; Tolkien's Elvish has a complete grammar. Conlangs test linguistic theory.",
+    "categoryId": "LANGUAGE",
+    "subtype": "constructed",
+    "tags": [
+      "constructed",
+      "esperanto",
+      "invented"
+    ],
+    "id": "lang-constructed-languages-conlangs",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Languages (Conlangs) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Languages (Conlangs) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Morphology: Agglutinative Languages",
+    "teaser": "Turkish and Finnish build words by stacking affixes — ev-ler-imiz-den (from our houses). Agglutinative languages can express in one word what takes a full sentence in English.",
+    "categoryId": "LANGUAGE",
+    "subtype": "typology",
+    "tags": [
+      "typology",
+      "agglutination",
+      "turkish"
+    ],
+    "id": "lang-morphology:-agglutinative-languages",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Morphology: Agglutinative Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Morphology: Agglutinative Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tone Languages (Mandarin, Yoruba)",
+    "teaser": "Mandarin has 4 tones that change meaning — 'ma' can mean mother, hemp, horse, or scold depending on pitch. Yoruba has 3 tones. Tonal languages make up 60-70% of the world's languages.",
+    "categoryId": "LANGUAGE",
+    "subtype": "phonology",
+    "tags": [
+      "phonology",
+      "tone",
+      "mandarin"
+    ],
+    "id": "lang-tone-languages-mandarin-yoruba",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tone Languages (Mandarin, Yoruba) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tone Languages (Mandarin, Yoruba) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Writing Systems: Alphabets, Syllabaries, Logographies",
+    "teaser": "Three ways to write: alphabets (one symbol per sound), syllabaries (one symbol per syllable), logographies (one symbol per word). Most real scripts mix types — Japanese uses all three.",
+    "categoryId": "LANGUAGE",
+    "subtype": "writing-system",
+    "tags": [
+      "writing-system",
+      "typology",
+      "scripts"
+    ],
+    "id": "lang-writing-systems:-alphabets-syllabaries-logographies",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing Systems: Alphabets, Syllabaries, Logographies end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing Systems: Alphabets, Syllabaries, Logographies — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Untranslatable Words",
+    "teaser": "Saudade (Portuguese), Hygge (Danish), Ubuntu (Zulu), Mono no Aware (Japanese) — concepts that exist in one language but require paragraphs to explain in another. Each reveals what a culture values.",
+    "categoryId": "LANGUAGE",
+    "subtype": "lexicon",
+    "tags": [
+      "lexicon",
+      "culture",
+      "vocabulary"
+    ],
+    "id": "lang-the-untranslatable-words",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Untranslatable Words end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Untranslatable Words — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Language Contact and Pidgins",
+    "teaser": "When speakers of different languages need to communicate, pidgins emerge — simplified contact languages. Tok Pisin in Papua New Guinea evolved from English pidgin to a full creole with native speakers.",
+    "categoryId": "LANGUAGE",
+    "subtype": "sociolinguistics",
+    "tags": [
+      "sociolinguistics",
+      "contact",
+      "creoles"
+    ],
+    "id": "lang-language-contact-and-pidgins",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Contact and Pidgins end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Contact and Pidgins — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Great Vowel Shift (1400-1700)",
+    "teaser": "English vowels shifted dramatically over 300 years — 'bite' went from 'beet' to its current sound. It's why English spelling is so inconsistent: the spelling froze while pronunciation kept moving.",
+    "categoryId": "LANGUAGE",
+    "subtype": "historical",
+    "tags": [
+      "historical",
+      "pronunciation",
+      "english"
+    ],
+    "id": "lang-the-great-vowel-shift-1400-1700",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Great Vowel Shift (1400-1700) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Great Vowel Shift (1400-1700) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Computational Linguistics",
+    "teaser": "Teaching computers to process human language — from spell-checkers to GPT. The field combines linguistics, computer science, and statistics. Machine translation, sentiment analysis, and chatbots all stem from it.",
+    "categoryId": "LANGUAGE",
+    "subtype": "computational",
+    "tags": [
+      "computational",
+      "nlp",
+      "ai"
+    ],
+    "id": "lang-computational-linguistics",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Computational Linguistics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Computational Linguistics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Babel Myth and Linguistic Diversity",
+    "teaser": "Why are there 7,000 languages? The Biblical answer is Babel; the scientific answer is geographic isolation. Mountain valleys, dense forests, and island archipelagos created linguistic isolation.",
+    "categoryId": "LANGUAGE",
+    "subtype": "sociolinguistics",
+    "tags": [
+      "sociolinguistics",
+      "diversity",
+      "myth"
+    ],
+    "id": "lang-the-babel-myth-and-linguistic-diversity",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Babel Myth and Linguistic Diversity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Babel Myth and Linguistic Diversity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Indo-European Language Tree",
+    "teaser": "From one proto-language came Germanic, Romance, Slavic, Indo-Iranian, and Celtic branches. English is Germanic; French is Romance; Russian is Slavic. Hindi and English are distant cousins.",
+    "categoryId": "LANGUAGE",
+    "subtype": "classification",
+    "tags": [
+      "classification",
+      "indo-european",
+      "history"
+    ],
+    "id": "lang-indo-european-language-tree",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Indo-European Language Tree end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Indo-European Language Tree — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Pirahã: The Language Without Recursion?",
+    "teaser": "Daniel Everett claimed Pirahã — spoken by 800 people in the Amazon — lacks recursion, violating Chomsky's universal grammar theory. The debate still divides linguists.",
+    "categoryId": "LANGUAGE",
+    "subtype": "controversy",
+    "tags": [
+      "controversy",
+      "amazon",
+      "universal-grammar"
+    ],
+    "id": "lang-pirahã:-the-language-without-recursion?",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pirahã: The Language Without Recursion? end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pirahã: The Language Without Recursion? — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The World Loanword Database",
+    "teaser": "English borrowed 'kindergarten' from German, 'tsunami' from Japanese, 'safari' from Swahili, 'yoga' from Sanskrit. No language is pure — every language is a mosaic of borrowed words.",
+    "categoryId": "LANGUAGE",
+    "subtype": "lexicon",
+    "tags": [
+      "lexicon",
+      "borrowing",
+      "etymology"
+    ],
+    "id": "lang-the-world-loanword-database",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The World Loanword Database end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The World Loanword Database — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Diglossia: When Two Languages Coexist",
+    "teaser": "In Egypt, people speak Egyptian Arabic at home but Modern Standard Arabic at school. In Switzerland, German at work, French at dinner. Diglossia — a high and low variety — exists in half the world's societies.",
+    "categoryId": "LANGUAGE",
+    "subtype": "sociolinguistics",
+    "tags": [
+      "sociolinguistics",
+      "diglossia",
+      "bilingualism"
+    ],
+    "id": "lang-diglossia:-when-two-languages-coexist",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Diglossia: When Two Languages Coexist end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Diglossia: When Two Languages Coexist — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The World's Oldest Written Languages",
+    "teaser": "Sumerian cuneiform (3400 BCE), Egyptian hieroglyphs (3200 BCE), Chinese oracle bone script (1200 BCE), and Linear B (1450 BCE). Only Chinese has an unbroken writing tradition.",
+    "categoryId": "LANGUAGE",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "writing",
+      "ancient"
+    ],
+    "id": "lang-the-worlds-oldest-written-languages",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The World's Oldest Written Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The World's Oldest Written Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Language and Color Perception",
+    "teaser": "Russian speakers distinguish light blue (goluboy) and dark blue (siniy) faster than English speakers. The Himba tribe has 12 color words and sees shades English speakers cannot. Language shapes perception.",
+    "categoryId": "LANGUAGE",
+    "subtype": "cognition",
+    "tags": [
+      "cognition",
+      "color",
+      "perception"
+    ],
+    "id": "lang-language-and-color-perception",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language and Color Perception end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language and Color Perception — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Alphabet's Origins",
+    "teaser": "Proto-Sinaitic (1800 BCE) → Phoenician (1050 BCE) → Greek (800 BCE) → Latin (700 BCE) → English alphabet. Every letter traces back to Egyptian hieroglyphs — 'A' was an ox head.",
+    "categoryId": "LANGUAGE",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "alphabet",
+      "phoenician"
+    ],
+    "id": "lang-the-alphabets-origins",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Alphabet's Origins end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Alphabet's Origins — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Linguistic Relativity in Space",
+    "teaser": "The Kuuk Thaayorre Aboriginal people in Australia use cardinal directions (north, south) instead of left/right. They have a perfect sense of direction — and time flows east to west in their language.",
+    "categoryId": "LANGUAGE",
+    "subtype": "cognition",
+    "tags": [
+      "cognition",
+      "spatial",
+      "aboriginal"
+    ],
+    "id": "lang-linguistic-relativity-in-space",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Linguistic Relativity in Space end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Linguistic Relativity in Space — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "id": "language-constructed-languages-1",
+    "name": "Constructed Languages",
+    "teaser": "Artificial languages created for specific purposes. Esperanto, invented in 1887 by L.L. Zamenhof, has about 2 million speakers. Klingon from Star Trek has 30,000 fluent speakers. Tolkien invented 14 languages for Middle-earth, with Quenya modeled on Finnish.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-death-1",
+    "name": "Language Death",
+    "teaser": "When a language loses its last native speaker. About one language dies every two weeks — of 7,000 languages, half may vanish by 2100. Yuchi in Oklahoma has fewer than 5 speakers, all over 80. The Endangered Languages Project documents at-risk languages.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Death end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Death — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-pig-latin",
+    "name": "Pig Latin",
+    "teaser": "A language game where syllables are rearranged — 'hello' becomes 'ello-hay.' It originated in English-speaking countries as a children's code. In Okinawan Pig Latin, the rules differ completely, showing the game adapts to each language's phonology.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pig Latin end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pig Latin — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-backslang",
+    "name": "Backslang",
+    "teaser": "Reversing syllables for coded speech — 'yob' for boy, 'evref' for free. Victorian police used it as cant. British English absorbed many backslang words: 'somethink' for something comes from reversing 'nik-emos' in 19th century thieves' argot.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Backslang end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Backslang — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-palindromes",
+    "name": "Palindromes",
+    "teaser": "Words, phrases, or sentences that read the same backward and forward. 'A man, a plan, a canal: Panama' is a famous palindrome. The longest known English palindrome is 58,542 characters, a translation of the Epic of Gilgamesh by Mike Keith.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Palindromes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Palindromes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-spoonerisms",
+    "name": "Spoonerisms",
+    "teaser": "Speech errors or jokes where initial sounds are swapped, named after Oxford clergyman W.A. Spooner. 'You have hissed all my mystery lectures' replaces 'You have missed all my history lectures.' The Wizard of Oz' became 'The Whizz of Odd.'",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Spoonerisms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Spoonerisms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-dead-languages",
+    "name": "Dead Languages",
+    "teaser": "Languages with no living native speakers but preserved in texts and liturgy. Latin remains in Vatican City, legal systems, and scientific nomenclature. Sanskrit, Ancient Egyptian, and Sumerian survive in religious and academic contexts despite being centuries dead.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dead Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dead Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-abugidas",
+    "name": "Abugidas",
+    "teaser": "Writing systems where each character represents a consonant-vowel unit, with vowels indicated by diacritics. Devanagari (used for Hindi) and Ge'ez (Ethiopic) are abugidas. Unlike alphabets, vowels are not equal partners but modifications of consonant signs.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Abugidas end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Abugidas — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-toki-pona-1",
+    "name": "Toki Pona",
+    "teaser": "A minimal constructed language with only 137 words, created by Sonja Lang in 2001. It forces speakers to express complex ideas simply. 'Hospital' becomes 'house of sick people.' It's used for meditation, poetry, and philosophical thought experiments.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Toki Pona end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Toki Pona — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-polysynthetic-languages",
+    "name": "Polysynthetic Languages",
+    "teaser": "Languages that pack entire sentences into single words through extensive morphology. Mohawk can combine dozens of morphemes into one word. Yupik Eskimo can create words meaning 'when they pretend to be worried about you' as a single unit.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Polysynthetic Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Polysynthetic Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-linguistic-relativity-1",
+    "name": "Linguistic Relativity",
+    "teaser": "The Sapir-Whorf hypothesis that language shapes thought and perception. The Hopi language has no past or future tense, leading to different time concepts. Russian speakers distinguish light blue (goluboy) and dark blue (siniy) faster than English speakers.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Linguistic Relativity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Linguistic Relativity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-cuneiform-1",
+    "name": "Cuneiform",
+    "teaser": "The earliest known writing system, developed in Sumer around 3400 BCE using wedge-shaped marks on clay tablets. It recorded everything from commerce to Epic of Gilgamesh. Sumerian scribes needed years of training — cuneiform was one of history's first professions.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cuneiform end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cuneiform — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-sign-language-1",
+    "name": "Sign Language",
+    "teaser": "Visual-gestural languages used by deaf communities worldwide. American Sign Language and British Sign Language are completely different — ASL is closer to French Sign Language. Nicaraguan Sign Language spontaneously emerged in the 1980s when deaf children were brought together.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sign Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sign Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-hieroglyphics",
+    "name": "Hieroglyphics",
+    "teaser": "The formal writing system of ancient Egypt using pictorial symbols. Ancient Egyptians called it 'words of the gods.' The Rosetta Stone, discovered in 1799, enabled Jean-François Champollion to crack the code in 1822, unlocking 3,000 years of Egyptian history.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hieroglyphics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hieroglyphics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-writing-systems-evolution",
+    "name": "Writing Systems Evolution",
+    "teaser": "From proto-Sinaitic glyphs around 1800 BCE to modern alphabets. The Phoenician alphabet spread via trade, inspiring Greek (which added vowels), which became Latin and Cyrillic. Hanzi Chinese characters, independently invented around 1200 BCE, are still used today.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing Systems Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing Systems Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-korean-hangul-1",
+    "name": "Korean Hangul",
+    "teaser": "Considered one of the most scientific writing systems, invented in 1443 by King Sejong the Great. Each letter represents the shape of the tongue and mouth when making the sound. It was deliberately designed so commoners could learn it in days, not years.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Korean Hangul end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Korean Hangul — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-logograms",
+    "name": "Logograms",
+    "teaser": "Writing systems where each symbol represents a word or morpheme rather than a sound. Chinese characters are the most widely used logograms, with over 50,000 in existence. Egyptian hieroglyphs and Sumerian cuneiform were also logographic, but most evolved toward phonetic writing.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Logograms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Logograms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-phonograms",
+    "name": "Phonograms",
+    "teaser": "Symbols that represent sounds rather than meanings. The English alphabet is a phonogram system where each letter typically represents one or more sounds. A writing system can be purely phonetic (Korean Hangul), mixed (Japanese), or purely logographic (classical Chinese).",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Phonograms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phonograms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-sandhi",
+    "name": "Sandhi",
+    "teaser": "Phonological changes that occur at word or morpheme boundaries in languages like Sanskrit, Hindi, and Tamil. In Sanskrit, 'tat + eka' becomes 'tadeka.' Hindi vowel sandhi changes 'parā + aho' to 'parāho.' These rules make connected speech flow naturally.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sandhi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sandhi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-evidentiality",
+    "name": "Evidentiality",
+    "teaser": "A grammatical category that indicates the source of information. In Turkish, '-mış' marks hearsay while '-di' marks direct experience. Quechua distinguishes visual, inferential, and reported evidence. English can express this loosely with 'apparently' or 'I saw that.'",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Evidentiality end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Evidentiality — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-whorfian-effects-in-color",
+    "name": "Whorfian Effects in Color",
+    "teaser": "Berlin and Kay's 1969 research showed all languages have basic color terms, but the number varies from 2 (Himba) to 11 (Russian). Russian speakers distinguish light blue (goluboy) and dark blue (siniy) faster than English speakers because their language treats them as separate categories.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Whorfian Effects in Color end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Whorfian Effects in Color — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-pirah-language",
+    "name": "Pirahã Language",
+    "teaser": "An Amazonian language with arguably no recursion, no numbers, no fixed color terms, and no words for quantities beyond 'few' and 'many.' Daniel Everett's 2005 claim that it lacks recursion challenged Noam Chomsky's theory of universal grammar.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pirahã Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pirahã Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-constructed-script-systems",
+    "name": "Constructed Script Systems",
+    "teaser": "Invented writing systems like Shavian (created in 1960 for English using George Bernard Shaw's bequest), Deseret (a phonetic script for English from 1854), and Blissymbols (a pictographic communication system for the speech-impaired created by Charles K. Bliss).",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Script Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Script Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-loanwords",
+    "name": "Loanwords",
+    "teaser": "Words adopted from one language into another. English has borrowed 'kindergarten' from German, 'sushi' from Japanese, 'ballet' from French, and 'algorithm' from Arabic (from al-Khwarizmi's name). About 30% of English vocabulary comes from French.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Loanwords end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Loanwords — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-wug-test",
+    "name": "Wug Test",
+    "teaser": "Jean Berko Gleason's 1958 experiment proving children internalize grammatical rules, not just memorized words. Children shown a 'wug' and asked about two of them correctly say 'wugs,' demonstrating productive morphology. It revolutionized child language acquisition research.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Wug Test end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wug Test — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-creoles-and-pidgins",
+    "name": "Creoles and Pidgins",
+    "teaser": "Pidgins are simplified trade languages; when children acquire a pidgin as a native language, it becomes a creole with expanded grammar. Haitian Creole blends French with West African languages and has 12 million speakers. Tok Pisin, Papua New Guinea's official language, is an English-based creole.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Creoles and Pidgins end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Creoles and Pidgins — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-contact-phenomena",
+    "name": "Language Contact Phenomena",
+    "teaser": "When languages interact through bilingual speakers, they influence each other. Code-switching alternates between languages mid-sentence. Calques translate phrases literally — 'Itch-kick' is a Calque of 'itch' in some Native American languages. About 200 sign languages evolved independently.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Contact Phenomena end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Contact Phenomena — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-oldest-known-languages",
+    "name": "Oldest Known Languages",
+    "teaser": "Sumerian (written, 3400 BCE) and Egyptian (written, 3200 BCE) are the oldest with written records. Spoken, Basque may predate Indo-European arrival in Europe 6,000 years ago. Tamil has a continuous literary tradition spanning 2,300+ years.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Oldest Known Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oldest Known Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-writing-system-invention",
+    "name": "Writing System Invention",
+    "teaser": "Writing was independently invented at least five times: Sumerian cuneiform, Egyptian hieroglyphs, Chinese characters, Mayan glyphs, and possibly the Indus script. Each emerged from pictographs representing trade records or religious texts in complex societies.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing System Invention end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing System Invention — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-script-direction",
+    "name": "Script Direction",
+    "teaser": "Most scripts are written left-to-right, but Arabic and Hebrew run right-to-left, and traditional Chinese and Japanese ran top-to-bottom. Boustrophedon alternated directions line by line and was used in early Greek. Mongolian uniquely runs top-to-bottom, left-to-right.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Script Direction end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Script Direction — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-endangerment-factors",
+    "name": "Language Endangerment Factors",
+    "teaser": "Urbanization, globalization, and dominant-language education all threaten minority languages. In Australia, only 13 of 250 Aboriginal languages are still being learned by children. Colombia's government declared 65 indigenous languages extinct in 2018 alone.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Endangerment Factors end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Endangerment Factors — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-gesture-and-language",
+    "name": "Gesture and Language",
+    "teaser": "Humans are the only species that uses pointing to direct attention — even deaf children who haven't learned sign language spontaneously develop pointing gestures. The relationship between gesture and speech dates back to the origins of language 50,000+ years ago.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gesture and Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gesture and Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-semantic-universals",
+    "name": "Semantic Universals",
+    "teaser": "All known languages distinguish nouns from verbs, have ways to form questions, and can negate statements. Color terms universally develop in a predictable order: black/white → red → yellow/green → blue → brown → purple/pink/orange. The word 'thing' exists in every documented language.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Semantic Universals end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Semantic Universals — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-linguistic-profiling",
+    "name": "Linguistic Profiling",
+    "teaser": "Identifying a speaker's race, region, or social class from their voice alone. John Baugh coined the term after documenting housing discrimination against African American English speakers. Resume callbacks decrease 50% when candidates speak with stereotypically Black voices.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Linguistic Profiling end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Linguistic Profiling — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-machine-translation-evolution",
+    "name": "Machine Translation Evolution",
+    "teaser": "From rule-based systems in the 1950s to statistical methods in 2006 to neural machine translation in 2016. Google Translate uses neural networks trained on 100 billion words across 103 languages. It handles 100 trillion words daily but still struggles with idioms and cultural context.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Machine Translation Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Machine Translation Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-bilingual-brain-benefits",
+    "name": "Bilingual Brain Benefits",
+    "teaser": "Speaking two languages strengthens executive function, delays dementia by 4-5 years, and increases gray matter density. The bilingual advantage in cognitive control appears even in low-education populations. Canadian bilinguals show different brain activation patterns than monolinguals.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bilingual Brain Benefits end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bilingual Brain Benefits — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-constructed-script-systems-1",
+    "name": "Constructed Script Systems",
+    "teaser": "Invented writing systems include Shavian (1960, using Shaw's bequest), Deseret (1854, phonetic English), and Blissymbols (1949, pictographic communication). Korea's Hangul (1443) is unique as a deliberately designed script that accurately represents phonetics.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Script Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Script Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-phono-semantic-matching",
+    "name": "Phono-Semantic Matching",
+    "teaser": "When a borrowed word is adapted to sound like a similar-sounding native word with related meaning. English 'champagne' from French; Hebrew 'telefon' from European languages; Japanese 'karate' from Chinese 'empty hand.' Each language filters foreign words through its own phonology.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Phono-Semantic Matching end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phono-Semantic Matching — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-prosody-and-meaning",
+    "name": "Prosody and Meaning",
+    "teaser": "Intonation, stress, and rhythm can completely change sentence meaning. 'She didn't steal the money' has seven different meanings depending on which word is emphasized. Tone languages like Mandarin use pitch to distinguish meaning — 'ma' means mother, hemp, horse, or scold.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Prosody and Meaning end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prosody and Meaning — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-metaphorical-language",
+    "name": "Metaphorical Language",
+    "teaser": "Lakoff and Johnson's 'Metaphors We Live By' (1980) showed everyday language is deeply metaphorical: 'attack an argument,' 'waste time,' 'the future is ahead.' These conceptual metaphors structure thought itself, not just expression.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Metaphorical Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Metaphorical Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-tone-sandhi",
+    "name": "Tone Sandhi",
+    "teaser": "Automatic tone changes in tonal languages when words are spoken together. In Mandarin, two third tones in a row change the first to a second tone — 'nǐ hǎo' (hello) sounds like 'ní hǎo.' This makes fluent speech significantly different from word-by-word pronunciation.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tone Sandhi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tone Sandhi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-sound-symbolism",
+    "name": "Sound Symbolism",
+    "teaser": "The non-arbitrary association between sounds and meanings. Most languages use 'i' for small things and 'a' or 'o' for large things. The 'bouba/kiki' effect shows people link rounded shapes to 'bouba' and spiky shapes to 'kiki' across cultures and languages.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sound Symbolism end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sound Symbolism — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-discourse-markers",
+    "name": "Discourse Markers",
+    "teaser": "Words like 'well,' 'so,' 'you know,' and 'like' that manage conversation flow rather than adding meaning. They signal turn-taking, emphasis, and stance. Japanese uses 'ne' for agreement-seeking and 'ano' for hesitation. Linguists debate whether they're fillers or essential tools.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Discourse Markers end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Discourse Markers — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-mixed-languages",
+    "name": "Mixed Languages",
+    "teaser": "Languages that combine elements from two or more languages at both lexical and grammatical levels. Media Lengua replaces Quechua vocabulary with Spanish words while keeping Quechua grammar. Michif mixes Cree verbs with French nouns in a single sentence.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mixed Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mixed Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-deixis",
+    "name": "Deixis",
+    "teaser": "Words whose meaning depends entirely on context — 'this,' 'here,' 'now,' 'I.' They anchor language to the speaker's perspective and moment. Temporal deixis ('yesterday' vs 'tomorrow') and spatial deixis ('this' vs 'that') are universal across languages.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Deixis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Deixis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-ideologies",
+    "name": "Language Ideologies",
+    "teaser": "Cultural beliefs about language that shape attitudes and policies. 'Standard language ideology' privileges certain dialects as correct while stigmatizing others. Diglossia describes situations where a formal variety is used for official purposes while a colloquial one is spoken at home.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Ideologies end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Ideologies — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-alphabet-literacy-rates",
+    "name": "Alphabet Literacy Rates",
+    "teaser": "Global literacy has risen from 12% in 1800 to 87% today, but 773 million adults still can't read. Functional literacy — the ability to use reading in daily life — is significantly lower. Countries with alphabetic writing systems generally have higher literacy than logographic ones.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Alphabet Literacy Rates end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Alphabet Literacy Rates — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-parallel-texts",
+    "name": "Parallel Texts",
+    "teaser": "Side-by-side texts in two languages used for translation study and language learning. The Bible was historically a major source of parallel texts. Modern parallel corpora like the Europarl dataset of EU parliament translations power machine translation training.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Parallel Texts end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Parallel Texts — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-writing-and-power",
+    "name": "Writing and Power",
+    "teaser": "Throughout history, literacy has been a tool of both liberation and control. Slave codes in the American South made it illegal to teach enslaved people to read. UNESCO estimates that literacy could lift 171 million people out of poverty.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing and Power end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing and Power — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-digital-communication-evolution",
+    "name": "Digital Communication Evolution",
+    "teaser": "From Morse code (1844) to email (1971) to texting (1992) to emojis (1999). The first SMS 'Merry Christmas' was sent on December 3, 1992. Emojis now convey emotional nuance that plain text lacks — the 😂 face is the most used emoji globally with over 5 billion uses.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Digital Communication Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Digital Communication Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-revitalization",
+    "name": "Language Revitalization",
+    "teaser": "Efforts to revive endangered languages through immersion schools, media, and technology. Hebrew was successfully revived from a liturgical language to a native tongue of 9 million. Hawaiian immersion schools have grown enrollment from 0 to 3,000 students since 1984.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Revitalization end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Revitalization — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-jargon-and-technical-language",
+    "name": "Jargon and Technical Language",
+    "teaser": "Specialized vocabulary used by professional groups. Medical jargon uses Latin and Greek roots to communicate precisely. 'Situational awareness' in aviation, 'dispersion' in statistics, and 'proprietary' in law each serve specific communicative functions.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Jargon and Technical Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jargon and Technical Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-vernacular-architecture-language",
+    "name": "Vernacular Architecture Language",
+    "teaser": "How the built environment communicates cultural values through design. Japanese houses use sliding screens to create flexible spaces. Middle Eastern courtyard houses provide privacy and climate control. Each architectural tradition encodes social norms.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Vernacular Architecture Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Vernacular Architecture Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-prosodic-stress-systems",
+    "name": "Prosodic Stress Systems",
+    "teaser": "Languages differ in how stress patterns work. English has lexical stress ('REcord' vs 'reCORD'). Russian has predictable stress that can fall on any syllable. Japanese uses pitch accent, and French uses phrase-final stress. These differences affect rhythm and melody of speech.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Prosodic Stress Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prosodic Stress Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-numeral-systems",
+    "name": "Numeral Systems",
+    "teaser": "Languages count in different bases — English uses base 10, but many languages use base 20 (Mayan, Yoruba). Tzeltal Maya uses base 20 with an offset. Pirahã may have no exact numbers at all. The binary system, base 2, is the foundation of all digital computing.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Numeral Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Numeral Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-speech-act-theory",
+    "name": "Speech Act Theory",
+    "teaser": "J.L. Austin's 1962 framework showing that language doesn't just describe reality — it performs actions. 'I promise' creates an obligation, 'I pronounce you married' changes social status, and 'I name this ship Queen Mary' inaugurates a vessel. Every utterance does something.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Speech Act Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Speech Act Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-sign-language-linguistics",
+    "name": "Sign Language Linguistics",
+    "teaser": "Sign languages are fully developed languages with their own grammar, not manual codes of spoken languages. ASL has aspect markers shown through movement repetition, question markers through facial expressions, and classifiers that function like pronouns for spatial reference.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sign Language Linguistics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sign Language Linguistics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-language-and-emotion",
+    "name": "Language and Emotion",
+    "teaser": "Some emotions lack direct translations: Portuguese 'saudade' (melancholic longing), Japanese 'amae' (indulgent dependence), German 'Schadenfreude' (pleasure at others' misfortune). Does speaking a language with a word for an emotion make you feel it more precisely?",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language and Emotion end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language and Emotion — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-pigmentary-morphemes",
+    "name": "Pigmentary Morphemes",
+    "teaser": "In some languages, color terms are built from morphemes describing visual properties. In many Australian Aboriginal languages, color terms derive from descriptions of surface properties like shininess or pattern rather than hue alone, challenging universal color term theories.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pigmentary Morphemes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pigmentary Morphemes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "language-written-japanese-complexity",
+    "name": "Written Japanese Complexity",
+    "teaser": "Japanese uses three scripts simultaneously: hiragana (46 syllables for native words), katakana (46 syllables for foreign words), and kanji (2,000+ characters for meanings). A single sentence may switch scripts multiple times, making it one of the most complex writing systems.",
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Written Japanese Complexity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Written Japanese Complexity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
- },
- {
-  "id": "language-phonetics",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Phonetics",
-  "teaser": "The science of speech sounds: how your tongue, lips, and vocal cords create the 40-odd sounds of English. The International Phonetic Alphabet maps every sound in every language on Earth.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "phonetics",
-   "speech"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How speech sounds are produced",
-   "durationMinutes": 7,
-   "instruction": "Learn the difference between stops, fricatives, and nasals using the IPA, then try to identify how many distinct sounds your language uses."
-  }
- },
- {
-  "id": "language-syntax",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Syntax",
-  "teaser": "The rules that govern how words combine into sentences. English puts the verb in the middle (SVO); Japanese puts it at the end (SOV); Arabic puts it first (VSO). The order reveals the grammar.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "grammar",
-   "structure"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Word order patterns across languages",
-   "durationMinutes": 7,
-   "instruction": "Learn the six possible word orders (SVO, SOV, VSO, VOS, OVS, OSV) and which languages use each, then explain why SVO is the most common."
-  }
- },
- {
-  "id": "language-semantics",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Semantics",
-  "teaser": "The study of meaning: how words, sentences, and contexts create understanding. 'I saw her duck' has three meanings — semantics explains why ambiguity is a feature, not a bug.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "meaning",
-   "logic"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How meaning works in language",
-   "durationMinutes": 6,
-   "instruction": "Find three meanings of 'I saw her duck' (the animal, the action, the possessive), then explain how context resolves ambiguity in everyday speech."
-  }
- },
- {
-  "id": "language-pragmatics",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Pragmatics",
-  "teaser": "What you mean vs what you say: pragmatics studies how context, tone, and implication shape communication. 'Can you pass the salt?' isn't a question about ability — it's a request.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "communication",
-   "context"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Grice's maxims and conversational implicature",
-   "durationMinutes": 8,
-   "instruction": "Learn Grice's four maxims (quantity, quality, relevance, manner), then find three examples where you mean something different from what you literally say."
-  }
- },
- {
-  "id": "language-morphology",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Morphology",
-  "teaser": "The structure of words: prefixes, suffixes, roots, and inflections. 'Unhappiness' contains three morphemes (un- + happy + -ness). Some languages pack entire sentences into a single word.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "words",
-   "structure"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How words are built from morphemes",
-   "durationMinutes": 7,
-   "instruction": "Break down five English words into their morphemes, then compare English (which uses many separate words) with Turkish (which fuses them into single words)."
-  }
- },
- {
-  "id": "language-sapir-whorf",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "The Sapir-Whorf Hypothesis",
-  "teaser": "Does the language you speak shape how you think? Strong Whorf says yes — speakers of different languages perceive reality differently. The evidence is mixed but fascinating.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "cognition",
-   "relativity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Does language shape thought?",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Pirahã language (no numbers), Russian blues (faster color discrimination), and Kuuk Thaayorre (absolute directions), then evaluate the evidence for linguistic relativity."
-  }
- },
- {
-  "id": "language-universal-grammar",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Universal Grammar",
-  "teaser": "Noam Chomsky's idea that all human languages share a deep structural blueprint. Children don't learn language from scratch — they activate a biological program that's already there.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Chomsky",
-   "nativism"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Chomsky's universal grammar",
-   "durationMinutes": 10,
-   "instruction": "Learn the poverty of the stimulus argument, then explain why some linguists think usage-based learning (not innate grammar) explains language acquisition."
-  }
- },
- {
-  "id": "language-language-acquisition",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Language Acquisition",
-  "teaser": "How children learn language without formal instruction: by age 3, most kids have mastered grammar they were never taught. The mechanism is one of linguistics' deepest mysteries.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "acquisition",
-   "childhood"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How children acquire language",
-   "durationMinutes": 8,
-   "instruction": "Learn about babbling, one-word stage, telegraphic speech, and the critical period, then explain why adults find second languages harder to learn."
-  }
- },
- {
-  "id": "language-critical-period",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "The Critical Period",
-  "teaser": "There's a window — roughly before puberty — when children acquire language effortlessly. After it closes, native-level fluency becomes nearly impossible. The case of Genie proves the window is real.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "acquisition",
-   "neuroscience"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The critical period for language",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Genie case and studies of late-exposure sign language, then debate whether the critical period is biological or social."
-  }
- },
- {
-  "id": "language-creole",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Creoles and Pidgins",
-  "teaser": "When speakers of different languages need to communicate, pidgins form — simplified hybrid languages. When children grow up speaking a pidg, it becomes a creole: a full language born from contact.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "creoles",
-   "contact"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How creole languages form",
-   "durationMinutes": 8,
-   "instruction": "Learn the difference between pidgins and creoles, then find one creole language (Haitian Creole, Tok Pisin, Papiamento) and its linguistic features."
-  }
- },
- {
-  "id": "language-language-death",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Language Endangerment",
-  "teaser": "Of the world's 7,000 languages, nearly half are endangered. Every two weeks, a language dies — and with it, centuries of accumulated knowledge about the world.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "endangerment",
-   "diversity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why languages die and how to save them",
-   "durationMinutes": 8,
-   "instruction": "Learn about language shift, domains of use, and revitalization efforts (Hebrew, Hawaiian, Welsh), then find one language near you that's endangered."
-  }
- },
- {
-  "id": "language-revitalization",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Language Revitalization",
-  "teaser": "Hebrew was dead for 1,600 years — now 9 million people speak it. Hawaiian, Welsh, and Māori are all being brought back. Revitalization proves that language death isn't inevitable.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "revitalization",
-   "culture"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Success stories in language revitalization",
-   "durationMinutes": 8,
-   "instruction": "Learn how Hebrew was revived (Eliezer Ben-Yehuda), then compare with modern revitalization efforts in Hawaiian or Māori."
-  }
- },
- {
-  "id": "language-indo-european",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Indo-European Family",
-  "teaser": "English, Hindi, Russian, Spanish, Persian — all related. Proto-Indo-European, spoken 6,000 years ago on the Eurasian steppe, is the ancestor of the world's most widespread language family.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "families",
-   "history"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How linguists reconstruct Proto-Indo-European",
-   "durationMinutes": 10,
-   "instruction": "Learn about the comparative method (reconstructing ancestors from cognates), then find five cognate words across English, Hindi, and Russian."
-  }
- },
- {
-  "id": "language-sino-tibetan",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Sino-Tibetan Family",
-  "teaser": "Mandarin Chinese, Cantonese, Tibetan, Burmese: the second-largest language family by speakers. Chinese languages are tonal — the same syllable with different pitches means entirely different things.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Chinese",
-   "tonal"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Chinese tones work",
-   "durationMinutes": 7,
-   "instruction": "Learn the four tones of Mandarin (plus the neutral tone), then try saying 'mā' (mother), 'má' (hemp), 'mǎ' (horse), 'mà' (scold) with different tones."
-  }
- },
- {
-  "id": "language-niger-congo",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Niger-Congo Family",
-  "teaser": "The world's largest language family by number of languages (1,500+). Swahili, Yoruba, Zulu — spoken across sub-Saharan Africa. Many use complex noun class systems unlike anything in European languages.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Africa",
-   "diversity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Bantu languages and their spread",
-   "durationMinutes": 8,
-   "instruction": "Learn how Bantu languages spread across sub-Saharan Africa through agricultural expansion, then find one Niger-Congo language and its unique features."
-  }
- },
- {
-  "id": "language-afroasiatic",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Afroasiatic Family",
-  "teaser": "Arabic, Hebrew, Amharic, Somali — one of the oldest language families on Earth. Arabic alone has 400 million speakers, and the family stretches from Morocco to Oman.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Arabic",
-   "Semitic"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Semitic branch of Afroasiatic",
-   "durationMinutes": 8,
-   "instruction": "Learn about the triconsonantal root system (Semitic morphology), then compare Arabic and Hebrew word families built from the same root."
-  }
- },
- {
-  "id": "language-dravidian",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Dravidian Family",
-  "teaser": "Tamil, Telugu, Kannada, Malayalam — spoken by 250 million people in southern India. Dravidian languages predate Indo-Aryan languages in India and have their own ancient literary tradition.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "India",
-   "Tamil"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Dravidian languages of South India",
-   "durationMinutes": 7,
-   "instruction": "Learn about Tamil's classical literary tradition (Sangam literature) and its agglutinative morphology, then compare Dravidian and Indo-Aryan language structures."
-  }
- },
- {
-  "id": "language-altaic",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Turkic Languages",
-  "teaser": "Turkish, Uzbek, Kazakh, Azerbaijani — languages that stretch from Istanbul to the Chinese border. Turkish reformed its alphabet in 1928, switching from Arabic script to Latin in one dramatic act of modernization.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Turkish",
-   "reform"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Atatürk's language reform",
-   "durationMinutes": 8,
-   "instruction": "Learn how Turkey replaced the Arabic script with Latin letters in 1928, then explain why language reform is always political."
-  }
- },
- {
-  "id": "language-basque",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Basque: Europe's Mystery Language",
-  "teaser": "Spoken in the Pyrenees for thousands of years, Basque is unrelated to any other known language. It's a language isolate — a reminder that linguistic diversity can defy all patterns.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Basque",
-   "isolate"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why Basque is unique",
-   "durationMinutes": 7,
-   "instruction": "Learn about Basque's ergative-absolutive case system and its mystery origins, then find one other language isolate (Ainu, Zuni, Hadza) and its situation."
-  }
- },
- {
-  "id": "language-austronesian",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "The Austronesian Family",
-  "teaser": "From Madagascar to Easter Island: the largest language family by geography. Malay, Tagalog, Hawaiian, Māori — spoken across the Pacific and Indian Oceans by Austronesian seafarers.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Pacific",
-   "seafaring"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Austronesian languages spread across the Pacific",
-   "durationMinutes": 10,
-   "instruction": "Learn how Austronesian speakers navigated the Pacific using stars, currents, and linguistic evidence, then find one shared Austronesian word (like 'mata' for eye)."
-  }
- },
- {
-  "id": "language-tonal-languages",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Tonal Languages",
-  "teaser": "In Chinese, Thai, Yoruba, and many others, pitch changes meaning. The word 'ma' in Mandarin has five meanings depending on its tone. Tonal languages use pitch the way English uses consonants and vowels.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "tones",
-   "phonology"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How tones work across languages",
-   "durationMinutes": 7,
-   "instruction": "Compare Mandarin (4 tones), Thai (5 tones), and Yoruba (3 tones), then explain why tonal languages tend to have simpler syllable structures."
-  }
- },
- {
-  "id": "language-writing-systems",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Writing Systems",
-  "teaser": "Alphabets, syllabaries, logographies, abjads: humans have invented at least six independent writing systems. Each makes different trade-offs between phonetic precision and visual compactness.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "writing",
-   "scripts"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Types of writing systems",
-   "durationMinutes": 8,
-   "instruction": "Learn the difference between alphabets (Latin, Cyrillic), abjads (Arabic, Hebrew), abugidas (Devanagari, Thai), syllabaries (Japanese kana), and logographies (Chinese), then classify your own writing system."
-  }
- },
- {
-  "id": "language-cuneiform",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Cuneiform",
-  "teaser": "The world's oldest writing system: wedge-shaped marks pressed into clay tablets in Mesopotamia 5,000 years ago. Cuneiform evolved from pictographs to abstract symbols — and most tablets are receipts and school exercises.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "ancient",
-   "Mesopotamia"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How cuneiform developed",
-   "durationMinutes": 8,
-   "instruction": "Learn how Sumerian pictographs evolved into abstract cuneiform signs, then find one cuneiform tablet that reveals something surprising about ancient daily life."
-  }
- },
- {
-  "id": "language-hieroglyphs",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Egyptian Hieroglyphs",
-  "teaser": "Beautiful pictures that encode language: hieroglyphs combined logographic and alphabetic elements. The Rosetta Stone cracked the code in 1822, unlocking 3,000 years of Egyptian writing.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "ancient",
-   "Egypt"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Champollion decoded hieroglyphs",
-   "durationMinutes": 10,
-   "instruction": "Learn how Jean-François Champollion used the Rosetta Stone to crack hieroglyphs, then try to read three common hieroglyphic signs."
-  }
- },
- {
-  "id": "language-hanzi",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Chinese Characters (Hanzi)",
-  "teaser": "The world's oldest continuously used writing system: Chinese characters encode meaning directly, not sound. You need 3,000 characters to read a newspaper — and there are 50,000+ in the dictionary.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Chinese",
-   "logography"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Chinese characters work",
-   "durationMinutes": 8,
-   "instruction": "Learn the six categories of Chinese characters (六书), then find three characters that combine simpler components (like 明 = sun + moon = bright)."
-  }
- },
- {
-  "id": "language-korean-hangul",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Hangul: The Perfect Alphabet",
-  "teaser": "Created in 1443 by King Sejong: Hangul is the most scientifically designed writing system on Earth. Each letter mimics the shape of the mouth when making the sound. It's called 'the most perfect phonetic system.'",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Korean",
-   "design"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Hangul was designed",
-   "durationMinutes": 8,
-   "instruction": "Learn how King Sejong's scholars designed Hangul to represent articulatory features (lip shape, tongue position), then compare it with the Latin alphabet's arbitrary letter shapes."
-  }
- },
- {
-  "id": "language-sanskrit",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Sanskrit",
-  "teaser": "The ancient language of the Vedas and the mathematical precision of Panini's grammar. Sanskrit influenced every Indo-Aryan language and its computational grammar anticipated formal language theory by 2,500 years.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "India",
-   "classical"
-  ],
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Panini's grammar of Sanskrit",
-   "durationMinutes": 10,
-   "instruction": "Learn about Panini's Ashtadhyayi (3,959 rules describing all of Sanskrit), then explain why computer scientists consider it a precursor to programming language theory."
-  }
- },
- {
-  "id": "language-latin",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Latin",
-  "teaser": "Dead for centuries, yet Latin lives in every Romance language and in the vocabulary of science, law, and medicine. It's the skeleton inside English's body — you just can't see it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Latin",
-   "Romance"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Latin shaped modern languages",
-   "durationMinutes": 8,
-   "instruction": "Learn how Latin evolved into French, Spanish, Italian, Portuguese, and Romanian, then find five English words that come from Latin roots."
-  }
- },
- {
-  "id": "language-arabic-script",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "The Arabic Script",
-  "teaser": "Written right-to-left, connected, with dots that change meaning: the Arabic script is one of the world's most widely used writing systems, adapted for Persian, Urdu, Malay, and dozens of other languages.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Arabic",
-   "script"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Arabic script works",
-   "durationMinutes": 7,
-   "instruction": "Learn the 28 letters of the Arabic alphabet and how initial/medial/final forms work, then compare with a language that adapted Arabic script (Persian or Urdu)."
-  }
- },
- {
-  "id": "language-devanagari",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Devanagari",
-  "teaser": "The script of Hindi, Sanskrit, Marathi, and Nepali: Devanagari's horizontal line connecting letters makes it one of the most visually distinctive writing systems on Earth.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Hindi",
-   "India"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Devanagari encodes sound",
-   "durationMinutes": 7,
-   "instruction": "Learn about the systematic arrangement of Devanagari consonants (by place and manner of articulation), then compare it with the Latin alphabet's less logical ordering."
-  }
- },
- {
-  "id": "language-language-love",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "Why 'I Love You' Is Different Everywhere",
-  "teaser": "English has one word for 'love'; Greek has four (eros, philia, storge, agape). Languages carve up emotions differently, revealing cultural priorities and historical assumptions.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "vocabulary",
-   "culture"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How languages express 'love'",
-   "durationMinutes": 6,
-   "instruction": "Find how 'love' is expressed in five different languages, then explain why some languages distinguish types of love with different words."
-  }
- },
- {
-  "id": "language-untranslatable-words",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "Untranslatable Words",
-  "teaser": "Hygge (Danish comfort), saudade (Portuguese longing), mono no aware (Japanese sensitivity to impermanence): some concepts exist in one language and nowhere else.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "vocabulary",
-   "culture"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Words that don't translate",
-   "durationMinutes": 7,
-   "instruction": "Find five untranslatable words from different languages, then explain what they reveal about the cultures that created them."
-  }
- },
- {
-  "id": "language-onomatopoeia",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "Onomatopoeia Across Languages",
-  "teaser": "A dog says 'woof' in English, 'wan wan' in Japanese, and 'hav hav' in Hindi. Onomatopoeia — words that imitate sounds — reveals how different cultures hear the same world differently.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "sound",
-    "words"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How different languages spell sounds",
-   "durationMinutes": 5,
-   "instruction": "Find how animal sounds are written in three different languages, then explain why onomatopoeia varies even though the sounds are the same."
-  }
- },
- {
-  "id": "language-color-words",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "Color Words Across Languages",
-  "teaser": "Russian has two basic words for blue (goluboy and siniy). The Himba people of Namibia have more green terms than English. Languages carve the color spectrum differently — and it affects perception.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "perception",
-   "vocabulary"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How languages name colors",
-   "durationMinutes": 7,
-   "instruction": "Learn Berlin and Kay's color term universals, then find three languages with unusual color distinctions (Russian blues, Japanese whites, Himba greens)."
-  }
- },
- {
-  "id": "language-number-systems",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "How Languages Count",
-  "teaser": "English uses base-10; French has remnants of base-20 (quatre-vingts = 4×20); Maya used base-20; Pirahã has no exact numbers at all. Counting systems reveal a culture's mathematical DNA.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "numbers",
-   "cognition"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Different number systems in languages",
-   "durationMinutes": 7,
-   "instruction": "Compare base-10 (English), base-20 (French/Maya), and base-12 (Yoruba), then explain why the Pirahã language has no exact number words."
-  }
- },
- {
-  "id": "language-euphemisms",
-  "categoryId": "LANGUAGE",
-  "subtype": "Word",
-  "name": "Euphemisms and Taboo Language",
-  "teaser": "Languages have elaborate systems for avoiding uncomfortable words: 'passed away' instead of 'died,' 'restroom' instead of 'toilet.' Euphemisms reveal what cultures can't bear to say directly.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "taboo",
-   "culture"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How euphemisms work across cultures",
-   "durationMinutes": 6,
-   "instruction": "Find euphemisms for death, toilet, and firing from three different languages, then explain why euphemisms cycle (old ones become offensive, new ones replace them)."
-  }
- },
- {
-  "id": "language-borrowed-words",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Loanwords and Borrowing",
-  "teaser": "English is a language thief: 'tsunami' from Japanese, 'safari' from Swahili, 'guru' from Sanskrit. Every language borrows — and the words it borrows reveal its contact history.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "borrowing",
-   "contact"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why languages borrow words",
-   "durationMinutes": 7,
-   "instruction": "Find ten English words borrowed from other languages, then explain why English borrows so freely while French resists borrowing."
-  }
- },
- {
-  "id": "language-code-switching",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Code-Switching",
-  "teaser": "Fluent bilinguals naturally switch languages mid-sentence: 'I was going to the tienda but then I saw my amiga.' Code-switching isn't confusion — it's sophisticated linguistic skill.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "bilingualism",
-   "sociolinguistics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The rules of code-switching",
-   "durationMinutes": 7,
-   "instruction": "Learn about grammatical constraints on code-switching (where switches can occur), then find one example of code-switching in music or media."
-  }
- },
- {
-  "id": "language-slang",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Slang and Language Change",
-  "teaser": "Slang is language in real time: new words emerge, spread, and die within a generation. 'Cool,' 'okay,' and 'jazz' were all slang once. Today's slang is tomorrow's dictionary.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "change",
-    "culture"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How slang shapes language",
-   "durationMinutes": 6,
-   "instruction": "Trace the history of three words that started as slang ('cool,' 'okay,' 'mob'), then explain why some slang sticks and some dies."
-  }
- },
- {
-  "id": "language-dialect-continuum",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Dialect Continua",
-  "teaser": "The difference between a 'language' and a 'dialect' is politics, not linguistics. Dutch and German are different languages, but their dialects form a continuous spectrum across the border.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "dialects",
-   "politics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "When do dialects become languages?",
-   "durationMinutes": 7,
-   "instruction": "Learn the joke 'a language is a dialect with an army and a navy,' then find two 'languages' that are mutually intelligible (Norwegian/Swedish or Hindi/Urdu)."
-  }
- },
- {
-  "id": "language-pidgin-english",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "English as a Global Lingua Franca",
-  "teaser": "More people speak English as a second language than as a first. It's the world's lingua franca — the language of science, aviation, and the internet — but it's evolving differently in every country.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "English",
-   "globalization"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How English became the world's language",
-   "durationMinutes": 8,
-   "instruction": "Learn about the three waves of English expansion (British Empire, American cultural power, internet age), then compare Global English with British/American English."
-  }
- },
- {
-  "id": "language-noam-chomsky",
-  "categoryId": "LANGUAGE",
-  "subtype": "Linguist",
-  "name": "Noam Chomsky",
-  "teaser": "The most cited scholar alive: Chomsky revolutionized linguistics with generative grammar and universal grammar, then became one of the world's most prominent political dissidents.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "linguistics",
-   "politics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Chomsky's linguistic revolution",
-   "durationMinutes": 10,
-   "instruction": "Learn about Syntactic Structures (1957) and the poverty of the stimulus argument, then explain why Chomsky's ideas about innate grammar remain controversial."
-  }
- },
- {
-  "id": "language-ferdinand-de-saussure",
-  "categoryId": "LANGUAGE",
-  "subtype": "Linguist",
-  "name": "Ferdinand de Saussure",
-  "teaser": "The father of modern linguistics: Saussure distinguished signifier from signified, langue from parole, and synchronic from diachronic analysis. His ideas shaped not just linguistics but philosophy and literary theory.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "semiotics",
-   "structuralism"
-  ],
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Saussure's core linguistic ideas",
-   "durationMinutes": 8,
-   "instruction": "Learn the signifier/signified distinction and the arbitrariness of the linguistic sign, then explain how Saussure's ideas influenced Levi-Strauss and Barthes."
-  }
- },
- {
-  "id": "language-george-lakoff",
-  "categoryId": "LANGUAGE",
-  "subtype": "Linguist",
-  "name": "George Lakoff",
-  "teaser": "The cognitive linguist who showed that metaphors aren't just poetic — they're how we think. 'Argument is war,' 'time is money,' 'ideas are food' — these conceptual metaphors structure our entire worldview.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "metaphor",
-   "cognition"
-  ],
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Metaphors We Live By",
-   "durationMinutes": 8,
-   "instruction": "Read examples from Lakoff and Johnson's Metaphors We Live By, then find three conceptual metaphors you used today without noticing."
-  }
- },
- {
-  "id": "language-edward-sapir",
-  "categoryId": "LANGUAGE",
-  "subtype": "Linguist",
-  "name": "Edward Sapir",
-  "teaser": "The anthropological linguist who documented Native American languages and proposed that language shapes thought. His student Benjamin Lee Whorf extended the idea — creating the Sapir-Whorf hypothesis.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "anthropology",
-   "relativity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Sapir's contributions to linguistics",
-   "durationMinutes": 8,
-   "instruction": "Learn about Sapir's fieldwork on Native American languages and his argument for linguistic relativity, then explain how his ideas connect to modern cognitive linguistics."
-  }
- },
- {
-  "id": "language-benjamin-lee-whorf",
-  "categoryId": "LANGUAGE",
-  "subtype": "Linguist",
-  "name": "Benjamin Lee Whorf",
-  "teaser": "The fire insurance inspector who revolutionized linguistics: Whorf studied Hopi time concepts and argued that the Hopi language encodes a fundamentally different experience of time.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Hopi",
-   "time"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Whorf's Hopi time hypothesis",
-   "durationMinutes": 8,
-   "instruction": "Learn about Whorf's claims about Hopi and its 'timeless' grammar, then evaluate the criticisms (Hopi does have temporal expressions)."
-  }
- },
- {
-  "id": "language-grammar-of-habit",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Grammar Drift",
-  "teaser": "English once had grammatical gender, case endings, and word order freedom — like German. Over 800 years, English simplified its grammar dramatically. Language change is constant, unstoppable, and invisible.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "change",
-   "English"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How English grammar has changed",
-   "durationMinutes": 8,
-   "instruction": "Compare Old English (Beowulf) with Modern English, then find three grammatical features that changed and one that's currently changing."
-  }
- },
- {
-  "id": "language-sign-language",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Sign Languages",
-  "teaser": "Full, complex languages expressed through hand gestures, facial expressions, and body movement. Sign languages aren't signed versions of spoken languages — they have their own grammar, poetry, and literature.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "sign",
-   "deaf"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How sign languages work",
-   "durationMinutes": 7,
-   "instruction": "Learn about ASL (American Sign Language) grammar differences from English, then explain why sign languages develop independently in deaf communities worldwide."
-  }
- },
- {
-  "id": "language-emoticons-internet",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Internet Language",
-  "teaser": "LOL, emoji, memes, ratio'd: the internet is creating new linguistic forms at unprecedented speed. Textspeak, copypasta, and reaction images are legitimate language evolution — just faster.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "internet",
-   "evolution"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How the internet changes language",
-   "durationMinutes": 6,
-   "instruction": "Find three examples of internet language that have entered mainstream use, then debate whether internet communication is enriching or degrading language."
-  }
- },
- {
-  "id": "language-lingua-franca",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Lingua Francas",
-  "teaser": "Latin in medieval Europe, French in diplomacy, English today: every era has a language of wider communication. Lingua francas enable trade, science, and empire — but they always replace local languages.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "globalization",
-   "history"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The history of lingua francas",
-   "durationMinutes": 8,
-   "instruction": "Trace the succession of lingua francas (Akkadian, Greek, Latin, French, English), then predict whether English will remain dominant or be replaced."
-  }
- },
- {
-  "id": "language-esperanto",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Esperanto",
-  "teaser": "Created in 1887 as a neutral international language: Esperanto has 2 million speakers but never became the world's second language. Its failure reveals why languages can't be designed by committee.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "constructed",
-   "idealism"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why Esperanto failed to become universal",
-   "durationMinutes": 7,
-   "instruction": "Learn about L.L. Zamenhof's vision and Esperanto's regular grammar, then explain why organic languages beat designed ones."
-  }
- },
- {
-  "id": "language-constructed-languages",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Conlangs (Constructed Languages)",
-  "teaser": "From Tolkien's Elvish to Klingon to Dothraki: conlangs are full languages created by individuals. Some serve fiction; others (like Lojban) test linguistic theory. Every conlang is a thought experiment.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "fiction",
-   "design"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The art and science of conlanging",
-   "durationMinutes": 8,
-   "instruction": "Learn about three conlangs (Tolkien's Quenya, Klingon, Toki Pona), then explain why the Language Creation Society hosts a biennial conference."
-  }
- },
- {
-  "id": "language-toki-pona",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Toki Pona: The Minimal Language",
-  "teaser": "120 words. That's all Toki Pona has — yet its speakers can express anything. The constructed language forces simplicity: no word for 'money' (use 'exchange food for work'), no word for 'war.'",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "minimalism",
-   "constructed"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Toki Pona works with only 120 words",
-   "durationMinutes": 7,
-   "instruction": "Learn ten Toki Pona words and try to express a complex idea, then explain how the language's constraints shape thought."
-  }
- },
- {
-  "id": "language-languages-of-the-internet",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Digital Language Death",
-  "teaser": "The internet is dominated by English, Chinese, and Spanish. Smaller languages have few websites, no autocorrect, and no voice assistants. The digital world may accelerate language death.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "digital",
-   "endangerment"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How technology affects language survival",
-   "durationMinutes": 7,
-   "instruction": "Find what percentage of websites are in English vs how many people speak English, then discuss what Google and Apple are doing to support minority languages."
-  }
- },
- {
-  "id": "language-japanese-writing",
-  "categoryId": "LANGUAGE",
-  "subtype": "Script",
-  "name": "Japan's Three Scripts",
-  "teaser": "Japanese uses three writing systems simultaneously: hiragana (native), katakana (foreign words), and kanji (Chinese characters). A single sentence can switch scripts four times.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Japanese",
-   "scripts"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How three scripts work together in Japanese",
-   "durationMinutes": 8,
-   "instruction": "Learn the roles of hiragana, katakana, and kanji in a Japanese sentence, then find a Japanese sentence that uses all three."
-  }
- },
- {
-  "id": "language-vowels-across-languages",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Vowel Systems",
-  "teaser": "English has 15+ vowel sounds; Japanese has 5; the vowel-rich languages of the Caucasus have dozens. The number and type of vowels a language uses shapes its music and rhythm.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "phonology",
-   "vowels"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How vowel systems vary",
-   "durationMinutes": 7,
-   "instruction": "Learn about the vowel triangle and how languages distribute vowels, then compare the vowel systems of English, Spanish, and Japanese."
-  }
- },
- {
-  "id": "language-polyglots",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Polyglots and Multilingualism",
-  "teaser": "Some people speak 10, 20, or 50+ languages. Polyglots reveal that the brain's language capacity is far greater than most people realize — and that multilingualism reshapes cognition.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "multilingualism",
-   "cognition"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The cognitive benefits of multilingualism",
-   "durationMinutes": 7,
-   "instruction": "Learn about the bilingual advantage (executive function, dementia delay), then find one famous polyglot and their learning method."
-  }
- },
- {
-  "id": "language-linguistic-relativity",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Color Naming and Perception",
-  "teaser": "Russian speakers distinguish light blue (goluboy) from dark blue (siniy) faster than English speakers. Language doesn't just describe perception — it can sharpen it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "perception",
-   "cognition"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How color words affect color perception",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Winawer et al. Russian blue study, then find one other example where language influences perception."
-  }
- },
- {
-  "id": "language-future-tense",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Future Tense and Behavior",
-  "teaser": "Speakers of languages without a strong future tense save more money and smoke less. The way a language grammaticalizes the future may shape how speakers plan for it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "grammar",
-   "behavior"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Does grammar affect financial decisions?",
-   "durationMinutes": 7,
-   "instruction": "Learn about Chen's study linking weak-future languages to better health and savings behavior, then evaluate whether grammar really causes these differences."
-  }
- },
- {
-  "id": "language-translation-impossible",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "The Impossibility of Perfect Translation",
-  "teaser": "Every translation is an interpretation: meaning, rhythm, cultural context, and wordplay can never fully transfer between languages. Poetry is especially untranslatable — yet translators keep trying.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "translation",
-   "meaning"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why perfect translation is impossible",
-   "durationMinutes": 7,
-   "instruction": "Compare three translations of the same poem (or proverb), then explain what gets lost and what can be gained in translation."
-  }
- },
- {
-  "id": "language-ai-translation",
-  "categoryId": "LANGUAGE",
-  "subtype": "Phenomenon",
-  "name": "Machine Translation and AI",
-  "teaser": "Google Translate, DeepL, and GPT models can translate between 100+ languages. But machine translation still struggles with nuance, idioms, and cultural context — the parts that make language human.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "AI",
-   "translation"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How neural machine translation works",
-   "durationMinutes": 8,
-   "instruction": "Learn how transformer models (like GPT and Google Translate) handle translation, then find one example where machine translation fails humorously or dangerously."
-  }
- },
- {
-  "id": "language-glottochronology",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Glottochronology",
-  "teaser": "Can you date when languages diverged by counting shared words? Swadesh lists and glottochronology try — but the method is controversial and unreliable beyond a few thousand years.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "historical",
-   "methods"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Dating language splits",
-   "durationMinutes": 8,
-   "instruction": "Learn about Swadesh lists (basic vocabulary that changes slowly), then explain why glottochronology is considered less reliable than genetic methods."
-  }
- },
- {
-  "id": "language-philippine-languages",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Philippine Languages",
-  "teaser": "The Philippines has 120+ languages: Tagalog, Cebuano, Ilocano, Hiligaynon. Filipino (based on Tagalog) is the national language, but every island speaks differently.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Philippines",
-   "diversity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The linguistic diversity of the Philippines",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Philippine language family (Austronesian), the focus system in Tagalog, and how Spanish and American colonization shaped Philippine languages."
-  }
- },
- {
-  "id": "language-ancient-greek",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Ancient Greek",
-  "teaser": "The language of Homer, Plato, and Aristotle: Ancient Greek gave Western philosophy, science, and democracy its vocabulary. Learning it reveals how the Greeks thought about truth, beauty, and justice.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Greek",
-   "classical"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Ancient Greek shaped Western thought",
-   "durationMinutes": 8,
-   "instruction": "Learn five Greek words that define Western concepts (demokratia, philosophia, logos, aletheia, arete), then explain why their original meanings differ from modern usage."
-  }
- },
- {
-  "id": "language-old-english",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Old English",
-  "teaser": "Beowulf is unrecognizable to modern English speakers: 'Hwæt! Wē Gār-Dena in gēar-dagum...' Old English had grammatical gender, complex inflections, and a vocabulary half-Germanic, half-Celtic.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "English",
-   "medieval"
-  ],
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The opening of Beowulf in Old English",
-   "durationMinutes": 8,
-   "instruction": "Read the first line of Beowulf in Old English and its modern translation, then explain why English changed so dramatically after the Norman Conquest."
-  }
- },
- {
-  "id": "language-nahuatl",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Nahuatl: The Language of the Aztecs",
-  "teaser": "Chocolate (xocolātl), tomato (tomatl), avocado (ahuacatl): English is full of Nahuatl loanwords. The Aztec language is still spoken by 1.7 million people in Mexico.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Nahuatl",
-   "Mesoamerica"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Nahuatl's influence on English",
-   "durationMinutes": 7,
-   "instruction": "Find ten English words borrowed from Nahuatl, then learn about Nahuatl's poetic tradition (flower and song poetry)."
-  }
- },
- {
-  "id": "language-quechua",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Quechua: The Inca Language",
-  "teaser": "Spoken by 8 million people across the Andes: Quechua was the Inca empire's language and survives in Peru, Bolivia, and Ecuador. It has no gender, uses suffixes for everything, and encodes evidence in its grammar.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Quechua",
-   "Andes"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Quechua encodes evidence",
-   "durationMinutes": 7,
-   "instruction": "Learn about Quechua's evidential suffixes (-shi for hearsay, -cha for inference), then explain why obligatory evidence marking changes how speakers report events."
-  }
- },
- {
-  "id": "language-swahili",
-  "categoryId": "LANGUAGE",
-  "subtype": "Family",
-  "name": "Swahili",
-  "teaser": "East Africa's lingua franca: Swahili is a Bantu language with heavy Arabic influence, spoken by 100+ million people. It's the language of trade, education, and African Union meetings.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "Swahili",
-   "Africa"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Swahili became East Africa's lingua franca",
-   "durationMinutes": 7,
-   "instruction": "Learn about Swahili's Bantu roots and Arabic loanwords, then find five Swahili words that show the Arabic influence."
-  }
- },
- {
-  "id": "language-language-ideology",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Language Ideology",
-  "teaser": "Some languages are considered 'beautiful,' others 'ugly'; some 'sophisticated,' others 'primitive.' None of this is linguistically true — it's all politics, power, and prejudice.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "prejudice",
-   "politics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How language prejudice works",
-   "durationMinutes": 7,
-   "instruction": "Learn about prescriptivism vs descriptivism, then find one example of language prejudice (against dialects, accents, or multilingualism) and explain its social impact."
-  }
- },
- {
-  "id": "language-prescriptivism",
-  "categoryId": "LANGUAGE",
-  "subtype": "Concept",
-  "name": "Prescriptivism vs Descriptivism",
-  "teaser": "Prescriptivists say 'that's wrong'; descriptivists say 'that's how people talk.' The debate between them is really about who owns language — the academy or the speakers.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "language",
-   "grammar",
-   "debate"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The debate about 'correct' grammar",
-   "durationMinutes": 7,
-   "instruction": "Learn the difference between prescriptive and descriptive grammar, then debate whether 'they' as a singular pronoun is correct or not."
-  }
- }
 ]

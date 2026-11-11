@@ -17,7 +17,8 @@
       "Greek",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-euclid",
@@ -37,7 +38,8 @@
       "Hellenistic-Egyptian",
       "Mathematics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-archimedes",
@@ -57,7 +59,8 @@
       "Greek",
       "Mathematics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-ptolemy",
@@ -77,7 +80,8 @@
       "Roman-Egyptian",
       "Astronomy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-hypatia",
@@ -97,7 +101,8 @@
       "Egyptian-Greek",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-copernicus",
@@ -117,7 +122,8 @@
       "Polish",
       "Astronomy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-kepler",
@@ -137,7 +143,8 @@
       "German",
       "Astronomy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-galileo",
@@ -157,7 +164,8 @@
       "Italian",
       "Astronomy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-newton",
@@ -177,7 +185,8 @@
       "British",
       "Physics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-leibniz",
@@ -197,7 +206,8 @@
       "German",
       "Mathematics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-lavoisier",
@@ -217,7 +227,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-priestley",
@@ -237,7 +248,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-faraday",
@@ -257,7 +269,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-maxwell",
@@ -277,7 +290,8 @@
       "Scottish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-mendeleev",
@@ -297,7 +311,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-marie-curie",
@@ -317,7 +332,8 @@
       "Polish-French",
       "Physics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-rutherford",
@@ -337,7 +353,8 @@
       "New Zealand-British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-einstein",
@@ -357,7 +374,8 @@
       "German",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-bohr-niels",
@@ -377,14 +395,15 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-dirac",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "Paul Dirac",
-    "teaser": "English physicist who combined quantum mechanics with relativity in 1928, produced the equation that predicted the existence of antimatter, won the 1933 Nobel, and spent the rest of his life saying 'Physical interpretation should be done later.'",
+    "teaser": "English physicist who combined quantum mechanics with relativity in 1928, produced the equation that predicted the existence of antimatter, won the 1933 Nobel, and spent the rest of his life saying 'Physical interpretation should be done later.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -397,7 +416,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-feynman",
@@ -417,14 +437,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-oppenheimer",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "J. Robert Oppenheimer",
-    "teaser": "American physicist who led the Manhattan Project's Los Alamos laboratory (1943–45), shipped the first nuclear bombs to Hiroshima and Nagasaki, and was later stripped of his security clearance for past Communist associations.",
+    "teaser": "American physicist who led the Manhattan Project's Los Alamos laboratory (1943–45), shipped the first nuclear bombs to Hiroshima and Nagasaki, and was later stripped of his security clearance for past Communist associations. J. Robert Oppenheimer.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -437,7 +458,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-darwin",
@@ -457,7 +479,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-wallace",
@@ -477,7 +500,8 @@
       "Welsh-British",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-mendel",
@@ -497,7 +521,8 @@
       "Austrian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-pasteur",
@@ -517,7 +542,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-lister",
@@ -537,7 +563,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-koch",
@@ -557,7 +584,8 @@
       "German",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-curie-repeat",
@@ -577,7 +605,8 @@
       "Scottish-British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-carson",
@@ -597,7 +626,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-goodall",
@@ -617,7 +647,8 @@
       "British",
       "20th-21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-mcclintock",
@@ -637,7 +668,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-franklin-rosalind",
@@ -657,14 +689,15 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-sanger",
     "categoryId": "SCIENTISTS",
     "subtype": "Biochemist",
     "name": "Frederick Sanger",
-    "teaser": "British biochemist who is the only person to win two Nobel Prizes in Chemistry — for sequencing insulin (1958) and for developing DNA sequencing (1980). He refused a knighthood, citing 'rather not.'",
+    "teaser": "British biochemist who is the only person to win two Nobel Prizes in Chemistry — for sequencing insulin (1958) and for developing DNA sequencing (1980). He refused a knighthood, citing 'rather not.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -677,7 +710,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-doudna",
@@ -697,7 +731,8 @@
       "American",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-euler",
@@ -718,7 +753,8 @@
       "Swiss",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-gauss",
@@ -738,14 +774,15 @@
       "German",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-gauss-anecdote",
     "categoryId": "SCIENTISTS",
     "subtype": "Mathematician",
     "name": "Emmy Noether",
-    "teaser": "German mathematician whose 1915 'Noether's Theorem' revealed that every conservation law in physics corresponds to a symmetry of the laws. Einstein called her 'the most significant creative mathematical genius thus far produced since the beginning of higher education for women.'",
+    "teaser": "German mathematician whose 1915 'Noether's Theorem' revealed that every conservation law in physics corresponds to a symmetry of the laws. Einstein called her 'the most significant creative mathematical genius thus far produced since the beginning of higher education for women.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -758,7 +795,8 @@
       "German",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-ramanujan",
@@ -778,7 +816,8 @@
       "Indian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-noether",
@@ -798,7 +837,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-erdos",
@@ -816,7 +856,8 @@
     "tags": [
       "Mathematics",
       "Hungarian"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-chan-shih-ho",
@@ -836,7 +877,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-ada-lovelace",
@@ -856,7 +898,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-turing",
@@ -876,7 +919,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-von-neumann",
@@ -896,7 +940,8 @@
       "Hungarian-American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-shannon",
@@ -916,7 +961,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-knuth",
@@ -936,7 +982,8 @@
       "American",
       "20th-21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-ricci-curvature",
@@ -956,7 +1003,8 @@
       "German",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "scientist-leverrier",
@@ -976,7 +1024,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-monet-brush",
@@ -996,7 +1045,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-antonie-van-leeuwenhoek-182",
@@ -1016,7 +1066,8 @@
       "Microscopy",
       "17th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-humphry-davy-183",
@@ -1035,7 +1086,8 @@
       "Chemistry",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-heinrich-hertz-184",
@@ -1055,7 +1107,8 @@
       "Electromagnetism",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-erwin-schrödinger-185",
@@ -1075,14 +1128,15 @@
       "Quantum Mechanics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-enrico-fermi-186",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Enrico Fermi",
-    "teaser": "The man who built the world's first nuclear reactor - under the stands of a Chicago football stadium, from graphite blocks and uranium, with no one else on site knowing - and then calmly announced, 'The Italian navigator has landed in the New World.'",
+    "teaser": "The man who built the world's first nuclear reactor - under the stands of a Chicago football stadium, from graphite blocks and uranium, with no one else on site knowing - and then calmly announced, 'The Italian navigator has landed in the New World.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1095,7 +1149,8 @@
       "Nuclear Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-otto-hahn-187",
@@ -1115,7 +1170,8 @@
       "Nuclear Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-edwin-hubble-188",
@@ -1135,7 +1191,8 @@
       "Cosmology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-subrahmanyan-chandrasekhar-189",
@@ -1154,7 +1211,8 @@
       "Astrophysics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-murray-gell-mann-151",
@@ -1174,7 +1232,8 @@
       "Particle Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-dorothy-hodgkin-152",
@@ -1194,7 +1253,8 @@
       "Crystallography",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-francis-crick-153",
@@ -1214,7 +1274,8 @@
       "Molecular Biology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-lynn-margulis-154",
@@ -1234,7 +1295,8 @@
       "Evolution",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-roger-penrose-155",
@@ -1254,7 +1316,8 @@
       "Mathematics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-neil-degrasse-tyson-156",
@@ -1274,7 +1337,8 @@
       "Astrophysics",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-dian-fossey-157",
@@ -1294,7 +1358,8 @@
       "Primatology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-eo-wilson-158",
@@ -1314,7 +1379,8 @@
       "Ecology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-richard-dawkins-159",
@@ -1334,14 +1400,15 @@
       "Evolution",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-vint-cerf-160",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Vint Cerf",
-    "teaser": "In 1974, with Bob Kahn, he designed TCP/IP - the protocol that lets all the world's networks talk to each other - and the internet was born. He now works at Google under the title 'Chief Internet Evangelist.'",
+    "teaser": "In 1974, with Bob Kahn, he designed TCP/IP - the protocol that lets all the world's networks talk to each other - and the internet was born. He now works at Google under the title 'Chief Internet Evangelist.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1354,7 +1421,8 @@
       "Internet",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-margaret-hamilton-161",
@@ -1374,7 +1442,8 @@
       "Software",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-katherine-johnson-162",
@@ -1394,7 +1463,8 @@
       "Spaceflight",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-dorothy-vaughan-163",
@@ -1414,14 +1484,15 @@
       "Computer Science",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-mae-jemison-164",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Mae Jemison",
-    "teaser": "Physician, dancer, and engineer who became the first Black woman in space aboard Endeavour in 1992. She took a poster of the Alvin Ailey dance company with her - and later appeared on an episode of 'Star Trek: The Next Generation.'",
+    "teaser": "Physician, dancer, and engineer who became the first Black woman in space aboard Endeavour in 1992. She took a poster of the Alvin Ailey dance company with her - and later appeared on an episode of 'Star Trek: The Next Generation.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1434,7 +1505,8 @@
       "Medicine",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-vera-rubin-165",
@@ -1454,7 +1526,8 @@
       "Dark Matter",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-donna-strickland-166",
@@ -1474,7 +1547,8 @@
       "Optics",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-emmanuelle-charpentier-167",
@@ -1494,7 +1568,8 @@
       "Genetics",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-katalin-karikó-168",
@@ -1514,7 +1589,8 @@
       "mRNA",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-françoise-barré-sinoussi-169",
@@ -1534,7 +1610,8 @@
       "Virology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-gerty-cori-170",
@@ -1554,7 +1631,8 @@
       "Medicine",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-may-britt-moser-171",
@@ -1574,7 +1652,8 @@
       "Medicine",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-alexander-fleming-172",
@@ -1594,7 +1673,8 @@
       "Antibiotics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-albert-sabin-173",
@@ -1614,7 +1694,8 @@
       "Virology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-frederick-banting-174",
@@ -1634,7 +1715,8 @@
       "Endocrinology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-barry-marshall-175",
@@ -1654,7 +1736,8 @@
       "Microbiology",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-harold-varmus-176",
@@ -1674,7 +1757,8 @@
       "Oncology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-eric-kandel-177",
@@ -1694,14 +1778,15 @@
       "Medicine",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-vs-ramachandran-178",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "V.S. Ramachandran",
-    "teaser": "He built a simple box of mirrors that made amputees' phantom limbs 'come back' and eased their pain - the mirror box. His work on phantom limbs and mirror neurons made him one of the most cited neuroscientists alive.",
+    "teaser": "He built a simple box of mirrors that made amputees' phantom limbs 'come back' and eased their pain - the mirror box. His work on phantom limbs and mirror neurons made him one of the most cited neuroscientists alive. V.S. Ramachandran.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1714,7 +1799,8 @@
       "Psychology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-amos-tversky-179",
@@ -1734,14 +1820,15 @@
       "Behavioral Economics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-bf-skinner-180",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "B.F. Skinner",
-    "teaser": "The behaviorist who argued free will is an illusion and everything we do is shaped by rewards - and demonstrated it with pigeons in boxes that learned to peck for food. He even designed an 'air crib' for his baby daughter that tabloids turned into a horror story.",
+    "teaser": "The behaviorist who argued free will is an illusion and everything we do is shaped by rewards - and demonstrated it with pigeons in boxes that learned to peck for food. He even designed an 'air crib' for his baby daughter that tabloids turned into a horror story. B.F. Skinner.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1754,7 +1841,8 @@
       "Behaviorism",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-lev-vygotsky-181",
@@ -1774,7 +1862,8 @@
       "Education",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-juan-maldacena-182",
@@ -1794,7 +1883,8 @@
       "String Theory",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-brian-greene-183",
@@ -1814,7 +1904,8 @@
       "String Theory",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-robert-hooke-184",
@@ -1834,7 +1925,8 @@
       "Microscopy",
       "17th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-carl-linnaeus-185",
@@ -1854,7 +1946,8 @@
       "Taxonomy",
       "18th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-benjamin-franklin-186",
@@ -1874,7 +1967,8 @@
       "Electricity",
       "18th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-lord-kelvin-187",
@@ -1894,7 +1988,8 @@
       "Thermodynamics",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-wilhelm-röntgen-188",
@@ -1914,7 +2009,8 @@
       "Radiology",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-pierre-curie-189",
@@ -1934,7 +2030,8 @@
       "Radioactivity",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-max-planck-190",
@@ -1954,7 +2051,8 @@
       "Quantum Mechanics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-werner-heisenberg-191",
@@ -1974,14 +2072,15 @@
       "Quantum Mechanics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-wolfgang-pauli-192",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Wolfgang Pauli",
-    "teaser": "He stated that no two identical particles can occupy the same quantum state - the exclusion principle that explains why matter doesn't collapse and why chemistry works. He won the 1945 Nobel, and colleagues joked his mere presence made lab equipment explode: the 'Pauli effect.'",
+    "teaser": "He stated that no two identical particles can occupy the same quantum state - the exclusion principle that explains why matter doesn't collapse and why chemistry works. He won the 1945 Nobel, and colleagues joked his mere presence made lab equipment explode: the 'Pauli effect.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -1994,7 +2093,8 @@
       "Quantum Mechanics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-lise-meitner-193",
@@ -2014,7 +2114,8 @@
       "Nuclear Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-kurt-gödel-194",
@@ -2034,7 +2135,8 @@
       "Logic",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-georges-lemaître-195",
@@ -2054,7 +2156,8 @@
       "Cosmology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-john-bardeen-196",
@@ -2074,7 +2177,8 @@
       "Electronics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-linus-pauling-197",
@@ -2094,7 +2198,8 @@
       "Peace",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-james-watson-198",
@@ -2114,7 +2219,8 @@
       "Genetics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-stephen-hawking-199",
@@ -2134,7 +2240,8 @@
       "Cosmology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-carl-sagan-200",
@@ -2154,7 +2261,8 @@
       "Science Communication",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-david-attenborough-201",
@@ -2174,14 +2282,15 @@
       "Conservation",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-tim-berners-lee-202",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Tim Berners-Lee",
-    "teaser": "He invented the World Wide Web in 1989 as a way to share documents among physicists at CERN - and gave it to the world free, refusing to patent it. His proposal was initially marked 'vague but exciting.'",
+    "teaser": "He invented the World Wide Web in 1989 as a way to share documents among physicists at CERN - and gave it to the world free, refusing to patent it. His proposal was initially marked 'vague but exciting.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -2194,7 +2303,8 @@
       "Internet",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-grace-hopper-203",
@@ -2214,7 +2324,8 @@
       "Programming",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-mary-jackson-204",
@@ -2234,7 +2345,8 @@
       "Spaceflight",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-sally-ride-205",
@@ -2254,14 +2366,15 @@
       "Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-chien-shiung-wu-206",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Chien-Shiung Wu",
-    "teaser": "She designed and ran the experiment that toppled a 'law' of physics - showing nature does not respect left-right symmetry. The Nobel went to the two theorists, not to her; she was called the First Lady of Physics and the 'Chinese Madame Curie.'",
+    "teaser": "She designed and ran the experiment that toppled a 'law' of physics - showing nature does not respect left-right symmetry. The Nobel went to the two theorists, not to her; she was called the First Lady of Physics and the 'Chinese Madame Curie.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Explore",
@@ -2274,7 +2387,8 @@
       "Weak Force",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-jocelyn-bell-burnell-207",
@@ -2294,7 +2408,8 @@
       "Pulsars",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-andrea-ghez-208",
@@ -2314,7 +2429,8 @@
       "Black Holes",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-tu-youyou-209",
@@ -2334,7 +2450,8 @@
       "Pharmacology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-rita-levi-montalcini-210",
@@ -2354,7 +2471,8 @@
       "Medicine",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-maria-goeppert-mayer-211",
@@ -2374,7 +2492,8 @@
       "Nuclear Physics",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-edward-jenner-212",
@@ -2394,7 +2513,8 @@
       "Vaccination",
       "18th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-jonas-salk-213",
@@ -2414,7 +2534,8 @@
       "Virology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-gertrude-elion-214",
@@ -2434,7 +2555,8 @@
       "Pharmacology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-charles-best-215",
@@ -2454,7 +2576,8 @@
       "Endocrinology",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-robin-warren-216",
@@ -2474,7 +2597,8 @@
       "Pathology",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-santiago-ramón-y-cajal-217",
@@ -2494,7 +2618,8 @@
       "Anatomy",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-oliver-sacks-218",
@@ -2514,7 +2639,8 @@
       "Medicine",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-daniel-kahneman-219",
@@ -2534,7 +2660,8 @@
       "Behavioral Economics",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-noam-chomsky-220",
@@ -2554,7 +2681,8 @@
       "Cognitive Science",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-jean-piaget-221",
@@ -2574,7 +2702,8 @@
       "Development",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-edward-witten-222",
@@ -2594,7 +2723,8 @@
       "String Theory",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-cumrun-vafa-223",
@@ -2614,7 +2744,8 @@
       "String Theory",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scie-lisa-randall-224",
@@ -2634,7 +2765,8 @@
       "Particle Physics",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "scientist-alhazen",
@@ -2659,7 +2791,8 @@
       "Physics",
       "Arab",
       "Medieval"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-avicenna",
@@ -2684,7 +2817,8 @@
       "Medicine",
       "Persian",
       "Medieval"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-al-biruni",
@@ -2709,7 +2843,8 @@
       "Astronomy",
       "Persian",
       "Medieval"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-al-khwarizmi",
@@ -2734,7 +2869,8 @@
       "Mathematics",
       "Persian",
       "Medieval"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hero",
@@ -2759,7 +2895,8 @@
       "Engineering",
       "Greek",
       "1st Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-eratosthenes",
@@ -2784,7 +2921,8 @@
       "Geography",
       "Greek",
       "3rd Century BCE"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-democritus",
@@ -2809,7 +2947,8 @@
       "Philosophy",
       "Greek",
       "Ancient"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-pythagoras",
@@ -2834,7 +2973,8 @@
       "Mathematics",
       "Greek",
       "Ancient"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-vesalius",
@@ -2859,7 +2999,8 @@
       "Medicine",
       "Belgian",
       "16th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-harvey",
@@ -2884,7 +3025,8 @@
       "Medicine",
       "English",
       "17th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-boyle",
@@ -2909,7 +3051,8 @@
       "Chemistry",
       "Irish",
       "17th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-huygens",
@@ -2934,7 +3077,8 @@
       "Physics",
       "Dutch",
       "17th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-halley",
@@ -2959,7 +3103,8 @@
       "Astronomy",
       "English",
       "17th-18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cavendish",
@@ -2984,7 +3129,8 @@
       "Chemistry",
       "English",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-volta",
@@ -3009,7 +3155,8 @@
       "Physics",
       "Italian",
       "18th-19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ampere",
@@ -3034,7 +3181,8 @@
       "Physics",
       "French",
       "18th-19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ohm",
@@ -3059,7 +3207,8 @@
       "Physics",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-dalton",
@@ -3084,7 +3233,8 @@
       "Chemistry",
       "English",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-avogadro",
@@ -3109,7 +3259,8 @@
       "Chemistry",
       "Italian",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-berzelius",
@@ -3134,7 +3285,8 @@
       "Chemistry",
       "Swedish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-liebig",
@@ -3159,7 +3311,8 @@
       "Chemistry",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kekule",
@@ -3184,7 +3337,8 @@
       "Chemistry",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-arrhenius",
@@ -3209,7 +3363,8 @@
       "Chemistry",
       "Swedish",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-born",
@@ -3234,7 +3389,8 @@
       "Physics",
       "German-British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-soddy",
@@ -3259,7 +3415,8 @@
       "Chemistry",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-moseley",
@@ -3284,7 +3441,8 @@
       "Physics",
       "English",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-becquerel",
@@ -3309,14 +3467,15 @@
       "Physics",
       "French",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-thomson-plum",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "J. J. Thomson",
-    "teaser": "British physicist who discovered the electron in 1897 by bending cathode rays in magnetic and electric fields — showing they were negatively charged particles far lighter than atoms. He proposed the 'plum pudding' atom, which his student Rutherford destroyed a decade later. He won the 1906 Nobel, and his son George later won the Nobel for showing electrons are waves — a father-son pair of opposites.",
+    "teaser": "British physicist who discovered the electron in 1897 by bending cathode rays in magnetic and electric fields — showing they were negatively charged particles far lighter than atoms. He proposed the 'plum pudding' atom, which his student Rutherford destroyed a decade later. He won the 1906 Nobel, and his son George later won the Nobel for showing electrons are waves — a father-son pair of opposites. J. J. Thomson.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -3334,7 +3493,8 @@
       "Physics",
       "British",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-brahe-supernova",
@@ -3359,7 +3519,8 @@
       "Astronomy",
       "Danish",
       "16th-17th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-herschel-galaxy",
@@ -3384,14 +3545,15 @@
       "Astronomy",
       "German",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-gibbs",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "Josiah Willard Gibbs",
-    "teaser": "American physicist who laid the foundations of chemical thermodynamics and statistical mechanics while teaching at Yale for his entire career — largely ignored in America but celebrated in Europe. His free energy concept and phase rule underpin all of physical chemistry. Einstein called him 'the greatest mind in American history.'",
+    "teaser": "American physicist who laid the foundations of chemical thermodynamics and statistical mechanics while teaching at Yale for his entire career — largely ignored in America but celebrated in Europe. His free energy concept and phase rule underpin all of physical chemistry. Einstein called him 'the greatest mind in American history.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -3409,7 +3571,8 @@
       "Physics",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-clausius",
@@ -3434,7 +3597,8 @@
       "Physics",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-carnot",
@@ -3459,7 +3623,8 @@
       "Physics",
       "French",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mayer",
@@ -3484,7 +3649,8 @@
       "Medicine",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-helmholtz",
@@ -3509,7 +3675,8 @@
       "Physics",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-vant-hoff",
@@ -3534,7 +3701,8 @@
       "Chemistry",
       "Dutch",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-le-chatelier",
@@ -3559,7 +3727,8 @@
       "Chemistry",
       "French",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-haber",
@@ -3584,7 +3753,8 @@
       "Chemistry",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bosch",
@@ -3609,7 +3779,8 @@
       "Chemistry",
       "German",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ostwald",
@@ -3634,7 +3805,8 @@
       "Chemistry",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-baeyer",
@@ -3659,7 +3831,8 @@
       "Chemistry",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-emil-fischer",
@@ -3684,7 +3857,8 @@
       "Chemistry",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-staudinger",
@@ -3709,7 +3883,8 @@
       "Chemistry",
       "German",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-carothers",
@@ -3734,7 +3909,8 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kwolek",
@@ -3759,7 +3935,8 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-goodyear",
@@ -3784,7 +3961,8 @@
       "Engineering",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alfred-nobel",
@@ -3809,7 +3987,8 @@
       "Chemistry",
       "Swedish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-woodward",
@@ -3834,7 +4013,8 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-corey",
@@ -3859,7 +4039,8 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-djerassi",
@@ -3884,7 +4065,8 @@
       "Chemistry",
       "Austrian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-julian",
@@ -3909,14 +4091,15 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-sharpless",
     "categoryId": "SCIENTISTS",
     "subtype": "Chemist",
     "name": "K. Barry Sharpless",
-    "teaser": "American chemist who invented 'click chemistry' — reactions that snap molecules together like Lego, quickly, cleanly, and in water. He won the Nobel in 2001 for his chiral catalysts and again in 2022 for click chemistry, becoming one of the few double Nobelists in chemistry. His motto: 'if you want to make a complex molecule, don't try to — make simple ones that click.'",
+    "teaser": "American chemist who invented 'click chemistry' — reactions that snap molecules together like Lego, quickly, cleanly, and in water. He won the Nobel in 2001 for his chiral catalysts and again in 2022 for click chemistry, becoming one of the few double Nobelists in chemistry. His motto: 'if you want to make a complex molecule, don't try to — make simple ones that click.'. K. Barry Sharpless.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -3934,7 +4117,8 @@
       "Chemistry",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bohr-sommerfeld",
@@ -3959,7 +4143,8 @@
       "Physics",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bloch",
@@ -3984,7 +4169,8 @@
       "Physics",
       "Swiss",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ramsey",
@@ -4009,7 +4195,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-maiman",
@@ -4034,7 +4221,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bethe",
@@ -4059,7 +4247,8 @@
       "Physics",
       "German-American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-gamow",
@@ -4084,7 +4273,8 @@
       "Physics",
       "Russian-American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alpher",
@@ -4109,7 +4299,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-schawlow",
@@ -4134,7 +4325,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-townes",
@@ -4159,7 +4351,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kroto",
@@ -4184,7 +4377,8 @@
       "Chemistry",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-geim",
@@ -4209,7 +4403,8 @@
       "Physics",
       "Dutch-Russian",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-novoselov",
@@ -4234,7 +4429,8 @@
       "Physics",
       "Russian-British",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-onsager",
@@ -4259,7 +4455,8 @@
       "Chemistry",
       "Norwegian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-debye",
@@ -4284,7 +4481,8 @@
       "Chemistry",
       "Dutch",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-uhlenbeck",
@@ -4309,7 +4507,8 @@
       "Physics",
       "Dutch",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-rainwater",
@@ -4334,7 +4533,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wilczek",
@@ -4359,7 +4559,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-gross",
@@ -4384,14 +4585,15 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-politzer",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "H. David Politzer",
-    "teaser": "American physicist who independently discovered asymptotic freedom in 1973, months after Gross and Wilczek, sharing the 2004 Nobel. His work completed the theory of the strong force, and he later made significant contributions to string theory, black hole physics, and quantum chromodynamics' applications.",
+    "teaser": "American physicist who independently discovered asymptotic freedom in 1973, months after Gross and Wilczek, sharing the 2004 Nobel. His work completed the theory of the strong force, and he later made significant contributions to string theory, black hole physics, and quantum chromodynamics' applications. H. David Politzer.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -4409,7 +4611,8 @@
       "Physics",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-schleiden",
@@ -4434,7 +4637,8 @@
       "Biology",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-brown-motion",
@@ -4459,7 +4663,8 @@
       "Biology",
       "Scottish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-dubois",
@@ -4484,14 +4689,15 @@
       "Anthropology",
       "Dutch",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-leakey",
     "categoryId": "SCIENTISTS",
     "subtype": "Paleoanthropologist",
     "name": "Louis Leakey",
-    "teaser": "British-Kenyan paleoanthropologist who spent decades digging in Olduvai Gorge and, with his wife Mary, found the 'Nutcracker Man' (Zinjanthropus) in 1959 and Homo habilis in 1964 — showing humanity's deep roots in Africa. He also launched the studies of Jane Goodall, Dian Fossey, and Biruté Galdikas, the 'trimates.'",
+    "teaser": "British-Kenyan paleoanthropologist who spent decades digging in Olduvai Gorge and, with his wife Mary, found the 'Nutcracker Man' (Zinjanthropus) in 1959 and Homo habilis in 1964 — showing humanity's deep roots in Africa. He also launched the studies of Jane Goodall, Dian Fossey, and Biruté Galdikas, the 'trimates.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -4509,7 +4715,8 @@
       "Paleontology",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-johanson",
@@ -4534,7 +4741,8 @@
       "Paleontology",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-broom",
@@ -4559,7 +4767,8 @@
       "Paleontology",
       "Scottish",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-dart",
@@ -4584,7 +4793,8 @@
       "Medicine",
       "Australian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-copeland",
@@ -4609,7 +4819,8 @@
       "Biology",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-whittaker",
@@ -4634,7 +4845,8 @@
       "Biology",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-lovelock",
@@ -4659,7 +4871,8 @@
       "Earth Science",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-elton",
@@ -4684,7 +4897,8 @@
       "Ecology",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-leopold",
@@ -4709,7 +4923,8 @@
       "Ecology",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-atanasoff",
@@ -4734,14 +4949,15 @@
       "Computer Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ekert",
     "categoryId": "SCIENTISTS",
     "subtype": "Computer Scientist",
     "name": "J. Presper Eckert",
-    "teaser": "American engineer who, with John Mauchly, built ENIAC (1945), the first general-purpose electronic computer — 17,000 vacuum tubes, 30 tons, and able to do 5,000 additions a second. He pioneered delay-line memory and co-founded the company that built UNIVAC, the first commercial computer.",
+    "teaser": "American engineer who, with John Mauchly, built ENIAC (1945), the first general-purpose electronic computer — 17,000 vacuum tubes, 30 tons, and able to do 5,000 additions a second. He pioneered delay-line memory and co-founded the company that built UNIVAC, the first commercial computer. J. Presper Eckert.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -4759,7 +4975,8 @@
       "Computer Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mauchly",
@@ -4784,7 +5001,8 @@
       "Computer Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cray",
@@ -4809,7 +5027,8 @@
       "Engineering",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ritchie",
@@ -4834,7 +5053,8 @@
       "Computer Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wirth",
@@ -4859,7 +5079,8 @@
       "Computer Science",
       "Swiss",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alexander-von-humboldt",
@@ -4878,7 +5099,8 @@
       "Science",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-birute-galdikas",
@@ -4897,7 +5119,8 @@
       "Science",
       "Lithuanian-Canadian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-muir",
@@ -4916,7 +5139,8 @@
       "Science",
       "Scottish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-norman-borlaug",
@@ -4935,7 +5159,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wangari-maathai",
@@ -4954,7 +5179,8 @@
       "Science",
       "Kenyan",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-sylvia-earle",
@@ -4973,7 +5199,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernst-mayr",
@@ -4992,7 +5219,8 @@
       "Science",
       "German-American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-gaylord-simpson",
@@ -5011,7 +5239,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-clyde-tombaugh",
@@ -5030,7 +5259,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-annie-jump-cannon",
@@ -5049,7 +5279,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-henrietta-swan-leavitt",
@@ -5068,7 +5299,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hermann-oberth",
@@ -5087,7 +5319,8 @@
       "Science",
       "German",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-tsiolkovsky-rocket",
@@ -5106,7 +5339,8 @@
       "Science",
       "Russian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-goddard-first-rocket",
@@ -5125,7 +5359,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-rudolf-virchow",
@@ -5144,7 +5379,8 @@
       "Science",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-sewall-wright",
@@ -5162,7 +5398,8 @@
     "tags": [
       "Science",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ronald-fisher",
@@ -5181,7 +5418,8 @@
       "Science",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jbs-haldane",
@@ -5200,7 +5438,8 @@
       "Science",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-theodosius-dobzhansky",
@@ -5219,14 +5458,15 @@
       "Science",
       "Ukrainian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernst-haeckel",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Ernst Haeckel",
-    "teaser": "The German biologist and artist who coined 'ecology' and drew radiant illustrations of radiolarians and jellyfish that still amaze. He popularized Darwin in Germany and coined the phrase 'ontogeny recapitulates phylogeny.'",
+    "teaser": "The German biologist and artist who coined 'ecology' and drew radiant illustrations of radiolarians and jellyfish that still amaze. He popularized Darwin in Germany and coined the phrase 'ontogeny recapitulates phylogeny.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -5238,7 +5478,8 @@
       "Science",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-niels-henrik-abel",
@@ -5257,7 +5498,8 @@
       "Science",
       "Norwegian",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-georg-cantor",
@@ -5276,7 +5518,8 @@
       "Science",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-david-hilbert",
@@ -5295,14 +5538,15 @@
       "Science",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-henri-poincare",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Henri Poincaré",
-    "teaser": "The French mathematician-physicist who nearly discovered relativity before Einstein, founded algebraic topology, and showed the three-body problem is chaotic. He called mathematics 'the art of giving the same name to different things.'",
+    "teaser": "The French mathematician-physicist who nearly discovered relativity before Einstein, founded algebraic topology, and showed the three-body problem is chaotic. He called mathematics 'the art of giving the same name to different things.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Puzzle",
@@ -5314,7 +5558,8 @@
       "Science",
       "French",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-maryam-mirzakhani",
@@ -5333,7 +5578,8 @@
       "Science",
       "Iranian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-blaise-pascal",
@@ -5352,7 +5598,8 @@
       "Science",
       "French",
       "17th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-caroline-herschel",
@@ -5371,7 +5618,8 @@
       "Science",
       "German",
       "18th-19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ibn-al-haytham",
@@ -5390,7 +5638,8 @@
       "Science",
       "Arab",
       "Medieval"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-aryabhata",
@@ -5409,7 +5658,8 @@
       "Science",
       "Indian",
       "Ancient"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-zhang-heng",
@@ -5428,7 +5678,8 @@
       "Science",
       "Chinese",
       "2nd Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-shen-kuo",
@@ -5447,7 +5698,8 @@
       "Science",
       "Chinese",
       "11th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-james-chadwick",
@@ -5466,7 +5718,8 @@
       "Science",
       "English",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-glenn-seaborg",
@@ -5485,7 +5738,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-melvin-calvin",
@@ -5504,7 +5758,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-erwin-chargaff",
@@ -5523,7 +5778,8 @@
       "Science",
       "Austrian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-maurice-wilkins",
@@ -5542,7 +5798,8 @@
       "Science",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-carl-woese",
@@ -5561,7 +5818,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-sydney-brenner",
@@ -5580,7 +5838,8 @@
       "Science",
       "South African",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-max-delbruck",
@@ -5599,7 +5858,8 @@
       "Science",
       "German-American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-lev-landau",
@@ -5618,7 +5878,8 @@
       "Science",
       "Russian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-abdus-salam",
@@ -5637,7 +5898,8 @@
       "Science",
       "Pakistani",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-steven-weinberg",
@@ -5656,7 +5918,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alan-guth",
@@ -5675,7 +5938,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-andrei-sakharov",
@@ -5694,7 +5958,8 @@
       "Science",
       "Russian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ignaz-semmelweis",
@@ -5713,7 +5978,8 @@
       "Science",
       "Hungarian",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-paul-ehrlich",
@@ -5732,7 +5998,8 @@
       "Science",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-snow",
@@ -5751,7 +6018,8 @@
       "Science",
       "English",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-james-hutton",
@@ -5770,7 +6038,8 @@
       "Science",
       "Scottish",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-lyell",
@@ -5789,7 +6058,8 @@
       "Science",
       "Scottish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alfred-wegener",
@@ -5808,7 +6078,8 @@
       "Science",
       "German",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-marie-tharp",
@@ -5827,7 +6098,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-inge-lehmann",
@@ -5846,7 +6118,8 @@
       "Science",
       "Danish",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-harry-hess",
@@ -5865,7 +6138,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-tuzo-wilson",
@@ -5884,7 +6158,8 @@
       "Science",
       "Canadian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-milutin-milankovic",
@@ -5903,7 +6178,8 @@
       "Science",
       "Serbian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edward-lorenz",
@@ -5922,7 +6198,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wilhelm-wundt",
@@ -5941,7 +6218,8 @@
       "Science",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-william-james",
@@ -5960,7 +6238,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ivan-pavlov",
@@ -5979,7 +6258,8 @@
       "Science",
       "Russian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-elizabeth-loftus",
@@ -5998,7 +6278,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-abraham-maslow",
@@ -6017,7 +6298,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-babbage",
@@ -6036,7 +6318,8 @@
       "Science",
       "British",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-konrad-zuse",
@@ -6055,7 +6338,8 @@
       "Science",
       "German",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-mccarthy",
@@ -6074,14 +6358,15 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edsger-dijkstra",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Edsger Dijkstra",
-    "teaser": "The Dutch computer scientist who wrote the shortest-path algorithm every map app uses, invented structured programming, and warned that debugging is harder than writing code. 'Simplicity is a great virtue,' he insisted, 'but it requires hard work.'",
+    "teaser": "The Dutch computer scientist who wrote the shortest-path algorithm every map app uses, invented structured programming, and warned that debugging is harder than writing code. 'Simplicity is a great virtue,' he insisted, 'but it requires hard work.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Route",
@@ -6093,7 +6378,8 @@
       "Science",
       "Dutch",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-barbara-liskov",
@@ -6112,7 +6398,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-washington-carver",
@@ -6131,7 +6418,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-luther-burbank",
@@ -6150,7 +6438,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-nikolai-vavilov",
@@ -6169,14 +6458,15 @@
       "Science",
       "Russian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-eugene-odum",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Eugene Odum",
-    "teaser": "The American ecologist who made ecosystems the unit of study and wrote the textbook that founded ecosystem ecology. His famous aphorism: 'the organism is only the visible product — the ecosystem is the real unit of nature.'",
+    "teaser": "The American ecologist who made ecosystems the unit of study and wrote the textbook that founded ecosystem ecology. His famous aphorism: 'the organism is only the visible product — the ecosystem is the real unit of nature.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Ecosystem",
@@ -6188,7 +6478,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-arthur-tansley",
@@ -6207,7 +6498,8 @@
       "Science",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-karl-von-frisch",
@@ -6226,7 +6518,8 @@
       "Science",
       "Austrian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-konrad-lorenz",
@@ -6245,7 +6538,8 @@
       "Science",
       "Austrian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-tyndall",
@@ -6264,7 +6558,8 @@
       "Science",
       "Irish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-de-hevesy",
@@ -6283,7 +6578,8 @@
       "Science",
       "Hungarian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-emil-von-behring",
@@ -6302,7 +6598,8 @@
       "Science",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-selman-waksman",
@@ -6321,7 +6618,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-howard-florey",
@@ -6340,7 +6638,8 @@
       "Science",
       "Australian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-walter-reed",
@@ -6359,7 +6658,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alexander-yersin",
@@ -6378,7 +6678,8 @@
       "Science",
       "French",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ronald-ross",
@@ -6397,7 +6698,8 @@
       "Science",
       "British",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-nicolle",
@@ -6416,7 +6718,8 @@
       "Science",
       "French",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-virginia-apgar",
@@ -6435,7 +6738,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-drew",
@@ -6454,7 +6758,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-joule",
@@ -6479,7 +6784,8 @@
       "Physics",
       "English",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-orsted",
@@ -6504,7 +6810,8 @@
       "Physics",
       "Danish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-millikan",
@@ -6529,7 +6836,8 @@
       "Physics",
       "American",
       "1900s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-de-broglie",
@@ -6554,7 +6862,8 @@
       "Physics",
       "French",
       "1920s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-schwinger",
@@ -6579,7 +6888,8 @@
       "Physics",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-tomonaga",
@@ -6604,7 +6914,8 @@
       "Physics",
       "Japanese",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-glashow",
@@ -6629,14 +6940,15 @@
       "Physics",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-higgs",
     "categoryId": "SCIENTISTS",
     "subtype": "Physicist",
     "name": "Peter Higgs",
-    "teaser": "British physicist who in 1964 proposed the mechanism by which particles acquire mass: a field filling all of space, with a particle attached — the Higgs boson. It took 48 years and the world's largest machine to find it, in 2012, and Higgs shared the 2013 Nobel. He reportedly said, 'I never expected it in my lifetime.'",
+    "teaser": "British physicist who in 1964 proposed the mechanism by which particles acquire mass: a field filling all of space, with a particle attached — the Higgs boson. It took 48 years and the world's largest machine to find it, in 2012, and Higgs shared the 2013 Nobel. He reportedly said, 'I never expected it in my lifetime.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -6654,7 +6966,8 @@
       "Physics",
       "British",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-englert",
@@ -6679,7 +6992,8 @@
       "Physics",
       "Belgian",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-yukawa",
@@ -6704,7 +7018,8 @@
       "Physics",
       "Japanese",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-penzias",
@@ -6729,7 +7044,8 @@
       "Astronomy",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-robert-wilson",
@@ -6754,7 +7070,8 @@
       "Astronomy",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hoyle",
@@ -6779,7 +7096,8 @@
       "Astronomy",
       "British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-shapley",
@@ -6804,7 +7122,8 @@
       "Astronomy",
       "American",
       "1920s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-payne-gaposchkin",
@@ -6829,7 +7148,8 @@
       "Astronomy",
       "British",
       "1920s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-james-watt",
@@ -6848,7 +7168,8 @@
       "Science",
       "Scottish",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-stephenson",
@@ -6867,7 +7188,8 @@
       "Science",
       "English",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-richard-trevithick",
@@ -6885,7 +7207,8 @@
     "tags": [
       "Science",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-isambard-kingdom-brunel",
@@ -6904,7 +7227,8 @@
       "Science",
       "British",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-nikola-tesla",
@@ -6923,7 +7247,8 @@
       "Science",
       "Serbian-American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-guglielmo-marconi",
@@ -6942,7 +7267,8 @@
       "Science",
       "Italian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-samuel-morse",
@@ -6961,7 +7287,8 @@
       "Science",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alexander-graham-bell",
@@ -6980,7 +7307,8 @@
       "Science",
       "Scottish",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-thomas-edison",
@@ -6999,7 +7327,8 @@
       "Science",
       "American",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-philo-farnsworth",
@@ -7018,14 +7347,15 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-lee-de-forest",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Lee de Forest",
-    "teaser": "The American inventor of the Audion tube — a tiny vacuum tube that amplified signals and made radio broadcasting, sound film, and early computers possible. He called it his 'burning sword of science.'",
+    "teaser": "The American inventor of the Audion tube — a tiny vacuum tube that amplified signals and made radio broadcasting, sound film, and early computers possible. He called it his 'burning sword of science.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Amplify",
@@ -7037,7 +7367,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-logie-baird",
@@ -7056,7 +7387,8 @@
       "Science",
       "Scottish",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-percy-spencer",
@@ -7075,7 +7407,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edwin-armstrong",
@@ -7094,7 +7427,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-kao",
@@ -7113,7 +7447,8 @@
       "Science",
       "Chinese",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-dennis-gabor",
@@ -7132,7 +7467,8 @@
       "Science",
       "Hungarian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-rudolf-diesel",
@@ -7151,7 +7487,8 @@
       "Science",
       "German",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-joseph-henry",
@@ -7170,7 +7507,8 @@
       "Science",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernst-mach",
@@ -7189,7 +7527,8 @@
       "Science",
       "Austrian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ludwig-boltzmann",
@@ -7208,7 +7547,8 @@
       "Science",
       "Austrian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-satyendra-nath-bose",
@@ -7227,14 +7567,15 @@
       "Science",
       "Indian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cv-raman",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "C. V. Raman",
-    "teaser": "The Indian physicist who discovered that light changes color slightly when it scatters off molecules — the Raman effect, now the basis of a whole analytical technique. He won the 1930 Nobel, the first Asian scientist to do so.",
+    "teaser": "The Indian physicist who discovered that light changes color slightly when it scatters off molecules — the Raman effect, now the basis of a whole analytical technique. He won the 1930 Nobel, the first Asian scientist to do so. C. V. Raman.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Scatter",
@@ -7246,7 +7587,8 @@
       "Science",
       "Indian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-meghnad-saha",
@@ -7265,7 +7607,8 @@
       "Science",
       "Indian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-emilio-segre",
@@ -7284,7 +7627,8 @@
       "Science",
       "Italian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-luis-alvarez",
@@ -7303,7 +7647,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernest-lawrence",
@@ -7322,7 +7667,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-leo-szilard",
@@ -7341,14 +7687,15 @@
       "Science",
       "Hungarian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-eugene-wigner",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Eugene Wigner",
-    "teaser": "The Hungarian-American physicist who applied symmetry to quantum mechanics, earning the 1963 Nobel. He also designed the graphite reactor that produced the first self-sustaining chain reaction — and marveled at the 'unreasonable effectiveness of mathematics.'",
+    "teaser": "The Hungarian-American physicist who applied symmetry to quantum mechanics, earning the 1963 Nobel. He also designed the graphite reactor that produced the first self-sustaining chain reaction — and marveled at the 'unreasonable effectiveness of mathematics.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Symmetry",
@@ -7360,7 +7707,8 @@
       "Science",
       "Hungarian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-john-wheeler",
@@ -7379,7 +7727,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-david-bohm",
@@ -7398,7 +7747,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alice-ball",
@@ -7417,7 +7767,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-esther-lederberg",
@@ -7436,7 +7787,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-gladys-west",
@@ -7455,7 +7807,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-yvonne-brill",
@@ -7474,14 +7827,15 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-williamina-fleming",
     "categoryId": "SCIENTISTS",
     "subtype": "Scientist",
     "name": "Williamina Fleming",
-    "teaser": "The Scottish maid-turned-astronomer who sorted the spectra of over 10,000 stars at Harvard and discovered the Horsehead Nebula. She created the first classification system for stellar spectra and trained a generation of women 'computers.'",
+    "teaser": "The Scottish maid-turned-astronomer who sorted the spectra of over 10,000 stars at Harvard and discovered the Horsehead Nebula. She created the first classification system for stellar spectra and trained a generation of women 'computers.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Classify",
@@ -7493,7 +7847,8 @@
       "Science",
       "Scottish",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ruby-payne-scott",
@@ -7512,7 +7867,8 @@
       "Science",
       "Australian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-katharine-burr-blodgett",
@@ -7531,7 +7887,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edith-clarke",
@@ -7550,7 +7907,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hedy-lamarr",
@@ -7569,7 +7927,8 @@
       "Science",
       "Austrian",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-francois-jacob",
@@ -7588,7 +7947,8 @@
       "Science",
       "French",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jacques-monod",
@@ -7606,7 +7966,8 @@
     "tags": [
       "Science",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-howard-temin",
@@ -7625,7 +7986,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-craig-venter",
@@ -7644,7 +8006,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-francis-collins",
@@ -7663,7 +8026,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-paul-berg",
@@ -7682,7 +8046,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-walter-gilbert",
@@ -7701,7 +8066,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernst-chain",
@@ -7720,7 +8086,8 @@
       "Science",
       "German-British",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-claude-bernard",
@@ -7739,7 +8106,8 @@
       "Science",
       "French",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-walter-cannon",
@@ -7758,7 +8126,8 @@
       "Science",
       "American",
       "20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-william-osler",
@@ -7777,7 +8146,8 @@
       "Science",
       "Canadian",
       "19th-20th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-elizabeth-blackwell",
@@ -7795,7 +8165,8 @@
     "tags": [
       "Science",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-christiaan-barnard",
@@ -7813,7 +8184,8 @@
     "tags": [
       "Science",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-willem-kolff",
@@ -7831,7 +8203,8 @@
     "tags": [
       "Science",
       "Dutch"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-karl-landsteiner",
@@ -7850,7 +8223,8 @@
       "Science",
       "Austrian",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-godfrey-hounsfield",
@@ -7869,7 +8243,8 @@
       "Science",
       "English",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jacques-cousteau",
@@ -7887,7 +8262,8 @@
     "tags": [
       "Science",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-robert-ballard",
@@ -7906,7 +8282,8 @@
       "Science",
       "American",
       "1980s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-fridtjof-nansen",
@@ -7924,7 +8301,8 @@
     "tags": [
       "Science",
       "Norwegian"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ernest-shackleton",
@@ -7943,7 +8321,8 @@
       "Science",
       "Irish",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-joseph-banks",
@@ -7961,7 +8340,8 @@
     "tags": [
       "Science",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mary-sherman-morgan",
@@ -7980,7 +8360,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-annibale-fantoli",
@@ -7998,7 +8379,8 @@
     "tags": [
       "Science",
       "Italian"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-robert-hutchings-goddard-grad",
@@ -8016,7 +8398,8 @@
     "tags": [
       "Science",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-karl-schwarzschild",
@@ -8035,7 +8418,8 @@
       "Science",
       "Russian",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hans-geiger",
@@ -8053,7 +8437,8 @@
     "tags": [
       "Science",
       "German"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-johannes-diderik-van-der-waals",
@@ -8072,7 +8457,8 @@
       "Science",
       "Dutch",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-joseph-fourier",
@@ -8090,7 +8476,8 @@
     "tags": [
       "Science",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-green",
@@ -8109,7 +8496,8 @@
       "Science",
       "English",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-william-bateson",
@@ -8127,7 +8515,8 @@
     "tags": [
       "Science",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hugo-de-vries",
@@ -8145,7 +8534,8 @@
     "tags": [
       "Science",
       "Dutch"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wilhelm-johannsen",
@@ -8163,7 +8553,8 @@
     "tags": [
       "Science",
       "Danish"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-thomas-hunt-morgan-lab",
@@ -8182,7 +8573,8 @@
       "Science",
       "American",
       "1940s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-alfred-hershey-dna",
@@ -8201,7 +8593,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-oswald-avery-dna",
@@ -8220,7 +8613,8 @@
       "Science",
       "American",
       "1940s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-beadle",
@@ -8239,7 +8633,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edward-tatum",
@@ -8257,7 +8652,8 @@
     "tags": [
       "Science",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-joshua-lederberg-lab",
@@ -8276,7 +8672,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-frederick-griffith-lab",
@@ -8295,7 +8692,8 @@
       "Science",
       "British",
       "1920s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-nettie-stevens",
@@ -8314,7 +8712,8 @@
       "Science",
       "American",
       "1900s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-edmund-bechtel",
@@ -8332,7 +8731,8 @@
     "tags": [
       "Science",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-harold-u-rey",
@@ -8351,7 +8751,8 @@
       "Science",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-stanley-miller",
@@ -8369,7 +8770,8 @@
     "tags": [
       "Science",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-george-wald",
@@ -8388,7 +8790,8 @@
       "Science",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ralph-steinman",
@@ -8407,7 +8810,8 @@
       "Science",
       "Canadian",
       "2010s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-michael-rosbash",
@@ -8426,7 +8830,8 @@
       "Science",
       "American",
       "2010s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jeffrey-hall",
@@ -8445,7 +8850,8 @@
       "Science",
       "American",
       "2010s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-charles-kao-fiber",
@@ -8463,7 +8869,8 @@
     "tags": [
       "Science",
       "German-American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-fritz-lipmann",
@@ -8482,7 +8889,8 @@
       "Science",
       "German-American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hans-krebs",
@@ -8501,7 +8909,8 @@
       "Science",
       "German-British",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-albert-szent-gyorgyi",
@@ -8520,7 +8929,8 @@
       "Science",
       "Hungarian",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-severo-ochoa",
@@ -8539,7 +8949,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-arthur-kornberg-synth",
@@ -8558,7 +8969,8 @@
       "Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-marshall-nirenberg",
@@ -8577,7 +8989,8 @@
       "Science",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-h-g-khorana",
@@ -8596,7 +9009,8 @@
       "Science",
       "Indian",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-frege",
@@ -8621,7 +9035,8 @@
       "Science",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-russell",
@@ -8646,14 +9061,15 @@
       "Science",
       "British",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-galois",
     "categoryId": "SCIENTISTS",
     "subtype": "Mathematician",
     "name": "Évariste Galois",
-    "teaser": "French mathematician who, as a teenager, solved the 350-year-old problem of when polynomial equations can be solved by radicals — inventing group theory overnight. He died at 20 in a duel, having spent his last night writing out his mathematics, ending with 'I have no time.'",
+    "teaser": "French mathematician who, as a teenager, solved the 350-year-old problem of when polynomial equations can be solved by radicals — inventing group theory overnight. He died at 20 in a duel, having spent his last night writing out his mathematics, ending with 'I have no time.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -8670,7 +9086,8 @@
     "tags": [
       "Mathematics",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-laplace",
@@ -8694,7 +9111,8 @@
     "tags": [
       "Mathematics",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-lagrange",
@@ -8719,7 +9137,8 @@
       "Mathematics",
       "Italian",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cauchy",
@@ -8743,7 +9162,8 @@
     "tags": [
       "Mathematics",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-germain",
@@ -8767,7 +9187,8 @@
     "tags": [
       "Mathematics",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kovalevskaya",
@@ -8792,7 +9213,8 @@
       "Mathematics",
       "Russian",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-klein",
@@ -8817,7 +9239,8 @@
       "Mathematics",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wiles",
@@ -8842,7 +9265,8 @@
       "Mathematics",
       "British",
       "1990s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-perelman",
@@ -8867,7 +9291,8 @@
       "Mathematics",
       "Russian",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-nash",
@@ -8892,7 +9317,8 @@
       "Mathematics",
       "American",
       "1990s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-minsky",
@@ -8917,7 +9343,8 @@
       "Computer Science",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hinton",
@@ -8942,7 +9369,8 @@
       "Computer Science",
       "British",
       "2010s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-schwann",
@@ -8966,7 +9394,8 @@
     "tags": [
       "Biology",
       "German"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-morgan",
@@ -8991,7 +9420,8 @@
       "Genetics",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-weismann",
@@ -9015,7 +9445,8 @@
     "tags": [
       "Biology",
       "German"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kitasato",
@@ -9039,7 +9470,8 @@
     "tags": [
       "Microbiology",
       "Japanese"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-nightingale",
@@ -9063,7 +9495,8 @@
     "tags": [
       "Mathematics",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-tinbergen",
@@ -9088,7 +9521,8 @@
       "Science",
       "Dutch",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-holmes",
@@ -9113,7 +9547,8 @@
       "Geology",
       "British",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-tuzo-wilson",
@@ -9138,7 +9573,8 @@
       "Earth Science",
       "Canadian",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-richter",
@@ -9163,7 +9599,8 @@
       "Earth Science",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-anning",
@@ -9187,7 +9624,8 @@
     "tags": [
       "Paleontology",
       "English"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cuvier",
@@ -9211,7 +9649,8 @@
     "tags": [
       "Paleontology",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-agassiz",
@@ -9236,7 +9675,8 @@
       "Science",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-keeling",
@@ -9261,7 +9701,8 @@
       "Chemistry",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-freud",
@@ -9286,7 +9727,8 @@
       "Psychology",
       "Austrian",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jung",
@@ -9310,7 +9752,8 @@
     "tags": [
       "Psychology",
       "Swiss"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-erikson",
@@ -9334,7 +9777,8 @@
     "tags": [
       "Psychology",
       "German-American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-rogers",
@@ -9358,7 +9802,8 @@
     "tags": [
       "Psychology",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-beck",
@@ -9382,7 +9827,8 @@
     "tags": [
       "Psychology",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bowlby",
@@ -9406,7 +9852,8 @@
     "tags": [
       "Psychology",
       "British"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-harlow",
@@ -9431,7 +9878,8 @@
       "Psychology",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-milgram",
@@ -9456,7 +9904,8 @@
       "Psychology",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bandura",
@@ -9481,7 +9930,8 @@
       "Psychology",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-galvani",
@@ -9506,7 +9956,8 @@
       "Science",
       "Italian",
       "18th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bichat",
@@ -9530,7 +9981,8 @@
     "tags": [
       "Medicine",
       "French"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mendel-again",
@@ -9554,7 +10006,8 @@
     "tags": [
       "Biology",
       "German"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mendelsohn",
@@ -9579,7 +10032,8 @@
       "Medicine",
       "German",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ramon-cajal",
@@ -9604,7 +10058,8 @@
       "Science",
       "Italian",
       "1900s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-cassini",
@@ -9628,7 +10083,8 @@
     "tags": [
       "Astronomy",
       "Italian"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-jansky",
@@ -9653,7 +10109,8 @@
       "Astronomy",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-reber",
@@ -9678,7 +10135,8 @@
       "Astronomy",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hewish",
@@ -9703,7 +10161,8 @@
       "Astronomy",
       "British",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ryle",
@@ -9728,7 +10187,8 @@
       "Astronomy",
       "British",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-lowell",
@@ -9752,7 +10212,8 @@
     "tags": [
       "Astronomy",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-van-allen",
@@ -9776,14 +10237,15 @@
     "tags": [
       "Physics",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-eddington",
     "categoryId": "SCIENTISTS",
     "subtype": "Astrophysicist",
     "name": "Arthur Eddington",
-    "teaser": "British astrophysicist who confirmed Einstein's general relativity by photographing the 1919 solar eclipse — showing starlight bending around the sun, making Einstein a worldwide celebrity overnight. He also worked out the physics of stellar structure, explaining why stars shine, and famously said matter can be weighed 'in the bathtub.'",
+    "teaser": "British astrophysicist who confirmed Einstein's general relativity by photographing the 1919 solar eclipse — showing starlight bending around the sun, making Einstein a worldwide celebrity overnight. He also worked out the physics of stellar structure, explaining why stars shine, and famously said matter can be weighed 'in the bathtub.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -9801,7 +10263,8 @@
       "Astronomy",
       "British",
       "1910s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-friedmann",
@@ -9826,7 +10289,8 @@
       "Science",
       "Russian",
       "1920s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-zwicky",
@@ -9851,7 +10315,8 @@
       "Astronomy",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-burbidge",
@@ -9876,7 +10341,8 @@
       "Astronomy",
       "British",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-thorne",
@@ -9901,7 +10367,8 @@
       "Physics",
       "American",
       "2010s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-weiss",
@@ -9926,7 +10393,8 @@
       "Physics",
       "German",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-bell",
@@ -9951,7 +10419,8 @@
       "Physics",
       "Irish",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-aspect",
@@ -9976,7 +10445,8 @@
       "Physics",
       "French",
       "1980s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-clauser",
@@ -10001,7 +10471,8 @@
       "Physics",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-zeilinger",
@@ -10026,7 +10497,8 @@
       "Physics",
       "Austrian",
       "2020s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-mayor-queloz",
@@ -10051,7 +10523,8 @@
       "Astronomy",
       "Swiss",
       "1990s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-frank-drake",
@@ -10076,7 +10549,8 @@
       "Astronomy",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wohler",
@@ -10101,7 +10575,8 @@
       "Chemistry",
       "German",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-curie-joliot",
@@ -10126,7 +10601,8 @@
       "Chemistry",
       "French",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-pauling-mullis",
@@ -10151,7 +10627,8 @@
       "Chemistry",
       "American",
       "1980s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-levene",
@@ -10175,7 +10652,8 @@
     "tags": [
       "Biochemistry",
       "Russian-American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-luria",
@@ -10200,7 +10678,8 @@
       "Biophysics",
       "American",
       "1940s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-horvitz",
@@ -10225,7 +10704,8 @@
       "Genetics",
       "American",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-sulston",
@@ -10250,7 +10730,8 @@
       "Biology",
       "British",
       "2000s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-von-euler",
@@ -10275,7 +10756,8 @@
       "Biochemistry",
       "Swedish",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hilleman",
@@ -10299,7 +10781,8 @@
     "tags": [
       "Medicine",
       "American"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-enders",
@@ -10324,7 +10807,8 @@
       "Medicine",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-gallo",
@@ -10349,7 +10833,8 @@
       "Medicine",
       "American",
       "1980s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-baltimore",
@@ -10374,7 +10859,8 @@
       "Medicine",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-hilbert-kahn",
@@ -10399,14 +10885,15 @@
       "Computer Science",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-licklider",
     "categoryId": "SCIENTISTS",
     "subtype": "Computer Scientist",
     "name": "J. C. R. Licklider",
-    "teaser": "American psychologist and computer scientist who envisioned the 'Intergalactic Computer Network' in 1963 — the idea that became the internet — and the human-computer symbiosis that became personal computing. As DARPA's first computing director, he funded the research that built both the internet and interactive computing.",
+    "teaser": "American psychologist and computer scientist who envisioned the 'Intergalactic Computer Network' in 1963 — the idea that became the internet — and the human-computer symbiosis that became personal computing. As DARPA's first computing director, he funded the research that built both the internet and interactive computing. J. C. R. Licklider.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -10424,7 +10911,8 @@
       "Computer Science",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-engelbart",
@@ -10449,7 +10937,8 @@
       "Computer Science",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kay",
@@ -10474,7 +10963,8 @@
       "Computer Science",
       "American",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-ritchie-thompson",
@@ -10499,14 +10989,15 @@
       "Computer Science",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-stallman",
     "categoryId": "SCIENTISTS",
     "subtype": "Computer Scientist",
     "name": "Richard Stallman",
-    "teaser": "American programmer who launched the free software movement in 1983 with the GNU project, wrote the GNU General Public License, and built the tools — compilers, editors, and the free operating system — that became the GNU/Linux stack running most of the world's servers and Android phones. He coined 'copyleft.'",
+    "teaser": "American programmer who launched the free software movement in 1983 with the GNU project, wrote the GNU General Public License, and built the tools — compilers, editors, and the free operating system — that became the GNU/Linux stack running most of the world's servers and Android phones. He coined 'copyleft.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -10524,14 +11015,15 @@
       "Computer Science",
       "American",
       "1980s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-torvalds",
     "categoryId": "SCIENTISTS",
     "subtype": "Computer Scientist",
     "name": "Linus Torvalds",
-    "teaser": "Finnish-American software engineer who, as a 21-year-old student in 1991, wrote the Linux kernel and released it free on the internet — and today it runs most of the world's servers, the majority of cloud computing, every Android phone, and much of the web. He also created Git, the version-control system used by nearly all software projects, and said, 'Talk is cheap. Show me the code.'",
+    "teaser": "Finnish-American software engineer who, as a 21-year-old student in 1991, wrote the Linux kernel and released it free on the internet — and today it runs most of the world's servers, the majority of cloud computing, every Android phone, and much of the web. He also created Git, the version-control system used by nearly all software projects, and said, 'Talk is cheap. Show me the code.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Read",
@@ -10549,7 +11041,8 @@
       "Computer Science",
       "American",
       "1990s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-berners-lee-larry",
@@ -10574,7 +11067,8 @@
       "Computer Science",
       "American",
       "1990s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wozniak",
@@ -10599,7 +11093,8 @@
       "Engineering",
       "American",
       "1970s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-argonne-hollerith",
@@ -10624,7 +11119,8 @@
       "Engineering",
       "American",
       "19th Century"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-shockley",
@@ -10649,7 +11145,8 @@
       "Physics",
       "American",
       "1940s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-kilby-noyce",
@@ -10674,7 +11171,8 @@
       "Engineering",
       "American",
       "1950s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-shriver",
@@ -10699,7 +11197,8 @@
       "Chemistry",
       "American",
       "1930s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-grothendieck",
@@ -10724,7 +11223,8 @@
       "Mathematics",
       "French",
       "1960s"
-    ]
+    ],
+    "byline": ""
   },
   {
     "id": "scientist-wiles-fermat",
@@ -10749,6 +11249,7 @@
       "Mathematics",
       "French",
       "17th Century"
-    ]
+    ],
+    "byline": ""
   }
 ]

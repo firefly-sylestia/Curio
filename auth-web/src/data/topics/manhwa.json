@@ -1,1410 +1,1410 @@
 [
-  {
-    "id": "manhwa-the-legend-of-the-northern-blade",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Legend of the Northern Blade (2019)",
-    "teaser": "The murim manhwa about a disabled martial artist who returns — the 'Northern Blade' sect's fall is the plot, and the manhwa's genius is that the disability is the strength.",
-    "imageUrl": "",
-    "byline": "Woogack",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Legend of the Northern Blade (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the disability — the 'crippled' protagonist is the power. The manhwa's genius is that the recovery is the fight."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Murim",
-      "2010s"
-    ],
-    "tier": 1
+ {
+  "id": "manhwa-the-legend-of-the-northern-blade",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Legend of the Northern Blade (2019)",
+  "teaser": "The murim manhwa about a disabled martial artist who returns — the 'Northern Blade' sect's fall is the plot, and the manhwa's genius is that the disability is the strength.",
+  "imageUrl": "",
+  "byline": "Woogack",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Legend of the Northern Blade (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the disability — the 'crippled' protagonist is the power. The manhwa's genius is that the recovery is the fight."
   },
-  {
-    "id": "manhwa-return-of-the-mount-hua-sect",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Return of the Mount Hua Sect (2021)",
-    "teaser": "The comedy-murim manhwa about the Mount Hua Sect's revival — the 'plum blossom sword' style is the plot, and the manhwa's genius is that the humble sect is the power.",
-    "imageUrl": "",
-    "byline": "Biga",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Return of the Mount Hua Sect (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the comedy — the 'beggar sect' is the joke. The manhwa's genius is that the revival is the plot."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Murim",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Murim",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-return-of-the-mount-hua-sect",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Return of the Mount Hua Sect (2021)",
+  "teaser": "The comedy-murim manhwa about the Mount Hua Sect's revival — the 'plum blossom sword' style is the plot, and the manhwa's genius is that the humble sect is the power.",
+  "imageUrl": "",
+  "byline": "Biga",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Return of the Mount Hua Sect (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the comedy — the 'beggar sect' is the joke. The manhwa's genius is that the revival is the plot."
   },
-  {
-    "id": "manhwa-nano-machine",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Nano Machine (2020)",
-    "teaser": "The murim manhwa with a sci-fi twist — the 'nano machine' in the protagonist's blood is the cheat, and the manhwa's genius is that the future tech is the power.",
-    "imageUrl": "",
-    "byline": "Han Jung Wollya",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Nano Machine (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the nano machine — the system is the plot. The manhwa's genius is that the 'cheat' is the character."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Sci-Fi",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Murim",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-nano-machine",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Nano Machine (2020)",
+  "teaser": "The murim manhwa with a sci-fi twist — the 'nano machine' in the protagonist's blood is the cheat, and the manhwa's genius is that the future tech is the power.",
+  "imageUrl": "",
+  "byline": "Han Jung Wollya",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Nano Machine (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the nano machine — the system is the plot. The manhwa's genius is that the 'cheat' is the character."
   },
-  {
-    "id": "manhwa-doctor-elise-the-royal-lady-with-the-lamp",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Doctor Elise: The Royal Lady with the Lamp (2017)",
-    "teaser": "The isekai medical romance — the surgeon who regresses to a noble lady, and the manhwa's genius is that the medicine is the plot.",
-    "imageUrl": "",
-    "byline": "Yuin",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Doctor Elise: The Royal Lady with the Lamp (2017) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the medicine — the surgeries are the drama. The manhwa's genius is that the 'lady with the lamp' is the thesis."
-    },
-    "tags": [
-      "Romance",
-      "Drama",
-      "Isekai",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Sci-Fi",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-doctor-elise-the-royal-lady-with-the-lamp",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Doctor Elise: The Royal Lady with the Lamp (2017)",
+  "teaser": "The isekai medical romance — the surgeon who regresses to a noble lady, and the manhwa's genius is that the medicine is the plot.",
+  "imageUrl": "",
+  "byline": "Yuin",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Doctor Elise: The Royal Lady with the Lamp (2017) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the medicine — the surgeries are the drama. The manhwa's genius is that the 'lady with the lamp' is the thesis."
   },
-  {
-    "id": "manhwa-a-returner-s-magic-should-be-special",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "A Returner's Magic Should Be Special (2018)",
-    "teaser": "The regression manhwa about a failed mage who returns — the 'shadow world' apocalypse is the plot, and the manhwa's genius is that the failure is the teacher.",
-    "imageUrl": "",
-    "byline": "Usonan",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "A Returner's Magic Should Be Special (2018) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the regression — the failed future is the guide. The manhwa's genius is that the 'special magic' is teamwork."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Regression",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Drama",
+   "Isekai",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-a-returner-s-magic-should-be-special",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "A Returner's Magic Should Be Special (2018)",
+  "teaser": "The regression manhwa about a failed mage who returns — the 'shadow world' apocalypse is the plot, and the manhwa's genius is that the failure is the teacher.",
+  "imageUrl": "",
+  "byline": "Usonan",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Returner's Magic Should Be Special (2018) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the regression — the failed future is the guide. The manhwa's genius is that the 'special magic' is teamwork."
   },
-  {
-    "id": "manhwa-the-second-coming-of-gluttony",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Second Coming of Gluttony (2019)",
-    "teaser": "The isekai manhwa about a gambler who becomes a hero — the 'tower of trials' is the plot, and the manhwa's genius is that the 'gluttony' is the sin.",
-    "imageUrl": "",
-    "byline": "Royale",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Second Coming of Gluttony (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the tower — the trials are the plot. The manhwa's genius is that the redemption is the arc."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Isekai",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Regression",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-second-coming-of-gluttony",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Second Coming of Gluttony (2019)",
+  "teaser": "The isekai manhwa about a gambler who becomes a hero — the 'tower of trials' is the plot, and the manhwa's genius is that the 'gluttony' is the sin.",
+  "imageUrl": "",
+  "byline": "Royale",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Second Coming of Gluttony (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the tower — the trials are the plot. The manhwa's genius is that the redemption is the arc."
   },
-  {
-    "id": "manhwa-i-am-the-sorcerer-king",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "I am the Sorcerer King (2019)",
-    "teaser": "The regression manhwa about a magic researcher who returns — the 'magic holes' are the plot, and the manhwa's genius is that the research is the power.",
-    "imageUrl": "",
-    "byline": "Decaspell",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "I am the Sorcerer King (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the research — the magic theory is the plot. The manhwa's genius is that the 'sorcerer king' is the title."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Revenge",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Isekai",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-i-am-the-sorcerer-king",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "I am the Sorcerer King (2019)",
+  "teaser": "The regression manhwa about a magic researcher who returns — the 'magic holes' are the plot, and the manhwa's genius is that the research is the power.",
+  "imageUrl": "",
+  "byline": "Decaspell",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "I am the Sorcerer King (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the research — the magic theory is the plot. The manhwa's genius is that the 'sorcerer king' is the title."
   },
-  {
-    "id": "manhwa-tomb-raider-king",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Tomb Raider King (2019)",
-    "teaser": "The relic-hunting manhwa about a tomb raider who returns — the 'relics' are the power system, and the manhwa's genius is that the artifacts are the characters.",
-    "imageUrl": "",
-    "byline": "Redice Studio",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Tomb Raider King (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the relics — each one has a power. The manhwa's genius is that the 'tomb raider' is the antihero."
-    },
-    "tags": [
-      "Action",
-      "Fantasy",
-      "Revenge",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Revenge",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-tomb-raider-king",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Tomb Raider King (2019)",
+  "teaser": "The relic-hunting manhwa about a tomb raider who returns — the 'relics' are the power system, and the manhwa's genius is that the artifacts are the characters.",
+  "imageUrl": "",
+  "byline": "Redice Studio",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tomb Raider King (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the relics — each one has a power. The manhwa's genius is that the 'tomb raider' is the antihero."
   },
-  {
-    "id": "manhwa-the-dark-magician-transmigrates-after-66666-years",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Dark Magician Transmigrates After 66666 Years (2021)",
-    "teaser": "The regression manhwa about a dark magician sealed for 66,666 years — the 'misfits' are the plot, and the manhwa's genius is that the villain is the protagonist.",
-    "imageUrl": "",
-    "byline": "Lunaart",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Dark Magician Transmigrates After 66666 Years (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the 66666 framing — the number is the title's joke. The manhwa's genius is that the 'dark' magician is the antihero."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Revenge",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Fantasy",
+   "Revenge",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-dark-magician-transmigrates-after-66666-years",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Dark Magician Transmigrates After 66666 Years (2021)",
+  "teaser": "The regression manhwa about a dark magician sealed for 66,666 years — the 'misfits' are the plot, and the manhwa's genius is that the villain is the protagonist.",
+  "imageUrl": "",
+  "byline": "Lunaart",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Dark Magician Transmigrates After 66666 Years (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the 66666 framing — the number is the title's joke. The manhwa's genius is that the 'dark' magician is the antihero."
   },
-  {
-    "id": "manhwa-ordeal",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Ordeal (2020)",
-    "teaser": "The webtoon superhero story about a 'tribe' of fighters — the manhwa's genius is that the martial arts are the powers, and the 'ordeal' is the tournament.",
-    "imageUrl": "",
-    "byline": "Brent Bristol",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Ordeal (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the martial arts — the 'tribes' are the powers. The manhwa's genius is that the tournament is the plot."
-    },
-    "tags": [
-      "Superhero",
-      "Action",
-      "Drama",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Revenge",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-ordeal",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Ordeal (2020)",
+  "teaser": "The webtoon superhero story about a 'tribe' of fighters — the manhwa's genius is that the martial arts are the powers, and the 'ordeal' is the tournament.",
+  "imageUrl": "",
+  "byline": "Brent Bristol",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ordeal (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the martial arts — the 'tribes' are the powers. The manhwa's genius is that the tournament is the plot."
   },
-  {
-    "id": "manhwa-tower-of-god-season-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Tower of God (Season 2) (2010)",
-    "teaser": "The second season skips years — Baam returns changed, and the manhwa's genius is that the Tower's rules are the plot.",
-    "imageUrl": "",
-    "byline": "SIU",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Tower of God (Season 2) (2010) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second season's first chapters and notice the time-skip — Baam is not the same. The manhwa's genius is that the Tower's floors are the character."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Adventure",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Superhero",
+   "Action",
+   "Drama",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-tower-of-god-season-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Tower of God (Season 2) (2010)",
+  "teaser": "The second season skips years — Baam returns changed, and the manhwa's genius is that the Tower's rules are the plot.",
+  "imageUrl": "",
+  "byline": "SIU",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tower of God (Season 2) (2010) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second season's first chapters and notice the time-skip — Baam is not the same. The manhwa's genius is that the Tower's floors are the character."
   },
-  {
-    "id": "manhwa-the-breaker-new-waves",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Breaker: New Waves (2010)",
-    "teaser": "The sequel to The Breaker — the 'Sun-Woo clan' arc is the plot, and the manhwa's genius is that the murim is the world.",
-    "imageUrl": "",
-    "byline": "Geuk-Jin Jeon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Breaker: New Waves (2010) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the world — the murim's politics are the plot. The manhwa's genius is that the 'new waves' is the title."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Murim",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Adventure",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-breaker-new-waves",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Breaker: New Waves (2010)",
+  "teaser": "The sequel to The Breaker — the 'Sun-Woo clan' arc is the plot, and the manhwa's genius is that the murim is the world.",
+  "imageUrl": "",
+  "byline": "Geuk-Jin Jeon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Breaker: New Waves (2010) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the world — the murim's politics are the plot. The manhwa's genius is that the 'new waves' is the title."
   },
-  {
-    "id": "manhwa-the-god-of-high-school-season-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The God of High School (Season 2) (2011)",
-    "teaser": "The second season reveals the 'god' powers — the manhwa's genius is that the tournament is a recruitment tool, and the mythic war is the plot.",
-    "imageUrl": "",
-    "byline": "Yongje Park",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The God of High School (Season 2) (2011) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second season and notice the gods — the powers are the bait. The manhwa's genius is that the 'high school' is the front."
-    },
-    "tags": [
-      "Action",
-      "Martial Arts",
-      "Tournament",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Murim",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-god-of-high-school-season-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The God of High School (Season 2) (2011)",
+  "teaser": "The second season reveals the 'god' powers — the manhwa's genius is that the tournament is a recruitment tool, and the mythic war is the plot.",
+  "imageUrl": "",
+  "byline": "Yongje Park",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The God of High School (Season 2) (2011) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second season and notice the gods — the powers are the bait. The manhwa's genius is that the 'high school' is the front."
   },
-  {
-    "id": "manhwa-unholy-blood",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Unholy Blood (2020)",
-    "teaser": "The vampire manhwa about a girl who hides her blood — the 'pure-blood' war is the plot, and the manhwa's genius is that the secret is the power.",
-    "imageUrl": "",
-    "byline": "Lina Im",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Unholy Blood (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the secret — the vampire is the protagonist. The manhwa's genius is that the 'unholy' is the title."
-    },
-    "tags": [
-      "Action",
-      "Supernatural",
-      "Drama",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Martial Arts",
+   "Tournament",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-unholy-blood",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Unholy Blood (2020)",
+  "teaser": "The vampire manhwa about a girl who hides her blood — the 'pure-blood' war is the plot, and the manhwa's genius is that the secret is the power.",
+  "imageUrl": "",
+  "byline": "Lina Im",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Unholy Blood (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the secret — the vampire is the protagonist. The manhwa's genius is that the 'unholy' is the title."
   },
-  {
-    "id": "manhwa-the-reincarnated-assassin-is-a-genius-swordsman",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Reincarnated Assassin is a Genius Swordsman (2021)",
-    "teaser": "The reincarnation manhwa about an assassin who becomes a noble — the 'sword' talent is the plot, and the manhwa's genius is that the assassin is the hero.",
-    "imageUrl": "",
-    "byline": "Pega",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Reincarnated Assassin is a Genius Swordsman (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the sword — the talent is the plot. The manhwa's genius is that the 'genius swordsman' is the title."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Reincarnation",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Supernatural",
+   "Drama",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-reincarnated-assassin-is-a-genius-swordsman",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Reincarnated Assassin is a Genius Swordsman (2021)",
+  "teaser": "The reincarnation manhwa about an assassin who becomes a noble — the 'sword' talent is the plot, and the manhwa's genius is that the assassin is the hero.",
+  "imageUrl": "",
+  "byline": "Pega",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Reincarnated Assassin is a Genius Swordsman (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the sword — the talent is the plot. The manhwa's genius is that the 'genius swordsman' is the title."
   },
-  {
-    "id": "manhwa-tales-of-demons-and-gods",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Tales of Demons and Gods (2015)",
-    "teaser": "The cultivation manhwa about a demon who regresses — the 'demon lord' who returns to his youth, and the manhwa's genius is that the knowledge is the power.",
-    "imageUrl": "",
-    "byline": "Mad Snail",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Tales of Demons and Gods (2015) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the regression — the demon's knowledge is the cheat. The manhwa's genius is that the 'demons and gods' is the title."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Cultivation",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Reincarnation",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-tales-of-demons-and-gods",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Tales of Demons and Gods (2015)",
+  "teaser": "The cultivation manhwa about a demon who regresses — the 'demon lord' who returns to his youth, and the manhwa's genius is that the knowledge is the power.",
+  "imageUrl": "",
+  "byline": "Mad Snail",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tales of Demons and Gods (2015) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the regression — the demon's knowledge is the cheat. The manhwa's genius is that the 'demons and gods' is the title."
   },
-  {
-    "id": "manhwa-against-the-gods",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Against the Gods (2015)",
-    "teaser": "The cultivation manhwa about a boy with a poison body — the 'poison' is the power, and the manhwa's genius is that the curse is the cheat.",
-    "imageUrl": "",
-    "byline": "Mars Gravity",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Against the Gods (2015) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the poison — the body is the plot. The manhwa's genius is that the 'against the gods' is the title."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Cultivation",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Cultivation",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-against-the-gods",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Against the Gods (2015)",
+  "teaser": "The cultivation manhwa about a boy with a poison body — the 'poison' is the power, and the manhwa's genius is that the curse is the cheat.",
+  "imageUrl": "",
+  "byline": "Mars Gravity",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Against the Gods (2015) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the poison — the body is the plot. The manhwa's genius is that the 'against the gods' is the title."
   },
-  {
-    "id": "manhwa-solo-max-level-newbie",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Solo Max-Level Newbie (2021)",
-    "teaser": "The system manhwa about a tower climber — the 'tower' is the plot, and the manhwa's genius is that the guide is the power.",
-    "imageUrl": "",
-    "byline": "Maslow",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Solo Max-Level Newbie (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the system — the tower's rules are the plot. The manhwa's genius is that the 'newbie' is the title."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Cultivation",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-solo-max-level-newbie",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Solo Max-Level Newbie (2021)",
+  "teaser": "The system manhwa about a tower climber — the 'tower' is the plot, and the manhwa's genius is that the guide is the power.",
+  "imageUrl": "",
+  "byline": "Maslow",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Solo Max-Level Newbie (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the system — the tower's rules are the plot. The manhwa's genius is that the 'newbie' is the title."
   },
-  {
-    "id": "manhwa-return-to-player",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Return to Player (2021)",
-    "teaser": "The regression manhwa about a 'returner' in a game world — the 'player' framing is the plot, and the manhwa's genius is that the game is real.",
-    "imageUrl": "",
-    "byline": "Jeho",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Return to Player (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the game framing — the 'quests' are real. The manhwa's genius is that the 'return' is the plot."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Regression",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-return-to-player",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Return to Player (2021)",
+  "teaser": "The regression manhwa about a 'returner' in a game world — the 'player' framing is the plot, and the manhwa's genius is that the game is real.",
+  "imageUrl": "",
+  "byline": "Jeho",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Return to Player (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the game framing — the 'quests' are real. The manhwa's genius is that the 'return' is the plot."
   },
-  {
-    "id": "manhwa-the-player-who-can-t-level-up",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Player Who Can't Level Up (2021)",
-    "teaser": "The system manhwa about a player who can't level up — the 'level cap' is the plot, and the manhwa's genius is that the weakness is the strength.",
-    "imageUrl": "",
-    "byline": "Woo-gak",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Player Who Can't Level Up (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the level cap — the 'can't level up' is the title. The manhwa's genius is that the weakness is the character."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Regression",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-player-who-can-t-level-up",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Player Who Can't Level Up (2021)",
+  "teaser": "The system manhwa about a player who can't level up — the 'level cap' is the plot, and the manhwa's genius is that the weakness is the strength.",
+  "imageUrl": "",
+  "byline": "Woo-gak",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Player Who Can't Level Up (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the level cap — the 'can't level up' is the title. The manhwa's genius is that the weakness is the character."
   },
-  {
-    "id": "manhwa-limit-breaker",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Limit Breaker (2021)",
-    "teaser": "The system manhwa about a player who breaks limits — the 'limit break' is the plot, and the manhwa's genius is that the system is the character.",
-    "imageUrl": "",
-    "byline": "Pyeong-ah",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Limit Breaker (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the system — the 'limit' is the enemy. The manhwa's genius is that the breaking is the plot."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-limit-breaker",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Limit Breaker (2021)",
+  "teaser": "The system manhwa about a player who breaks limits — the 'limit break' is the plot, and the manhwa's genius is that the system is the character.",
+  "imageUrl": "",
+  "byline": "Pyeong-ah",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Limit Breaker (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the system — the 'limit' is the enemy. The manhwa's genius is that the breaking is the plot."
   },
-  {
-    "id": "manhwa-the-dungeon-cleaning-life-of-a-once-genius-hunter",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Dungeon Cleaning Life of a Once Genius Hunter (2020)",
-    "teaser": "The system manhwa about a fallen hunter who cleans dungeons — the 'cleaning' is the plot, and the manhwa's genius is that the mundane is the power.",
-    "imageUrl": "",
-    "byline": "Danduchu",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Dungeon Cleaning Life of a Once Genius Hunter (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the cleaning — the 'genius hunter' is the title. The manhwa's genius is that the fall is the setup."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-dungeon-cleaning-life-of-a-once-genius-hunter",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Dungeon Cleaning Life of a Once Genius Hunter (2020)",
+  "teaser": "The system manhwa about a fallen hunter who cleans dungeons — the 'cleaning' is the plot, and the manhwa's genius is that the mundane is the power.",
+  "imageUrl": "",
+  "byline": "Danduchu",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Dungeon Cleaning Life of a Once Genius Hunter (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the cleaning — the 'genius hunter' is the title. The manhwa's genius is that the fall is the setup."
   },
-  {
-    "id": "manhwa-the-max-level-hero-has-returned-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Max Level Hero Has Returned! (Vol 2) (2021)",
-    "teaser": "The second volume's political revenge — the 'max level' hero's return is the plot, and the manhwa's genius is that the level gap is the joke.",
-    "imageUrl": "",
-    "byline": "Ray Halim",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Max Level Hero Has Returned! (Vol 2) (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the politics — the 'revenge' is courtly. The manhwa's genius is that the power gap is the comedy."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Revenge",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-max-level-hero-has-returned-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Max Level Hero Has Returned! (Vol 2) (2021)",
+  "teaser": "The second volume's political revenge — the 'max level' hero's return is the plot, and the manhwa's genius is that the level gap is the joke.",
+  "imageUrl": "",
+  "byline": "Ray Halim",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Max Level Hero Has Returned! (Vol 2) (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the politics — the 'revenge' is courtly. The manhwa's genius is that the power gap is the comedy."
   },
-  {
-    "id": "manhwa-eleceed-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Eleceed (Vol 2) (2018)",
-    "teaser": "The second volume introduces the 'awakened' world — the manhwa's genius is that the cat mentor is the comedy, and the found family is the plot.",
-    "imageUrl": "",
-    "byline": "Jeho Son",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Eleceed (Vol 2) (2018) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the mentor — the cat is the comedy. The manhwa's genius is that the family is the plot."
-    },
-    "tags": [
-      "Action",
-      "Comedy",
-      "Superhero",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Revenge",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-eleceed-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Eleceed (Vol 2) (2018)",
+  "teaser": "The second volume introduces the 'awakened' world — the manhwa's genius is that the cat mentor is the comedy, and the found family is the plot.",
+  "imageUrl": "",
+  "byline": "Jeho Son",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Eleceed (Vol 2) (2018) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the mentor — the cat is the comedy. The manhwa's genius is that the family is the plot."
   },
-  {
-    "id": "manhwa-wind-breaker-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Wind Breaker (Vol 2) (2013)",
-    "teaser": "The second volume's first race — the manhwa's genius is that the cycling physics are real, and the gang is the plot.",
-    "imageUrl": "",
-    "byline": "Yongseok Jo",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Wind Breaker (Vol 2) (2013) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the race — the drafting is real. The manhwa's genius is that the violence and the racing are the same."
-    },
-    "tags": [
-      "Sports",
-      "Action",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Comedy",
+   "Superhero",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-wind-breaker-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Wind Breaker (Vol 2) (2013)",
+  "teaser": "The second volume's first race — the manhwa's genius is that the cycling physics are real, and the gang is the plot.",
+  "imageUrl": "",
+  "byline": "Yongseok Jo",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Wind Breaker (Vol 2) (2013) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the race — the drafting is real. The manhwa's genius is that the violence and the racing are the same."
   },
-  {
-    "id": "manhwa-sweet-home-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Sweet Home (Vol 2) (2017)",
-    "teaser": "The second volume's monster rules — the manhwa's genius is that each monster is a wish, and the 'desire' is the clue.",
-    "imageUrl": "",
-    "byline": "Kim Carnby",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Sweet Home (Vol 2) (2017) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the monsters — each one is a desire. The manhwa's genius is that the horror is the wish."
-    },
-    "tags": [
-      "Horror",
-      "Survival",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sports",
+   "Action",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-sweet-home-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Sweet Home (Vol 2) (2017)",
+  "teaser": "The second volume's monster rules — the manhwa's genius is that each monster is a wish, and the 'desire' is the clue.",
+  "imageUrl": "",
+  "byline": "Kim Carnby",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sweet Home (Vol 2) (2017) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the monsters — each one is a desire. The manhwa's genius is that the horror is the wish."
   },
-  {
-    "id": "manhwa-bastard-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Bastard (Vol 2) (2014)",
-    "teaser": "The second volume's tension — the manhwa's genius is that the reader knows the truth, and the complicity is the horror.",
-    "imageUrl": "",
-    "byline": "Kim Carnby",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Bastard (Vol 2) (2014) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the irony — the knowledge is the tension. The manhwa's genius is that the killer is the least of it."
-    },
-    "tags": [
-      "Thriller",
-      "Psychological",
-      "Horror",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Horror",
+   "Survival",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-bastard-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Bastard (Vol 2) (2014)",
+  "teaser": "The second volume's tension — the manhwa's genius is that the reader knows the truth, and the complicity is the horror.",
+  "imageUrl": "",
+  "byline": "Kim Carnby",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Bastard (Vol 2) (2014) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the irony — the knowledge is the tension. The manhwa's genius is that the killer is the least of it."
   },
-  {
-    "id": "manhwa-lookism-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Lookism (Vol 2) (2014)",
-    "teaser": "The second volume's gang arc — the manhwa's genius is that the body-switch is the commentary, and the 'lookism' is the thesis.",
-    "imageUrl": "",
-    "byline": "Park Tae-joon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Lookism (Vol 2) (2014) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the commentary — the 'handsome body' is the metaphor. The manhwa's genius is that the beauty standards are the plot."
-    },
-    "tags": [
-      "Drama",
-      "Action",
-      "Social",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Thriller",
+   "Psychological",
+   "Horror",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-lookism-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Lookism (Vol 2) (2014)",
+  "teaser": "The second volume's gang arc — the manhwa's genius is that the body-switch is the commentary, and the 'lookism' is the thesis.",
+  "imageUrl": "",
+  "byline": "Park Tae-joon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lookism (Vol 2) (2014) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the commentary — the 'handsome body' is the metaphor. The manhwa's genius is that the beauty standards are the plot."
   },
-  {
-    "id": "manhwa-study-group",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Study Group (2019)",
-    "teaser": "The school manhwa about a student who wants to study but keeps fighting — the 'study group' is the plot, and the manhwa's genius is that the violence is the comedy.",
-    "imageUrl": "",
-    "byline": "Shin Hyung-wook",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Study Group (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the premise — the 'study' is the joke. The manhwa's genius is that the fights are the school."
-    },
-    "tags": [
-      "Action",
-      "Comedy",
-      "School",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Action",
+   "Social",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-study-group",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Study Group (2019)",
+  "teaser": "The school manhwa about a student who wants to study but keeps fighting — the 'study group' is the plot, and the manhwa's genius is that the violence is the comedy.",
+  "imageUrl": "",
+  "byline": "Shin Hyung-wook",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Study Group (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the premise — the 'study' is the joke. The manhwa's genius is that the fights are the school."
   },
-  {
-    "id": "manhwa-dice-vol-2",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "DICE (Vol 2) (2013)",
-    "teaser": "The second volume's dice rules — the manhwa's genius is that the stats come from others' loss, and the social commentary is the plot.",
-    "imageUrl": "",
-    "byline": "Hyunseok Song",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "DICE (Vol 2) (2013) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the second volume and notice the cost — the dice are a zero-sum game. The manhwa's genius is that the education metaphor is the horror."
-    },
-    "tags": [
-      "Fantasy",
-      "Drama",
-      "System",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Comedy",
+   "School",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-dice-vol-2",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "DICE (Vol 2) (2013)",
+  "teaser": "The second volume's dice rules — the manhwa's genius is that the stats come from others' loss, and the social commentary is the plot.",
+  "imageUrl": "",
+  "byline": "Hyunseok Song",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "DICE (Vol 2) (2013) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the second volume and notice the cost — the dice are a zero-sum game. The manhwa's genius is that the education metaphor is the horror."
   },
-  {
-    "id": "manhwa-get-schooled",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Get Schooled (2019)",
-    "teaser": "The school manhwa about a teacher who fights bullies — the 'education' is the plot, and the manhwa's genius is that the violence is the lesson.",
-    "imageUrl": "",
-    "byline": "Yongtaek Chae",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Get Schooled (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the teacher — the 'get schooled' is the title. The manhwa's genius is that the bullies are the system."
-    },
-    "tags": [
-      "Action",
-      "Drama",
-      "School",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Drama",
+   "System",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-get-schooled",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Get Schooled (2019)",
+  "teaser": "The school manhwa about a teacher who fights bullies — the 'education' is the plot, and the manhwa's genius is that the violence is the lesson.",
+  "imageUrl": "",
+  "byline": "Yongtaek Chae",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Get Schooled (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the teacher — the 'get schooled' is the title. The manhwa's genius is that the bullies are the system."
   },
-  {
-    "id": "manhwa-locker-opener",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Locker Opener (2020)",
-    "teaser": "The school manhwa about a student who can open any locker — the 'locker' is the plot, and the manhwa's genius is that the mystery is the hook.",
-    "imageUrl": "",
-    "byline": "Pponya",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Locker Opener (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the lockers — each one is a story. The manhwa's genius is that the opening is the plot."
-    },
-    "tags": [
-      "Action",
-      "School",
-      "Drama",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Drama",
+   "School",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-locker-opener",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Locker Opener (2020)",
+  "teaser": "The school manhwa about a student who can open any locker — the 'locker' is the plot, and the manhwa's genius is that the mystery is the hook.",
+  "imageUrl": "",
+  "byline": "Pponya",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Locker Opener (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the lockers — each one is a story. The manhwa's genius is that the opening is the plot."
   },
-  {
-    "id": "manhwa-money-game",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Money Game (2020)",
-    "teaser": "The survival manhwa about 8 people locked in a house for 100 days — the 'money game' is the plot, and the manhwa's genius is that the greed is the horror.",
-    "imageUrl": "",
-    "byline": "Bae Jin-soo",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Money Game (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the rules — the 100-day survival is the plot. The manhwa's genius is that the money is the trap."
-    },
-    "tags": [
-      "Thriller",
-      "Drama",
-      "Survival",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "School",
+   "Drama",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-money-game",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Money Game (2020)",
+  "teaser": "The survival manhwa about 8 people locked in a house for 100 days — the 'money game' is the plot, and the manhwa's genius is that the greed is the horror.",
+  "imageUrl": "",
+  "byline": "Bae Jin-soo",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Money Game (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the rules — the 100-day survival is the plot. The manhwa's genius is that the money is the trap."
   },
-  {
-    "id": "manhwa-the-world-is-money-and-power",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The World Is Money and Power (2020)",
-    "teaser": "The survival manhwa about a game where money is power — the 'world is money' is the plot, and the manhwa's genius is that the class war is the game.",
-    "imageUrl": "",
-    "byline": "Hansol",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The World Is Money and Power (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the game — the money is the power. The manhwa's genius is that the rich are the villains."
-    },
-    "tags": [
-      "Action",
-      "Drama",
-      "Survival",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Thriller",
+   "Drama",
+   "Survival",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-world-is-money-and-power",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The World Is Money and Power (2020)",
+  "teaser": "The survival manhwa about a game where money is power — the 'world is money' is the plot, and the manhwa's genius is that the class war is the game.",
+  "imageUrl": "",
+  "byline": "Hansol",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The World Is Money and Power (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the game — the money is the power. The manhwa's genius is that the rich are the villains."
   },
-  {
-    "id": "manhwa-high-school-lunch-dad",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "High School Lunch Dad (2021)",
-    "teaser": "The school manhwa about a father who becomes his daughter's classmate — the 'lunch dad' is the plot, and the manhwa's genius is that the comedy is the family.",
-    "imageUrl": "",
-    "byline": "Hee",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "High School Lunch Dad (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the premise — the dad is the student. The manhwa's genius is that the lunch is the love."
-    },
-    "tags": [
-      "Comedy",
-      "School",
-      "Family",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Drama",
+   "Survival",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-high-school-lunch-dad",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "High School Lunch Dad (2021)",
+  "teaser": "The school manhwa about a father who becomes his daughter's classmate — the 'lunch dad' is the plot, and the manhwa's genius is that the comedy is the family.",
+  "imageUrl": "",
+  "byline": "Hee",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "High School Lunch Dad (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the premise — the dad is the student. The manhwa's genius is that the lunch is the love."
   },
-  {
-    "id": "manhwa-my-daughter-is-a-zombie",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "My Daughter Is a Zombie (2021)",
-    "teaser": "The comedy manhwa about a father and his zombie daughter — the 'zombie' is the plot, and the manhwa's genius is that the family is the comedy.",
-    "imageUrl": "",
-    "byline": "Ggomdol",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "My Daughter Is a Zombie (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the premise — the zombie is the daughter. The manhwa's genius is that the fatherhood is the plot."
-    },
-    "tags": [
-      "Comedy",
-      "Family",
-      "Fantasy",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "School",
+   "Family",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-my-daughter-is-a-zombie",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "My Daughter Is a Zombie (2021)",
+  "teaser": "The comedy manhwa about a father and his zombie daughter — the 'zombie' is the plot, and the manhwa's genius is that the family is the comedy.",
+  "imageUrl": "",
+  "byline": "Ggomdol",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "My Daughter Is a Zombie (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the premise — the zombie is the daughter. The manhwa's genius is that the fatherhood is the plot."
   },
-  {
-    "id": "manhwa-the-girl-downstairs",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Girl Downstairs (2021)",
-    "teaser": "The romance manhwa about a student and his mysterious neighbor — the 'downstairs' is the plot, and the manhwa's genius is that the mystery is the romance.",
-    "imageUrl": "",
-    "byline": "Soonkki",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Girl Downstairs (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the mystery — the neighbor is the plot. The manhwa's genius is that the reveal is the romance."
-    },
-    "tags": [
-      "Romance",
-      "Comedy",
-      "Slice of Life",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Comedy",
+   "Family",
+   "Fantasy",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-girl-downstairs",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Girl Downstairs (2021)",
+  "teaser": "The romance manhwa about a student and his mysterious neighbor — the 'downstairs' is the plot, and the manhwa's genius is that the mystery is the romance.",
+  "imageUrl": "",
+  "byline": "Soonkki",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Girl Downstairs (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the mystery — the neighbor is the plot. The manhwa's genius is that the reveal is the romance."
   },
-  {
-    "id": "manhwa-a-good-day-to-be-a-dog",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "A Good Day to Be a Dog (2017)",
-    "teaser": "The romance manhwa about a girl who turns into a dog when kissed — the 'dog' is the plot, and the manhwa's genius is that the curse is the comedy.",
-    "imageUrl": "",
-    "byline": "Lee Hey",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "A Good Day to Be a Dog (2017) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the curse — the dog is the premise. The manhwa's genius is that the kiss is the problem."
-    },
-    "tags": [
-      "Romance",
-      "Comedy",
-      "Fantasy",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Comedy",
+   "Slice of Life",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-a-good-day-to-be-a-dog",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "A Good Day to Be a Dog (2017)",
+  "teaser": "The romance manhwa about a girl who turns into a dog when kissed — the 'dog' is the plot, and the manhwa's genius is that the curse is the comedy.",
+  "imageUrl": "",
+  "byline": "Lee Hey",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Good Day to Be a Dog (2017) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the curse — the dog is the premise. The manhwa's genius is that the kiss is the problem."
   },
-  {
-    "id": "manhwa-seasons-of-blossom",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Seasons of Blossom (2020)",
-    "teaser": "The school romance manhwa about four seasons of love — the 'seasons' is the plot, and the manhwa's genius is that each arc is a season.",
-    "imageUrl": "",
-    "byline": "Hongduck",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Seasons of Blossom (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the seasons — each arc is a stage. The manhwa's genius is that the blossom is the metaphor."
-    },
-    "tags": [
-      "Romance",
-      "Drama",
-      "School",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Comedy",
+   "Fantasy",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-seasons-of-blossom",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Seasons of Blossom (2020)",
+  "teaser": "The school romance manhwa about four seasons of love — the 'seasons' is the plot, and the manhwa's genius is that each arc is a season.",
+  "imageUrl": "",
+  "byline": "Hongduck",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Seasons of Blossom (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the seasons — each arc is a stage. The manhwa's genius is that the blossom is the metaphor."
   },
-  {
-    "id": "manhwa-annarasumanara",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Annarasumanara (2011)",
-    "teaser": "The magic-realism manhwa about a girl and a magician — the 'magic' is the plot, and the manhwa's genius is that the trick is the theme.",
-    "imageUrl": "",
-    "byline": "Ha Il-kwon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Annarasumanara (2011) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the magic — the magician is the metaphor. The manhwa's genius is that the 'annarasumanara' is the spell."
-    },
-    "tags": [
-      "Drama",
-      "Fantasy",
-      "Coming of Age",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Drama",
+   "School",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-annarasumanara",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Annarasumanara (2011)",
+  "teaser": "The magic-realism manhwa about a girl and a magician — the 'magic' is the plot, and the manhwa's genius is that the trick is the theme.",
+  "imageUrl": "",
+  "byline": "Ha Il-kwon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Annarasumanara (2011) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the magic — the magician is the metaphor. The manhwa's genius is that the 'annarasumanara' is the spell."
   },
-  {
-    "id": "manhwa-hellper",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Hellper (2013)",
-    "teaser": "The punk-fantasy manhwa about a hell where souls fight — the 'hellper' is the plot, and the manhwa's genius is that the punk aesthetic is the style.",
-    "imageUrl": "",
-    "byline": "Sakki",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Hellper (2013) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the style — the punk is the tone. The manhwa's genius is that the hell is the world."
-    },
-    "tags": [
-      "Action",
-      "Fantasy",
-      "Dark Comedy",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Fantasy",
+   "Coming of Age",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-hellper",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Hellper (2013)",
+  "teaser": "The punk-fantasy manhwa about a hell where souls fight — the 'hellper' is the plot, and the manhwa's genius is that the punk aesthetic is the style.",
+  "imageUrl": "",
+  "byline": "Sakki",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Hellper (2013) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the style — the punk is the tone. The manhwa's genius is that the hell is the world."
   },
-  {
-    "id": "manhwa-knight-run",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Knight Run (2011)",
-    "teaser": "The sci-fi manhwa about a war against an alien threat — the 'knight' is the plot, and the manhwa's genius is that the mecha are the characters.",
-    "imageUrl": "",
-    "byline": "Sungmin Kim",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Knight Run (2011) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the war — the alien threat is the plot. The manhwa's genius is that the knights are the last hope."
-    },
-    "tags": [
-      "Sci-Fi",
-      "Action",
-      "War",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Fantasy",
+   "Dark Comedy",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-knight-run",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Knight Run (2011)",
+  "teaser": "The sci-fi manhwa about a war against an alien threat — the 'knight' is the plot, and the manhwa's genius is that the mecha are the characters.",
+  "imageUrl": "",
+  "byline": "Sungmin Kim",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Knight Run (2011) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the war — the alien threat is the plot. The manhwa's genius is that the knights are the last hope."
   },
-  {
-    "id": "manhwa-dr-frost",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Dr. Frost (2011)",
-    "teaser": "The psychological manhwa about a psychologist who can't feel — the 'Frost' is the plot, and the manhwa's genius is that the psychology is the case.",
-    "imageUrl": "",
-    "byline": "Lee Jong-beom",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Dr. Frost (2011) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the cases — each one is a lesson. The manhwa's genius is that the therapist is the patient."
-    },
-    "tags": [
-      "Psychological",
-      "Mystery",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sci-Fi",
+   "Action",
+   "War",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-dr-frost",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Dr. Frost (2011)",
+  "teaser": "The psychological manhwa about a psychologist who can't feel — the 'Frost' is the plot, and the manhwa's genius is that the psychology is the case.",
+  "imageUrl": "",
+  "byline": "Lee Jong-beom",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Dr. Frost (2011) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the cases — each one is a lesson. The manhwa's genius is that the therapist is the patient."
   },
-  {
-    "id": "manhwa-tower-of-god",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Tower of God (2010)",
-    "teaser": "The manhwa that made webtoons global — SIU wrote it while working as a delivery driver, and the Tower's floors are so detailed that fans have maps.",
-    "imageUrl": "",
-    "byline": "SIU",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Tower of God (2010) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first floor climb and notice the rules — the Tower is a system that rewards cleverness over power. The series' twist is that the 'god' of the title is the Tower itself."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Adventure",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Psychological",
+   "Mystery",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-tower-of-god",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Tower of God (2010)",
+  "teaser": "The manhwa that made webtoons global — SIU wrote it while working as a delivery driver, and the Tower's floors are so detailed that fans have maps.",
+  "imageUrl": "",
+  "byline": "SIU",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tower of God (2010) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first floor climb and notice the rules — the Tower is a system that rewards cleverness over power. The series' twist is that the 'god' of the title is the Tower itself."
   },
-  {
-    "id": "manhwa-solo-leveling",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Solo Leveling (2018)",
-    "teaser": "The 'system' manhwa that spawned a genre — the hunter E-rank who levels up alone became a template copied by hundreds of series. The art studio Redice drew every fight to look cinematic.",
-    "imageUrl": "",
-    "byline": "Chugong",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Solo Leveling (2018) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and notice the E-rank humiliation — the power fantasy only works because the powerless start is real. The system is the story; the stats are the plot."
-    },
-    "tags": [
-      "Action",
-      "Fantasy",
-      "System",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Adventure",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-solo-leveling",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Solo Leveling (2018)",
+  "teaser": "The 'system' manhwa that spawned a genre — the hunter E-rank who levels up alone became a template copied by hundreds of series. The art studio Redice drew every fight to look cinematic.",
+  "imageUrl": "",
+  "byline": "Chugong",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Solo Leveling (2018) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and notice the E-rank humiliation — the power fantasy only works because the powerless start is real. The system is the story; the stats are the plot."
   },
-  {
-    "id": "manhwa-the-god-of-high-school",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The God of High School (2011)",
-    "teaser": "The tournament arc is the whole first season — and the manhwa's secret is that the 'god' powers are a bait-and-switch for a much bigger mythic war.",
-    "imageUrl": "",
-    "byline": "Yongje Park",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The God of High School (2011) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first tournament and track the martial arts styles — each fighter has a real discipline. The series' twist is that the tournament is a recruitment tool for gods."
-    },
-    "tags": [
-      "Action",
-      "Martial Arts",
-      "Tournament",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Fantasy",
+   "System",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-god-of-high-school",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The God of High School (2011)",
+  "teaser": "The tournament arc is the whole first season — and the manhwa's secret is that the 'god' powers are a bait-and-switch for a much bigger mythic war.",
+  "imageUrl": "",
+  "byline": "Yongje Park",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The God of High School (2011) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first tournament and track the martial arts styles — each fighter has a real discipline. The series' twist is that the tournament is a recruitment tool for gods."
   },
-  {
-    "id": "manhwa-noblesse",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Noblesse (2007)",
-    "teaser": "A vampire nobleman wakes after 820 years and enrolls in high school — the manhwa's action scenes are famous for their white-space fights where the panel IS the impact.",
-    "imageUrl": "",
-    "byline": "Jeho Son",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Noblesse (2007) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first school arc and notice the power disparity — Rai's strength is the joke. The series' real theme is found family, and the fights exist to protect it."
-    },
-    "tags": [
-      "Action",
-      "Supernatural",
-      "Vampire",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Martial Arts",
+   "Tournament",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-noblesse",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Noblesse (2007)",
+  "teaser": "A vampire nobleman wakes after 820 years and enrolls in high school — the manhwa's action scenes are famous for their white-space fights where the panel IS the impact.",
+  "imageUrl": "",
+  "byline": "Jeho Son",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Noblesse (2007) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first school arc and notice the power disparity — Rai's strength is the joke. The series' real theme is found family, and the fights exist to protect it."
   },
-  {
-    "id": "manhwa-the-breaker",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Breaker (2007)",
-    "teaser": "The 'murim' (martial arts underworld) manhwa that western fans discovered through scanlations — the sequel, New Waves, is considered the best of the trilogy.",
-    "imageUrl": "",
-    "byline": "Geuk-Jin Jeon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Breaker (2007) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the master-student dynamic — the series is about inheritance of violence. The fights are choreographed like wuxia films; the bruises are real."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Murim",
-      "2000s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Supernatural",
+   "Vampire",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-breaker",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Breaker (2007)",
+  "teaser": "The 'murim' (martial arts underworld) manhwa that western fans discovered through scanlations — the sequel, New Waves, is considered the best of the trilogy.",
+  "imageUrl": "",
+  "byline": "Geuk-Jin Jeon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Breaker (2007) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the master-student dynamic — the series is about inheritance of violence. The fights are choreographed like wuxia films; the bruises are real."
   },
-  {
-    "id": "manhwa-sweet-home",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Sweet Home (2017)",
-    "teaser": "Kim Carnby's monster apocalypse where people turn into monsters that embody their desires — the Netflix adaptation kept the manhwa's core: the monster is the wish.",
-    "imageUrl": "",
-    "byline": "Kim Carnby",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Sweet Home (2017) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and match each monster to its human's desire — the wish is the clue. The series' horror is that the monsters are more honest than the humans."
-    },
-    "tags": [
-      "Horror",
-      "Survival",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Murim",
+   "2000s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-sweet-home",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Sweet Home (2017)",
+  "teaser": "Kim Carnby's monster apocalypse where people turn into monsters that embody their desires — the Netflix adaptation kept the manhwa's core: the monster is the wish.",
+  "imageUrl": "",
+  "byline": "Kim Carnby",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sweet Home (2017) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and match each monster to its human's desire — the wish is the clue. The series' horror is that the monsters are more honest than the humans."
   },
-  {
-    "id": "manhwa-bastard",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Bastard (2014)",
-    "teaser": "A serial killer's son who discovers his father's secret — the manhwa's tension is built entirely on what the reader knows that the characters don't.",
-    "imageUrl": "",
-    "byline": "Kim Carnby",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Bastard (2014) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the dramatic irony — you know the truth before the protagonist does. The series is a study of complicity; the killer is the least of the horrors."
-    },
-    "tags": [
-      "Thriller",
-      "Psychological",
-      "Horror",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Horror",
+   "Survival",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-bastard",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Bastard (2014)",
+  "teaser": "A serial killer's son who discovers his father's secret — the manhwa's tension is built entirely on what the reader knows that the characters don't.",
+  "imageUrl": "",
+  "byline": "Kim Carnby",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Bastard (2014) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the dramatic irony — you know the truth before the protagonist does. The series is a study of complicity; the killer is the least of the horrors."
   },
-  {
-    "id": "manhwa-lookism",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Lookism (2014)",
-    "teaser": "A bullied overweight teen wakes in a handsome body — the manhwa's fantasy premise is a social commentary on Korean beauty standards, and the action arcs hide real psychological insight.",
-    "imageUrl": "",
-    "byline": "Park Tae-joon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Lookism (2014) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice the body-switch rules — the 'ugly' body and 'handsome' body are the same person. The series asks what changes when the world treats you differently."
-    },
-    "tags": [
-      "Drama",
-      "Action",
-      "Social",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Thriller",
+   "Psychological",
+   "Horror",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-lookism",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Lookism (2014)",
+  "teaser": "A bullied overweight teen wakes in a handsome body — the manhwa's fantasy premise is a social commentary on Korean beauty standards, and the action arcs hide real psychological insight.",
+  "imageUrl": "",
+  "byline": "Park Tae-joon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lookism (2014) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice the body-switch rules — the 'ugly' body and 'handsome' body are the same person. The series asks what changes when the world treats you differently."
   },
-  {
-    "id": "manhwa-unordinary",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Unordinary (2016)",
-    "teaser": "A superhero-school webtoon where the protagonist is the one 'normal' kid in a world of powers — the series' commentary on power hierarchies is the actual plot.",
-    "imageUrl": "",
-    "byline": "uru-chan",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Unordinary (2016) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first arc and notice how the world treats the powerless — the hierarchy is the villain. The series' twist is that John's 'normalcy' is a performance."
-    },
-    "tags": [
-      "Superhero",
-      "Drama",
-      "Action",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Drama",
+   "Action",
+   "Social",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-unordinary",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Unordinary (2016)",
+  "teaser": "A superhero-school webtoon where the protagonist is the one 'normal' kid in a world of powers — the series' commentary on power hierarchies is the actual plot.",
+  "imageUrl": "",
+  "byline": "uru-chan",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Unordinary (2016) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first arc and notice how the world treats the powerless — the hierarchy is the villain. The series' twist is that John's 'normalcy' is a performance."
   },
-  {
-    "id": "manhwa-the-beginning-after-the-end",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Beginning After the End (2018)",
-    "teaser": "An isekai where the protagonist reincarnates and learns magic — the manhwa's art and the novel's depth made it one of the most popular webtoons on the platform.",
-    "imageUrl": "",
-    "byline": "TurtleMe",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Beginning After the End (2018) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first arc and notice the 'second chance' framing — the protagonist's past life is the tragic part. The series' strength is the slow worldbuilding; don't skim the magic school."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Isekai",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Superhero",
+   "Drama",
+   "Action",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-beginning-after-the-end",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Beginning After the End (2018)",
+  "teaser": "An isekai where the protagonist reincarnates and learns magic — the manhwa's art and the novel's depth made it one of the most popular webtoons on the platform.",
+  "imageUrl": "",
+  "byline": "TurtleMe",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Beginning After the End (2018) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first arc and notice the 'second chance' framing — the protagonist's past life is the tragic part. The series' strength is the slow worldbuilding; don't skim the magic school."
   },
-  {
-    "id": "manhwa-eleceed",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Eleceed (2018)",
-    "teaser": "A cat-man superhero mentor comedy from the Noblesse artist — the 'awakened' power system and the cat mentor's comedy hide a real found-family story.",
-    "imageUrl": "",
-    "byline": "Jeho Son",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Eleceed (2018) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume for the cat jokes, then notice the mentor's past — the comedy is armor. The series' fights are drawn with the same white-space impact as Noblesse."
-    },
-    "tags": [
-      "Action",
-      "Comedy",
-      "Superhero",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Isekai",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-eleceed",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Eleceed (2018)",
+  "teaser": "A cat-man superhero mentor comedy from the Noblesse artist — the 'awakened' power system and the cat mentor's comedy hide a real found-family story.",
+  "imageUrl": "",
+  "byline": "Jeho Son",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Eleceed (2018) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume for the cat jokes, then notice the mentor's past — the comedy is armor. The series' fights are drawn with the same white-space impact as Noblesse."
   },
-  {
-    "id": "manhwa-omniscient-reader-s-viewpoint",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Omniscient Reader's Viewpoint (2020)",
-    "teaser": "A novel reader wakes inside the apocalypse novel he read — the manhwa's meta-commentary on stories and readers is the actual plot, and the 'sponsor' system is a brilliant conceit.",
-    "imageUrl": "",
-    "byline": "sing N song",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Omniscient Reader's Viewpoint (2020) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and notice the 'sponsors' — they're watching the reader watch the story. The series' thesis is that the reader is the most important character."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Action",
+   "Comedy",
+   "Superhero",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-omniscient-reader-s-viewpoint",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Omniscient Reader's Viewpoint (2020)",
+  "teaser": "A novel reader wakes inside the apocalypse novel he read — the manhwa's meta-commentary on stories and readers is the actual plot, and the 'sponsor' system is a brilliant conceit.",
+  "imageUrl": "",
+  "byline": "sing N song",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Omniscient Reader's Viewpoint (2020) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and notice the 'sponsors' — they're watching the reader watch the story. The series' thesis is that the reader is the most important character."
   },
-  {
-    "id": "manhwa-wind-breaker",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Wind Breaker (2013)",
-    "teaser": "A bicycle racing manhwa (not the high school one) with a gang twist — the cycling scenes are drawn with real physics and the author's passion for biking is in every panel.",
-    "imageUrl": "",
-    "byline": "Yongseok Jo",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Wind Breaker (2013) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first race and track the drafting — the bike tactics are real. The series' secret is that the gang violence and the racing are the same struggle."
-    },
-    "tags": [
-      "Sports",
-      "Action",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-wind-breaker",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Wind Breaker (2013)",
+  "teaser": "A bicycle racing manhwa (not the high school one) with a gang twist — the cycling scenes are drawn with real physics and the author's passion for biking is in every panel.",
+  "imageUrl": "",
+  "byline": "Yongseok Jo",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Wind Breaker (2013) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first race and track the drafting — the bike tactics are real. The series' secret is that the gang violence and the racing are the same struggle."
   },
-  {
-    "id": "manhwa-the-boxer",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Boxer (2019)",
-    "teaser": "A boxing manhwa about talent vs. hard work — the 'genius' protagonist is a question the series keeps asking: what is a person who never struggles?",
-    "imageUrl": "",
-    "byline": "JH",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Boxer (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first fight and notice the talent gap — it's not a training montage series. The series' thesis is about what 'talent' really means, and the answer is darker than you'd expect."
-    },
-    "tags": [
-      "Sports",
-      "Psychological",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sports",
+   "Action",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-boxer",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Boxer (2019)",
+  "teaser": "A boxing manhwa about talent vs. hard work — the 'genius' protagonist is a question the series keeps asking: what is a person who never struggles?.",
+  "imageUrl": "",
+  "byline": "JH",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Boxer (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first fight and notice the talent gap — it's not a training montage series. The series' thesis is about what 'talent' really means, and the answer is darker than you'd expect."
   },
-  {
-    "id": "manhwa-gosu",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Gosu (2015)",
-    "teaser": "A martial arts revenge story where the protagonist is already the strongest — the series' comedy comes from the power gap, and the murim politics are the real plot.",
-    "imageUrl": "",
-    "byline": "Mun Jeong-ho",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Gosu (2015) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first arc and notice the comedic power-gap — the series is a power fantasy with a brain. The real fights aren't the physical ones; they're the political ones."
-    },
-    "tags": [
-      "Martial Arts",
-      "Action",
-      "Murim",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Sports",
+   "Psychological",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-gosu",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Gosu (2015)",
+  "teaser": "A martial arts revenge story where the protagonist is already the strongest — the series' comedy comes from the power gap, and the murim politics are the real plot.",
+  "imageUrl": "",
+  "byline": "Mun Jeong-ho",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Gosu (2015) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first arc and notice the comedic power-gap — the series is a power fantasy with a brain. The real fights aren't the physical ones; they're the political ones."
   },
-  {
-    "id": "manhwa-her-summon",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Her Summon (2017)",
-    "teaser": "A painter who can summon his paintings into reality — the series' art is its selling point, and the painter's 'summons' mirror his emotional state.",
-    "imageUrl": "",
-    "byline": "Mogoon",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Her Summon (2017) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and notice the summoning rules — the paintings are the painter's soul. The romance is secondary to the art; the real love story is the painting."
-    },
-    "tags": [
-      "Romance",
-      "Fantasy",
-      "Drama",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Martial Arts",
+   "Action",
+   "Murim",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-her-summon",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Her Summon (2017)",
+  "teaser": "A painter who can summon his paintings into reality — the series' art is its selling point, and the painter's 'summons' mirror his emotional state.",
+  "imageUrl": "",
+  "byline": "Mogoon",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Her Summon (2017) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and notice the summoning rules — the paintings are the painter's soul. The romance is secondary to the art; the real love story is the painting."
   },
-  {
-    "id": "manhwa-the-max-level-hero-has-returned",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Max Level Hero Has Returned! (2021)",
-    "teaser": "A max-level hero returns to a powerless world and the 'revenge' is against nobles who mocked him — the manhwa's satisfaction comes from the level gap being unfair on purpose.",
-    "imageUrl": "",
-    "byline": "Ray Halim",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Max Level Hero Has Returned! (2021) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first arc and notice the power-system joke — the world can't comprehend his level. The series is a power fantasy with a political point about inherited power."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Revenge",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Fantasy",
+   "Drama",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-max-level-hero-has-returned",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Max Level Hero Has Returned! (2021)",
+  "teaser": "A max-level hero returns to a powerless world and the 'revenge' is against nobles who mocked him — the manhwa's satisfaction comes from the level gap being unfair on purpose. The Max Level Hero Has Returned!",
+  "imageUrl": "",
+  "byline": "Ray Halim",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Max Level Hero Has Returned! (2021) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first arc and notice the power-system joke — the world can't comprehend his level. The series is a power fantasy with a political point about inherited power."
   },
-  {
-    "id": "manhwa-dice-the-cube-that-changes-everything",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "DICE: The Cube that Changes Everything (2013)",
-    "teaser": "A webtoon where dice grant stats in real life — the manhwa's social commentary on Korean education and status anxiety is the real plot hidden under the game mechanics.",
-    "imageUrl": "",
-    "byline": "Hyunseok Song",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "DICE: The Cube that Changes Everything (2013) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first volume and notice what the dice cost — stats come from other people's loss. The series' horror is that the game is a metaphor for real social systems."
-    },
-    "tags": [
-      "Fantasy",
-      "Drama",
-      "System",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Revenge",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-dice-the-cube-that-changes-everything",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "DICE: The Cube that Changes Everything (2013)",
+  "teaser": "A webtoon where dice grant stats in real life — the manhwa's social commentary on Korean education and status anxiety is the real plot hidden under the game mechanics.",
+  "imageUrl": "",
+  "byline": "Hyunseok Song",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "DICE: The Cube that Changes Everything (2013) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first volume and notice what the dice cost — stats come from other people's loss. The series' horror is that the game is a metaphor for real social systems."
   },
-  {
-    "id": "manhwa-the-remarried-empress",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Remarried Empress (2019)",
-    "teaser": "The empress's husband divorces her for a mistress and she remarries — the manhwa's revenge is quiet and legal, and the 'remarried empress' became the face of the genre.",
-    "imageUrl": "",
-    "byline": "Alphatart",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Remarried Empress (2019) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and notice the political chess — the 'revenge' is courtly, not bloody. The series' pleasure is watching a woman win by being more competent than everyone around her."
-    },
-    "tags": [
-      "Romance",
-      "Drama",
-      "Fantasy",
-      "2010s"
-    ],
-    "tier": 1
+  "tags": [
+   "Fantasy",
+   "Drama",
+   "System",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-remarried-empress",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Remarried Empress (2019)",
+  "teaser": "The empress's husband divorces her for a mistress and she remarries — the manhwa's revenge is quiet and legal, and the 'remarried empress' became the face of the genre.",
+  "imageUrl": "",
+  "byline": "Alphatart",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Remarried Empress (2019) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and notice the political chess — the 'revenge' is courtly, not bloody. The series' pleasure is watching a woman win by being more competent than everyone around her."
   },
-  {
-    "id": "manhwa-solo-farming-in-the-tower",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "Solo Farming in the Tower (2023)",
-    "teaser": "A failed hunter who becomes a 'farmer' inside the tower — the manhwa's farming mechanics are the actual plot, and the tower's ecology is built like a real ecosystem.",
-    "imageUrl": "",
-    "byline": "World's End",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Solo Farming in the Tower (2023) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first chapters and notice the farming system — the 'weak' class is the clever one. The series' thesis is that the tower rewards patience, not power."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "System",
-      "2020s"
-    ],
-    "tier": 1
+  "tags": [
+   "Romance",
+   "Drama",
+   "Fantasy",
+   "2010s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-solo-farming-in-the-tower",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "Solo Farming in the Tower (2023)",
+  "teaser": "A failed hunter who becomes a 'farmer' inside the tower — the manhwa's farming mechanics are the actual plot, and the tower's ecology is built like a real ecosystem.",
+  "imageUrl": "",
+  "byline": "World's End",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Solo Farming in the Tower (2023) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first chapters and notice the farming system — the 'weak' class is the clever one. The series' thesis is that the tower rewards patience, not power."
   },
-  {
-    "id": "manhwa-the-constellation-that-returned-from-hell",
-    "categoryId": "MANHWA",
-    "subtype": "Manhwa",
-    "name": "The Constellation That Returned From Hell (2023)",
-    "teaser": "A hunter who returns from hell with the power of constellations — the manhwa's art is its signature and the constellation system is the plot engine.",
-    "imageUrl": "",
-    "byline": "Ggoba",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Constellation That Returned From Hell (2023) end-to-end",
-      "durationMinutes": 45,
-      "instruction": "Read the first arc and notice the constellation mechanic — each one has a personality. The series is a revenge fantasy with a cosmic bureaucracy."
-    },
-    "tags": [
-      "Fantasy",
-      "Action",
-      "Revenge",
-      "2020s"
-    ],
-    "tier": 1
-  }
+  "tags": [
+   "Fantasy",
+   "Action",
+   "System",
+   "2020s"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "manhwa-the-constellation-that-returned-from-hell",
+  "categoryId": "MANHWA",
+  "subtype": "Manhwa",
+  "name": "The Constellation That Returned From Hell (2023)",
+  "teaser": "A hunter who returns from hell with the power of constellations — the manhwa's art is its signature and the constellation system is the plot engine.",
+  "imageUrl": "",
+  "byline": "Ggoba",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Constellation That Returned From Hell (2023) end-to-end",
+   "durationMinutes": 45,
+   "instruction": "Read the first arc and notice the constellation mechanic — each one has a personality. The series is a revenge fantasy with a cosmic bureaucracy."
+  },
+  "tags": [
+   "Fantasy",
+   "Action",
+   "Revenge",
+   "2020s"
+  ],
+  "tier": 1
+ }
 ]

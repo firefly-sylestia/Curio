@@ -73,6 +73,9 @@ export const loadTopicsForCategory = async (categoryId: CategoryId): Promise<Cur
       subtype: item.subtype || 'Topic',
       name: item.name,
       teaser: item.teaser || '',
+      byline: item.byline || undefined,
+      tier: item.tier || item.difficulty || undefined,
+      tags: Array.isArray(item.tags) ? item.tags : [],
       imageUrl: item.imageUrl || '',
       actionPrompt: {
         verb: item.exploreAction?.verb || 'Explore',
@@ -136,6 +139,7 @@ export const searchTopics = async (query: string): Promise<CurioTopic[]> => {
       if (
         topic.name.toLowerCase().includes(lowerQuery) ||
         topic.aliases.some(alias => alias.toLowerCase().includes(lowerQuery)) ||
+        (topic.tags || []).some(tag => tag.toLowerCase().includes(lowerQuery)) ||
         topic.teaser.toLowerCase().includes(lowerQuery)
       ) {
         results.push(topic);

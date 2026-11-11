@@ -17,7 +17,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-michelangelo",
@@ -37,7 +38,8 @@
       "Italian",
       "15th-16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-raphael",
@@ -57,7 +59,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-caravaggio",
@@ -77,7 +80,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rembrandt",
@@ -97,7 +101,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vermeer",
@@ -117,7 +122,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-goya",
@@ -137,7 +143,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-turner",
@@ -157,7 +164,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-constable",
@@ -177,7 +185,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-friedrich",
@@ -197,7 +206,8 @@
       "German",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-manet",
@@ -217,7 +227,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-monet",
@@ -237,7 +248,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-cezanne",
@@ -257,7 +269,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-van-gogh",
@@ -277,7 +290,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gauguin",
@@ -297,7 +311,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-morisot",
@@ -317,7 +332,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-cassatt",
@@ -337,7 +353,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-picasso",
@@ -357,7 +374,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-matisse",
@@ -377,7 +395,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kandinsky",
@@ -397,7 +416,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-mondrian",
@@ -417,7 +437,8 @@
       "Dutch",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pollock",
@@ -437,7 +458,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rothko",
@@ -457,7 +479,8 @@
       "Latvian-American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-warhol",
@@ -477,7 +500,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hockney",
@@ -497,7 +521,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-okeeffe",
@@ -517,14 +542,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-frida-kahlo",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Frida Kahlo",
-    "teaser": "Mexican painter who dressed in Tehuana costume, painted almost exclusively self-portraits because she spent 30 years ill in a body cast after a bus crash, and died in 1954 at 47 with a final diary page: 'I hope the exit is joyful — and I hope never to come back.'",
+    "teaser": "Mexican painter who dressed in Tehuana costume, painted almost exclusively self-portraits because she spent 30 years ill in a body cast after a bus crash, and died in 1954 at 47 with a final diary page: 'I hope the exit is joyful — and I hope never to come back.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -537,7 +563,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hokusai",
@@ -557,7 +584,8 @@
       "Japanese",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hiroshige",
@@ -577,7 +605,8 @@
       "Japanese",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-ai-weiwei",
@@ -597,7 +626,8 @@
       "Chinese",
       "21st Century"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "painter-banksy",
@@ -617,7 +647,8 @@
       "British",
       "21st Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-bourgeois",
@@ -637,7 +668,8 @@
       "French-American",
       "20th-21st Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-brancusi",
@@ -657,7 +689,8 @@
       "Sculpture",
       "Romanian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-rodin",
@@ -677,7 +710,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ansel-adams",
@@ -697,7 +731,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-dorothea-lange",
@@ -717,7 +752,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-robert-frank",
@@ -737,14 +773,15 @@
       "Swiss-American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-diane-arbus",
     "categoryId": "PAINTERS",
     "subtype": "Photographer",
     "name": "Diane Arbus",
-    "teaser": "American photographer who, between 1962 and 1971, found 230 of the most otherized people in American suburbia and photographed them, then killed herself at 48. 'A photograph is a secret about a secret.'",
+    "teaser": "American photographer who, between 1962 and 1971, found 230 of the most otherized people in American suburbia and photographed them, then killed herself at 48. 'A photograph is a secret about a secret.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -757,7 +794,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-cindy-sherman",
@@ -777,7 +815,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "painter-andy-warhol-quote",
@@ -797,7 +836,8 @@
       "Japanese-American",
       "20th Century"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "pain-gustav-klimt-177",
@@ -817,14 +857,15 @@
       "Austrian",
       "Symbolism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-edvard-munch-178",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Edvard Munch",
-    "teaser": "Munch's The Scream — painted in 1893 — is the second-most-famous image in Western art after the Mona Lisa, and he made four versions of it. He wrote the moment down first: 'I felt the great scream throughout nature,' after a sunset turned 'blood red' — and he described his art as a diary of 'the modern life of the soul.'",
+    "teaser": "Munch's The Scream — painted in 1893 — is the second-most-famous image in Western art after the Mona Lisa, and he made four versions of it. He wrote the moment down first: 'I felt the great scream throughout nature,' after a sunset turned 'blood red' — and he described his art as a diary of 'the modern life of the soul.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -837,7 +878,8 @@
       "Norwegian",
       "Symbolism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-marc-chagall-179",
@@ -857,7 +899,8 @@
       "Russian-French",
       "Folk"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-salvador-dalí-180",
@@ -877,7 +920,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-paul-klee-181",
@@ -897,7 +941,8 @@
       "Swiss",
       "Modernism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-diego-rivera-131",
@@ -917,7 +962,8 @@
       "Muralism",
       "Social Realism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-edward-hopper-132",
@@ -937,7 +983,8 @@
       "Realism",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-norman-rockwell-133",
@@ -957,14 +1004,15 @@
       "Illustration",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-francis-bacon-134",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Francis Bacon",
-    "teaser": "Bacon's screaming, distorted figures — most famously his 1953 reworking of Velázquez's portrait of Pope Innocent X — are among the most violent images in modern painting. He worked from photographs, never from life, and once said of the pope series: 'I wanted to paint the scream more than the horror... I feel ever so sorry for the Pope but I have no choice.'",
+    "teaser": "Bacon's screaming, distorted figures — most famously his 1953 reworking of Velázquez's portrait of Pope Innocent X — are among the most violent images in modern painting. He worked from photographs, never from life, and once said of the pope series: 'I wanted to paint the scream more than the horror... I feel ever so sorry for the Pope but I have no choice.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -977,7 +1025,8 @@
       "Irish-British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-bridget-riley-135",
@@ -997,7 +1046,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-anselm-kiefer-136",
@@ -1017,7 +1067,8 @@
       "German",
       "Postwar"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-yayoi-kusama-137",
@@ -1037,14 +1088,15 @@
       "Japanese",
       "Installation"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-yoshitomo-nara-138",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Yoshitomo Nara",
-    "teaser": "Nara's paintings of sullen, big-headed children — girls with knives, cigarettes, or simply flat stares — made him the face of Japanese neo-pop and, in 2019, one of the most expensive living Asian artists when one sold for $25 million. He has said the children are not cute but 'the unknown soldier of the void.'",
+    "teaser": "Nara's paintings of sullen, big-headed children — girls with knives, cigarettes, or simply flat stares — made him the face of Japanese neo-pop and, in 2019, one of the most expensive living Asian artists when one sold for $25 million. He has said the children are not cute but 'the unknown soldier of the void.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -1057,7 +1109,8 @@
       "Japanese",
       "Contemporary"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-lee-krasner-139",
@@ -1077,7 +1130,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-agnes-martin-140",
@@ -1097,7 +1151,8 @@
       "American",
       "Abstract"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-alice-neel-141",
@@ -1117,7 +1172,8 @@
       "American",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-betye-saar-142",
@@ -1137,7 +1193,8 @@
       "American",
       "Black Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-lorna-simpson-143",
@@ -1157,7 +1214,8 @@
       "American",
       "Conceptual"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-kehinde-wiley-144",
@@ -1177,7 +1235,8 @@
       "American",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-toyin-ojih-odutola-145",
@@ -1197,7 +1256,8 @@
       "Nigerian-American",
       "Drawing"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-mickalene-thomas-146",
@@ -1217,14 +1277,15 @@
       "American",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-julie-mehretu-147",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Julie Mehretu",
-    "teaser": "Mehretu builds paintings at architectural scale from thousands of layered marks — architectural drawings, maps, calligraphy, and abstract gestures — that read like exploded cities seen from orbit. Her work asks what history looks like as form: she has said she wants to 'make a space for the imagination to move in.'",
+    "teaser": "Mehretu builds paintings at architectural scale from thousands of layered marks — architectural drawings, maps, calligraphy, and abstract gestures — that read like exploded cities seen from orbit. Her work asks what history looks like as form: she has said she wants to 'make a space for the imagination to move in.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -1237,7 +1298,8 @@
       "Ethiopian-American",
       "Abstract"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-tschabalala-self-148",
@@ -1257,14 +1319,15 @@
       "American",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-flora-yukhnovich-149",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Flora Yukhnovich",
-    "teaser": "Yukhnovich paints rococo — the frothy 18th-century style of Tiepolo and Boucher — as seen through a modern lens: her canvases of billowing fabric, clouds, and naked nymphs dissolve into abstract brushwork, and she has said she is 're-presenting' historical painting 'through the filter of how we see images now.'",
+    "teaser": "Yukhnovich paints rococo — the frothy 18th-century style of Tiepolo and Boucher — as seen through a modern lens: her canvases of billowing fabric, clouds, and naked nymphs dissolve into abstract brushwork, and she has said she is 're-presenting' historical painting 'through the filter of how we see images now.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -1277,7 +1340,8 @@
       "British",
       "Rococo"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-shara-hughes-150",
@@ -1297,7 +1361,8 @@
       "American",
       "Landscape"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-otis-kwame-kye-quaicoe-151",
@@ -1317,7 +1382,8 @@
       "Ghanaian",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-issy-wood-152",
@@ -1337,7 +1403,8 @@
       "British",
       "Painting"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-caroline-walker-153",
@@ -1357,7 +1424,8 @@
       "British",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-fra-angelico-154",
@@ -1377,7 +1445,8 @@
       "Italian",
       "Fresco"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-hieronymus-bosch-155",
@@ -1397,7 +1466,8 @@
       "Dutch",
       "Fantasy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-albrecht-dürer-156",
@@ -1417,7 +1487,8 @@
       "German",
       "Printmaking"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-el-greco-157",
@@ -1437,7 +1508,8 @@
       "Spanish",
       "Religious"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-judith-leyster-158",
@@ -1457,7 +1529,8 @@
       "Baroque",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-angelica-kauffman-159",
@@ -1477,7 +1550,8 @@
       "Swiss-Austrian",
       "History Painting"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-jmw-turner-160",
@@ -1497,7 +1571,8 @@
       "British",
       "Landscape"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-eugène-delacroix-161",
@@ -1517,7 +1592,8 @@
       "French",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-jean-françois-millet-162",
@@ -1537,7 +1613,8 @@
       "French",
       "Rural"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-rosa-bonheur-163",
@@ -1557,7 +1634,8 @@
       "French",
       "Animal Painting"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-edgar-degas-164",
@@ -1577,7 +1655,8 @@
       "French",
       "Dancers"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-georges-seurat-165",
@@ -1597,7 +1676,8 @@
       "French",
       "Post-Impressionism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-henri-de-toulouse-lautrec-166",
@@ -1617,7 +1697,8 @@
       "French",
       "Poster"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-egon-schiele-167",
@@ -1637,7 +1718,8 @@
       "Austrian",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-kazimir-malevich-168",
@@ -1657,7 +1739,8 @@
       "Russian",
       "Avant-Garde"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-rené-magritte-169",
@@ -1677,7 +1760,8 @@
       "Belgian",
       "Conceptual"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-joan-miró-170",
@@ -1697,7 +1781,8 @@
       "Spanish",
       "Abstract"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-tamara-de-lempicka-171",
@@ -1717,14 +1802,15 @@
       "Polish-French",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-grant-wood-172",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Grant Wood",
-    "teaser": "Wood's American Gothic (1930) — the farmer with the pitchfork and his stern companion — is the most parodied painting in American history, and Wood intended it as a dignified portrait of rural Iowa, not a satire. He based the farmer on his dentist and the woman on his sister, who insisted the painting showed them as 'proper people.'",
+    "teaser": "Wood's American Gothic (1930) — the farmer with the pitchfork and his stern companion — is the most parodied painting in American history, and Wood intended it as a dignified portrait of rural Iowa, not a satire. He based the farmer on his dentist and the woman on his sister, who insisted the painting showed them as 'proper people.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -1737,7 +1823,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-andrew-wyeth-173",
@@ -1757,7 +1844,8 @@
       "American",
       "Realism"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-lucian-freud-174",
@@ -1777,14 +1865,15 @@
       "British",
       "20th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-gerhard-richter-175",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Gerhard Richter",
-    "teaser": "Richter is the most expensive living artist in history (an abstract sold for $46.3 million in 2015) and the rare painter who works in two opposite styles at once: photo-realist paintings blurred from photographs, and huge abstract canvases scraped with a squeegee. He has said both are attempts 'to make a picture without knowing what it is.'",
+    "teaser": "Richter is the most expensive living artist in history (an abstract sold for $46.3 million in 2015) and the rare painter who works in two opposite styles at once: photo-realist paintings blurred from photographs, and huge abstract canvases scraped with a squeegee. He has said both are attempts 'to make a picture without knowing what it is.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -1797,7 +1886,8 @@
       "German",
       "Abstract"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-georg-baselitz-176",
@@ -1817,7 +1907,8 @@
       "German",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-takashi-murakami-177",
@@ -1837,7 +1928,8 @@
       "Japanese",
       "Contemporary"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-zao-wou-ki-178",
@@ -1857,7 +1949,8 @@
       "Chinese-French",
       "Lyrical"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-helen-frankenthaler-179",
@@ -1877,7 +1970,8 @@
       "American",
       "Color Field"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-joan-mitchell-180",
@@ -1897,7 +1991,8 @@
       "American",
       "Gesture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-faith-ringgold-181",
@@ -1917,7 +2012,8 @@
       "American",
       "Story Quilt"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-howardena-pindell-182",
@@ -1937,7 +2033,8 @@
       "American",
       "Conceptual"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-kerry-james-marshall-183",
@@ -1957,7 +2054,8 @@
       "American",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-amy-sherald-184",
@@ -1977,7 +2075,8 @@
       "American",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-njideka-akunyili-crosby-185",
@@ -1997,7 +2096,8 @@
       "Nigerian-American",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-wangechi-mutu-186",
@@ -2017,14 +2117,15 @@
       "Kenyan-American",
       "Sculpture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-lynette-yiadom-boakye-187",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Lynette Yiadom-Boakye",
-    "teaser": "Yiadom-Boakye paints invented portraits of Black people who don't exist — figures made up from her imagination, titled after the times they could have lived ('The Hour of Bewilderbeast'). She has said she 'makes paintings with the people in them as props' and that she has 'no interest in realism as a process.'",
+    "teaser": "Yiadom-Boakye paints invented portraits of Black people who don't exist — figures made up from her imagination, titled after the times they could have lived ('The Hour of Bewilderbeast'). She has said she 'makes paintings with the people in them as props' and that she has 'no interest in realism as a process.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -2037,14 +2138,15 @@
       "British",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-jadé-fadojutimi-188",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Jadé Fadojutimi",
-    "teaser": "Fadojutimi — born in London in 1993, of Nigerian and Japanese heritage — paints huge, saturated canvases of memory and emotion: layered strokes, bold color, and gestural forms that suggest places and feelings without naming them. She is among the youngest artists ever to see her work auctioned for millions, and she has said her paintings are 'maps of my mind.'",
+    "teaser": "Fadojutimi — born in London in 1993, of Nigerian and Japanese heritage — paints huge, saturated canvases of memory and emotion: layered strokes, bold color, and gestural forms that suggest places and feelings without naming them. She is among the youngest artists ever to see her work auctioned for millions, and she has said her paintings are 'maps of my mind.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -2057,14 +2159,15 @@
       "British",
       "Abstract"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-salman-toor-189",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Salman Toor",
-    "teaser": "Toor paints intimate, nocturnal scenes of queer South Asian life — men in bars, apartments, and hammams, rendered with loose brushwork and glowing color. Born in Lahore, he came out as gay while living in Pakistan, and his work has been read as a portrait of 'what it's like to be gay and South Asian' — a subject he has said is 'both personal and political.'",
+    "teaser": "Toor paints intimate, nocturnal scenes of queer South Asian life — men in bars, apartments, and hammams, rendered with loose brushwork and glowing color. Born in Lahore, he came out as gay while living in Pakistan, and his work has been read as a portrait of 'what it's like to be gay and South Asian' — a subject he has said is 'both personal and political.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look at",
@@ -2077,7 +2180,8 @@
       "Pakistani-American",
       "Queer"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-amoako-boafo-190",
@@ -2097,7 +2201,8 @@
       "Ghanaian",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-tunji-adeniyi-jones-191",
@@ -2117,7 +2222,8 @@
       "Nigerian-British",
       "Figurative"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-louise-giovanelli-192",
@@ -2137,7 +2243,8 @@
       "British",
       "Painting"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-giotto-193",
@@ -2157,7 +2264,8 @@
       "Italian",
       "Fresco"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-piero-della-francesca-194",
@@ -2177,7 +2285,8 @@
       "Italian",
       "Perspective"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-matthias-grünewald-195",
@@ -2197,7 +2306,8 @@
       "German",
       "Religious"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-pieter-bruegel-the-elder-196",
@@ -2217,7 +2327,8 @@
       "Flemish",
       "Genre"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-artemisia-gentileschi-197",
@@ -2237,7 +2348,8 @@
       "Italian",
       "Caravaggisti"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-rachel-ruysch-198",
@@ -2257,7 +2369,8 @@
       "Still Life",
       "Baroque"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-élisabeth-vigée-le-brun-199",
@@ -2277,7 +2390,8 @@
       "French",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-camille-corot-200",
@@ -2297,7 +2411,8 @@
       "French",
       "Landscape"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-gustave-courbet-201",
@@ -2317,7 +2432,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "pain-james-mcneill-whistler-202",
@@ -2337,7 +2453,8 @@
       "American-British",
       "Portraiture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-sandro-botticelli",
@@ -2357,7 +2474,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-titian",
@@ -2377,7 +2495,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-diego-velazquez",
@@ -2397,7 +2516,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-peter-paul-rubens",
@@ -2417,7 +2537,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jacques-louis-david",
@@ -2437,7 +2558,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-auguste-dominique-ingres",
@@ -2457,7 +2579,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-anthony-van-dyck",
@@ -2477,7 +2600,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frans-hals",
@@ -2497,7 +2621,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-andrea-mantegna",
@@ -2517,7 +2642,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-domenico-ghirlandaio",
@@ -2537,7 +2663,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-filippo-lippi",
@@ -2557,7 +2684,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-giovanni-bellini",
@@ -2577,14 +2705,15 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-nicolas-poussin",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Nicolas Poussin",
-    "teaser": "The French painter who lived in Rome and turned painting into philosophy — calm, ordered, classical scenes where every figure is placed like a chess piece. Cézanne spent his life trying to 'do Poussin over again from nature.'",
+    "teaser": "The French painter who lived in Rome and turned painting into philosophy — calm, ordered, classical scenes where every figure is placed like a chess piece. Cézanne spent his life trying to 'do Poussin over again from nature.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -2597,7 +2726,8 @@
       "French",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-claude-lorrain",
@@ -2617,7 +2747,8 @@
       "French",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bartolome-esteban-murillo",
@@ -2637,7 +2768,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francisco-de-zurbaran",
@@ -2657,7 +2789,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-tintoretto",
@@ -2677,7 +2810,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-paolo-veronese",
@@ -2697,7 +2831,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-luca-signorelli",
@@ -2717,7 +2852,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-piero-di-cosimo",
@@ -2737,7 +2873,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alfred-sisley-2",
@@ -2757,7 +2894,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-armand-guillaumin",
@@ -2777,7 +2915,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gustave-caillebotte-floor",
@@ -2797,7 +2936,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-eva-gonzales",
@@ -2817,7 +2957,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-berthe-morisot-2",
@@ -2837,7 +2978,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henri-edmond-cross",
@@ -2857,7 +2999,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-maximilien-luce",
@@ -2877,7 +3020,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-paul-signac",
@@ -2897,7 +3041,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-theo-van-rysseberghe",
@@ -2917,7 +3062,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ivan-generalic",
@@ -2937,7 +3083,8 @@
       "Croatian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-franjo-mraz",
@@ -2957,7 +3104,8 @@
       "Croatian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-niko-pirosmani",
@@ -2977,7 +3125,8 @@
       "Georgian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-grandma-moses",
@@ -2997,7 +3146,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-morris-hirschfield",
@@ -3017,7 +3167,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bill-traylor",
@@ -3037,7 +3188,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-clementine-hunter",
@@ -3057,7 +3209,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-joseph-yoakum",
@@ -3077,7 +3230,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-minnie-evans",
@@ -3097,7 +3251,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-james-hampton",
@@ -3117,7 +3272,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-simon-rodia",
@@ -3137,7 +3293,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pierre-bonnard",
@@ -3157,7 +3314,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-edouard-vuillard",
@@ -3177,7 +3335,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-maurice-denys",
@@ -3197,7 +3356,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-paul-serusier",
@@ -3217,7 +3377,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-felix-vallotton",
@@ -3237,7 +3398,8 @@
       "Swiss",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ker-xavier-roussel",
@@ -3257,7 +3419,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-toorop",
@@ -3277,7 +3440,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-johan-barthold-jongkind",
@@ -3297,7 +3461,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jozef-israels",
@@ -3317,7 +3482,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jacob-maris",
@@ -3337,7 +3503,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hendrik-willem-mesdag",
@@ -3357,7 +3524,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-isaac-israels",
@@ -3377,7 +3545,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-floris-verster",
@@ -3397,7 +3566,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-hendrik-breitner",
@@ -3417,7 +3587,8 @@
       "Dutch",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-sluyters",
@@ -3437,7 +3608,8 @@
       "Dutch",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-karel-appel",
@@ -3457,7 +3629,8 @@
       "Dutch",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-constant-nieuwenhuys",
@@ -3477,7 +3650,8 @@
       "Dutch",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-asger-jorn",
@@ -3497,7 +3671,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-carl-henning-pedersen",
@@ -3517,7 +3692,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-else-alfelt",
@@ -3537,7 +3713,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henry-heerup",
@@ -3557,7 +3734,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hans-hofmann",
@@ -3577,7 +3755,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-adolph-gottlieb",
@@ -3597,7 +3776,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-arnold-newman",
@@ -3617,7 +3797,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-clyfford-still",
@@ -3637,7 +3818,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-robert-motherwell",
@@ -3657,7 +3839,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-franz-kline",
@@ -3677,7 +3860,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-philip-guston",
@@ -3697,7 +3881,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-milton-avery",
@@ -3717,7 +3902,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-arthur-dove",
@@ -3737,7 +3923,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-marsden-hartley",
@@ -3757,7 +3944,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-marin",
@@ -3777,7 +3965,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-stuart-davis",
@@ -3797,7 +3986,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-charles-demuth",
@@ -3817,14 +4007,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-elie-nadelman",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Elie Nadelman",
-    "teaser": "The Polish-American sculptor who made elegant figures from a few curved lines — his circus performers, dancers, and society women are built like notes of music in marble and wood. He said sculpture should be 'the study of pure form.'",
+    "teaser": "The Polish-American sculptor who made elegant figures from a few curved lines — his circus performers, dancers, and society women are built like notes of music in marble and wood. He said sculpture should be 'the study of pure form.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -3837,7 +4028,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gaston-lachaise",
@@ -3857,7 +4049,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alexander-calder",
@@ -3877,7 +4070,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-david-smith",
@@ -3897,7 +4091,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-isamu-noguchi",
@@ -3917,7 +4112,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-louise-nevelson",
@@ -3937,7 +4133,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-chaim-gross",
@@ -3957,7 +4154,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hugo-robus",
@@ -3977,7 +4175,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pierre-auguste-renoir",
@@ -3997,7 +4196,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-leon-gerome",
@@ -4017,7 +4217,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-adolphe-bouguereau",
@@ -4037,7 +4238,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alexandre-cabanel",
@@ -4057,7 +4259,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-theodore-gericault",
@@ -4077,7 +4280,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-theodore-chasseriau",
@@ -4097,7 +4301,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pierre-puvis-de-chavannes",
@@ -4117,7 +4322,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jules-bastien-lepage",
@@ -4137,7 +4343,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-francois-raphaelli",
@@ -4157,7 +4364,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-leon-lhermitte",
@@ -4177,7 +4385,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pascal-dagnan-bouveret",
@@ -4197,7 +4406,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-fernand-khnopff",
@@ -4217,7 +4427,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-delville",
@@ -4237,7 +4448,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-xavier-mellery",
@@ -4257,7 +4469,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-felicien-rops",
@@ -4277,7 +4490,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-matejko",
@@ -4297,7 +4511,8 @@
       "Polish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jozef-brandt",
@@ -4317,7 +4532,8 @@
       "Polish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-aleksander-gierymski",
@@ -4337,7 +4553,8 @@
       "Polish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jozef-chelmonski",
@@ -4357,7 +4574,8 @@
       "Polish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-albert-ryder",
@@ -4377,7 +4595,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ralph-blakelock",
@@ -4397,7 +4616,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-martin-johnson-heade",
@@ -4417,7 +4637,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-fitz-henry-lane",
@@ -4437,7 +4658,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-inness",
@@ -4457,7 +4679,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-merritt-chase",
@@ -4477,7 +4700,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-childe-hassam",
@@ -4497,14 +4721,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-henry-twachtman",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "John Henry Twachtman",
-    "teaser": "The quietest of the American Impressionists — his winter scenes, waterfalls, and gardens are painted in pale greys and whites with a Japanese sense of emptiness. He said he loved 'the beauty of the commonplace.'",
+    "teaser": "The quietest of the American Impressionists — his winter scenes, waterfalls, and gardens are painted in pale greys and whites with a Japanese sense of emptiness. He said he loved 'the beauty of the commonplace.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -4517,7 +4742,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-j-aldem-weir",
@@ -4537,7 +4763,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-mcgregor-paxton",
@@ -4557,7 +4784,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-thomas-wilmer-dewing",
@@ -4577,7 +4805,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-abbott-thayer",
@@ -4597,14 +4826,15 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-dwight-tryon",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Dwight William Tryon",
-    "teaser": "The American tonalist of misty autumns — his landscapes of Connecticut and Devon are painted in greys, golds, and soft blues, like music played quietly. He was known as 'the poet of the dawn.'",
+    "teaser": "The American tonalist of misty autumns — his landscapes of Connecticut and Devon are painted in greys, golds, and soft blues, like music played quietly. He was known as 'the poet of the dawn.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -4617,7 +4847,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henry-ossawa-tanner",
@@ -4637,7 +4868,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-harnett",
@@ -4657,7 +4889,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-frederick-peto",
@@ -4677,7 +4910,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-joaquin-sorolla",
@@ -4697,7 +4931,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ignacio-zuloaga",
@@ -4717,7 +4952,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ramon-casas",
@@ -4737,7 +4973,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-santiago-rusinol",
@@ -4757,7 +4994,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-anton-slavicek",
@@ -4777,7 +5015,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-max-svabinsky",
@@ -4797,7 +5036,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jakub-schikaneder",
@@ -4817,7 +5057,8 @@
       "Czech",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-prebler",
@@ -4837,7 +5078,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-josef-capek",
@@ -4857,7 +5099,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-emil-filla",
@@ -4877,7 +5120,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bohumil-kubista",
@@ -4897,7 +5141,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vaclav-spala",
@@ -4917,7 +5162,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frantisek-muzika",
@@ -4937,7 +5183,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-toyen",
@@ -4957,7 +5204,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jindrich-styrsky",
@@ -4977,7 +5225,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-josef-sima",
@@ -4997,7 +5246,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-zdenek-sklenar",
@@ -5017,7 +5267,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mikulas-medek",
@@ -5037,7 +5288,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jiri-kolar",
@@ -5057,7 +5309,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-karel-teige",
@@ -5077,7 +5330,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-adrien-henri-vital-van-ostade",
@@ -5097,7 +5351,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-steen",
@@ -5117,7 +5372,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gerard-ter-borch",
@@ -5137,7 +5393,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gabriel-metsu",
@@ -5157,7 +5414,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pieter-de-hooch",
@@ -5177,7 +5435,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francisco-de-herrera",
@@ -5197,7 +5456,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-juan-bautista-maino",
@@ -5217,7 +5477,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vicente-carducho",
@@ -5237,7 +5498,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-antonio-de-pereda",
@@ -5257,7 +5519,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-antonio-palomino",
@@ -5277,7 +5540,8 @@
       "Spanish",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alonso-cano",
@@ -5297,7 +5561,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pedro-de-mena",
@@ -5317,7 +5582,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-juan-martinez-montanes",
@@ -5337,7 +5603,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jose-de-mora",
@@ -5357,7 +5624,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-antonio-arnao",
@@ -5377,7 +5645,8 @@
       "Spanish",
       "16th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-alonso-berruguete",
@@ -5397,7 +5666,8 @@
       "Spanish",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-juan-de-juni",
@@ -5417,7 +5687,8 @@
       "Spanish",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francisco-salzillo",
@@ -5437,7 +5708,8 @@
       "Spanish",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-federico-de-madrazo",
@@ -5457,7 +5729,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-carlos-luis-de-ribera",
@@ -5477,7 +5750,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "painter-antonio-maria-esquivel",
@@ -5497,7 +5771,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jose-casado-del-alisal",
@@ -5517,7 +5792,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mariano-fortuny",
@@ -5537,7 +5813,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francisco-pradilla",
@@ -5557,7 +5834,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jose-jimenez-aranda",
@@ -5577,7 +5855,8 @@
       "Spanish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-simeon-solomon",
@@ -5597,7 +5876,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-arthur-hughes",
@@ -5617,7 +5897,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henry-wallis",
@@ -5637,7 +5918,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-william-waterhouse",
@@ -5657,7 +5939,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-holman-hunt",
@@ -5677,7 +5960,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-richard-dadd",
@@ -5697,7 +5981,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-quiller-orchardson",
@@ -5717,7 +6002,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-luke-fildes",
@@ -5737,7 +6023,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hubert-von-herkomer",
@@ -5757,7 +6044,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frank-holl",
@@ -5777,7 +6065,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-clausen",
@@ -5797,14 +6086,15 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-stanhope-forbes",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Stanhope Forbes",
-    "teaser": "The founder of the Newlyn School — he settled in the Cornish fishing village of Newlyn and painted its fishermen, women, and weather with a serious, French-trained realism. He was called 'the father of British Impressionism.'",
+    "teaser": "The founder of the Newlyn School — he settled in the Cornish fishing village of Newlyn and painted its fishermen, women, and weather with a serious, French-trained realism. He was called 'the father of British Impressionism.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -5817,7 +6107,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-walter-langley",
@@ -5837,7 +6128,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henry-scott-tuke",
@@ -5857,7 +6149,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-nicholson",
@@ -5877,7 +6170,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-walter-sickert",
@@ -5897,7 +6191,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-duncan-grant",
@@ -5917,7 +6212,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vanessa-bell",
@@ -5937,7 +6233,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mark-gertler",
@@ -5957,7 +6254,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-c-r-w-nevinson",
@@ -5977,7 +6275,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-paul-nash",
@@ -5997,7 +6296,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-nikolai-astrup",
@@ -6017,7 +6317,8 @@
       "Norwegian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-harald-sohlberg",
@@ -6037,7 +6338,8 @@
       "Norwegian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-halfdan-egedius",
@@ -6057,7 +6359,8 @@
       "Norwegian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-christian-krohg",
@@ -6077,7 +6380,8 @@
       "Norwegian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-erik-werenskiold",
@@ -6097,7 +6401,8 @@
       "Norwegian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gerhard-munthe",
@@ -6117,7 +6422,8 @@
       "Norwegian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-anna-ancher",
@@ -6137,7 +6443,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-michael-ancher",
@@ -6157,7 +6464,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ps-kroyer",
@@ -6177,7 +6485,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-laurits-tuxen",
@@ -6197,7 +6506,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vilhelm-hammershoi",
@@ -6217,14 +6527,15 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-j-f-willesen",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "J.F. Willumsen",
-    "teaser": "The Danish modernist who never stayed still — he painted symbolist visions, carved sculptural reliefs, designed ceramics, and ended with wild expressionist canvases. His Great Relief of the wedding couple is a monument of Danish symbolism.",
+    "teaser": "The Danish modernist who never stayed still — he painted symbolist visions, carved sculptural reliefs, designed ceramics, and ended with wild expressionist canvases. His Great Relief of the wedding couple is a monument of Danish symbolism. J.F. Willumsen.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -6237,7 +6548,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-axel-salto",
@@ -6257,7 +6569,8 @@
       "Danish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-otto-bache",
@@ -6277,14 +6590,15 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-christoffer-wilhelm-eckersberg",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Christoffer Wilhelm Eckersberg",
-    "teaser": "The father of Danish Golden Age painting — his views of Copenhagen, the sea, and the naked figure are painted with a clarity that made him the teacher of an entire generation. He is called 'the father of Danish painting.'",
+    "teaser": "The father of Danish Golden Age painting — his views of Copenhagen, the sea, and the naked figure are painted with a clarity that made him the teacher of an entire generation. He is called 'the father of Danish painting.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -6297,7 +6611,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-christen-kobke",
@@ -6317,7 +6632,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-constantin-hansen",
@@ -6337,7 +6653,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-wilhelm-marstrand",
@@ -6357,7 +6674,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-julius-exner",
@@ -6377,7 +6695,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frants-henningsen",
@@ -6397,7 +6716,8 @@
       "Danish",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-georges-braque",
@@ -6417,7 +6737,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-fernand-leger",
@@ -6437,7 +6758,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-juan-gris",
@@ -6457,7 +6779,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-albert-gleizes",
@@ -6477,7 +6800,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-sonia-delaunay",
@@ -6497,7 +6821,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jacques-villon",
@@ -6517,7 +6842,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-roger-de-la-fresnaye",
@@ -6537,7 +6863,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-andre-lhote",
@@ -6557,7 +6884,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-marie-laurencin",
@@ -6577,14 +6905,15 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francis-picabia",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Francis Picabia",
-    "teaser": "The eternal provocateur — a rich French painter who switched styles every few years: Impressionism, Cubism, Dada machine-paintings, abstract, and figurative again, always with a joke up his sleeve. He painted machines as lovers and called art 'a product of the spirit.'",
+    "teaser": "The eternal provocateur — a rich French painter who switched styles every few years: Impressionism, Cubism, Dada machine-paintings, abstract, and figurative again, always with a joke up his sleeve. He painted machines as lovers and called art 'a product of the spirit.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -6597,7 +6926,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-marcel-duchamp",
@@ -6617,7 +6947,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-man-ray",
@@ -6637,7 +6968,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-yves-tanguy",
@@ -6657,7 +6989,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-roberto-matta",
@@ -6677,7 +7010,8 @@
       "Chilean",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-victor-brauner",
@@ -6697,7 +7031,8 @@
       "Romanian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-wolfgang-paalen",
@@ -6717,7 +7052,8 @@
       "Austrian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gordon-onslow-ford",
@@ -6737,7 +7073,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mathias-goeritz",
@@ -6757,7 +7094,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gunther-gerzso",
@@ -6777,14 +7115,15 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-dr-atl",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Dr. Atl",
-    "teaser": "The Mexican volcano painter — Gerardo Murillo, who took the Nahuatl name 'Atl' (water) and painted erupting volcanoes from the crater's edge. He also invented a painting surface called 'Atl-color' and lost a leg after a fall from a volcano, which only made him paint more.",
+    "teaser": "The Mexican volcano painter — Gerardo Murillo, who took the Nahuatl name 'Atl' (water) and painted erupting volcanoes from the crater's edge. He also invented a painting surface called 'Atl-color' and lost a leg after a fall from a volcano, which only made him paint more. Dr. Atl.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -6797,7 +7136,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jesus-reyes-ferreira",
@@ -6817,7 +7157,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-van-eyck",
@@ -6837,7 +7178,8 @@
       "Flemish",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-roger-van-der-weyden",
@@ -6857,7 +7199,8 @@
       "Flemish",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hans-holbein-the-younger",
@@ -6877,7 +7220,8 @@
       "German",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-albrecht-altdorfer",
@@ -6897,7 +7241,8 @@
       "German",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-stubbs",
@@ -6917,7 +7262,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-singer-sargent",
@@ -6937,7 +7283,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alfred-sisley",
@@ -6957,7 +7304,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-camille-pissarro",
@@ -6977,7 +7325,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gustave-moreau",
@@ -6997,7 +7346,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-odilon-redon",
@@ -7017,7 +7367,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-aubrey-beardsley",
@@ -7037,7 +7388,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alphonse-mucha",
@@ -7057,7 +7409,8 @@
       "Czech",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henri-rousseau",
@@ -7077,7 +7430,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ame-deo-modigliani",
@@ -7097,7 +7451,8 @@
       "Italian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-umberto-boccioni",
@@ -7117,7 +7472,8 @@
       "Italian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frantisek-kupka",
@@ -7137,7 +7493,8 @@
       "Czech",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-robert-delaunay",
@@ -7157,7 +7514,8 @@
       "French",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-giorgio-de-chirico",
@@ -7177,7 +7535,8 @@
       "Italian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-max-ernst",
@@ -7197,7 +7556,8 @@
       "German",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-anthony-van-dyck-2",
@@ -7217,7 +7577,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frans-snyders",
@@ -7237,7 +7598,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-david-teniers-the-younger",
@@ -7257,7 +7619,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-adriaen-brouwer",
@@ -7277,7 +7640,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jan-brueghel-the-elder",
@@ -7297,7 +7661,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-joos-de-momper",
@@ -7317,7 +7682,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-cornelis-de-vos",
@@ -7337,7 +7703,8 @@
       "Flemish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gerard-dou",
@@ -7357,7 +7724,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frans-van-mieris",
@@ -7377,7 +7745,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gerard-ter-borch-2",
@@ -7397,7 +7766,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-willem-van-aelst",
@@ -7417,7 +7787,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rachel-ruysch-2",
@@ -7437,7 +7808,8 @@
       "Dutch",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-james-ensor",
@@ -7457,7 +7829,8 @@
       "Belgian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-otto-dix",
@@ -7477,7 +7850,8 @@
       "German",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-grosz",
@@ -7497,7 +7871,8 @@
       "German",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jose-clemente-orozco",
@@ -7517,7 +7892,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-david-alfaro-siqueiros",
@@ -7537,7 +7913,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rufino-tamayo",
@@ -7557,7 +7934,8 @@
       "Mexican",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-wifredo-lam",
@@ -7577,7 +7955,8 @@
       "Cuban",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-tarsila-do-amaral",
@@ -7597,7 +7976,8 @@
       "Brazilian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-leonora-carrington",
@@ -7617,7 +7997,8 @@
       "British",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-remedios-varo",
@@ -7637,7 +8018,8 @@
       "Spanish",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jose-posada",
@@ -7657,7 +8039,8 @@
       "Mexican",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jacob-lawrence",
@@ -7677,14 +8060,15 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-aaron-douglas",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Aaron Douglas",
-    "teaser": "The visual voice of the Harlem Renaissance — his flat, geometric silhouettes of musicians, workers, and angels, inspired by African art and Art Deco, appeared on book covers and murals across 1920s Harlem. He called his style 'African design with a modern rhythm.'",
+    "teaser": "The visual voice of the Harlem Renaissance — his flat, geometric silhouettes of musicians, workers, and angels, inspired by African art and Art Deco, appeared on book covers and murals across 1920s Harlem. He called his style 'African design with a modern rhythm.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -7697,7 +8081,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-romare-bearden",
@@ -7717,7 +8102,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-horace-pippin",
@@ -7737,7 +8123,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-charles-white",
@@ -7757,7 +8144,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-elizabeth-catlett",
@@ -7777,7 +8165,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-andrea-del-sarto",
@@ -7797,7 +8186,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rosso-fiorentino",
@@ -7817,7 +8207,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pontormo",
@@ -7837,7 +8228,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-giorgione",
@@ -7857,14 +8249,15 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-fra-bartolomeo",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Fra Bartolomeo",
-    "teaser": "The Dominican friar-painter of Florence who burned his secular drawings after joining Savonarola's movement, then rebuilt his art on serenity — his balanced, glowing altarpieces influenced Raphael and earned him the nickname 'Fra Bartolomeo of the beautiful colors.'",
+    "teaser": "The Dominican friar-painter of Florence who burned his secular drawings after joining Savonarola's movement, then rebuilt his art on serenity — his balanced, glowing altarpieces influenced Raphael and earned him the nickname 'Fra Bartolomeo of the beautiful colors.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -7877,7 +8270,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-correggio",
@@ -7897,7 +8291,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-parmigianino",
@@ -7917,7 +8312,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-annibale-carracci",
@@ -7937,7 +8333,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-guido-reni",
@@ -7957,7 +8354,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-carlo-crivelli",
@@ -7977,7 +8375,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pietro-perugino",
@@ -7997,7 +8396,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bernardo-daddi",
@@ -8017,7 +8417,8 @@
       "Italian",
       "14th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-duccio-di-buoninsegna",
@@ -8037,7 +8438,8 @@
       "Italian",
       "14th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-simone-martini",
@@ -8057,7 +8459,8 @@
       "Italian",
       "14th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ambrogio-lorenzetti",
@@ -8077,7 +8480,8 @@
       "Italian",
       "14th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-masaccio",
@@ -8097,7 +8501,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-domenico-veneziano",
@@ -8117,14 +8522,15 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-paolo-uccello",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Paolo Uccello",
-    "teaser": "The Florentine who fell in love with perspective — his three panels of the Battle of San Romano scatter lances, horses, and helmets across a tilted chessboard of a battlefield. His wife reportedly called him to bed and he'd answer: 'What a sweet thing perspective is!'",
+    "teaser": "The Florentine who fell in love with perspective — his three panels of the Battle of San Romano scatter lances, horses, and helmets across a tilted chessboard of a battlefield. His wife reportedly called him to bed and he'd answer: 'What a sweet thing perspective is!'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -8137,7 +8543,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-antonello-da-messina",
@@ -8157,7 +8564,8 @@
       "Italian",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-thomas-gainsborough",
@@ -8177,7 +8585,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-joshua-reynolds",
@@ -8197,7 +8606,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-hogarth",
@@ -8217,7 +8627,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-everett-millais",
@@ -8237,7 +8648,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-dante-gabriel-rossetti",
@@ -8257,7 +8669,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-edward-burne-jones",
@@ -8277,7 +8690,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-james-tissot",
@@ -8297,7 +8711,8 @@
       "French",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-frederic-leighton",
@@ -8317,7 +8732,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-lawrence-alma-tadema",
@@ -8337,7 +8753,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-singleton-copley",
@@ -8357,7 +8774,8 @@
       "American",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gilbert-stuart",
@@ -8377,7 +8795,8 @@
       "American",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-thomas-eakins",
@@ -8397,7 +8816,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-winslow-homer",
@@ -8417,7 +8837,8 @@
       "American",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-george-bellows",
@@ -8437,7 +8858,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-charles-sheeler",
@@ -8457,7 +8879,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-thomas-hart-benton",
@@ -8477,7 +8900,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-charles-burchfield",
@@ -8497,7 +8921,8 @@
       "American",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-georges-de-la-tour",
@@ -8517,7 +8942,8 @@
       "French",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-le-nain-brothers",
@@ -8537,7 +8963,8 @@
       "French",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-philippe-de-champaigne",
@@ -8557,7 +8984,8 @@
       "French",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hyacinthe-rigaud",
@@ -8577,7 +9005,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francois-boucher",
@@ -8597,7 +9026,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-honore-fragonard",
@@ -8617,7 +9047,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-baptiste-simeon-chardin",
@@ -8637,7 +9068,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-antoine-watteau",
@@ -8657,7 +9089,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jean-baptiste-greuze",
@@ -8677,14 +9110,15 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hubert-robert",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Hubert Robert",
-    "teaser": "The French painter of ruins and gardens — his imaginary landscapes of broken Roman temples, hanging gardens, and flooded galleries made decay look delightful. He also helped design the gardens of Versailles and was called 'Robert of the Ruins.'",
+    "teaser": "The French painter of ruins and gardens — his imaginary landscapes of broken Roman temples, hanging gardens, and flooded galleries made decay look delightful. He also helped design the gardens of Versailles and was called 'Robert of the Ruins.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -8697,7 +9131,8 @@
       "French",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-joseph-wright-of-derby",
@@ -8717,7 +9152,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-henry-fuseli",
@@ -8737,7 +9173,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-blake",
@@ -8757,7 +9194,8 @@
       "British",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-john-martin",
@@ -8777,7 +9215,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-samuel-palmer",
@@ -8797,7 +9236,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-richard-parkes-bonington",
@@ -8817,7 +9257,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-david-wilkie",
@@ -8837,7 +9278,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-edwin-landseer",
@@ -8857,7 +9299,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-william-powell-frith",
@@ -8877,7 +9320,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ford-madox-brown",
@@ -8897,7 +9341,8 @@
       "British",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ivan-aivazovsky",
@@ -8917,7 +9362,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-karl-bryullov",
@@ -8937,7 +9383,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ilya-repin",
@@ -8957,7 +9404,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vasily-surikov",
@@ -8977,7 +9425,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-valentin-serov",
@@ -8997,7 +9446,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mikhail-vrubel",
@@ -9017,7 +9467,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-vasily-kandinsky",
@@ -9037,7 +9488,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-el-lissitzky",
@@ -9057,14 +9509,15 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-natalia-goncharova",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Natalia Goncharova",
-    "teaser": "The Russian avant-gardist who fused folk icon painting with Cubo-Futurism — her rayonist paintings of light rays and her peasant cycles are among the most original art of the 1910s. She was called 'the Amazons of the Russian avant-garde.'",
+    "teaser": "The Russian avant-gardist who fused folk icon painting with Cubo-Futurism — her rayonist paintings of light rays and her peasant cycles are among the most original art of the 1910s. She was called 'the Amazons of the Russian avant-garde.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -9077,7 +9530,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-lyubov-popova",
@@ -9097,7 +9551,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-aleksandra-exter",
@@ -9117,7 +9572,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-varvara-stepanova",
@@ -9137,7 +9593,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pavel-filonov",
@@ -9157,7 +9614,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kuzma-petrov-vodkin",
@@ -9177,7 +9635,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-nikolai-ge",
@@ -9197,7 +9656,8 @@
       "Russian",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-aleksandr-deineka",
@@ -9217,7 +9677,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-arkady-plastov",
@@ -9237,7 +9698,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-yuri-pimenov",
@@ -9257,7 +9719,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-georgy-nissky",
@@ -9277,7 +9740,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pavel-kuznetsov",
@@ -9297,7 +9761,8 @@
       "Russian",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kaii-higashiyama",
@@ -9317,7 +9782,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-yokoyama-taikan",
@@ -9337,7 +9803,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kawase-hasui",
@@ -9357,7 +9824,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ito-shinsui",
@@ -9377,7 +9845,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ogata-korin",
@@ -9397,7 +9866,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-tawaraya-sotatsu",
@@ -9417,7 +9887,8 @@
       "Japanese",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-maru-yama-okyo",
@@ -9437,7 +9908,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kitagawa-utamaro",
@@ -9457,7 +9929,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-toshusai-sharaku",
@@ -9477,7 +9950,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hishikawa-moronobu",
@@ -9497,7 +9971,8 @@
       "Japanese",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-suzuki-harunobu",
@@ -9517,7 +9992,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-torii-kiyonaga",
@@ -9537,7 +10013,8 @@
       "Japanese",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kobayashi-kiyochika",
@@ -9557,7 +10034,8 @@
       "Japanese",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-tsukioka-yoshitoshi",
@@ -9577,7 +10055,8 @@
       "Japanese",
       "19th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hiroshi-yoshida",
@@ -9597,7 +10076,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-ohara-koson",
@@ -9617,7 +10097,8 @@
       "Japanese",
       "20th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-hasegawa-tohaku",
@@ -9637,7 +10118,8 @@
       "Japanese",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-sesshu-toyo",
@@ -9657,7 +10139,8 @@
       "Japanese",
       "15th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kao-ninga",
@@ -9677,7 +10160,8 @@
       "Japanese",
       "14th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-kano-eitoku",
@@ -9697,7 +10181,8 @@
       "Japanese",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-lorenzo-lotto",
@@ -9717,7 +10202,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-moretto-da-brescia",
@@ -9737,7 +10223,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-savoldo",
@@ -9757,14 +10244,15 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bernardino-luini",
     "categoryId": "PAINTERS",
     "subtype": "Painter",
     "name": "Bernardino Luini",
-    "teaser": "The Lombard painter who carried Leonardo's sweetness into northern Italy — his Madonnas are gentle, his frescoes are graceful, and his Salome holds the Baptist's head with an expression of mild surprise. He was the most popular 'Leonardo follower.'",
+    "teaser": "The Lombard painter who carried Leonardo's sweetness into northern Italy — his Madonnas are gentle, his frescoes are graceful, and his Salome holds the Baptist's head with an expression of mild surprise. He was the most popular 'Leonardo follower.'.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Look",
@@ -9777,7 +10265,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-gaudenzio-ferrari",
@@ -9797,7 +10286,8 @@
       "Italian",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-bernardo-strozzi",
@@ -9817,7 +10307,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-giovanni-battista-tiepolo",
@@ -9837,7 +10328,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-canaletto",
@@ -9857,7 +10349,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francesco-guardi",
@@ -9877,7 +10370,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-pietro-longhi",
@@ -9897,7 +10391,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-rosalba-carriera",
@@ -9917,7 +10412,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-francesco-solimena",
@@ -9937,7 +10433,8 @@
       "Italian",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-luca-giordano",
@@ -9957,7 +10454,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-salvator-rosa",
@@ -9977,7 +10475,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-mattia-preti",
@@ -9997,7 +10496,8 @@
       "Italian",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-jusepe-de-ribera",
@@ -10017,7 +10517,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-luis-de-morales",
@@ -10037,7 +10538,8 @@
       "Spanish",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-alejo-fernandez",
@@ -10057,7 +10559,8 @@
       "Spanish",
       "16th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-juan-sanchez-cotan",
@@ -10077,7 +10580,8 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-luis-egidio-melendez",
@@ -10097,7 +10601,8 @@
       "Spanish",
       "18th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "painter-claudio-coello",
@@ -10117,6 +10622,7 @@
       "Spanish",
       "17th Century"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   }
 ]
