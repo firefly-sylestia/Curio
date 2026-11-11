@@ -1140,3 +1140,51 @@ html:not(.dark):not(.amoled) .curio-install-sheet { background:rgba(248,250,253,
   box-shadow:none!important;
 }
 html:not(.dark):not(.amoled) .curio-modal-surface { background:rgba(248,250,253,.58)!important; }
+
+
+/* iOS-style capsule navigation: remove the displaced rectangular indicator entirely. */
+.curio-bottom-nav {
+  border-radius:999px!important;
+  padding:5px!important;
+  min-height:72px!important;
+  overflow:hidden!important;
+}
+.curio-bottom-nav button {
+  min-height:60px!important;
+  align-self:stretch!important;
+  border-radius:999px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  transform:none!important;
+  transition:background-color 220ms ease,color 220ms ease!important;
+}
+.curio-bottom-nav button.active {
+  border-radius:999px!important;
+  background:rgba(218,30,55,.105)!important;
+  color:#A71931!important;
+  box-shadow:inset 0 0 0 1px rgba(218,30,55,.075)!important;
+}
+html.dark .curio-bottom-nav button.active,
+html.amoled .curio-bottom-nav button.active {
+  background:rgba(255,255,255,.105)!important;
+  color:rgba(255,255,255,.98)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)!important;
+}
+.curio-bottom-nav button.active .curio-nav-icon {
+  transform:none!important;
+  filter:none!important;
+}
+.curio-nav-liquid-active,
+.curio-nav-liquid-active-shape,
+.curio-nav-blob {
+  display:none!important;
+}
+@media(max-width:520px) {
+  .curio-bottom-nav {
+    min-height:66px!important;
+    padding:4px!important;
+    border-radius:999px!important;
+  }
+  .curio-bottom-nav button { min-height:56px!important; }
+}

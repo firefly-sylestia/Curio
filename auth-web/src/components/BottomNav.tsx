@@ -2,9 +2,7 @@
 // Home · Explore · Shuffle · Account — focused discovery navigation
 
 import React from 'react';
-import LiquidGlass from 'liquid-glass-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTheme } from '../theme/ThemeContext';
 import { MaterialIcon } from './SharedComponents';
 
 const tabs = [
@@ -17,7 +15,6 @@ const tabs = [
 const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isDark } = useTheme();
 
   // Highlight the current discovery destination.
   const isActive = (path: string) => {
@@ -25,37 +22,13 @@ const BottomNav: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  const activeIndex = Math.max(0, tabs.findIndex(tab => isActive(tab.path)));
 
   return (
     <nav
       className="curio-bottom-nav fixed bottom-0 left-0 right-0 z-50"
       aria-label="Primary navigation"
-      style={{
-        '--nav-index': activeIndex,
-        '--nav-count': tabs.length,
-      } as React.CSSProperties}
+      style={{ '--nav-count': tabs.length } as React.CSSProperties}
     >
-      <LiquidGlass
-        className="curio-nav-liquid-active"
-        displacementScale={34}
-        blurAmount={0.09}
-        saturation={isDark ? 145 : 135}
-        aberrationIntensity={0.55}
-        elasticity={0.12}
-        cornerRadius={18}
-        padding="0"
-        overLight={!isDark}
-        mode="standard"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: `${((activeIndex + 0.5) / tabs.length) * 100}%`,
-          zIndex: 1,
-        }}
-      >
-        <span className="curio-nav-liquid-active-shape" aria-hidden="true" />
-      </LiquidGlass>
       {tabs.map(tab => {
         const active = isActive(tab.path);
         return (
