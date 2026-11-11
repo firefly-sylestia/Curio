@@ -89,7 +89,7 @@ export const ManageCategoriesScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-manage-categories-screen min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={SETTINGS_HERO_HEIGHT + 30} alphaScale={0.45} />
 
       <TornHero

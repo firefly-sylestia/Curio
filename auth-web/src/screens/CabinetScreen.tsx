@@ -106,7 +106,7 @@ export const CabinetScreen: React.FC = () => {
   const heroFill = activeCat?.accent || ROSE_WOOD;
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-library-screen min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={CABINET_HERO_HEIGHT + 30} alphaScale={0.45} />
 
       {/* ── Torn Hero Banner ──────────────────────────────────────── */}

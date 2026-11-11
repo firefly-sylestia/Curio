@@ -153,7 +153,7 @@ export const OnboardingScreen: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="curio-onboarding-screen min-h-screen flex flex-col"
       style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}
     >
       {/* Header */}

@@ -330,7 +330,7 @@ export const EntryDetailScreen: React.FC = () => {
   const tiny = daysAgo === 0 ? new Date(entry.capturedAtMillis).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : daysAgo === 1 ? 'yesterday' : `${daysAgo}d ago`;
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ background: `${category.accent}0A` }}>
+    <div className="curio-entry-detail-screen min-h-screen pb-24 relative" style={{ background: `${category.accent}0A` }}>
       <CurioWatermarkBackdrop activeCatId={category.id} topClearance={HERO_H + 30} alphaScale={0.45} />
 
       {/* ── Torn Hero Banner ──────────────────────────────────────── */}

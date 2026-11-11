@@ -166,7 +166,7 @@ export const TopicHistoryScreen: React.FC = () => {
   }, {} as Record<string, CaptureEntity[]>), [entries]);
 
   return (
-    <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
+    <div className="curio-history-screen min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={HISTORY_HERO_HEIGHT + 30} alphaScale={0.45} />
       <TornHero height={HISTORY_HERO_HEIGHT} fill={ROSE_WOOD} ink="#fff" tearSeed={HISTORY_TEAR_SEED} bold symbols={BROWSER_HERO_SYMBOLS} isDark={isDark}>
         <div className="flex flex-col h-full px-5 pt-[68px] pb-[18px] justify-end">
