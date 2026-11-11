@@ -968,3 +968,17 @@ html.dark .curio-explore-topic,html.amoled .curio-explore-topic{box-shadow:0 18p
 .curio-explore-screen .curio-explore-content{align-self:flex-start;}
 @media(max-width:767px){.curio-explore-screen .curio-explore-content{width:100%;padding-inline:16px!important;margin-inline:auto!important}}
 @media(min-width:768px){.curio-explore-screen .curio-explore-content{width:min(100%,1440px);padding-inline:clamp(28px,4vw,64px);margin-inline:auto!important}}
+
+
+/* Onboarding interest selection states */
+.curio-onboarding-screen .curio-interest-option{position:relative;border:1px solid transparent!important;outline:0;transition:transform .2s ease,background .2s ease,box-shadow .2s ease!important}
+.curio-onboarding-screen .curio-interest-option.is-selected{background:color-mix(in srgb,var(--curio-accent) 13%,var(--curio-glass))!important;border-color:color-mix(in srgb,var(--curio-accent) 55%,transparent)!important;box-shadow:0 12px 28px -20px color-mix(in srgb,var(--curio-accent) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.48)!important;transform:translateY(-2px)}
+.curio-onboarding-screen .curio-interest-check{position:absolute;right:8px;top:8px;width:21px;height:21px;display:grid;place-items:center;border-radius:50%;background:var(--curio-accent);color:white;opacity:0;transform:scale(.7);transition:opacity .18s ease,transform .18s ease}
+.curio-onboarding-screen .curio-interest-option.is-selected .curio-interest-check{opacity:1;transform:scale(1)}
+.curio-onboarding-screen .curio-interest-option:focus-visible{outline:2px solid var(--curio-accent);outline-offset:3px}
+
+/* Full-screen saved-image viewer above route layers and bottom navigation */
+.curio-image-viewer{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));background:rgba(5,7,11,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.curio-image-viewer img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:8px}
+.curio-image-viewer-close{position:absolute;top:max(16px,env(safe-area-inset-top));right:16px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);z-index:1}
+.curio-gallery-image{width:100%;padding:0;border:0;cursor:zoom-in}

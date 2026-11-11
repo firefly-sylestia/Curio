@@ -64,7 +64,9 @@ const CategorySelectionStep: React.FC<{
             <button
               key={category.id}
               onClick={() => onToggle(category.id)}
-              className="flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-200"
+              className={`curio-interest-option flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-200 ${isSelected ? 'is-selected' : ''}`}
+              aria-pressed={isSelected}
+              aria-label={`${category.displayName}${isSelected ? ', selected' : ''}`}
               style={{
                 background: isSelected 
                   ? `${category.accent}20`
@@ -75,6 +77,7 @@ const CategorySelectionStep: React.FC<{
                 transform: isSelected ? 'scale(1.05)' : 'scale(1)',
               }}
             >
+              <span className="curio-interest-check" aria-hidden="true"><MaterialIcon name="check" size={13} /></span>
               <MaterialIcon name={category.iconGlyph} size={28} />
               <span
                 className="text-xs font-medium"

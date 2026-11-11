@@ -2,6 +2,7 @@
 // Matches Android: torn hero, frosted date bar, paper note cards, audio player, mood card, quotes
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getBackgroundColor, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
@@ -245,19 +246,45 @@ const FieldNotesRender: React.FC<{ data: CaptureData; isDark: boolean; accent: s
 
 const GalleryWallRender: React.FC<{ data: CaptureData; isDark: boolean; accent: string }> = ({ data, isDark, accent }) => {
   const d = data as any;
+  const images: string[] = Array.isArray(d.images) ? d.images.filter((image: unknown): image is string => typeof image === 'string' && image.length > 0) : [];
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!activeImage) return;
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActiveImage(null);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [activeImage]);
+
   return (
     <div className="space-y-4">
       <SavedPaperCard isDark={isDark} accent={accent}>
         {d.caption && <p className="whitespace-pre-wrap mb-4">{d.caption}</p>}
         <div className="curio-gallery-grid">
-          {(Array.isArray(d.images) ? d.images : []).map((image: string, i: number) => (
-            <a key={i} href={image} target="_blank" rel="noreferrer" className="curio-gallery-image">
+          {images.map((image, i) => (
+            <button key={i} type="button" onClick={() => setActiveImage(image)} className="curio-gallery-image" aria-label={`Open saved image ${i + 1}`}>
               <img src={image} alt={`Saved image ${i + 1}`} loading="lazy" />
-            </a>
+            </button>
           ))}
         </div>
       </SavedPaperCard>
       {d.mood && <MoodBadge mood={d.mood} accent={accent} />}
+      {activeImage && createPortal(
+        <div className="curio-image-viewer" role="dialog" aria-modal="true" aria-label="Image viewer" onClick={() => setActiveImage(null)}>
+          <button type="button" className="curio-image-viewer-close" aria-label="Close image" onClick={() => setActiveImage(null)}>
+            <MaterialIcon name="close" size={23} />
+          </button>
+          <img src={activeImage} alt="Saved image enlarged" onClick={(event) => event.stopPropagation()} />
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
