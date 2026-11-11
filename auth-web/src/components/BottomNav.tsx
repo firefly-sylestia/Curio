@@ -22,13 +22,18 @@ const BottomNav: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  const activeIndex = Math.max(0, tabs.findIndex(tab => isActive(tab.path)));
 
   return (
     <nav
       className="curio-bottom-nav fixed bottom-0 left-0 right-0 z-50"
       aria-label="Primary navigation"
-      style={{ '--nav-count': tabs.length } as React.CSSProperties}
+      style={{
+        '--nav-index': activeIndex,
+        '--nav-count': tabs.length,
+      } as React.CSSProperties}
     >
+      <span className="curio-nav-blob" aria-hidden="true" />
       {tabs.map(tab => {
         const active = isActive(tab.path);
         return (

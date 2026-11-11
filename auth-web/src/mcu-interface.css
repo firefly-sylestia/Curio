@@ -1188,3 +1188,55 @@ html.amoled .curio-bottom-nav button.active {
   }
   .curio-bottom-nav button { min-height:56px!important; }
 }
+
+
+
+/* Restore the softly moving navigation pill without a visible edge or hard outline. */
+.curio-bottom-nav .curio-nav-blob {
+  display:block!important;
+  position:absolute!important;
+  z-index:1!important;
+  top:5px!important;
+  bottom:5px!important;
+  left:5px!important;
+  width:calc((100% - 10px)/var(--nav-count))!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:999px!important;
+  background:rgba(218,30,55,.12)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(165%)!important;
+  backdrop-filter:blur(20px) saturate(165%)!important;
+  box-shadow:0 8px 24px -18px rgba(218,30,55,.32)!important;
+  transform:translate3d(calc(var(--nav-index)*100%),0,0)!important;
+  transition:transform 520ms cubic-bezier(.22,1,.36,1),background-color 260ms ease!important;
+  pointer-events:none!important;
+  will-change:transform;
+}
+.curio-bottom-nav button,
+.curio-bottom-nav button.active {
+  position:relative!important;
+  z-index:2!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.curio-bottom-nav button.active { color:#A71931!important; }
+html.dark .curio-bottom-nav .curio-nav-blob {
+  background:rgba(255,255,255,.105)!important;
+  box-shadow:0 8px 24px -18px rgba(0,0,0,.28)!important;
+}
+html.amoled .curio-bottom-nav .curio-nav-blob {
+  background:rgba(255,255,255,.095)!important;
+}
+html.dark .curio-bottom-nav button.active,
+html.amoled .curio-bottom-nav button.active { color:rgba(255,255,255,.98)!important; }
+@media(max-width:520px) {
+  .curio-bottom-nav .curio-nav-blob {
+    top:4px!important;
+    bottom:4px!important;
+    left:4px!important;
+    width:calc((100% - 8px)/var(--nav-count))!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .curio-bottom-nav .curio-nav-blob { transition:none!important; }
+}
