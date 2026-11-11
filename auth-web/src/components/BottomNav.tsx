@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { MaterialIcon } from './SharedComponents';
 
 const tabs = [
-  { path: '/', label: 'Home', icon: 'cottage' },
+  { path: '/', label: 'Home', icon: 'home' },
   { path: '/browse', label: 'Explore', icon: 'explore' },
   { path: '/spin', label: 'Shuffle', icon: 'auto_awesome' },
   { path: '/profile', label: 'Account', icon: 'person' },
@@ -46,7 +46,7 @@ const BottomNav: React.FC = () => {
             className={active ? 'active' : ''}
             aria-current={active ? 'page' : undefined}
           >
-            <MaterialIcon name={tab.icon} size={22} filled={active} />
+            <span className={`curio-nav-icon ${tab.path === '/' ? 'curio-nav-home-icon' : ''}`}><MaterialIcon name={tab.icon} size={23} filled={active} /></span>
             <span>{tab.label}</span>
           </button>
         );

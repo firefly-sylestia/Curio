@@ -937,3 +937,7 @@ html.dark .curio-library-screen .sticky.top-0,html.amoled .curio-library-screen 
 @media(prefers-reduced-motion:reduce) {
   .curio-route-transition { animation:none; }
 }
+
+
+/* Navigation icon refinement */
+.curio-bottom-nav .curio-nav-icon{width:34px;height:30px;display:grid;place-items:center;border-radius:12px;transition:transform 260ms cubic-bezier(.2,.9,.3,1),background 220ms ease}.curio-bottom-nav button.active .curio-nav-icon{transform:translateY(-1px)}.curio-bottom-nav .curio-nav-home-icon{position:relative}.curio-bottom-nav .curio-nav-home-icon::after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:currentColor;bottom:1px;opacity:.72}.curio-bottom-nav button.active .curio-nav-home-icon::after{background:#fff}
