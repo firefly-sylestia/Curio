@@ -443,7 +443,9 @@ html.amoled .curio-bottom-nav { background: rgba(8,9,12,.66) !important; }
 .curio-shuffle-canvas-bottom { border-top:1px solid var(--curio-glass-border); padding-top:16px; }
 .curio-shuffle-progress { position:absolute; bottom:0; left:0; right:0; height:3px; background:color-mix(in srgb,var(--curio-accent) 12%,transparent); overflow:hidden; }
 .curio-shuffle-progress span { display:block; width:30%; height:100%; background:var(--curio-accent); border-radius:9px; animation:curio-shuffle-sweep 4.9s cubic-bezier(.12,.75,.18,1) forwards; }
-.curio-shuffle-canvas.is-drawing .curio-shuffle-art { animation:curio-shuffle-orbit 4.9s cubic-bezier(.12,.75,.18,1) both; }
+.curio-shuffle-canvas.is-drawing .curio-shuffle-art { animation:none; }
+.curio-shuffle-canvas.is-drawing .curio-shuffle-orbit.orbit-one { animation:curio-shuffle-orbit-one 4.9s cubic-bezier(.12,.75,.18,1) both; }
+.curio-shuffle-canvas.is-drawing .curio-shuffle-orbit.orbit-two { animation:curio-shuffle-orbit-two 4.9s cubic-bezier(.12,.75,.18,1) both; }
 .curio-shuffle-canvas.has-result { animation:curio-shuffle-reveal 620ms cubic-bezier(.16,1,.3,1) both; }
 .curio-shuffle-actions { display:flex; gap:10px; margin-top:14px; }
 .curio-shuffle-draw-button { min-height:60px; flex:1; display:flex; justify-content:space-between; align-items:center; gap:14px; padding:7px 9px 7px 21px; border-radius:16px; background:#DA1E37; color:#fff; font-size:14px; font-weight:800; box-shadow:0 14px 30px -18px rgba(218,30,55,.75); transition:transform 180ms ease,filter 180ms ease,opacity 180ms ease; }
@@ -476,3 +478,6 @@ html.amoled .curio-bottom-nav { background: rgba(8,9,12,.66) !important; }
 @media (prefers-reduced-motion:reduce) {
  .curio-shuffle-rolling-title,.curio-shuffle-canvas,.curio-shuffle-canvas.is-drawing .curio-shuffle-art,.curio-shuffle-progress span { animation:none !important; }
 }
+
+@keyframes curio-shuffle-orbit-one { from { transform:rotate(-28deg) scaleY(.72); } to { transform:rotate(67deg) scaleY(.72); } }
+@keyframes curio-shuffle-orbit-two { from { transform:rotate(48deg) scaleY(.72); } to { transform:rotate(-47deg) scaleY(.72); } }
