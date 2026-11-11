@@ -263,19 +263,6 @@ const GalleryWallRender: React.FC<{ data: CaptureData; isDark: boolean; accent: 
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FROSTED SEGMENT
-// ═══════════════════════════════════════════════════════════════════════════
-
-const FrostedSegment: React.FC<{ icon: string; title: string; subtitle: string; tiny?: string }> = ({ icon, title, subtitle, tiny }) => (
-  <div className="flex flex-col items-center flex-1">
-    <MaterialIcon name={icon} size={16} style={{ color: 'rgba(255,255,255,0.9)' }} />
-    <span className="text-xs font-bold mt-0.5 text-white">{title}</span>
-    <span className="text-[10px] text-white/80">{subtitle}</span>
-    {tiny && <span className="text-[9px] text-white/70">{tiny}</span>}
-  </div>
-);
-
-// ═══════════════════════════════════════════════════════════════════════════
 // MAIN ENTRY DETAIL SCREEN
 // ═══════════════════════════════════════════════════════════════════════════
 
