@@ -481,3 +481,134 @@ html.amoled .curio-bottom-nav { background: rgba(8,9,12,.66) !important; }
 
 @keyframes curio-shuffle-orbit-one { from { transform:rotate(-28deg) scaleY(.72); } to { transform:rotate(67deg) scaleY(.72); } }
 @keyframes curio-shuffle-orbit-two { from { transform:rotate(48deg) scaleY(.72); } to { transform:rotate(-47deg) scaleY(.72); } }
+
+
+/* Account — elevated, borderless personal dashboard */
+.curio-account-screen {
+  --account-ink:#171B26;
+  --account-muted:rgba(23,27,38,.58);
+  --account-panel:rgba(255,255,255,.82);
+  --account-panel-strong:#fff;
+  --account-soft:rgba(20,27,42,.045);
+  --account-shadow:0 24px 60px -34px rgba(22,29,44,.24),0 8px 22px -16px rgba(22,29,44,.16),inset 0 1px 0 rgba(255,255,255,.88);
+  --account-shadow-hover:0 28px 66px -34px rgba(22,29,44,.30),0 12px 26px -16px rgba(22,29,44,.18),inset 0 1px 0 rgba(255,255,255,.9);
+  --account-accent:#DA1E37;
+  isolation:isolate;
+  overflow-x:clip;
+}
+html.dark .curio-account-screen,html.amoled .curio-account-screen {
+  --account-ink:#F5F3F4;
+  --account-muted:rgba(245,243,244,.56);
+  --account-panel:rgba(24,27,34,.88);
+  --account-panel-strong:#1A1D24;
+  --account-soft:rgba(255,255,255,.065);
+  --account-shadow:0 26px 68px -34px rgba(0,0,0,.82),0 9px 24px -16px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.075);
+  --account-shadow-hover:0 30px 76px -34px rgba(0,0,0,.9),0 14px 30px -16px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,255,255,.09);
+}
+html.amoled .curio-account-screen { --account-panel:rgba(14,15,19,.94); --account-panel-strong:#111216; }
+.curio-account-content { position:relative; z-index:1; width:min(100%,900px); }
+.curio-account-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin:10px 0 30px; }
+.curio-account-eyebrow,.curio-account-label { display:block; color:var(--account-accent); font-size:9px; line-height:1.3; font-weight:850; letter-spacing:.19em; }
+.curio-account-heading h1 { margin:8px 0 0; color:var(--account-ink); font:850 clamp(34px,6vw,48px)/.98 Geom,Inter,sans-serif; letter-spacing:-.055em; }
+.curio-account-heading h1 span { color:var(--account-accent); }
+.curio-account-subtitle { margin:11px 0 0; color:var(--account-muted); font-size:13px; }
+.curio-account-settings { width:48px; height:48px; flex:none; display:grid; place-items:center; border-radius:17px; color:var(--account-ink); background:var(--account-panel); box-shadow:var(--account-shadow); transition:transform 200ms ease,box-shadow 200ms ease; }
+.curio-account-settings:hover { transform:translateY(-2px); box-shadow:var(--account-shadow-hover); }
+.curio-account-profile,.curio-account-online { position:relative; overflow:hidden; border:0 !important; border-radius:26px !important; background:var(--account-panel) !important; box-shadow:var(--account-shadow) !important; -webkit-backdrop-filter:blur(24px) saturate(140%); backdrop-filter:blur(24px) saturate(140%); }
+.curio-account-profile { padding:24px; margin-bottom:24px; }
+.curio-account-profile-glow { position:absolute; width:250px; height:250px; right:-90px; top:-150px; border-radius:50%; background:radial-gradient(circle,rgba(218,30,55,.18),rgba(218,30,55,0) 70%); pointer-events:none; }
+.curio-account-profile-top { position:relative; display:flex; align-items:center; gap:16px; }
+.curio-account-avatar { width:68px; height:68px; flex:none; display:grid; place-items:center; border-radius:23px; color:#fff; font:850 27px/1 Geom,Inter,sans-serif; background:linear-gradient(145deg,#F04458,#A90F2B 78%); box-shadow:0 15px 30px -13px rgba(218,30,55,.64),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -7px 14px rgba(90,0,12,.15); }
+.curio-account-profile-copy { min-width:0; flex:1; }
+.curio-account-profile-copy h2 { color:var(--account-ink); margin:5px 0 0; font:800 21px/1.15 Geom,Inter,sans-serif; letter-spacing:-.035em; overflow-wrap:anywhere; }
+.curio-account-profile-copy p { display:flex; align-items:center; gap:5px; margin:7px 0 0; color:var(--account-muted); font-size:11px; }
+.curio-account-local-mark { display:flex; align-items:center; gap:6px; color:#168653; font-size:9px; font-weight:850; letter-spacing:.12em; }
+.curio-account-local-mark i { width:7px; height:7px; border-radius:50%; background:#21A36B; box-shadow:0 0 0 4px rgba(33,163,107,.12); }
+.curio-account-field-label { display:block; margin:24px 0 9px; color:var(--account-muted); font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.curio-account-screen .curio-account-input { width:100%; min-height:50px; padding:0 15px; border:0 !important; border-radius:14px; outline:0; color:var(--account-ink); background:var(--account-soft); box-shadow:inset 0 2px 5px rgba(0,0,0,.035),inset 0 1px 0 rgba(255,255,255,.35); font-size:14px; transition:box-shadow 180ms ease,background 180ms ease; }
+.curio-account-screen .curio-account-input:focus { background:var(--account-panel-strong); box-shadow:0 0 0 3px rgba(218,30,55,.16),0 5px 16px -12px rgba(0,0,0,.3); }
+.curio-account-progress { margin:0 0 27px; }
+.curio-account-section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:0 2px 14px; color:var(--account-accent); }
+.curio-account-section-heading h2 { margin:5px 0 0; color:var(--account-ink); font:800 20px/1.15 Geom,Inter,sans-serif; letter-spacing:-.035em; }
+.curio-account-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.curio-account-stat { min-width:0; min-height:132px; padding:16px; border-radius:22px; background:var(--account-panel); box-shadow:var(--account-shadow); transition:transform 200ms ease,box-shadow 200ms ease; }
+.curio-account-stat:hover { transform:translateY(-3px); box-shadow:var(--account-shadow-hover); }
+.curio-account-stat-icon { width:35px; height:35px; display:grid; place-items:center; border-radius:12px; color:var(--account-accent); background:rgba(218,30,55,.085); box-shadow:inset 0 1px 0 rgba(255,255,255,.45); }
+.curio-account-stat strong { display:block; margin-top:13px; color:var(--account-ink); font:850 clamp(22px,3vw,28px)/1 Geom,Inter,sans-serif; letter-spacing:-.045em; font-variant-numeric:tabular-nums; }
+.curio-account-stat small { display:block; margin-top:7px; color:var(--account-muted); font-size:10px; line-height:1.35; font-weight:650; }
+.curio-account-online { padding:23px; margin-bottom:26px; }
+.curio-account-online-heading { display:flex; align-items:center; gap:13px; margin-bottom:20px; }
+.curio-account-online-symbol { width:45px; height:45px; flex:none; display:grid; place-items:center; border-radius:15px; color:var(--account-accent); background:rgba(218,30,55,.09); box-shadow:0 7px 17px -12px rgba(218,30,55,.45),inset 0 1px 0 rgba(255,255,255,.45); }
+.curio-account-online-copy { min-width:0; flex:1; }
+.curio-account-online-copy h2 { margin:5px 0 0; color:var(--account-ink); font:800 18px/1.15 Geom,Inter,sans-serif; letter-spacing:-.025em; }
+.curio-account-online-copy p { margin:5px 0 0; color:var(--account-muted); font-size:11px; }
+.curio-account-status { flex:none; padding:7px 10px; border-radius:999px; color:var(--account-muted); background:var(--account-soft); font-size:9px; font-weight:800; }
+.curio-account-status.is-connected { color:#168653; background:rgba(22,134,83,.10); }
+.curio-account-loading { display:flex; align-items:center; gap:10px; padding:20px 2px; color:var(--account-muted); font-size:13px; }
+.curio-account-spinner { width:17px; height:17px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:curio-account-spin .8s linear infinite; }
+@keyframes curio-account-spin { to { transform:rotate(360deg); } }
+.curio-account-identity { display:flex; flex-direction:column; gap:6px; padding:17px; border-radius:17px; background:var(--account-soft); box-shadow:inset 0 2px 5px rgba(0,0,0,.035); }
+.curio-account-identity strong { color:var(--account-ink); font-size:13px; overflow-wrap:anywhere; }
+.curio-account-identity span,.curio-account-identity small { color:var(--account-muted); font-size:11px; }
+.curio-account-privacy-note { display:flex; align-items:flex-start; gap:9px; margin:15px 0; color:var(--account-muted); font-size:11px; line-height:1.6; }
+.curio-account-privacy-note svg { flex:none; margin-top:1px; color:#168653; }
+.curio-account-secondary-action,.curio-account-primary-action { min-height:52px; width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 17px; border:0; border-radius:15px; font-size:13px; font-weight:800; transition:transform 180ms ease,filter 180ms ease,box-shadow 180ms ease; }
+.curio-account-secondary-action { color:var(--account-ink); background:var(--account-soft); box-shadow:0 8px 20px -17px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35); }
+.curio-account-primary-action { margin-top:3px; color:#fff; background:linear-gradient(135deg,#E52A45,#B90F2C); box-shadow:0 14px 26px -15px rgba(218,30,55,.72),inset 0 1px 0 rgba(255,255,255,.24); }
+.curio-account-secondary-action:hover,.curio-account-primary-action:hover { transform:translateY(-1px); filter:brightness(1.04); }
+.curio-account-danger-action { width:100%; padding:13px; margin-top:8px; border-radius:14px; color:#D04458; background:rgba(218,30,55,.07); font-size:12px; font-weight:750; }
+.curio-account-auth-switch { display:flex; gap:5px; padding:5px; margin-bottom:18px; border-radius:15px; background:var(--account-soft); }
+.curio-account-auth-switch button { flex:1; min-height:41px; border-radius:11px; color:var(--account-muted); font-size:12px; font-weight:750; transition:background 180ms ease,box-shadow 180ms ease,color 180ms ease; }
+.curio-account-auth-switch button.active { color:var(--account-ink); background:var(--account-panel-strong); box-shadow:0 5px 14px -10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.55); }
+.curio-account-auth-form { display:flex; flex-direction:column; gap:14px; }
+.curio-account-auth-form > label { display:flex; flex-direction:column; gap:8px; color:var(--account-muted); font-size:11px; font-weight:750; }
+.curio-account-auth-form input:not([type=checkbox]) { min-height:49px; border:0 !important; border-radius:14px; background:var(--account-soft) !important; color:var(--account-ink) !important; box-shadow:inset 0 2px 5px rgba(0,0,0,.035); }
+.curio-account-auth-form input:focus { outline:0 !important; box-shadow:0 0 0 3px rgba(218,30,55,.16),inset 0 1px 2px rgba(0,0,0,.04) !important; }
+.curio-account-auth-form .curio-account-terms { flex-direction:row; align-items:flex-start; gap:9px; font-size:11px; line-height:1.55; font-weight:550; }
+.curio-account-terms input { accent-color:#DA1E37; margin-top:2px; }
+.curio-account-terms a,.curio-account-auth-links button:first-child { color:var(--account-accent); font-weight:800; }
+.curio-account-auth-links { display:flex; flex-wrap:wrap; gap:18px; margin-top:17px; }
+.curio-account-auth-links button { color:var(--account-muted); font-size:11px; font-weight:700; }
+.curio-account-unavailable { padding:15px; border-radius:15px; color:var(--account-muted); background:var(--account-soft); font-size:12px; line-height:1.6; }
+.curio-account-notice { margin:17px 0 0; padding:13px 15px; border-radius:14px; font-size:11px; line-height:1.55; }
+.curio-account-notice.is-error { color:#C53045; background:rgba(197,48,69,.09); }
+.curio-account-notice.is-success { color:#168653; background:rgba(22,134,83,.09); }
+.curio-account-notice.is-info { color:var(--account-muted); background:var(--account-soft); }
+.curio-account-preferences { margin-bottom:24px; }
+.curio-account-menu { overflow:hidden; padding:7px; border-radius:23px; background:var(--account-panel); box-shadow:var(--account-shadow); }
+.curio-account-menu button,.curio-account-menu a { width:100%; min-height:75px; display:flex; align-items:center; gap:13px; padding:11px 12px; border-radius:17px; color:var(--account-ink); text-align:left; transition:background 180ms ease,transform 180ms ease; }
+.curio-account-menu button:hover,.curio-account-menu a:hover { background:var(--account-soft); transform:translateX(2px); }
+.curio-account-menu-icon { width:41px; height:41px; flex:none; display:grid; place-items:center; border-radius:14px; color:var(--account-muted); background:var(--account-soft); }
+.curio-account-menu button > span:nth-child(2),.curio-account-menu a > span:nth-child(2) { min-width:0; flex:1; }
+.curio-account-menu strong { display:block; font-size:12px; font-weight:800; }
+.curio-account-menu small { display:block; margin-top:4px; color:var(--account-muted); font-size:10px; }
+.curio-account-menu > button > svg:last-child,.curio-account-menu > a > svg:last-child { color:var(--account-muted); }
+.curio-account-footer { padding:10px 0 0; color:var(--account-muted); text-align:center; font-size:9px; font-weight:800; letter-spacing:.2em; }
+@media (min-width:768px) {
+ .curio-account-content { width:min(100%,940px); }
+ .curio-account-heading { margin-top:8px; margin-bottom:34px; }
+ .curio-account-profile { padding:30px; }
+ .curio-account-online { padding:28px; }
+ .curio-account-progress { margin-bottom:32px; }
+ .curio-account-stat { min-height:145px; padding:19px; }
+}
+@media (max-width:520px) {
+ .curio-account-heading { margin:5px 0 24px; }
+ .curio-account-heading h1 { font-size:36px; }
+ .curio-account-profile { padding:19px; border-radius:23px !important; }
+ .curio-account-avatar { width:59px; height:59px; border-radius:20px; }
+ .curio-account-profile-copy h2 { font-size:18px; }
+ .curio-account-local-mark { font-size:8px; }
+ .curio-account-stats { gap:8px; }
+ .curio-account-stat { min-height:119px; padding:12px 10px; border-radius:18px; }
+ .curio-account-stat strong { font-size:22px; }
+ .curio-account-stat small { font-size:9px; }
+ .curio-account-online { padding:18px; border-radius:22px !important; }
+ .curio-account-online-heading { gap:10px; }
+ .curio-account-online-symbol { width:39px; height:39px; border-radius:13px; }
+ .curio-account-online-copy h2 { font-size:15px; }
+ .curio-account-status { padding:6px 8px; font-size:8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+ .curio-account-screen *, .curio-account-screen *::before, .curio-account-screen *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
