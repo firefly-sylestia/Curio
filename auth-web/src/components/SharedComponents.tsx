@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import LiquidGlass from 'liquid-glass-react';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { ALL_CATEGORIES } from '../data/categories';
 import type { CurioCategory } from '../types';
@@ -60,22 +61,47 @@ export const CurioBackButton: React.FC<{
   size?: number;
   containerColor?: string;
   contentColor?: string;
-}> = ({ onClick, size = 40, containerColor, contentColor }) => {
+}> = ({ onClick, size = 40, contentColor }) => {
   const { isDark } = useTheme();
-  const bgColor = containerColor || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(23,27,38,0.05)');
-  const txtColor = contentColor || (isDark ? 'rgba(255,255,255,0.9)' : '#171B26');
+  const txtColor = contentColor || (isDark ? 'rgba(255,255,255,0.94)' : '#171B26');
   
+  const [portalHost] = useState(() => document.createElement('div'));
+  useEffect(() => {
+    portalHost.className = 'curio-floating-portal';
+    document.documentElement.appendChild(portalHost);
+    return () => portalHost.remove();
+  }, [portalHost]);
+
   return (
     <>
       <span className="curio-back-button-slot" style={{ width: size, height: size }} aria-hidden="true" />
       {createPortal(
-        <button type="button" onClick={onClick} className="curio-back-button" aria-label="Go back" title="Go back"
-          style={{ width: size, height: size, background: bgColor, color: txtColor }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>,
-        document.body
+        <LiquidGlass
+          className="curio-back-liquid-glass"
+          displacementScale={25}
+          blurAmount={0.1}
+          saturation={isDark ? 145 : 135}
+          aberrationIntensity={0.35}
+          elasticity={0.08}
+          cornerRadius={15}
+          padding="0"
+          overLight={!isDark}
+          mode="standard"
+          style={{
+            position: 'absolute',
+            top: `calc(env(safe-area-inset-top, 0px) + ${14 + size / 2}px)`,
+            left: `calc(env(safe-area-inset-left, 0px) + ${16 + size / 2}px)`,
+            zIndex: 1200,
+          }}
+        >
+          <button type="button" onClick={onClick} className="curio-back-button" aria-label="Go back" title="Go back"
+            style={{ width: size, height: size, color: txtColor, background: 'transparent' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        </LiquidGlass>,
+        portalHost
       )}
     </>
   );
@@ -881,8 +907,21 @@ export const CurioModal: React.FC<{
       }}
       onClick={onClose}
     >
+      <LiquidGlass
+        className="curio-modal-liquid-glass"
+        displacementScale={30}
+        blurAmount={0.12}
+        saturation={isDark ? 140 : 135}
+        aberrationIntensity={0.45}
+        elasticity={0.08}
+        cornerRadius={24}
+        padding="0"
+        overLight={!isDark}
+        mode="standard"
+        style={{ position: 'absolute', top: '50%', left: '50%', width: 'min(512px, calc(100vw - 32px))', zIndex: 1 }}
+      >
       <div
-        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 max-h-[80vh] overflow-y-auto transition-all duration-300"
+        className="curio-modal-surface w-full rounded-3xl p-6 max-h-[80vh] overflow-y-auto transition-all duration-300"
         style={{
           background: isDark ? '#1a1a2e' : 'white',
           transform: isVisible ? 'translateY(0)' : 'translateY(100%)',
@@ -908,6 +947,7 @@ export const CurioModal: React.FC<{
         )}
         {children}
       </div>
+      </LiquidGlass>
     </div>
   );
 };

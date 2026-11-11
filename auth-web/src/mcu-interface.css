@@ -1036,3 +1036,107 @@ html.amoled .curio-bottom-nav{background:rgba(10,11,14,.70)!important}
   .curio-account-screen .curio-account-stat-icon svg { width:15px; height:15px; }
   .curio-account-screen .curio-account-stat strong { font-size:19px; }
 }
+
+
+/* Curio Liquid Glass system — shared geometry, calmer dark surfaces, real refraction. */
+:root {
+  --curio-radius-control: 16px;
+  --curio-radius-panel: 24px;
+  --curio-radius-card: 20px;
+  --curio-radius-nav: 26px;
+  --curio-radius-dialog: 24px;
+}
+.curio-bottom-nav {
+  width:min(520px,calc(100% - 32px))!important;
+  min-height:72px!important;
+  padding:7px!important;
+  border:1px solid color-mix(in srgb,var(--curio-glass-border) 80%,transparent)!important;
+  border-radius:var(--curio-radius-nav)!important;
+  background:rgba(248,250,253,.58)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(145%)!important;
+  backdrop-filter:blur(24px) saturate(145%)!important;
+  box-shadow:0 18px 44px -27px rgba(24,31,44,.28),0 3px 10px rgba(24,31,44,.08),inset 0 1px 0 rgba(255,255,255,.62)!important;
+}
+html.dark .curio-bottom-nav {
+  background:rgba(18,20,26,.86)!important;
+  border-color:rgba(255,255,255,.085)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(125%)!important;
+  backdrop-filter:blur(28px) saturate(125%)!important;
+  box-shadow:0 22px 54px -26px rgba(0,0,0,.9),0 4px 14px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.075)!important;
+}
+html.amoled .curio-bottom-nav {
+  background:rgba(5,6,8,.94)!important;
+  border-color:rgba(255,255,255,.09)!important;
+  box-shadow:0 18px 44px -25px rgba(0,0,0,.98),inset 0 1px 0 rgba(255,255,255,.075)!important;
+}
+.curio-bottom-nav::before,.curio-bottom-nav .curio-nav-blob { display:none!important; }
+.curio-nav-liquid-active { pointer-events:none!important; }
+.curio-nav-liquid-active-shape {
+  display:block;
+  width:calc((min(520px,100vw - 32px) - 28px)/4);
+  height:56px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+}
+html.dark .curio-nav-liquid-active-shape { background:rgba(255,255,255,.075); }
+html.amoled .curio-nav-liquid-active-shape { background:rgba(255,255,255,.065); }
+.curio-bottom-nav button {
+  z-index:2!important;gap:4px!important;border-radius:18px!important;
+  color:color-mix(in srgb,var(--curio-muted) 94%,transparent)!important;
+  font-size:10px!important;letter-spacing:.005em;
+}
+.curio-bottom-nav button.active { color:#A71931!important; }
+html.dark .curio-bottom-nav button.active,html.amoled .curio-bottom-nav button.active { color:#fff!important; }
+.curio-bottom-nav .curio-nav-icon {
+  width:36px;height:32px;display:grid;place-items:center;border-radius:var(--curio-radius-control);
+  transition:transform 260ms cubic-bezier(.2,.9,.3,1),background 220ms ease,box-shadow 220ms ease;
+}
+.curio-bottom-nav button.active .curio-nav-icon { transform:translateY(-1px);filter:drop-shadow(0 1px 5px rgba(218,30,55,.16)); }
+html.dark .curio-bottom-nav button.active .curio-nav-icon,html.amoled .curio-bottom-nav button.active .curio-nav-icon { filter:drop-shadow(0 1px 5px rgba(255,255,255,.12)); }
+@media(max-width:520px) {
+  .curio-bottom-nav { width:calc(100% - 24px)!important;min-height:66px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 8px)!important; }
+  .curio-nav-liquid-active-shape { width:calc((100vw - 52px)/4);height:50px; }
+}
+@media(min-width:900px) { .curio-bottom-nav { bottom:24px!important; } }
+
+/* Dedicated portal host is a sibling of body, outside transformed route and scroll containers. */
+.curio-floating-portal {
+  position:fixed!important;inset:0!important;z-index:1200!important;pointer-events:none!important;
+  transform:none!important;contain:layout style;
+}
+.curio-back-liquid-glass { pointer-events:auto!important; }
+.curio-back-button {
+  position:relative!important;display:grid;place-items:center;padding:0!important;
+  border:0!important;border-radius:15px!important;background:transparent!important;color:inherit;
+  box-shadow:none!important;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.curio-back-button:hover { transform:translateY(-1px) scale(1.035); }
+.curio-back-button:active { transform:scale(.94); }
+.curio-back-button:focus-visible { outline:2px solid var(--curio-accent);outline-offset:3px; }
+
+/* Refractive modal surface, aligned to the same 24px panel geometry. */
+.curio-dialog-liquid-glass { max-width:calc(100vw - 32px); }
+.curio-install-sheet {
+  width:min(100%,460px);max-height:calc(100dvh - 40px);overflow-y:auto;
+  padding:30px 24px max(26px,env(safe-area-inset-bottom));
+  border-radius:var(--curio-radius-dialog)!important;border:0!important;
+  background:rgba(18,20,26,.28)!important;box-shadow:none!important;color:var(--curio-text);
+}
+html:not(.dark):not(.amoled) .curio-install-sheet { background:rgba(248,250,253,.58)!important; }
+.curio-install-close,.curio-install-symbol { border-radius:var(--curio-radius-control)!important; }
+.curio-install-card { border-radius:var(--curio-radius-panel)!important; }
+.curio-install-card>button:not(.curio-install-dismiss) { border-radius:var(--curio-radius-control)!important; }
+.curio-install-card>.curio-install-dismiss { border-radius:12px!important; }
+.curio-gallery-image { border-radius:var(--curio-radius-card)!important; }
+.curio-image-viewer-close { border-radius:var(--curio-radius-control)!important; }
+@media(prefers-reduced-motion:reduce) { .curio-nav-liquid-active,.curio-back-liquid-glass { transition:none!important; } }
+
+
+/* General CurioModal glass surface. */
+.curio-modal-liquid-glass { max-width:calc(100vw - 32px); max-height:calc(100dvh - 32px); }
+.curio-modal-surface {
+  border-radius:24px!important;
+  background:rgba(18,20,26,.25)!important;
+  box-shadow:none!important;
+}
+html:not(.dark):not(.amoled) .curio-modal-surface { background:rgba(248,250,253,.58)!important; }

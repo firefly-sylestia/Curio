@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MaterialIcon } from './SharedComponents';
+import LiquidGlass from 'liquid-glass-react';
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -35,13 +36,15 @@ const InstallAppCard: React.FC = () => {
     </div>
     {helpOpen && createPortal(
       <div className="curio-install-backdrop" onClick={() => setHelpOpen(false)}>
-        <section className="curio-install-sheet" role="dialog" aria-modal="true" aria-labelledby="curio-install-title" onClick={event => event.stopPropagation()}>
-          <button type="button" className="curio-install-close" onClick={() => setHelpOpen(false)} aria-label="Close"><MaterialIcon name="close" size={20} /></button>
-          <div className="curio-install-symbol"><MaterialIcon name="add_to_home_screen" size={24} /></div>
-          <h2 id="curio-install-title">Add Curio to your home screen</h2>
-          {isIOS ? <ol><li>Open Curio in <strong>Safari</strong>.</li><li>Tap the <strong>Share</strong> button.</li><li>Choose <strong>Add to Home Screen</strong>, then tap Add.</li></ol> : <ol><li>Open your browser menu (<strong>⋮</strong>).</li><li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li><li>Confirm the installation.</li></ol>}
-          <p>{isIOS ? 'iPhone and iPad browsers use the Share menu for this. The automatic install prompt is not available on iOS.' : 'If your browser shows an install icon in the address bar, you can use that instead.'}</p>
-        </section>
+        <LiquidGlass className="curio-dialog-liquid-glass" displacementScale={30} blurAmount={0.12} saturation={145} aberrationIntensity={0.45} elasticity={0.08} cornerRadius={24} padding="0" overLight={false} mode="standard" style={{ position: 'absolute', top: '50%', left: '50%', zIndex: 1 }}>
+          <section className="curio-install-sheet" role="dialog" aria-modal="true" aria-labelledby="curio-install-title" onClick={event => event.stopPropagation()}>
+            <button type="button" className="curio-install-close" onClick={() => setHelpOpen(false)} aria-label="Close"><MaterialIcon name="close" size={20} /></button>
+            <div className="curio-install-symbol"><MaterialIcon name="add_to_home_screen" size={24} /></div>
+            <h2 id="curio-install-title">Add Curio to your home screen</h2>
+            {isIOS ? <ol><li>Open Curio in <strong>Safari</strong>.</li><li>Tap the <strong>Share</strong> button.</li><li>Choose <strong>Add to Home Screen</strong>, then tap Add.</li></ol> : <ol><li>Open your browser menu (<strong>⋮</strong>).</li><li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li><li>Confirm the installation.</li></ol>}
+            <p>{isIOS ? 'iPhone and iPad browsers use the Share menu for this. The automatic install prompt is not available on iOS.' : 'If your browser shows an install icon in the address bar, you can use that instead.'}</p>
+          </section>
+        </LiquidGlass>
       </div>,
       document.body
     )}
