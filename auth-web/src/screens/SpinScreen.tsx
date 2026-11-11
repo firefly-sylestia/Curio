@@ -1,7 +1,7 @@
 // Curio Web App - Shuffle
 // A focused, card-first topic draw.
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { MaterialIcon } from '../components/SharedComponents';
@@ -22,6 +22,9 @@ export const SpinScreen: React.FC = () => {
   );
   const [topics, setTopics] = useState<CurioTopic[]>([]);
   const [topic, setTopic] = useState<CurioTopic | null>(null);
+  const [rollingTopic, setRollingTopic] = useState<CurioTopic | null>(null);
+  const intervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
   const [previousId, setPreviousId] = useState<string | null>(null);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,17 +74,29 @@ export const SpinScreen: React.FC = () => {
   const drawDiscovery = useCallback(() => {
     if (drawing || loading || eligibleTopics.length === 0) return;
     setDrawing(true);
-    const pool = eligibleTopics.length > 1
-      ? eligibleTopics.filter(item => item.id !== (topic?.id || previousId))
-      : eligibleTopics;
-    const choice = pool[Math.floor(Math.random() * pool.length)] || eligibleTopics[0];
-    window.setTimeout(() => {
+    setRollingTopic(null);
+    const pool = eligibleTopics.length > 1 ? eligibleTopics.filter(item => item.id !== (topic?.id || previousId)) : eligibleTopics;
+    const candidates = pool.length ? pool : eligibleTopics;
+    const choice = candidates[Math.floor(Math.random() * candidates.length)] || eligibleTopics[0];
+    intervalRef.current = window.setInterval(() => {
+      setRollingTopic(eligibleTopics[Math.floor(Math.random() * eligibleTopics.length)]);
+    }, 82);
+    timeoutRef.current = window.setTimeout(() => {
+      if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      setRollingTopic(null);
       setPreviousId(topic?.id || previousId);
       setTopic(choice);
       setDrawing(false);
+      timeoutRef.current = null;
       questSystem.onSpin(activeCategory.id);
-    }, 260);
+    }, 1180);
   }, [drawing, loading, eligibleTopics, topic, previousId, questSystem, activeCategory.id]);
+
+  useEffect(() => () => {
+    if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+  }, []);
 
   const chooseCategory = (category: CurioCategory) => {
     setActiveCategory(category);
@@ -132,7 +147,7 @@ export const SpinScreen: React.FC = () => {
 
         <section className="curio-draw-stage" aria-live="polite">
           <div key={topic?.id || (drawing ? 'drawing' : 'ready')}
-            className="curio-draw-card relative overflow-hidden rounded-[22px] p-6 sm:p-8"
+            className={"curio-draw-card relative overflow-hidden rounded-[22px] p-6 sm:p-8 " + (drawing ? "is-drawing" : topic ? "has-result" : "")}
             style={{
               minHeight: 'clamp(290px, 43vh, 390px)',
               display: 'flex',
@@ -160,10 +175,10 @@ export const SpinScreen: React.FC = () => {
               {loading ? (
                 <p className="text-base font-medium" style={{ color: muted }}>Loading topics…</p>
               ) : drawing ? (
-                <div className="space-y-3" aria-label="Choosing a topic">
-                  <div className="curio-draw-skeleton h-8 w-3/4 rounded-lg" />
-                  <div className="curio-draw-skeleton h-3 w-full rounded" />
-                  <div className="curio-draw-skeleton h-3 w-2/3 rounded" />
+                <div className="curio-rolling-wrap" aria-label="Shuffling through topics">
+                  <p className="text-[10px] font-bold uppercase tracking-[.16em] mb-3" style={{ color: muted }}>Finding your next curiosity</p>
+                  <h2 key={rollingTopic?.id || "rolling"} className="curio-rolling-title text-[28px] sm:text-[34px] font-extrabold leading-tight tracking-tight" style={{ color: ink, fontFamily: "Geom, Inter, sans-serif" }}>{rollingTopic?.name || "Mixing the deck…"}</h2>
+                  <div className="curio-shuffle-track mt-6" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /></div>
                 </div>
               ) : topic ? (
                 <>
@@ -186,7 +201,7 @@ export const SpinScreen: React.FC = () => {
                 {loading ? ' ' : `${eligibleTopics.length.toLocaleString()} topics available`}
               </span>
               <span className="text-[10px] uppercase tracking-[.12em] font-bold" style={{ color: muted }}>
-                {topic ? 'Selected' : 'Random draw'}
+                {drawing ? 'Shuffling' : topic ? 'Selected' : 'Random draw'}
               </span>
             </div>
           </div>
@@ -254,11 +269,20 @@ export const SpinScreen: React.FC = () => {
       )}
 
       <style>{`
-        .curio-draw-card { animation: curio-draw-enter 260ms cubic-bezier(.2,.75,.25,1) both; }
-        @keyframes curio-draw-enter { from { opacity: .65; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .curio-draw-skeleton { background: linear-gradient(90deg, rgba(120,120,120,.08), rgba(120,120,120,.16), rgba(120,120,120,.08)); background-size: 200% 100%; animation: curio-draw-shimmer 1.1s linear infinite; }
-        @keyframes curio-draw-shimmer { to { background-position: -200% 0; } }
-        @media (prefers-reduced-motion: reduce) { .curio-draw-card, .curio-draw-skeleton { animation: none; } }
+        .curio-draw-card { animation: curio-draw-enter 320ms cubic-bezier(.2,.75,.25,1) both; transform-origin: 50% 58%; }
+        .curio-draw-card.is-drawing { animation: curio-deck-shake 180ms ease-in-out infinite alternate; }
+        .curio-draw-card.has-result { animation: curio-card-land 520ms cubic-bezier(.16,1,.3,1) both; }
+        .curio-rolling-title { animation: curio-title-flicker 100ms linear both; }
+        .curio-shuffle-track { height: 3px; display: flex; gap: 5px; align-items: center; overflow: hidden; }
+        .curio-shuffle-track span { height: 3px; flex: 1; border-radius: 9px; background: #DA1E37; opacity: .25; animation: curio-track 650ms ease-in-out infinite alternate; }
+        .curio-shuffle-track span:nth-child(2n) { animation-delay: 90ms; }
+        .curio-shuffle-track span:nth-child(3n) { animation-delay: 180ms; }
+        @keyframes curio-draw-enter { from { opacity: .55; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes curio-deck-shake { from { transform: translateX(-2px) rotate(-.25deg) scale(.995); } to { transform: translateX(2px) rotate(.25deg) scale(1.005); } }
+        @keyframes curio-card-land { 0% { opacity: .72; transform: translateY(12px) scale(.97); } 65% { opacity: 1; transform: translateY(-3px) scale(1.008); } 100% { transform: translateY(0) scale(1); } }
+        @keyframes curio-title-flicker { from { opacity: .45; filter: blur(3px); transform: translateY(4px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
+        @keyframes curio-track { from { opacity: .2; transform: scaleX(.55); } to { opacity: .9; transform: scaleX(1); } }
+        @media (prefers-reduced-motion: reduce) { .curio-draw-card, .curio-draw-card.is-drawing, .curio-draw-card.has-result, .curio-rolling-title, .curio-shuffle-track span { animation: none; } }
       `}</style>
     </div>
   );
