@@ -11,7 +11,6 @@ const InstallAppCard: React.FC = () => {
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [installed, setInstalled] = useState(false);
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem('curio-install-card-dismissed') === '1');
   const isIOS = typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent);
   useEffect(() => {
     const onPrompt = (event: Event) => { event.preventDefault(); setPromptEvent(event as InstallPromptEvent); };
@@ -21,7 +20,7 @@ const InstallAppCard: React.FC = () => {
     setInstalled(window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
     return () => { window.removeEventListener('beforeinstallprompt', onPrompt); window.removeEventListener('appinstalled', onInstalled); };
   }, []);
-  if (installed || dismissed) return null;
+  if (installed || !promptEvent) return null;
   const handleInstall = async () => {
     await promptEvent.prompt();
     const choice = await promptEvent.userChoice;
@@ -33,7 +32,6 @@ const InstallAppCard: React.FC = () => {
       <div className="curio-install-symbol"><MaterialIcon name="install_mobile" size={22} /></div>
       <div className="curio-install-copy"><strong>Take Curio with you</strong><span>Install it for a focused, app-like experience.</span></div>
       <button type="button" onClick={handleInstall}>{promptEvent ? 'Install' : 'Add app'} <MaterialIcon name="arrow_forward" size={15} /></button>
-      <button type="button" className="curio-install-dismiss" onClick={() => { localStorage.setItem('curio-install-card-dismissed', '1'); setDismissed(true); }} aria-label="Dismiss install suggestion"><MaterialIcon name="close" size={16} /></button>
     </div>
     {helpOpen && createPortal(
       <div className="curio-install-backdrop" onClick={() => setHelpOpen(false)}>
