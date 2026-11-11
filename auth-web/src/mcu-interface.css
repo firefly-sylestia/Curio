@@ -638,3 +638,55 @@ html.amoled .curio-settings-screen { --settings-panel:rgba(14,15,19,.94); }
 .curio-bottom-nav button.active { color:#B91632 !important; }
 html.dark .curio-bottom-nav button.active,html.amoled .curio-bottom-nav button.active { color:#FF6B80 !important; }
 html.dark .curio-nav-blob,html.amoled .curio-nav-blob { background:rgba(218,30,55,.30) !important; border-color:rgba(255,125,145,.14); box-shadow:0 9px 25px -17px rgba(218,30,55,.55),inset 0 1px 0 rgba(255,255,255,.14) !important; }
+
+
+/* Account polish: remove theme artifacts and lighten the floating navigation */
+.curio-account-screen .curio-account-progress,
+.curio-account-screen .curio-account-progress + section,
+.curio-account-screen .curio-account-section-heading {
+  border: 0 !important;
+  outline: 0 !important;
+  background-image: none !important;
+}
+.curio-account-screen .curio-account-progress::before,
+.curio-account-screen .curio-account-progress::after,
+.curio-account-screen .curio-account-section-heading::before,
+.curio-account-screen .curio-account-section-heading::after {
+  content: none !important;
+  display: none !important;
+}
+.curio-account-screen .curio-account-stats {
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  background: transparent !important;
+}
+.curio-account-screen .curio-account-stat {
+  box-shadow: 0 10px 24px -22px rgba(25,35,55,.24) !important;
+}
+html.dark .curio-account-screen .curio-account-stat,
+html.amoled .curio-account-screen .curio-account-stat {
+  box-shadow: 0 15px 30px -25px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+.curio-account-screen .curio-account-section-heading {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.curio-bottom-nav {
+  background: rgba(248,249,252,.36) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(175%) !important;
+  backdrop-filter: blur(34px) saturate(175%) !important;
+  box-shadow: 0 14px 38px -25px rgba(12,16,24,.25), inset 0 1px 0 rgba(255,255,255,.28) !important;
+}
+html.dark .curio-bottom-nav {
+  background: rgba(20,23,29,.38) !important;
+  box-shadow: 0 17px 42px -28px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+html.amoled .curio-bottom-nav {
+  background: rgba(8,9,12,.42) !important;
+}
+@media (max-width:767px) {
+  .curio-bottom-nav { background: rgba(248,249,252,.36) !important; }
+  html.dark .curio-bottom-nav { background: rgba(20,23,29,.38) !important; }
+  html.amoled .curio-bottom-nav { background: rgba(8,9,12,.42) !important; }
+}
