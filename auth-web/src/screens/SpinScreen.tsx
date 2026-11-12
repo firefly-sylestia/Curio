@@ -9,6 +9,7 @@ import { ALL_CATEGORIES, getCategoryBySlug } from '../data/categories';
 import { loadTopicsForCategory } from '../data/topics';
 import { getQuestSystem } from '../data/QuestSystem';
 import type { CurioCategory, CurioTopic } from '../types';
+import { readShuffleState, writeShuffleState, recordShuffleTopics } from '../data/discoveryPersistence';
 
 const ACCENT = '#DA1E37';
 
@@ -17,20 +18,22 @@ export const SpinScreen: React.FC = () => {
   const { categorySlug } = useParams();
   const { isDark, isAmoled } = useTheme();
   const [questSystem] = useState(() => getQuestSystem());
+  const savedState = useRef(readShuffleState());
   const [activeCategory, setActiveCategory] = useState<CurioCategory>(() =>
-    (categorySlug && getCategoryBySlug(categorySlug)) || ALL_CATEGORIES[0]
+    (categorySlug && getCategoryBySlug(categorySlug)) || ALL_CATEGORIES.find(category => category.id === savedState.current.categoryId) || ALL_CATEGORIES[0]
   );
   const [topics, setTopics] = useState<CurioTopic[]>([]);
   const [topic, setTopic] = useState<CurioTopic | null>(null);
   const [drawnTopics, setDrawnTopics] = useState<CurioTopic[]>([]);
-  const [allCategories, setAllCategories] = useState(false);
-  const [drawCount, setDrawCount] = useState(1);
+  const [allCategories, setAllCategories] = useState(() => savedState.current.allCategories === true);
+  const [drawCount, setDrawCount] = useState(() => [1, 3, 5, 10].includes(Number(savedState.current.drawCount)) ? Number(savedState.current.drawCount) : 1);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [rollingTopic, setRollingTopic] = useState<CurioTopic | null>(null);
   const intervalRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
-  const [previousId, setPreviousId] = useState<string | null>(null);
-  const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
+  const [previousId, setPreviousId] = useState<string | null>(() => savedState.current.previousId || null);
+  const [selectedSubtype, setSelectedSubtype] = useState<string | null>(() => savedState.current.subtype || null);
+  const [stateHydrated, setStateHydrated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drawing, setDrawing] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -46,29 +49,35 @@ export const SpinScreen: React.FC = () => {
   useEffect(() => {
     if (!categorySlug) return;
     const category = getCategoryBySlug(categorySlug);
-    if (category) setActiveCategory(category);
+    if (category) {
+      if (savedState.current.categoryId !== category.id || savedState.current.allCategories) savedState.current = { ...savedState.current, categoryId: category.id, allCategories: false, subtype: null, topicId: null, drawnTopicIds: [], previousId: null };
+      setActiveCategory(category);
+      setAllCategories(false);
+    }
   }, [categorySlug]);
 
   useEffect(() => {
     let current = true;
     setLoading(true);
     setTopics([]);
-    setTopic(null);
-    setDrawnTopics([]);
-    setPreviousId(null);
-    setSelectedSubtype(null);
     const categoryIds = allCategories
       ? ALL_CATEGORIES.filter(category => category.isReady && !category.isHidden).map(category => category.id)
       : [activeCategory.id];
     Promise.all(categoryIds.map(id => loadTopicsForCategory(id))).then(groups => {
       if (!current) return;
-      setTopics(groups.flat());
+      const loadedTopics = groups.flat();
+      setTopics(loadedTopics);
+      const saved = savedState.current;
+      const resolveTopic = (id: string | null | undefined) => id ? loadedTopics.find(item => item.id === id) || null : null;
+      setTopic(resolveTopic(saved.topicId));
+      setDrawnTopics((saved.drawnTopicIds || []).map(id => resolveTopic(id)).filter((item): item is CurioTopic => Boolean(item)));
+      setStateHydrated(true);
       setLoading(false);
     }).catch(() => {
       if (current) setLoading(false);
     });
     return () => { current = false; };
-  }, [activeCategory.id, allCategories]);
+  }, [activeCategory.id, allCategories, categorySlug]);
 
   const subtypes = useMemo(
     () => Array.from(new Set(topics.map(item => item.subtype).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
@@ -107,6 +116,7 @@ export const SpinScreen: React.FC = () => {
           setDrawnTopics(picks);
           setDrawing(false);
           timeoutRef.current = null;
+          recordShuffleTopics(picks);
           questSystem.onSpin(activeCategory.id);
         }, 760);
         return;
@@ -118,12 +128,18 @@ export const SpinScreen: React.FC = () => {
     intervalRef.current = window.setTimeout(tick, 58);
   }, [drawing, loading, eligibleTopics, topic, previousId, questSystem, activeCategory.id, drawCount]);
 
+  useEffect(() => {
+    if (!stateHydrated) return;
+    writeShuffleState({ categoryId: activeCategory.id, allCategories, subtype: selectedSubtype, drawCount, topicId: topic?.id || null, drawnTopicIds: drawnTopics.map(item => item.id), previousId });
+  }, [stateHydrated, activeCategory.id, allCategories, selectedSubtype, drawCount, topic, drawnTopics, previousId]);
+
   useEffect(() => () => {
     if (intervalRef.current !== null) window.clearTimeout(intervalRef.current);
     if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
   }, []);
 
   const chooseCategory = (category: CurioCategory) => {
+    savedState.current = { ...savedState.current, categoryId: category.id, allCategories: false, subtype: null, topicId: null, drawnTopicIds: [], previousId: null };
     setActiveCategory(category);
     setAllCategories(false);
     setSelectedSubtype(null);
@@ -133,6 +149,7 @@ export const SpinScreen: React.FC = () => {
   };
 
   const chooseSubtype = (subtype: string | null) => {
+    savedState.current = { ...savedState.current, subtype, topicId: null, drawnTopicIds: [], previousId: null };
     setSelectedSubtype(subtype);
     setTopic(null);
     setDrawnTopics([]);
@@ -141,6 +158,7 @@ export const SpinScreen: React.FC = () => {
   };
 
   const chooseAllCategories = () => {
+    savedState.current = { ...savedState.current, allCategories: true, subtype: null, topicId: null, drawnTopicIds: [], previousId: null };
     setAllCategories(true);
     setSelectedSubtype(null);
     setTopic(null);
@@ -183,7 +201,7 @@ export const SpinScreen: React.FC = () => {
           </div>
           <div className="curio-shuffle-multi-control" aria-label="Number of topics to shuffle">
             <span>DRAW</span>
-            {[1, 3, 5, 10].map(count => <button key={count} type="button" aria-pressed={drawCount === count} onClick={() => { setDrawCount(count); setDrawnTopics([]); }}>{count === 1 ? 'One' : count}</button>)}
+            {[1, 3, 5, 10].map(count => <button key={count} type="button" aria-pressed={drawCount === count} onClick={() => { savedState.current = { ...savedState.current, drawCount: count, topicId: null, drawnTopicIds: [] }; setDrawCount(count); setTopic(null); setDrawnTopics([]); }}>{count === 1 ? 'One' : count}</button>)}
             <small>topics</small>
           </div>
           <div className={"curio-shuffle-canvas " + (drawing ? "is-drawing" : topic ? "has-result" : "is-idle")}>

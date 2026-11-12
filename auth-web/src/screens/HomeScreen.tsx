@@ -10,13 +10,14 @@ import { MaterialIcon } from '../components/SharedComponents';
 import { captureRepository } from '../db/database';
 import { ScreenEntrance, usePressable } from '../animations';
 import InstallAppCard from '../components/InstallAppCard';
+import { getShuffleRecents } from '../data/discoveryPersistence';
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, isAmoled } = useTheme();
   const [questSystem] = useState(() => getQuestSystem());
   const [stats, setStats] = useState({ streak: 0, saved: 0, topics: '6,480+' });
-  const [recents, setRecents] = useState<Array<{ id: string; name: string; categoryId: string; subtype: string; daysAgo: number }>>([]);
+  const [recents, setRecents] = useState<Array<{ id: string; name: string; categoryId: string; subtype: string; daysAgo: number; isShuffle?: boolean; timestamp: number }>>([]);
   const [greeting, setGreeting] = useState('');
   const [displayName] = useState(() => localStorage.getItem('curio-display-name') || 'Explorer');
 
@@ -29,11 +30,9 @@ const HomeScreen: React.FC = () => {
     const load = async () => {
       try {
         const entries = await captureRepository.getAll();
-        const recent = entries.reverse().slice(0, 5).map(e => ({
-          id: e.id, name: e.topicName, categoryId: e.categoryId,
-          subtype: e.topicSubtype, daysAgo: Math.floor((Date.now() - e.capturedAtMillis) / 86400000),
-        }));
-        setRecents(recent);
+        const captured = entries.map(e => ({ id: e.id, name: e.topicName, categoryId: e.categoryId, subtype: e.topicSubtype, daysAgo: Math.floor((Date.now() - e.capturedAtMillis) / 86400000), isShuffle: false, timestamp: e.capturedAtMillis }));
+        const shuffled = getShuffleRecents().map(item => ({ id: item.id, name: item.name, categoryId: item.categoryId, subtype: item.subtype, daysAgo: Math.floor((Date.now() - item.drawnAt) / 86400000), isShuffle: true, timestamp: item.drawnAt }));
+        setRecents([...captured, ...shuffled].sort((a, b) => b.timestamp - a.timestamp).filter((item, index, all) => all.findIndex(other => other.id === item.id && other.categoryId === item.categoryId) === index).slice(0, 5));
         setStats(s => ({ ...s, saved: entries.length }));
       } catch {}
     };
@@ -41,6 +40,15 @@ const HomeScreen: React.FC = () => {
     setStats({ streak: qs.bestStreak || 0, saved: 0, topics: '6,480+' });
     load();
   }, [questSystem]);
+
+  useEffect(() => {
+    const refresh = () => {
+      const latest = getShuffleRecents().map(item => ({ id: item.id, name: item.name, categoryId: item.categoryId, subtype: item.subtype, daysAgo: Math.floor((Date.now() - item.drawnAt) / 86400000), isShuffle: true, timestamp: item.drawnAt }));
+      setRecents(previous => [...previous.filter(item => !item.isShuffle), ...latest].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5));
+    };
+    window.addEventListener('curio:shuffle-recents-updated', refresh);
+    return () => window.removeEventListener('curio:shuffle-recents-updated', refresh);
+  }, []);
 
   const handleShuffle = () => {
     const cats = ALL_CATEGORIES.filter(c => c.isReady);
@@ -149,7 +157,7 @@ const HomeScreen: React.FC = () => {
                 const cat = ALL_CATEGORIES.find(c => c.id === e.categoryId);
                 return (
                   <RecentEntry key={e.id} entry={e} cat={cat} isDark={isDark}
-                    onClick={() => navigate(`/detail/${e.id}`)} />
+                    onClick={() => navigate(e.isShuffle ? `/reveal/${e.categoryId.toLowerCase()}/${e.id}` : `/detail/${e.id}`)} />
                 );
               })}
             </div>
@@ -162,7 +170,7 @@ const HomeScreen: React.FC = () => {
 };
 
 const RecentEntry: React.FC<{
-  entry: { id: string; name: string; categoryId: string; subtype: string; daysAgo: number };
+  entry: { id: string; name: string; categoryId: string; subtype: string; daysAgo: number; isShuffle?: boolean; timestamp: number };
   cat: any; isDark: boolean; onClick: () => void;
 }> = ({ entry, cat, isDark, onClick }) => {
   const { handlers, pressStyle } = usePressable();
@@ -178,7 +186,7 @@ const RecentEntry: React.FC<{
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate" style={{ color: getTextColor(isDark) }}>{entry.name}</p>
         <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(59,10,23,0.4)' }}>
-          {cat?.displayName} · {entry.subtype} · {entry.daysAgo === 0 ? 'today' : entry.daysAgo === 1 ? 'yesterday' : `${entry.daysAgo}d ago`}
+          {cat?.displayName} · {entry.subtype} · {entry.isShuffle ? 'Shuffled' : 'Saved'} · {entry.daysAgo === 0 ? 'today' : entry.daysAgo === 1 ? 'yesterday' : `${entry.daysAgo}d ago`}
         </p>
       </div>
       <MaterialIcon name="chevron_right" size={16} style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(59,10,23,0.3)' }} />
