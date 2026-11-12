@@ -50,7 +50,7 @@ export const SpinScreen: React.FC = () => {
     if (!categorySlug) return;
     const category = getCategoryBySlug(categorySlug);
     if (category) {
-      if (savedState.current.categoryId !== category.id) savedState.current = { ...savedState.current, categoryId: category.id, allCategories: false, subtype: null, topicId: null, drawnTopicIds: [], previousId: null };
+      if (savedState.current.categoryId !== category.id || savedState.current.allCategories) savedState.current = { ...savedState.current, categoryId: category.id, allCategories: false, subtype: null, topicId: null, drawnTopicIds: [], previousId: null };
       setActiveCategory(category);
       setAllCategories(false);
     }
