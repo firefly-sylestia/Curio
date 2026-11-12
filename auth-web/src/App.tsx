@@ -2,6 +2,7 @@
 // Routes, theme, bottom nav, floating pet
 
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './theme/ThemeContext';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './screens/HomeScreen';
@@ -78,6 +79,7 @@ const App: React.FC = () => {
         </div>
 
         {showBottomNav && <BottomNav />}
+        <Analytics />
       </div>
     </ThemeProvider>
   );

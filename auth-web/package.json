@@ -11,11 +11,12 @@
     "check": "node --check assets/curio.js && node --check api/config.js && node --check api/delete-account.js"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "idb": "^8.0.3",
+    "liquid-glass-react": "^1.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2",
-    "liquid-glass-react": "^1.1.1"
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

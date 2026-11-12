@@ -1,0 +1,38 @@
+# Vercel Web Analytics Installation
+
+Successfully installed and configured Vercel Web Analytics for the Curio auth-web project.
+
+## Changes Made
+
+### 1. Package Installation
+- Installed `@vercel/analytics` version 2.0.1 as a dependency
+- Updated `package.json` to include the new dependency
+- Updated `package-lock.json` with the new package and its dependencies
+
+### 2. Code Integration
+- Modified `src/App.tsx` to integrate analytics:
+  - Added import statement: `import { Analytics } from '@vercel/analytics/react';`
+  - Added `<Analytics />` component at the end of the main app div, after the bottom navigation
+  
+### Implementation Details
+- Following the official Vercel documentation for React applications
+- The Analytics component was placed at the root level of the application (in App.tsx)
+- Positioned after all route content and the bottom navigation for optimal tracking
+- The component is inside the ThemeProvider and main app container to ensure it has access to the full React context
+
+### Verification
+- ✅ Build completed successfully (`npm run build`)
+- ✅ Linter passed with no new errors (`npm run lint`)
+- ✅ Lock file updated with new dependencies
+- ✅ Package.json properly includes @vercel/analytics in dependencies
+
+## Next Steps
+Once this is deployed to Vercel:
+1. Navigate to the Analytics section in the Vercel dashboard
+2. Click the "Enable" button to activate analytics
+3. Verify analytics are working by checking browser Network tab for requests to the analytics endpoint
+
+## Framework Details
+- Project: React 19.2.8 with Vite 8.2.0
+- Analytics Package: @vercel/analytics/react (framework-specific for React)
+- Integration follows React best practices with component-based architecture
