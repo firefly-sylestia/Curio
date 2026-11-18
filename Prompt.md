@@ -6,6 +6,63 @@ from the state rather than from memory.
 
 ---
 
+## §106 — POSTS AND MESSAGES STAY, AND A PICTURE TRAVELS AS SVG TEXT (v513 / `1.5.15` / `20260958`)
+
+> "instead of only last 24 hours when posting make it last forever, as the data is just texts.
+> and for image upload can we add like png jpg to svg convert then use that svg text only and
+> upload to supabase and load on the others device"
+
+**THREE DECISIONS ASKED AND ANSWERED BEFORE ANY EDIT** (the member's standing process, §94): the
+24-hour window goes for **posts and DMs both**; pictures ship as **SVG text in the row**; they are
+allowed on **cards, DMs and profile pictures**.
+
+**WHAT THE 24-HOUR WINDOW ACTUALLY WAS** — not one number, four layers: `community_cards.expires_at`
+(`now() + interval '24 hours'`) with an insert policy capping 25 hours, **12 read policies**
+re-checking `expires_at > now()`, `curio_purge_expired_cards()`; and on `dm_messages` a 24-hour
+SELECT window, `curio_purge_expired_messages()`, plus a one-day limit inside
+`curio_edit_dm_message`. The app added its OWN filters (`expires_at=gt.<now>` on two query paths)
+and the offline wall cache DROPPED any card whose expiry had passed — the piece that would have
+silently emptied the wall, because `epochMillis("infinity")` is 0.
+
+**BUILT, schema.** `expires_at` defaults a **century** out (and an idempotent `alter … set default`
+upgrades an existing table — `create table if not exists` never touches one); the insert policy now
+only refuses an expiry in the PAST; the DM SELECT policy has no age filter; `curio_purge_expired_messages()`
+**returns 0** (kept as a door so an existing `pg_cron` schedule keeps working) and card purge stays
+for legacy rows; `curio_edit_dm_message` edits any message its sender owns. `expires_at` was LEFT on
+the table so a build that still filters on it keeps answering.
+
+**BUILT, app.** Both `expires_at=gt.` filters are gone; `hoursLeft` is replaced by
+`CommunityCard.ageLabel` ("3h ago"), and the three countdown sites (wall meta, comments sheet, card
+page) plus the share/notification/error copy no longer promise 24 hours. The offline cache no longer
+drops old cards.
+
+**BUILT, the picture.** `data/SvgPicture.kt` (new) encodes a picked image to an SVG DOCUMENT: it
+reduces the picture to a 16-colour palette and emits merged `<rect>` runs (vector, for flat art), and
+when that exceeds `MAX_CHARS` it stores a downscaled JPEG inside an SVG `<image>` data URI instead —
+still one string, still one text column, but a photograph stays recognisable instead of turning into
+path soup. `community_cards.svg` (≤180000 chars, `community_cards_svg_len`) carries it;
+`CommunityCard`/`CommunityCardDraft`/`CARD_COLUMNS`/payload/parse and the wall cache all carry it;
+`ui/components/CurioSvgPicture.kt` (new) draws it — traced documents through Coil's `SvgDecoder`
+(already registered in `MainActivity`), embedded ones decoded straight to a bitmap — and
+`CurioPictureDoor` is the composer's attach/remove control.
+
+**STILL OPEN, STATED PLAINLY.** Pictures on **DMs and profile pictures** are NOT built: `profiles`
+online identity is a code-drawn `avatar_style` index (0..27), not a photo, so syncing a portrait means
+replacing that system, and the DM composer/bubble work is its own pass. The schema for those two
+surfaces was deliberately NOT added, so there are no dead columns.
+
+**⚠️ DEPLOY ORDER MATTERS.** The app now SELECTs `svg`; a database that has not had this
+`supabase/schema.sql` pasted answers a missing-column error, so the SQL goes in BEFORE the app ships.
+
+**CHECKS HERE.** No Gradle (forbidden), so nothing is compiled: all nine edited/created Kotlin files
+pass a string/comment-aware brace+paren+bracket balance scan (all 0), every new import was verified
+against the file's existing import block (the `SvgPicture` + `CurioPictureDoor` imports were MISSING
+on the first pass and added — the root rule 13 shape again), no `interval '24 hours'` remains in the
+schema, `git diff --check` is clean, and version `1.5.14 → 1.5.15` / code `20260957 → 20260958` with
+`changelogs/20260958.txt` carried forward (the old file untouched).
+
+---
+
 ## §105 — THE WINDOWS + iOS APP: A NEW FLUTTER CLIENT, AND THE OLD Compose DESKTOP MODULE REMOVED (2026-11-03; COMMITTED, NOT PUSHED)
 
 > "then we will work on desktop app with totally new code, i meant desktop and ios together in a totally new language code.

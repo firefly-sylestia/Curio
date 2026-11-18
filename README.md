@@ -356,7 +356,7 @@ Copyright (C) 2026 the Curio contributors.
 ### Not in v1.0
 - **iOS** — Android only for now
 - **Cloud sync of your library** — your captures stay on the device; use Backup & Restore (Settings) to export and keep them safe
-- **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, 24-hour expiry) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
+- **End-to-end encryption** — messages, replies and cards are private by policy (row-level security, friends-only visibility, and posts that stay up until their author removes them) but the server holds the plain text, so a server operator can read them. Content that must stay unreadable to a server doesn't belong in a message yet
 - **Localization** — English only in v1.0
 - **Google Play** — distributed via GitHub Releases; the fastlane metadata keeps the store listings release-ready, and the fully-FOSS F-Droid build is ready to switch back on when the store listing lands
 - **Content depth grows** — every lane ships 500+ topics today, and the catalog keeps growing

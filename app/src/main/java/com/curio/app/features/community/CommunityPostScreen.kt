@@ -58,7 +58,11 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
+import com.curio.app.data.SvgPicture
+import com.curio.app.ui.components.CurioPictureDoor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -214,6 +218,20 @@ internal fun CommunityPostScreen(
     // preview itself, and the ratio it is edited at comes back here
     // (`onAspectChanged`) so one post keeps one shape everywhere it is shown.
     var shareSheetOpen by remember { mutableStateOf(false) }
+    // v513 — the picture that rides with the post, as SVG TEXT. It is encoded
+    // off the UI thread the moment a picture is picked, so the POST carries a
+    // finished string and the wall can store and re-show it without ever
+    // handling image bytes.
+    var picture by remember { mutableStateOf("") }
+    val picturePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            picture = withContext(Dispatchers.IO) { SvgPicture.fromUri(context, uri).orEmpty() }
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+    }
 
     // ── THE COMPOSER'S OWN MEMORY ──────────────────────────────────────────
     // What you have typed but not posted, and what you deleted, both kept on
@@ -316,7 +334,8 @@ internal fun CommunityPostScreen(
         style = style.name,
         aspect = aspect.name,
         bodyScale = bodyScale,
-        byline = if (kind == KIND_QUOTE) credit else ""
+        byline = if (kind == KIND_QUOTE) credit else "",
+        svg = picture
     )
 
     val canPost = when {
@@ -463,6 +482,14 @@ internal fun CommunityPostScreen(
                             onEditCard = { shareSheetOpen = true },
                             onTopicNote = { topicPresentation = TopicPresentation.NOTE },
                             onTopicCard = { topicPresentation = TopicPresentation.CARD }
+                        )
+                    }
+
+                    item(key = "picture") {
+                        CurioPictureDoor(
+                            svg = picture,
+                            onPick = { picturePicker.launch("image/*") },
+                            onClear = { picture = "" }
                         )
                     }
 

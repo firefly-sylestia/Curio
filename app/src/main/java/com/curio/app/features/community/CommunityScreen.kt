@@ -573,7 +573,7 @@ fun CommunityScreen(navController: NavController) {
                     }
                 }
             } else {
-                item { SettingsSectionHeading("Last 24 hours") }
+                item { SettingsSectionHeading("Latest") }
 
                 // The wall's one filter: EVERYTHING, or only the members you
                 // follow. A follow is how a member's posts survive the wall's
@@ -661,7 +661,7 @@ fun CommunityScreen(navController: NavController) {
                                 CurioIcons.Info,
                                 if (followingOnly) "Nothing from who you follow" else "Nothing here yet",
                                 if (followingOnly) {
-                                    "Nobody you followed has posted in the last 24 hours."
+                                    "Nobody you followed has posted yet."
                                 } else {
                                     "Cards only last a day — be the first to pin one up."
                                 }
@@ -1054,11 +1054,7 @@ private fun CommunityCardItem(
                         maxLines = 1
                     )
                     Text(
-                        text = if (card.hoursLeft <= 0L) {
-                            "${card.authorHandleLabel} · expiring now"
-                        } else {
-                            "${card.authorHandleLabel} · ${card.hoursLeft}h left"
-                        },
+                        text = "${card.authorHandleLabel} · ${card.ageLabel}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1

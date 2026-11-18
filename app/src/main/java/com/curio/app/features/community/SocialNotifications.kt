@@ -253,7 +253,7 @@ internal object SocialNotifications {
             notificationId = notificationId(COMMUNITY_NOTIFICATION_BASE, notificationKey),
             channelId = COMMUNITY_CHANNEL,
             channelName = "Social",
-            channelDescription = "New posts on the 24-hour wall",
+            channelDescription = "New posts on the wall",
             title = title,
             body = body,
             whenMillis = System.currentTimeMillis(),
@@ -483,8 +483,8 @@ internal fun SocialNotificationWatcher() {
                     }
                     val body = when {
                         fromOthers.size > 1 ->
-                            "New cards on the social wall — they disappear after 24 hours."
-                        subject.isNotBlank() -> "$subject — on the wall for 24 hours."
+                            "New cards on the social wall."
+                        subject.isNotBlank() -> "$subject — on the wall."
                         else -> "A new line on the social wall."
                     }
                     SocialNotifications.community(context, title, body)

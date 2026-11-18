@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -67,6 +68,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyLine
+import com.curio.app.ui.components.CurioSvgPicture
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.ShareCardAspect
@@ -203,7 +205,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
                         title = "Card",
-                        subtitle = "Gone in 24 hours",
+                        subtitle = "Posted",
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -232,7 +234,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                         SettingsOptionInfoRow(
                             CurioIcons.Info,
                             "This card is gone",
-                            error ?: "Cards only last 24 hours — it may have expired."
+                            error ?: "This card is no longer available."
                         )
                     }
                 }
@@ -244,6 +246,24 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                        }
+                    }
+                    // v513 — the picture the poster attached, drawn from the SVG
+                    // text the server stores, above the card itself.
+                    if (current.svg.isNotBlank()) {
+                        item(key = "picture") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(220.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                            ) {
+                                CurioSvgPicture(
+                                    svg = current.svg,
+                                    contentDescription = "A picture attached to this card",
+                                    modifier = Modifier.fillMaxWidth().height(220.dp)
+                                )
+                            }
                         }
                     }
                     item(key = "card", contentType = "card") {
@@ -290,8 +310,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                     text = listOfNotNull(
                                         current.authorHandleLabel,
                                         current.categoryName.takeIf { it.isNotBlank() },
-                                        agoLabel(current.createdAtMillis),
-                                        if (current.hoursLeft <= 0L) "expiring" else "${current.hoursLeft}h left"
+                                        agoLabel(current.createdAtMillis)
                                     ).joinToString(" · "),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -397,7 +416,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         if (!wide) {
             SettingsHeroHeader(
                 title = "Card",
-                subtitle = "Gone in 24 hours",
+                subtitle = "Posted",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
             )

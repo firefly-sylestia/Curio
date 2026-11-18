@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- Curio — online schema (account, text-only capture sync, 24-hour community)
+-- Curio — online schema (account, text-only capture sync, permanent community)
 --
 -- HOW TO APPLY: Supabase dashboard → SQL Editor → New query → paste this whole
 -- file → Run. The script is IDEMPOTENT (create … if not exists / drop policy
@@ -11,9 +11,15 @@
 --    never disable it, and never add a policy for the `anon` role.
 --  • Community reads and writes additionally require the AUTHOR/READER to have
 --    Online Mode enabled in their own profile row.
---  • Community cards expire 24 hours after they are posted and are filtered
---    out of every read by `expires_at > now()`; DM messages have the same
---    24-hour window (§6c) and are swept by `curio_purge_expired_messages()`.
+--  • Community cards and DM messages are PERMANENT (v513). No read is
+--    filtered by age and nothing is swept; the two purge functions stay as
+--    no-op doors so an existing `pg_cron` schedule keeps working. `expires_at`
+--    remains on `community_cards` (a century out by default) so an app build
+--    that still asks `expires_at > now()` keeps answering.
+--  • A post may carry a PICTURE, and it is TEXT: the app traces the picked
+--    image into an SVG document and stores that string in `svg`. There is no
+--    media bucket anywhere — a picture crosses devices through the same
+--    text-only tables.
 --  • Public text is moderated at the DATABASE too (§5h): `curio_text_is_clean`
 --    is CHECKed on community_cards, community_comments and profiles, so a
 --    modified client cannot post a slur. `dm_messages` is DELIBERATELY EXEMPT
@@ -128,7 +134,7 @@ create policy cc_delete_own on public.cloud_captures
     using (owner = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 3. community_cards — TEMPORARY text share cards (24 hours)
+-- 3. community_cards — permanent text share cards (plus an SVG picture)
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_cards (
     id             uuid primary key default gen_random_uuid(),
@@ -136,8 +142,8 @@ create table if not exists public.community_cards (
     author_handle  text not null default 'A curious soul',
     -- What kind of post this is. A CARD is a topic share card, a NOTE is a
     -- tweet-style text post (no topic, no card art), and a QUOTE is a line
-    -- someone else said. All three are still TEXT ONLY — the column chooses a
-    -- renderer, it cannot carry media.
+    -- someone else said. All three stay TEXT ONLY in the sense that matters:
+    -- the picture is SVG TEXT in `svg` (v513), never image bytes.
     kind           text not null default 'CARD',
     topic_name     text not null default '',
     category_slug  text not null default '',
@@ -151,7 +157,7 @@ create table if not exists public.community_cards (
     body_scale     real not null default 1.0,
     byline         text not null default '',
     created_at     timestamptz not null default now(),
-    expires_at     timestamptz not null default (now() + interval '24 hours'),
+    expires_at     timestamptz not null default (now() + interval '100 years'),
     -- A topic CARD must say something (it renders the question and its quick
     -- fact); a NOTE or QUOTE may be short but never empty either — the same 1
     -- character floor, just phrased so an upgrade can drop the old constraint.
@@ -168,6 +174,26 @@ create table if not exists public.community_cards (
 alter table public.community_cards add column if not exists caption text not null default '';
 alter table public.community_cards add column if not exists kind text not null default 'CARD';
 alter table public.community_cards alter column topic_name set default '';
+
+-- v513 — a card no longer expires. `create table if not exists` never touches an
+-- existing table, so the default is REPLACED here. The column itself stays so a
+-- build that still filters `expires_at > now()` keeps answering (a century out
+-- always passes).
+alter table public.community_cards
+    alter column expires_at set default (now() + interval '100 years');
+
+-- v513 — a picture rides with a card AS TEXT. The app traces the picked image
+-- into an SVG document and stores that string, so a card crosses devices through
+-- the same text-only tables: no bucket, no image bytes, no signed URL. 180000
+-- characters is the app's own encoder ceiling (SvgPicture.MAX_CHARS).
+alter table public.community_cards add column if not exists svg text not null default '';
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'community_cards_svg_len') then
+        alter table public.community_cards
+            add constraint community_cards_svg_len check (char_length(svg) <= 180000);
+    end if;
+end $$;
 
 -- Upgrade path for a project that already ran an earlier version of this
 -- file: the original fact constraint demanded at least one character of a
@@ -253,7 +279,7 @@ create policy comm_insert_own on public.community_cards
     for insert to authenticated
     with check (
         owner = auth.uid()
-        and expires_at <= now() + interval '25 hours'
+        and expires_at > now()
         and exists (
             select 1 from public.profiles me
             where me.id = auth.uid() and me.online_mode_enabled
@@ -1147,10 +1173,9 @@ begin
        set body = clean,
            edited_at = now()
      where id = p_message_id
-       and sender = actor
-       and created_at > now() - interval '24 hours';
+       and sender = actor;
     if not found then
-        raise exception 'curio: only your own message from the last day can be edited';
+        raise exception 'curio: only your own message can be edited';
     end if;
 end $$;
 
@@ -1387,7 +1412,11 @@ begin
 end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 6. Expiry sweep — housekeeping for the 24-hour cards
+-- 6. Expiry sweep — legacy rows only (v513: cards are permanent)
+--
+-- A card written before v513 may still carry an old `expires_at`; this keeps
+-- clearing those. A card written now defaults a century out, so it never
+-- matches and the function is otherwise a harmless no-op.
 -- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.curio_purge_expired_cards()
 returns integer
@@ -1589,15 +1618,13 @@ begin
 end $$;
 
 -- ─────────────────────────────────────────────────────────────────────────��─
--- 6c. Messages live 24 hours, just like the cards
+-- 6c. Messages are permanent, just like the cards
 --
--- A conversation is a 24-hour thing in Curio: the server keeps a message for
--- one day, and the DATABASE — not the client — decides that a day has passed,
--- so an old message is unreadable even to its own participants once it expires.
--- The device keeps its own copy of what it received (that is what makes an
--- offline thread readable), so "gone from the server" and "gone from the app"
--- are two different things on purpose: nothing you received is lost, and
--- nothing you sent lives on the server for longer than a day.
+-- v513 — a conversation is KEPT. The server holds every message until one of
+-- the two participants removes it (a sender-only unsend, or the pair's own
+-- "delete for both of us"), and no read is filtered by age. The device still
+-- keeps its own copy, so the server is a durable mirror rather than a one-day
+-- window.
 -- ──────────────────────────────────────────────��────────────────────────────
 create or replace function public.curio_purge_expired_messages()
 returns integer
@@ -1608,24 +1635,23 @@ as $$
 declare
     removed integer;
 begin
-    delete from public.dm_messages
-     where created_at <= now() - interval '24 hours';
-    get diagnostics removed = row_count;
-    return removed;
+    -- v513 — messages no longer expire: there is nothing to remove. Kept as a
+    -- door so an existing `pg_cron` schedule keeps working rather than failing
+    -- on a missing function.
+    return 0;
 end;
 $$;
 
 revoke all on function public.curio_purge_expired_messages() from public, anon, authenticated;
 
--- The read window: a participant can only ever READ the last 24 hours, whether
--- or not the sweep has run yet. The purge function is housekeeping; this policy
--- is the actual limit.
+-- The read window is EVERY message of the conversation (v513): a participant
+-- reads the whole thread, with no age filter, for as long as either of them
+-- keeps it.
 drop policy if exists dm_select_participants on public.dm_messages;
 create policy dm_select_participants on public.dm_messages
     for select to authenticated
     using (
         (sender = auth.uid() or recipient = auth.uid())
-        and created_at > now() - interval '24 hours'
         and exists (
             select 1 from public.profiles me
             where me.id = auth.uid() and me.online_mode_enabled

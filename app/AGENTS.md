@@ -71,6 +71,20 @@ app/src/main/java/com/curio/app/
 
 ## Local Contracts
 
+### The online social layer's two standing rules (v513)
+- **Permanence.** A community card and a DM message never expire. No read is
+  filtered by age, `curio_purge_expired_messages()` removes nothing, and
+  `community_cards.expires_at` defaults a century out only so an older query
+  that still asks `expires_at > now()` keeps answering. The wall prints when a
+  card was written ([CommunityCard.ageLabel]) instead of a countdown.
+- **A picture is TEXT.** `community_cards.svg` holds an SVG document, never
+  image bytes, and `SvgPicture` is the only encoder: it traces flat art into
+  `<rect>` runs and stores a photograph as a downscaled JPEG inside an SVG
+  `<image>` data URI when tracing would exceed `MAX_CHARS`. Every surface draws
+  it through `CurioSvgPicture` — traced documents via Coil's `SvgDecoder`,
+  embedded ones decoded straight to a bitmap — so one picture is never rendered
+  by two different rules. The composer's door is `CurioPictureDoor`.
+
 ### Identity
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)

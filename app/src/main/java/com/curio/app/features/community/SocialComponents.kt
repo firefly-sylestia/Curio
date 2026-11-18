@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.curio.app.ui.components.CurioSvgPicture
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -484,6 +485,24 @@ internal fun SocialTextPost(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // v513 — the picture the poster attached, drawn from the SVG TEXT
+            // the server stores. It sits above the words for every kind, so a
+            // note, a quote and a topic card all show their picture the same
+            // way; a post without one draws nothing at all.
+            if (card.svg.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    CurioSvgPicture(
+                        svg = card.svg,
+                        contentDescription = "A picture attached to this post",
+                        modifier = Modifier.fillMaxWidth().height(180.dp)
+                    )
+                }
+            }
             if (card.kind == KIND_QUOTE) {
                 // A QUOTE IS ITS OWN THING — see [SocialPullQuote]. The old
                 // rendering was the same paragraph as a note with a “— name”
@@ -1257,32 +1276,32 @@ internal object SocialPeopleCache {
  * Why it exists: the community page was BLANK whenever the first request
  * failed — open the wall on a train and it said nothing at all. This keeps the
  * last page of cards the device actually saw, so opening Community offline
- * shows the 24-hour wall it last loaded (with the age of that copy stated)
- * instead of an empty screen, and the network replaces it the moment it
- * answers.
+ * shows the wall it last loaded (with the age of that copy stated) instead of
+ * an empty screen, and the network replaces it the moment it answers.
  *
  * Text only, like everything else in the social layer, and it is a cache: the
- * server owns the cards, `expires_at` still decides what is alive, and an
- * expired copy is dropped on read rather than shown past its 24 hours.
+ * server owns the cards. Cards no longer expire (v513), so a cached copy is
+ * never dropped for being old — the cache's own TTL decides when it is
+ * refetched.
  */
 internal object SocialFeedCache {
     private const val KIND = "wall"
     private const val KEY = "wall"
     private const val CAP = 40
 
-    /** The last page of cards, minus anything that has already expired. */
+    /** The last page of cards this device saw. */
     fun read(context: Context): List<CommunityCard> {
         val entry = SocialCache.read(context, KIND, KEY, SocialCache.TTL_WALL_MS)
             ?: return emptyList()
         val array = entry.data
-        val now = System.currentTimeMillis()
         return buildList(array.length()) {
             for (index in 0 until array.length()) {
                 val row = array.optJSONObject(index) ?: continue
                 val card = fromJson(row)
-                // A cached card is only shown while the server would still
-                // serve it: the 24-hour promise holds offline too.
-                if (card.expiresAtMillis > now) add(card)
+                // v513 — cards are permanent, so a cached copy is never dropped
+                // for being old; the wall's own cache TTL still decides when the
+                // copy is refetched.
+                add(card)
             }
         }
     }
@@ -1315,6 +1334,7 @@ internal object SocialFeedCache {
         .put("aspect", card.aspect)
         .put("scale", card.bodyScale.toDouble())
         .put("byline", card.byline)
+        .put("svg", card.svg)
         .put("created", card.createdAtMillis)
         .put("expires", card.expiresAtMillis)
         .put("likes", card.likeCount)
@@ -1340,6 +1360,7 @@ internal object SocialFeedCache {
         aspect = row.optString("aspect"),
         bodyScale = row.optDouble("scale", 1.0).toFloat(),
         byline = row.optString("byline"),
+        svg = row.optString("svg"),
         createdAtMillis = row.optLong("created"),
         expiresAtMillis = row.optLong("expires"),
         likeCount = row.optInt("likes"),

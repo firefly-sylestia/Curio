@@ -264,8 +264,7 @@ internal fun CommunityCommentsSheet(
                     CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                 } else {
                     Text(
-                        text = if (card.hoursLeft <= 0L) "expiring"
-                        else "${card.hoursLeft}h left",
+                        text = card.ageLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

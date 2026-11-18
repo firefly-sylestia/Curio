@@ -7,7 +7,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.time.Instant
 import java.time.OffsetDateTime
 
 /**
@@ -58,13 +57,31 @@ data class CommunityCard(
   /** How many replies hang under the card. */
     val commentCount: Int,
     /** True when this device's account posted the card. */
-    val mine: Boolean
+    val mine: Boolean,
+    /**
+     * The picture riding with this post, as SVG TEXT (v513). Blank means the
+     * post carries none. It is a string, so a card still crosses devices
+     * through the same text-only table — see [com.curio.app.data.SvgPicture].
+     */
+    val svg: String = ""
 ) {
-    /** Hours left before the card disappears, floored at 0. */
-    val hoursLeft: Long
-        get() = expiresAtMillis.takeIf { it > 0 }
-            ?.let { ((it - System.currentTimeMillis()).coerceAtLeast(0L)) / 3_600_000L }
-            ?: 0L
+    /**
+     * How old the post is — "just now" / "12m ago" / "3h ago" / "2d ago".
+     *
+     * Cards are permanent (v513), so the wall states when a card was written
+     * instead of counting down to the moment it disappears.
+     */
+    val ageLabel: String
+        get() {
+            if (createdAtMillis <= 0L) return ""
+            val minutes = ((System.currentTimeMillis() - createdAtMillis).coerceAtLeast(0L)) / 60_000L
+            return when {
+                minutes < 1L -> "just now"
+                minutes < 60L -> "${minutes}m ago"
+                minutes < 1_440L -> "${minutes / 60L}h ago"
+                else -> "${minutes / 1_440L}d ago"
+            }
+        }
 
     /**
      * What to PRINT for the author: the display name first, then the live
@@ -257,7 +274,9 @@ data class CommunityCardDraft(
     val style: String = "PAPER",
     val aspect: String = "CLASSIC",
     val bodyScale: Float = 1f,
-    val byline: String = ""
+    val byline: String = "",
+    /** The picture as SVG text (v513); blank when the post carries none. */
+    val svg: String = ""
 ) {
     /** True for the text-only posts that carry no topic and no card art. */
     val isTextOnly: Boolean get() = kind == KIND_NOTE || kind == KIND_QUOTE
@@ -419,7 +438,7 @@ internal fun Throwable.isTransportFailure(): Boolean = this is java.io.IOExcepti
  * `community_cards` / `community_reactions` / `community_reports` tables.
  *
  * Every call runs with the signed-in access token, and every rule the UI
- * enforces (sign in, Online Mode on, text only, 24-hour life) is ALSO
+ * enforces (sign in, Online Mode on, text only) is ALSO
  * enforced by row-level security in `supabase/schema.sql`. This layer never
  * assumes the client is the guard.
  */
@@ -481,7 +500,7 @@ object CommunityApi {
      */
     private const val CARD_COLUMNS =
         "id,owner,author_handle,kind,topic_name,category_name,category_glyph,accent_hex," +
-            "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
+            "fact_text,caption,style,aspect,body_scale,byline,svg,created_at,expires_at," +
             "community_reactions(user_id,kind),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
@@ -533,7 +552,6 @@ object CommunityApi {
         withContext(Dispatchers.IO) {
             val parsed = mapped {
                 val path = "$CARDS?select=$CARD_COLUMNS" +
-                    "&expires_at=gt.${Instant.now()}" +
                     "&order=created_at.desc&limit=$FEED_LIMIT"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 parseCards(SupabaseClient.executeBody(request), myUserId)
@@ -557,10 +575,9 @@ object CommunityApi {
         myUserId: String?
     ): Result<List<CommunityCard>> = withContext(Dispatchers.IO) {
         val parsed = mapped {
-            val path = "$CARDS?select=$CARD_COLUMNS" +
-                "&owner=eq.$authorId" +
-                "&expires_at=gt.${Instant.now()}" +
-                "&order=created_at.desc&limit=$PROFILE_LIMIT"
+                            val path = "$CARDS?select=$CARD_COLUMNS" +
+                    "&owner=eq.$authorId" +
+                    "&order=created_at.desc&limit=$PROFILE_LIMIT"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             parseCards(SupabaseClient.executeBody(request), myUserId)
         }
@@ -579,7 +596,7 @@ object CommunityApi {
                 val path = "$CARDS?select=$CARD_COLUMNS&id=eq.$cardId&limit=1"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 parseCards(SupabaseClient.executeBody(request), myUserId).firstOrNull()
-                    ?: throw IllegalStateException("That card has expired — cards only last 24 hours.")
+                    ?: throw IllegalStateException("That card is no longer available.")
             }
             val one = parsed.getOrNull() ?: return@withContext parsed.asFailure()
             Result.success(withAuthors(accessToken, listOf(one)).first())
@@ -775,8 +792,8 @@ object CommunityApi {
      * `return=representation` is what lets the wall put the card up the moment
      * the sheet closes: the poster sees their own post instantly, wearing the
      * id the server assigned, instead of waiting for a whole feed read to come
-     * back and find it. The owner column and the 24-hour expiry are set by the
-     * DB, so the returned row is the only place those exist before a refresh.
+     * back and find it. The owner column is set by the DB, so the returned row
+     * is the only place that exists before a refresh.
      */
     suspend fun post(
         accessToken: String,
@@ -805,6 +822,7 @@ object CommunityApi {
                 .put("aspect", draft.aspect)
                 .put("body_scale", draft.bodyScale.toDouble())
                 .put("byline", draft.byline.trim())
+                .put("svg", draft.svg.trim())
             val request = SupabaseClient.requestBuilder(CARDS, accessToken)
                 .header("Prefer", "return=representation")
                 .post(payload.toString().toRequestBody(jsonMediaType))
@@ -1456,6 +1474,9 @@ object CommunityApi {
                 aspect = row.optString("aspect").ifBlank { "CLASSIC" },
                 bodyScale = row.optDouble("body_scale", 1.0).toFloat(),
                 byline = row.optString("byline"),
+                svg = row.optString("svg")
+                    .takeIf { it.isNotBlank() && it != "null" }
+                    .orEmpty(),
                 createdAtMillis = epochMillis(row.optString("created_at")),
                 expiresAtMillis = epochMillis(row.optString("expires_at")),
                 likeCount = likes,
