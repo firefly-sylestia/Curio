@@ -6,6 +6,51 @@ from the state rather than from memory.
 
 ---
 
+## §112 — THE PICTURE THAT SOMETIMES WOULD NOT POST (v516 / `1.5.21` / `20260964`)
+
+> "why sometimes it says new row for relation community cards violates check constraint
+> community-cards-svg-len when adding photo sometimes"
+
+**WHY — TWO CEILINGS, ONE NAME.** The app's encoder caps a picture at
+`SvgPicture.MAX_CHARS = 1_200_000`; the database caps `char_length(svg)` at the same number, in a
+constraint called `community_cards_svg_len`. That constraint first shipped at **180 000** characters
+(v513, `7bf84a34`) and was raised to 1 200 000 in `b379c04c` — but the raise sat inside
+`do $$ … if not exists (select 1 from pg_constraint where conname = 'community_cards_svg_len')`,
+which **does nothing when the constraint already exists**. So re-pasting `schema.sql` on the live
+project silently kept the ORIGINAL 180 000 limit while the app went on encoding at 320px with a
+1 200 000 ceiling: every picture whose traced document landed between 180 001 and 1 200 000
+characters was accepted by the encoder, previewed on the phone, and refused by Postgres.
+
+**AND WHY ONLY SOMETIMES.** The traced document's size is entirely the picture's content. Flat art
+and simple shapes merge into a few thousand `<rect>` runs and stay far under 180 000 — those posts
+always worked. A photograph, a screenshot of text, or a busy illustration turns into tens of
+thousands of runs and crosses 180 000 routinely — those posts always failed. Same button, same code
+path, opposite result, which is what made it read as random.
+
+**FIXED — `supabase/schema.sql`.** The guard is gone: the file now does
+`drop constraint if exists community_cards_svg_len` and re-adds it at 1 200 000 unconditionally, so
+pasting the schema is what actually raises an existing project. No stored row can exceed the new
+value, so the re-add cannot fail on data. **⚠️ THIS REQUIRES A PASTE IN THE SUPABASE DASHBOARD — the
+app cannot change its own constraint.**
+
+**FIXED — `SvgPicture`.** The traced form was measured against `MAX_CHARS` in `encode`; the embedded
+(photograph) form was returned **unmeasured**, so it was the one path that could leave the encoder
+over the ceiling. `embedded` now steps the JPEG's edge and quality down (`PHOTO_EDGE` 1080 →
+`MIN_EDGE` 128, quality 90 → `MIN_QUALITY` 60) until the document fits, so nothing the app builds can
+be longer than the database accepts.
+
+**⚠️ NOT COMPILED / NOT SEEN.** Brace/paren/bracket scan on `SvgPicture.kt` (0), `git diff --check`
+clean, no declaration was inserted so no annotation moved. Version `1.5.20 → 1.5.21`.
+
+**NOTE FOR NEXT SESSION — the 1080px photo is dead code today.** `fromUri` decodes at
+`MAX_EDGE = 320` and only then calls `encode`, so `embedded` is handed a bitmap that is already
+320px on its long edge and `PHOTO_EDGE = 1080` never applies. Photographs are stored at 320px, and
+the v516 changelog line "posts now keep up to 1080px" is not what the code does. Fixing it means
+decoding once at `PHOTO_EDGE` for the embedded path and tracing a separate 320px copy (tracing costs
+O(pixels × palette), which is why the decode is small in the first place). Flagged, not done.
+
+---
+
 ## §111 — PASSWORDS AND PEOPLE (v516 / `1.5.20` / `20260963`)
 
 > "add password reset feature with ability to chnage password if user knows previous password. remove

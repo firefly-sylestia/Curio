@@ -54,6 +54,12 @@ object SvgPicture {
     /** JPEG quality for the embedded form — small enough to stay under the cap. */
     private const val PHOTO_QUALITY = 90
 
+    /** Where the embedded form stops stepping down: a photograph of noise fits here. */
+    private const val MIN_EDGE = 128
+
+    /** Floor for the embedded form's quality while it steps down. */
+    private const val MIN_QUALITY = 60
+
     /**
      * Reads a picked image and answers the SVG document to store.
      *
@@ -251,18 +257,42 @@ object SvgPicture {
     // ── the embedded fallback ───────────────────────────────────────────────
 
     /**
-     * A photograph as SVG text: one `<image>` whose `href` is a data URI.
+     * A photograph as SVG text: one `<image>` whose `href` is a data URI,
+     * stepped down until the document fits [MAX_CHARS].
      *
      * This is the honest form of "PNG/JPG converted to SVG" for a picture that
      * is not flat art — vectorising a photograph produces a bigger, mangled
      * file, while this keeps the same visual result in bounded text.
+     *
+     * THE CEILING IS ENFORCED HERE TOO, and that is not belt-and-braces: the
+     * traced document is measured in [encode], but this one is produced AFTER
+     * that measurement, so it was the one path that could leave the encoder over
+     * the database's `community_cards_svg_len` check — a detailed photograph
+     * base64s to several times the original bytes, and the post then failed at
+     * the last step with `new row … violates check constraint
+     * community_cards_svg_len` after the words were written and the picture was
+     * already showing in the preview. So the resolution and the quality step
+     * down until the document fits; at [MIN_EDGE] even noise is tens of
+     * thousands of characters, so this always ends.
      */
     private fun embedded(source: Bitmap): String {
+        var edge = PHOTO_EDGE
+        var quality = PHOTO_QUALITY
+        while (true) {
+            val document = embeddedAt(source, edge, quality)
+            if (document.length <= MAX_CHARS || edge <= MIN_EDGE) return document
+            edge = max(MIN_EDGE, edge / 2)
+            quality = max(MIN_QUALITY, quality - 15)
+        }
+    }
+
+    /** One attempt at the embedded form: [source] as a JPEG of [edge], [quality]. */
+    private fun embeddedAt(source: Bitmap, edge: Int, quality: Int): String {
         val width = source.width
         val height = source.height
-        val scaled = scaleDown(source, PHOTO_EDGE)
+        val scaled = scaleDown(source, edge)
         val stream = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, PHOTO_QUALITY, stream)
+        scaled.compress(Bitmap.CompressFormat.JPEG, quality, stream)
         if (scaled !== source) scaled.recycle()
         val payload = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
         return buildString {

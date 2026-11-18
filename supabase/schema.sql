@@ -187,16 +187,30 @@ alter table public.community_cards
 
 -- v513 — a picture rides with a card AS TEXT. The app traces the picked image
 -- into an SVG document and stores that string, so a card crosses devices through
--- the same text-only tables: no bucket, no image bytes, no signed URL. 180000
+-- the same text-only tables: no bucket, no image bytes, no signed URL. 1200000
 -- characters is the app's own encoder ceiling (SvgPicture.MAX_CHARS).
 alter table public.community_cards add column if not exists svg text not null default '';
-do $$
-begin
-    if not exists (select 1 from pg_constraint where conname = 'community_cards_svg_len') then
-        alter table public.community_cards
-            add constraint community_cards_svg_len check (char_length(svg) <= 1200000);
-    end if;
-end $$;
+
+-- ⚠️ DROPPED AND RE-ADDED, never "if not exists". This constraint first shipped
+-- at 180000 characters; the ceiling was raised to 1200000 later, and the guard
+-- this line used to have (`do $$ … if not exists (… conname = …)`) then silently
+-- kept the OLD limit forever, because pasting this file on a project that
+-- already had the constraint did nothing at all. The app encodes up to 1200000,
+-- so every picture between 180001 and 1200000 characters was built, previewed and
+-- then refused by the database:
+--
+--     new row for relation "community_cards" violates check constraint
+--     "community_cards_svg_len"
+--
+-- and it happened only SOMETIMES, because whether a traced document crosses
+-- 180000 depends on the picture: flat art traces to a few thousand merged
+-- rectangles and posted fine, a photograph or a detailed illustration traces to
+-- tens of thousands and did not. Re-creating the constraint unconditionally
+-- makes this file the single source of its value. No stored row can be above
+-- 1200000, so the re-add cannot fail on existing data.
+alter table public.community_cards drop constraint if exists community_cards_svg_len;
+alter table public.community_cards
+    add constraint community_cards_svg_len check (char_length(svg) <= 1200000);
 
 -- Upgrade path for a project that already ran an earlier version of this
 -- file: the original fact constraint demanded at least one character of a
