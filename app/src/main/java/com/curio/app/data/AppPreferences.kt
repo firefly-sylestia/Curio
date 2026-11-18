@@ -1914,7 +1914,8 @@ object AppPreferences {
      * [initThemeMode]; off hides the pet entirely and restores the plain
      * quests layout.
      */
-    var petEnabledState by mutableStateOf(true)
+    // v515 — off until the invitation on Home is accepted (was on by default).
+    var petEnabledState by mutableStateOf(false)
         private set
     // v8.8 — whether the pet floats freely on every screen (draggable +
     // wanders). Independent of [petEnabledState]: the pet layer can be on
@@ -3637,8 +3638,16 @@ object AppPreferences {
 
     // ── Curio pet companion (v8.5) ───────────────────────────────────
     /** Whether the Curio pet companion layer is on (default ON). */
+    /**
+     * v515 — THE PET ASKS FIRST.
+     *
+     * Curie used to be switched on for everybody. The member asked for the app
+     * to ASK instead, with skipping leaving the pet OFF — so an unanswered
+     * install reads as disabled, and the pet layer only turns on once the
+     * invitation is accepted (see [isPetInvitePending] / [answerPetInvite]).
+     */
     fun isPetEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PET_ENABLED, true)
+        prefs(context).getBoolean(KEY_PET_ENABLED, false)
 
     fun setPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_ENABLED, enabled).apply()
@@ -3652,6 +3661,25 @@ object AppPreferences {
     fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
         floatingPetEnabledState = enabled
+    }
+
+    // v515 — the one-time invitation that decides whether the pet exists at all.
+    // Answering is permanent: Skip is a DECISION, not a deferral, so the dialog
+    // never nags. A member who changes their mind later uses the pet switch in
+    // Settings, which is the same preference this writes.
+    private const val KEY_PET_INVITE_ANSWERED = "pet_invite_answered"
+
+    /** True until the member has answered the invitation once. */
+    fun isPetInvitePending(context: Context): Boolean =
+        !prefs(context).getBoolean(KEY_PET_INVITE_ANSWERED, false)
+
+    /**
+     * Records the answer and sets the pet to match it — [enabled] false is the
+     * Skip path, so a skipped invitation leaves the pet disabled.
+     */
+    fun answerPetInvite(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_INVITE_ANSWERED, true).apply()
+        setPetEnabled(context, enabled)
     }
 
     // v256 — the outside-the-app companion toggle (default OFF: it needs

@@ -106,6 +106,21 @@ app/src/main/java/com/curio/app/
   null and falls back to the `DEFAULT_*` constants the format already shipped
   with.
 
+### The pet asks first (v515)
+- **The pet is opt-in.** `AppPreferences.isPetEnabled` defaults to **false** (it
+  used to default true) and `petEnabledState` starts false, so an unanswered
+  install has no pet layer at all.
+- **The invitation** is an `AlertDialog` in `CurioNavHost`, shown only on Home,
+  only while `AppPreferences.isPetInvitePending(context)` and only once
+  `TourController.offerPending` is false (a new member is never met by two
+  dialogs at once). It is also skipped for a member who already switched the pet
+  on themselves.
+- **Skip is a decision, not a deferral.** `answerPetInvite(context, enabled)`
+  stamps `pet_invite_answered` and sets the pet to match — Skip and dismissing
+  the dialog both pass `false`, so the pet stays off and the question is never
+  asked again. The Settings switch is the way to change your mind, and it writes
+  the same `KEY_PET_ENABLED` preference.
+
 ### Identity
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)

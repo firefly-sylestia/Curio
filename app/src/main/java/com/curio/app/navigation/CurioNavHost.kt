@@ -1710,6 +1710,58 @@ composable(CurioRoutes.COMMUNITY) {
         )
     }
 
+    // ── v515 — THE PET ASKS FIRST ────────────────────────────────────────
+    // Curie used to arrive switched on for everybody. The member asked for the
+    // app to ASK, with skipping leaving the pet OFF — so the invitation is the
+    // only thing that turns the pet layer on. It waits for the tour offer to be
+    // answered first, so a new member is never met by two dialogs at once, and
+    // it is asked exactly once: Skip is a decision, not a deferral.
+    // Nothing to ask a member who already switched the pet on themselves.
+    var petInviteOpen by remember {
+        mutableStateOf(
+            AppPreferences.isPetInvitePending(context) &&
+                !AppPreferences.isPetEnabled(context)
+        )
+    }
+    if (petInviteOpen && routePrefix == CurioRoutes.HOME && !TourController.offerPending) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = {
+                // Dismissing is skipping — the pet stays off.
+                AppPreferences.answerPetInvite(context, false)
+                petInviteOpen = false
+            },
+            title = { Text("Bring Curie along?") },
+            text = {
+                Text(
+                    "Curie is a small pet that lives in the app: it naps on Home, " +
+                        "perks up when you explore, and can follow you from screen to screen. " +
+                        "You can turn it off whenever you like in Settings."
+                )
+            },
+            confirmButton = {
+                CurioGlassWindowBlur()
+                TextButton(
+                    onClick = {
+                        AppPreferences.answerPetInvite(context, true)
+                        petInviteOpen = false
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Turn on Curie") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        AppPreferences.answerPetInvite(context, false)
+                        petInviteOpen = false
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Skip") }
+            }
+        )
+    }
+
     // ── The highlights themselves, once the welcome is over (v406) ────────
     // Rises over Home, so it reads as the version saying hello rather than as
     // a settings page opening on its own. "See all" keeps the full screen.

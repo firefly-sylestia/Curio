@@ -6,6 +6,37 @@ from the state rather than from memory.
 
 ---
 
+## §108 — THE PET ASKS FIRST (v515 / `1.5.17` / `20260960`)
+
+> "add like a diloag box asking if they wanna enbale the curie pet, if skip keep it disabled."
+
+**WHAT WAS THERE.** The pet layer was on for everybody: `isPetEnabled` read
+`KEY_PET_ENABLED` with a default of **true**, and `petEnabledState` started true. There was no
+question anywhere, so "skip keeps it disabled" could not be true of a fresh install.
+
+**BUILT.** A one-time `AlertDialog` on Home ("Bring Curie along?") beside the tour offer, wearing the
+same dialog language (`curioDialogContainerColor` / `CurioDialogShape` /
+`curioDialogActionButtonColors` + `CurioGlassWindowBlur`): **Turn on Curie** turns the pet layer on,
+**Skip** leaves it OFF, and dismissing the dialog counts as skip. Two preferences: the pet's default
+flipped to **false**, and a new `pet_invite_answered` stamp makes the question one-time —
+`AppPreferences.answerPetInvite(context, enabled)` writes both together. The dialog waits for
+`TourController.offerPending` to be false so a new member never meets two dialogs at once, and it is
+skipped for anyone who already switched the pet on themselves. The Settings switch remains the way
+to change your mind (it writes the same `KEY_PET_ENABLED`).
+
+**⚠️ ONE DELIBERATE CONSEQUENCE.** A member who has used the app with the pet on by default and never
+touched its switch has no stored `pet_enabled` key, so they now read as disabled and will be asked
+once — which is the point of an opt-in, but it does mean the pet can disappear until they answer.
+Anyone who explicitly turned it on keeps it on and is not asked.
+
+**⚠️ NOT COMPILED.** No Gradle here. `CurioNavHost.kt` and `AppPreferences.kt` both pass the
+brace/paren/bracket balance scan (0), every symbol the dialog uses (`AlertDialog`, `remember`,
+`mutableStateOf`, `getValue`/`setValue`, `context`) was verified as already imported and in scope,
+and `git diff --check` is clean. Version `1.5.16 → 1.5.17`, code `20260959 → 20260960`,
+`changelogs/20260960.txt` carried forward.
+
+---
+
 ## §107 — EXPRESS YOURSELF IS ONE PAGE OF ROWS, AND JOURNAL IS ITS DEFAULT (v514 / `1.5.16` / `20260959`)
 
 > "for express yourself make journal the default one, eith ability to rename it, and instead of
