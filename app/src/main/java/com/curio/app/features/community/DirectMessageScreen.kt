@@ -573,7 +573,7 @@ onSuccess = {
     // the safety net (the push shows it the instant the other side starts; the
     // timer is what CLEARS a row whose writer stopped refreshing it). Fast only
     // while the push channel is down.
-    LaunchedEffect(eligible, token, myUserId) {
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
         if (!eligible || token == null || myUserId == null) return@LaunchedEffect
         while (true) {
             peerTyping = SocialApi.isTyping(token, myUserId, otherUserId)
