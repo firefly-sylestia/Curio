@@ -101,6 +101,8 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
+import com.curio.app.ui.components.CurioSignInCard
+import com.curio.app.ui.components.CurioSignInDialog
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
@@ -1516,20 +1518,33 @@ private fun ProgressAndAchievementsCard(
             color = curioSageInk(),
             trackColor = curioSageInk().copy(alpha = 0.14f)
         )
-        // v8.27 — the PINNED badge strip: earned medals first (up to five),
-        // a "+N" tile when there are more, then locked silhouettes for
-        // aspiration. Tapping the strip opens the full badge shelf on the
-        // Quests page (spec §4.1 — earned first, locked as silhouettes).
-        CurioBadgeStrip(
-            earnedLimit = 5,
-            lockedPreview = 2,
-            medalSize = 46.dp,
-            onViewAll = onOpenQuests,
-            // v42 — tap any medal (earned or locked) to open its detail.
-            onBadgeClick = { badgeDialog = it },
-            emptyText = currentQuest?.let { "Next: ${it.title}" }
-                ?: "Keep exploring to unlock your first badge."
-        )
+        // v516 — SIGNED OUT, THE STRIP IS A SIGN-IN CARD (the member's report:
+        // the first thing Profile showed a signed-out member was a LOCKED badge
+        // — "Tuned Ear" — an aspiration for an account they do not have yet).
+        // The badges are local XP and come straight back the moment they sign
+        // in; the strip is untouched for anyone who has.
+        if (OnlineAccount.signedIn) {
+            // v8.27 — the PINNED badge strip: earned medals first (up to five),
+            // a "+N" tile when there are more, then locked silhouettes for
+            // aspiration. Tapping the strip opens the full badge shelf on the
+            // Quests page (spec §4.1 — earned first, locked as silhouettes).
+            CurioBadgeStrip(
+                earnedLimit = 5,
+                lockedPreview = 2,
+                medalSize = 46.dp,
+                onViewAll = onOpenQuests,
+                // v42 — tap any medal (earned or locked) to open its detail.
+                onBadgeClick = { badgeDialog = it },
+                emptyText = currentQuest?.let { "Next: ${it.title}" }
+                    ?: "Keep exploring to unlock your first badge."
+            )
+        } else {
+            var signInOpen by remember { mutableStateOf(false) }
+            CurioSignInCard(onClick = { signInOpen = true })
+            if (signInOpen) {
+                CurioSignInDialog(onDismiss = { signInOpen = false })
+            }
+        }
     }
 }
 

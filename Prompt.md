@@ -6,6 +6,43 @@ from the state rather than from memory.
 
 ---
 
+## §109 — SIGNING IN IS A DIALOG, AND A SIGNED-OUT PROFILE SAYS SO (v516 / `1.5.18` / `20260961`)
+
+> "curio sign in flow from edit profile is bad replace tuned ear in profile to sign in dialog"
+
+**THE PHRASE THAT NEEDED DECODING.** "Tuned Ear" is not a control — it is a **quest badge name**
+(`CurioQuests`, the third in the chain). It surfaces in Profile's `CurioBadgeStrip`, whose first
+locked tile is the aspiration slot, so a SIGNED-OUT member was greeted by a badge they cannot earn
+before anything that helped them. That read was confirmed with three questions before any file was
+opened.
+
+**THREE ANSWERS.** Open a **sign-in dialog in place** from Edit profile; **replace the whole badge
+strip while signed out**; the dialog offers **sign in + create an account**.
+
+**WHAT THE OLD FLOW DID.** Edit profile's signed-out row navigated to `settings/online` — the whole
+account page — so signing in meant leaving the profile being edited. Nothing was wrong with the page
+itself; it was the wrong door for that moment.
+
+**BUILT.** New `ui/components/CurioSignInDialog.kt` holding two things: `CurioSignInDialog` (sign in /
+create account in one dialog, email + password, busy state, and the message from
+`OnlineAccount.state.error` / `.notice`, which is already UI-safe; `configured` off disables the form
+rather than failing mysteriously) and `CurioSignInCard` (the signed-out Profile card). Edit profile's
+row opens the dialog (`signInOpen` state inside its signed-out branch) instead of navigating, and
+Profile wraps its `CurioBadgeStrip` in `if (OnlineAccount.signedIn)` with the card + dialog in the
+else branch. The achievements header and progress bar stay for everyone — they are local XP.
+
+**⚠️ NOT COMPILED.** No Gradle here. All three files pass the brace/paren/bracket scan (0), the
+dialog's helpers were confirmed to live in `ui.theme` (`CurioDialogShape`,
+`curioDialogContainerColor`, `curioDialogActionButtonColors`), `OnlineAccount` and `remember` were
+confirmed imported in `ProfileScreen`, `SETTINGS_ONLINE` now has zero references in ProfileEditScreen
+(the navigation it decorated is gone), and `git diff --check` is clean. Version `1.5.17 → 1.5.18`,
+code `20260960 → 20260961`, `changelogs/20260961.txt` carried forward.
+
+**OPEN.** Password reset and the magic link remain on the account page (the member chose sign-in +
+create only). Nothing was added for "confirm your email", which that page already explains.
+
+---
+
 ## §108 — THE PET ASKS FIRST (v515 / `1.5.17` / `20260960`)
 
 > "add like a diloag box asking if they wanna enbale the curie pet, if skip keep it disabled."

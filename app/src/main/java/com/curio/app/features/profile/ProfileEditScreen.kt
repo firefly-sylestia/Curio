@@ -82,6 +82,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.AvatarCropDialog
 import com.curio.app.ui.components.CurioMemberAvatar
+import com.curio.app.ui.components.CurioSignInDialog
 import com.curio.app.ui.components.hasOwnPicture
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -590,15 +591,18 @@ fun ProfileEditScreen(navController: NavController) {
                                 .clickable { termsOpen = true }
                         )
                     } else {
-                        // Signed out: ONE calm row. The form itself lives on the
-                        // account's own page, where it can be as long as it needs
-                        // to be.
+                        // v516 — Signed out: ONE calm row that opens the sign-in
+                        // DIALOG. It used to navigate to the whole account page,
+                        // which the member reported as a bad flow: leaving the
+                        // profile you were editing to find a form on another
+                        // screen. The long tail (reset, delete, magic link) still
+                        // lives on that page, one door further in.
+                        var signInOpen by remember { mutableStateOf(false) }
+                        if (signInOpen) {
+                            CurioSignInDialog(onDismiss = { signInOpen = false })
+                        }
                         Surface(
-                            onClick = {
-                                navController.navigate(CurioRoutes.SETTINGS_ONLINE) {
-                                    launchSingleTop = true
-                                }
-                            },
+                            onClick = { signInOpen = true },
                             shape = RoundedCornerShape(18.dp),
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         ) {

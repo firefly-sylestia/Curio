@@ -121,6 +121,19 @@ app/src/main/java/com/curio/app/
   asked again. The Settings switch is the way to change your mind, and it writes
   the same `KEY_PET_ENABLED` preference.
 
+### Signing in (v516)
+- **The dialog is the door.** `CurioSignInDialog` (`ui/components`) is the one
+  sign-in surface reached from inside the app: it offers sign in and create an
+  account, and every outcome comes from `OnlineAccount` (`state.error` is already
+  UI-safe). The long tail — reset, magic link, deletion — stays on the
+  `settings/online` account page, which is where Edit profile used to send people
+  and no longer does.
+- **Signed out, Profile's badge strip is a sign-in card.** `CurioSignInCard`
+  replaces `CurioBadgeStrip` while `OnlineAccount.signedIn` is false, because the
+  strip's first tile was a LOCKED badge ("Tuned Ear") — an aspiration for an
+  account the member does not have. Badges are local XP and return the moment
+  they sign in.
+
 ### Identity
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
