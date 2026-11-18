@@ -165,16 +165,19 @@ fun DirectMessageScreen(
     // still sitting there for a chat you are reading is noise (v389).
     LaunchedEffect(otherUserId) { SocialNotifications.cancelMessage(context, otherUserId) }
 
+    // A reused navigation destination must never retain the previous thread's scroll position.
+    LaunchedEffect(otherUserId) { listState.scrollToItem(0) }
+
     // Filled from the device's own copy the instant the account resolves, so
     // a conversation you have already had is never a blank screen.
-    var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    var messages by remember(otherUserId) { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     // Sent-but-not-yet-confirmed messages, drawn exactly like real ones.
-    var pending by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    var pending by remember(otherUserId) { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     // Sent bubbles waiting for their server row: rendered exactly like a
     // delivered message (same text, same clock), dropped the moment the real
     // row arrives. This is what keeps a send from vanishing and returning.
-    var sentShadow by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
-    var person by remember {
+    var sentShadow by remember(otherUserId) { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    var person by remember(otherUserId) {
         // On screen from the FIRST frame: the device remembers every identity
         // it has resolved, and the route carries the handle the caller already
         // had (Friends, a thread row, a profile). The network only refines
@@ -186,13 +189,13 @@ fun DirectMessageScreen(
                     ?.let { CurioPerson(userId = otherUserId, displayName = it) }
         )
     }
-    var reactions by remember { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
-    var draft by remember { mutableStateOf("") }
-    var peerTyping by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
-    var sending by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loadedOnce by remember { mutableStateOf(false) }
+    var reactions by remember(otherUserId) { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
+    var draft by remember(otherUserId) { mutableStateOf("") }
+    var peerTyping by remember(otherUserId) { mutableStateOf(false) }
+    var loading by remember(otherUserId) { mutableStateOf(false) }
+    var sending by remember(otherUserId) { mutableStateOf(false) }
+    var error by remember(otherUserId) { mutableStateOf<String?>(null) }
+    var loadedOnce by remember(otherUserId) { mutableStateOf(false) }
     // A server push bumps this, which re-runs the delta fetch below. It is a
     // COUNTER rather than a flag so two pushes in a row are two fetches, and it
     // is keyed on the thread so opening another conversation starts fresh.
@@ -543,7 +546,7 @@ onSuccess = {
         sending = false
     }
 
-    LaunchedEffect(eligible, token, myUserId) {
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
         if (!eligible || token == null || myUserId == null) {
             messages = emptyList()
             pending = emptyList()
@@ -716,7 +719,7 @@ onSuccess = {
 
     // Tell the other side when this side is writing: a short debounce stops a
     // request per keystroke, and the row clears itself after a pause.
-    LaunchedEffect(draft, eligible, token) {
+    LaunchedEffect(draft, eligible, token, otherUserId) {
         if (!eligible || token == null) return@LaunchedEffect
         if (draft.isBlank()) {
             SocialApi.setTyping(token, otherUserId, false)
