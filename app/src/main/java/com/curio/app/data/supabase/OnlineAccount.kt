@@ -522,11 +522,11 @@ internal fun onlineAuthMessage(failure: Throwable): String {
     val raw = failure.message.orEmpty()
     return when {
         raw.contains("rate limit", true) || raw.contains("too many", true) ->
-            "Too many attempts — wait a minute and try again."
+            "Too many attempts. Wait a minute and try again."
         raw.contains("not confirmed", true) ->
-            "That email isn't confirmed yet — check your inbox for the link."
+            "That email isn't confirmed yet. Check your inbox for the link."
         raw.contains("already registered", true) || raw.contains("already been registered", true) ->
-            "That email already has an account — sign in instead."
+            "That email already has an account. Sign in instead."
         raw.contains("invalid login credentials", true) || raw.contains("invalid_grant", true) ->
             "That email and password don't match."
         raw.contains("at least 6 characters", true) || raw.contains("Password should be", true) ->
@@ -538,7 +538,7 @@ internal fun onlineAuthMessage(failure: Throwable): String {
         raw.contains("unable to resolve host", true) ||
             raw.contains("failed to connect", true) ||
             raw.contains("timeout", true) ->
-            "No connection — check your network and try again."
+            "No connection. Check your network and try again."
         else -> "Something went wrong. Try again in a moment."
     }
 }

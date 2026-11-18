@@ -549,7 +549,7 @@ internal fun CommunityCommentsSheet(
                     CommunityApi.report(accessToken, "comment", target.id, reason, note).fold(
                         onSuccess = {
                             reportingReply = null
-                            error = "Thanks — we'll take a look."
+                            error = "Thanks. We'll take a look."
                         },
                         onFailure = { error = it.message }
                     )

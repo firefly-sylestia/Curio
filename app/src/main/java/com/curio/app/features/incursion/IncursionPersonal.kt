@@ -158,7 +158,7 @@ internal fun IncursionPersonalDesk(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     if (watched == 0) {
-                        "Nothing marked yet — open a line and start where the order starts."
+                        "Nothing marked yet. Open a line and start where the order starts."
                     } else if (watched == total && total > 0) {
                         "Every title in the order is watched."
                     } else {

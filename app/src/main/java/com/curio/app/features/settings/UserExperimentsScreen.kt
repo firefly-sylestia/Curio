@@ -165,7 +165,7 @@ fun UserExperimentsScreen(navController: NavController) {
                         // real blur under a thin tint of the surface's own colour,
                         // so text on the glass stays crisp. Turning it off returns
                         // the clear refracting glass.
-                        ExperimentSwitchRow("Frosted glass", "A heavy, real blur with only a thin tint on top — the page behind reads as soft, out-of-focus glass and anything drawn on the glass stays sharp. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
+                        ExperimentSwitchRow("Frosted glass", "A heavy, real blur with only a thin tint on top. The page behind reads as soft, out-of-focus glass and anything drawn on the glass stays sharp. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
                             AppPreferences.setGlassFrostedEnabled(context, it)
                         }
                         CurioSettingsDivider()
@@ -202,7 +202,7 @@ fun UserExperimentsScreen(navController: NavController) {
                         // the six tiles it was; ink already written is kept and
                         // comes back the moment it is switched on again.
                         "Pencil margin",
-                        "Write in a book's margin with your finger — the reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
+                        "Write in a book's margin with your finger. The reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
                         AppPreferences.readerMarginState
                     ) { AppPreferences.setReaderMarginEnabled(context, it) }
                     CurioSettingsDivider()
@@ -302,7 +302,7 @@ fun UserExperimentsScreen(navController: NavController) {
                     SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Book browser",
-                        "Every book line by line — covers, ratings and years, scrollable",
+                        "Every book line by line. Covers, ratings and years, scrollable",
                         onClick = {
                             navController.navigate(com.curio.app.navigation.CurioRoutes.SETTINGS_BOOK_BROWSER) {
                                 launchSingleTop = true
@@ -336,7 +336,7 @@ fun UserExperimentsScreen(navController: NavController) {
             item {
                 SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("The Return", "A topic you finished comes back on a widening schedule — a day, then three, then a week — as one card on Home asking what you still remember. Answering earns more XP than saving does.", AppPreferences.recallEnabledState) {
+                    ExperimentSwitchRow("The Return", "A topic you finished comes back on a widening schedule: a day, then three, then a week. It is one card on Home asking what you still remember. Answering earns more XP than saving does.", AppPreferences.recallEnabledState) {
                         AppPreferences.setRecallEnabled(context, it)
                         // Recompute at once: switching it off must clear a due
                         // card the member is looking at, not leave it until the

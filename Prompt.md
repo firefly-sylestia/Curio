@@ -6,6 +6,49 @@ from the state rather than from memory.
 
 ---
 
+## §114 — LESS TEXT, AND NO EM DASHES (v517 / `1.5.23` / `20260966`)
+
+> "save your take messenges info etc is texts is so much like also dont use erm dashes, and clean up
+> things in that page and remove duplicates"
+
+**ASKED FIRST.** The request named one page but described three things, so the scope was asked
+rather than guessed: the member chose **Save your take + Messages** for the cleanup and **the app's
+user-facing text** for the em dashes. Both answers are what was built.
+
+**THE DUPLICATES WERE STALE CLAIMS, and two of them were also false.** A copy of an older truth left
+standing after the behaviour changed under it:
+
+- `ChatsScreen` empty inbox: *"messages are private and the server forgets them after a day"*. Threads
+  have been permanent since v513, and the same screen's own "Delete for both of us" row promises the
+  server keeps the conversation. Rewritten to "Your chats stay private between you".
+- `CommunityScreen` empty wall: *"Cards only last a day"*. Cards are permanent since v513 too.
+  Rewritten to "Nothing posted yet. Be the first to pin one up".
+- `FriendsScreen` said *"Friends and messages stay off while Online mode is off"* on a screen that has
+  no messages on it, next to `ChatsScreen`'s own line for that. Trimmed to "Friends stay off …".
+
+**EM DASHES: 60-ish member-facing strings rewritten, not replaced by a dash of another name.** Each
+one was re-said rather than mechanically shifted: a full stop where the dash joined two sentences,
+including where the continuation had to be re-capitalised (`"Offline — showing the wall…"` →
+`"Offline. Showing the wall…"`), a comma where it was an aside (`"First choice — usually matches
+best"` → `"First choice, usually matches best"`), and a rewrite where neither worked
+(`"Signature · Classic — tap for the current design"` → `"Signature · Classic. Tap for the
+current design"`). Surfaces: capture/studio rows and dialogs, chats, direct messages, friends, the wall,
+comments, notifications, moderation, the share-card editor, text history, cabinet, book shelf, book
+detail, reader settings and reader hints, journals, topic notes, incursion, reveal, updates, online
+mode, the content filter's blocked-message, and the shared auth/community error copy.
+
+**WHAT KEEPS ITS DASH ON PURPOSE.** 37 literals still contain one and none is prose: `"—"` as an
+EMPTY-VALUE placeholder (a page number, a stat, a prereq), `" — "` inside topic-name parsing, a
+regex character class, the reader's punctuation table, the Pet design export's debug header, the
+crash reporter's own log lines, and the Source fetch lab's diagnostics. Say the word if the lab and
+the placeholders should go too.
+
+**⚠️ NOT COMPILED / NOT SEEN.** String-literal-only edits, `git diff --check` clean, every edited
+file re-scanned (no unbalanced declaration introduced; the bracket-count deltas in three files are
+characters inside comments and regexes that were already there). Version `1.5.22 → 1.5.23`.
+
+---
+
 ## §113 — THE PICTURE'S OWN SIZE AND ITS OWN SHAPE (v517 / `1.5.22` / `20260965`)
 
 > "add proper big picture compression too, and add proper dimension ration of that image, not just

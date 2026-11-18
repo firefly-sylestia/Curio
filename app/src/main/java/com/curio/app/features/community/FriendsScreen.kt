@@ -354,7 +354,7 @@ fun FriendsScreen(navController: NavController) {
                                     SettingsOptionInfoRow(
                                         CurioIcons.Info,
                                         "Sign in to add friends",
-                                        "Friends are tied to a Curio account — profile, username and all."
+                                        "Friends are tied to a Curio account."
                                     )
                                     SettingsOptionRow(
                                         icon = CurioIcons.Person,
@@ -367,7 +367,7 @@ fun FriendsScreen(navController: NavController) {
                                     SettingsOptionInfoRow(
                                         CurioIcons.Info,
                                         "Online mode is off",
-                                        "Friends and messages stay off while Online mode is off."
+                                        "Friends stay off while Online mode is off."
                                     )
                                     SettingsOptionRow(
                                         icon = CurioIcons.Refresh,

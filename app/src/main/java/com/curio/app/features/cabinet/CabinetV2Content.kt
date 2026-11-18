@@ -2946,7 +2946,7 @@ private fun V2CollectionNameSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Pick a tone, art and icon — tap one again to go back to Auto.",
+                text = "Pick a tone, art and icon. Tap one again to go back to Auto.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
@@ -3381,8 +3381,8 @@ private fun V2CoverSourceSheet(
                                 maxLines = 1
                             )
                             Text(
-                                text = if (index == 0) "First choice — usually matches best"
-                                else "Alternate source — try this one if the cover is off",
+                                text = if (index == 0) "First choice, usually matches best"
+                                else "Alternate source, try this one if the cover is off",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 2
@@ -3576,7 +3576,7 @@ private fun V2AddToShelfSheet(
 
             if (shownLikes.isNotEmpty()) {
                 item(key = "likes-label") {
-                    AddSectionLabel(if (isFavorites) "Your favorites — tap to remove" else "From favorites")
+                    AddSectionLabel(if (isFavorites) "Your favorites, tap to remove" else "From favorites")
                 }
                 items(shownLikes.size, key = { "lk-$it" }) { index ->
                     val liked = shownLikes[index]
@@ -3609,7 +3609,7 @@ private fun V2AddToShelfSheet(
                 if (cappedOptions.size < availableOptions.size) {
                     item(key = "entries-more") {
                         Text(
-                            text = "…and ${availableOptions.size - cappedOptions.size} more — search to find them",
+                            text = "…and ${availableOptions.size - cappedOptions.size} more, search to find them",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 53.dp, top = 4.dp, bottom = 4.dp)
@@ -3638,7 +3638,7 @@ private fun V2AddToShelfSheet(
             if (shownLikes.isEmpty() && availableOptions.isEmpty() && catalogHit == null) {
                 item(key = "empty") {
                     Text(
-                        text = "Nothing matches — try a different search.",
+                        text = "Nothing matches. Try a different search.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 14.dp)
@@ -3941,7 +3941,7 @@ private fun V2CupboardAddSheet(
                 item(key = "cp-empty") {
                     Text(
                         text = if (q.isEmpty()) "Nothing on the wall yet."
-                        else "Nothing matches — try a different search.",
+                        else "Nothing matches. Try a different search.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 14.dp)

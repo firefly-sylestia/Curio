@@ -137,7 +137,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
         if (current.kind != KIND_CARD) {
             val body = buildString {
                 append(current.factText)
-                if (current.byline.isNotBlank()) append("\n— ").append(current.byline)
+                if (current.byline.isNotBlank()) append("\nby ").append(current.byline)
             }
             val send = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"

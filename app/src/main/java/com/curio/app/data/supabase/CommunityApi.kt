@@ -1578,7 +1578,7 @@ internal fun communityMessage(failure: Throwable): String {
         failure is IllegalArgumentException && raw.isNotBlank() -> raw
         failure is IllegalStateException && raw.isNotBlank() -> raw
         raw.contains("rate limit", true) || raw.contains("too many", true) ->
-            "Too much just now — try again in a minute."
+            "Too much just now. Try again in a minute."
         // A unique-index collision arrives as a 23505 duplicate-key error, and
         // whether the server names the column, the index or neither depends on
         // how the constraint was created — so the identity-shaped answer is
@@ -1595,7 +1595,7 @@ internal fun communityMessage(failure: Throwable): String {
         raw.contains("unable to resolve host", true) ||
             raw.contains("failed to connect", true) ||
             raw.contains("timeout", true) ->
-            "No connection — check your network and try again."
+            "No connection. Check your network and try again."
         else -> "Something went wrong. Try again in a moment."
     }
 }

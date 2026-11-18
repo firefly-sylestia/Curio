@@ -148,7 +148,7 @@ fun ExperimentsScreen(navController: NavController) {
                         // comes back the moment it is switched on again.
                         ExperimentSwitchRow(
                             "Pencil margin",
-                            "Write in a book's margin with your finger — the reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
+                            "Write in a book's margin with your finger. The reader's ⋯ menu has a Margin door that opens a strip over the page's edge, and what you scrawl is kept per page, in the book. Off removes that door; nothing already written is lost.",
                             AppPreferences.readerMarginState
                         ) { wanted -> AppPreferences.setReaderMarginEnabled(context, wanted) }
                     }
@@ -192,7 +192,7 @@ fun ExperimentsScreen(navController: NavController) {
                         // real blur under a thin tint of the surface's own colour,
                         // so text on the glass stays crisp. Turning it off returns
                         // the clear refracting glass.
-                        ExperimentSwitchRow("Frosted glass", "A heavy, real blur with only a thin tint on top — the page behind reads as soft, out-of-focus glass and anything drawn on the glass stays sharp. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
+                        ExperimentSwitchRow("Frosted glass", "A heavy, real blur with only a thin tint on top. The page behind reads as soft, out-of-focus glass and anything drawn on the glass stays sharp. Reaches bottom sheets and dialogs too, and blurs the page behind them.", AppPreferences.glassFrostedState) {
                             AppPreferences.setGlassFrostedEnabled(context, it)
                         }
                         CurioSettingsDivider()
@@ -229,7 +229,7 @@ fun ExperimentsScreen(navController: NavController) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
                             "Cabinet v2 collections",
-                            "Experimental: saved discoveries and liked books / series live in a new collections view with jacket-art covers (books half-book, albums square, series poster — never stretched). While on, Home's Save shortcut leads here; the old view returns when you turn it off.",
+                            "Experimental: saved discoveries and liked books / series live in a new collections view with jacket-art covers (books half-book, albums square, series poster, never stretched). While on, Home's Save shortcut leads here; the old view returns when you turn it off.",
                             AppPreferences.cabinetV2EnabledState
                         ) { wanted -> AppPreferences.setCabinetV2Enabled(context, wanted) }
                     }
@@ -316,7 +316,7 @@ fun ExperimentsScreen(navController: NavController) {
             item {
                 SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("The Return", "A topic you finished comes back on a widening schedule — a day, then three, then a week — as one card on Home asking what you still remember. Answering earns more XP than saving does.", AppPreferences.recallEnabledState) {
+                    ExperimentSwitchRow("The Return", "A topic you finished comes back on a widening schedule: a day, then three, then a week. It is one card on Home asking what you still remember. Answering earns more XP than saving does.", AppPreferences.recallEnabledState) {
                         AppPreferences.setRecallEnabled(context, it)
                         // Recompute at once: switching it off must clear a due
                         // card the member is looking at, not leave it until the

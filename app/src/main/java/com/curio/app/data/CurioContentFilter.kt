@@ -42,7 +42,7 @@ object CurioContentFilter {
 
     /** What the person is told when their text is refused. */
     const val BLOCKED_MESSAGE: String =
-        "That text can't be posted — slurs, sexual content and harassment are " +
+        "That text can't be posted. Slurs, sexual content and harassment are " +
             "not allowed anywhere in Curio, and accounts that use them are banned."
 
     /** The name-specific wording, used by the account form and Edit profile. */

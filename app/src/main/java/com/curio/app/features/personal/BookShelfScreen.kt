@@ -808,9 +808,9 @@ private fun BookImportConfirm(
     )
     Text(
         if (pending.title.isNotBlank()) {
-            "Read from the file's name — fix it if the guess is off."
+            "Read from the file's name. Fix it if the guess is off."
         } else {
-            "The file's name did not say — give it a title."
+            "The file's name did not say. Give it a title."
         },
         style = MaterialTheme.typography.bodySmall,
         color = ink.copy(alpha = 0.6f)

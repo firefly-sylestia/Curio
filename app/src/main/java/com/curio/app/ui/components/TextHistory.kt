@@ -407,7 +407,7 @@ fun TextHistoryBrowser(
             text = {
                 Text(
                     "\u201C${previewLine(deleteTarget.text, 64)}\u201D\n\n" +
-                        "This removes it from Text history for good — the field itself is untouched."
+                        "This removes it from Text history for good. The field itself is untouched."
                 )
             },
             confirmButton = {
@@ -589,7 +589,7 @@ fun TextHistoryBrowser(
                         size = 16.dp
                     )
                     Text(
-                        "Comparing ${formatHistoryTime(armed.ts)} — tap another snapshot's compare",
+                        "Comparing ${formatHistoryTime(armed.ts)}. Tap another snapshot's compare",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
@@ -612,7 +612,7 @@ fun TextHistoryBrowser(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Snapshots stay on this device — “Reset layout” or a new card never clears them.",
+                        "Snapshots stay on this device. “Reset layout” or a new card never clears them.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -868,7 +868,7 @@ fun TextHistoryBrowser(
                     if (prevOf == null) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Original version — the first snapshot of this field.",
+                            "Original version. The first snapshot of this field.",
                             style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1518,7 +1518,7 @@ private fun RestoreModeDialog(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "The field already has text — where should the snapshot go?",
+                    "The field already has text. Where should the snapshot go?",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

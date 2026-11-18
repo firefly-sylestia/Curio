@@ -1070,7 +1070,7 @@ private fun SocialProfileTile(card: CommunityCard, onClick: () -> Unit) {
                 Spacer(Modifier.weight(1f))
                 card.byline.trim().takeIf { it.isNotEmpty() }?.let { credit ->
                     Text(
-                        text = "— $credit",
+                        text = "by $credit",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

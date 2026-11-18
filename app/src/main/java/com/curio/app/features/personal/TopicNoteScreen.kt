@@ -456,7 +456,7 @@ private fun TopicNoteReadView(
         Spacer(Modifier.height(16.dp))
         if (doc.isEmpty) {
             Text(
-                "Nothing written about this topic yet — tap the pen to start.",
+                "Nothing written about this topic yet. Tap the pen to start.",
                 style = TextStyle(
                     fontFamily = FrauncesFontFamily,
                     fontSize = 15.sp,

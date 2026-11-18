@@ -507,7 +507,7 @@ fun CommunityScreen(navController: NavController) {
                                     when {
                                         status.locked ->
                                             "No post, reply, reaction, message or edit is accepted " +
-                                                "while it stands — reach out if you think this is a mistake."
+                                                "while it stands. Reach out if you think this is a mistake."
                                         status.readOnly ->
                                             "You can still read the wall, but posting, replying, " +
                                                 "reacting, friends and messages are paused meanwhile."
@@ -516,7 +516,7 @@ fun CommunityScreen(navController: NavController) {
                                                 "are paused meanwhile."
                                         else ->
                                             "Your posts and replies are hidden and you cannot post " +
-                                                "meanwhile — reach out if you think this is a mistake."
+                                                "meanwhile. Reach out if you think this is a mistake."
                                     }
                                 )
                                 status.untilMillis?.let { until ->
@@ -560,7 +560,7 @@ fun CommunityScreen(navController: NavController) {
                                 SettingsOptionInfoRow(
                                     CurioIcons.Info,
                                     "Online mode is off",
-                                    "Nothing here loads while Online mode is off — nothing of yours is shared either."
+                                    "Nothing here loads while Online mode is off, and nothing of yours is shared either."
                                 )
                                 SettingsOptionRow(
                                     icon = CurioIcons.Refresh,
@@ -616,7 +616,7 @@ fun CommunityScreen(navController: NavController) {
                     // the device's own copy because the request failed.
                     item(key = "offline-copy") {
                         SocialNote(
-                            "Offline — showing the wall as you last saw it.",
+                            "Offline. Showing the wall as you last saw it.",
                             false
                         )
                     }
@@ -663,7 +663,7 @@ fun CommunityScreen(navController: NavController) {
                                 if (followingOnly) {
                                     "Nobody you followed has posted yet."
                                 } else {
-                                    "Cards only last a day — be the first to pin one up."
+                                    "Nothing posted yet. Be the first to pin one up."
                                 }
                             )
                         }
@@ -877,7 +877,7 @@ fun CommunityScreen(navController: NavController) {
                     CommunityApi.report(active, "card", card.id, reason, note).fold(
                         onSuccess = {
                             reporting = null
-                            notice = "Thanks — we'll take a look."
+                            notice = "Thanks. We'll take a look."
                         },
                         onFailure = { error = it.message }
                     )
@@ -921,7 +921,7 @@ fun CommunityScreen(navController: NavController) {
                                         )
                                     )
                                 }
-                                notice = "Taken down — it is kept on this phone if you change your mind."
+                                notice = "Taken down. It is kept on this phone if you change your mind."
                                 load()
                             },
                             onFailure = { error = it.message }

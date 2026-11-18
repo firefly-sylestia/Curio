@@ -484,7 +484,7 @@ internal fun SocialNotificationWatcher() {
                     val body = when {
                         fromOthers.size > 1 ->
                             "New cards on the social wall."
-                        subject.isNotBlank() -> "$subject — on the wall."
+                        subject.isNotBlank() -> "$subject on the wall."
                         else -> "A new line on the social wall."
                     }
                     SocialNotifications.community(context, title, body)

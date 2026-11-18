@@ -642,8 +642,8 @@ private fun DeletedPostsDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "They were removed from Curio's servers the moment you deleted them — " +
-                        "these copies are on this phone, and nothing is shared unless you post one again.",
+                    text = "They were removed from Curio's servers when you deleted them. " +
+                        "These copies are on this phone, and nothing is shared unless you post one again.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -408,7 +408,7 @@ fun BookCoverHubScreen(navController: NavController) {
             // ── Failed list ────────────────────────────────────────────
             if (failedList.isNotEmpty()) {
                 item(key = "failed-header") {
-                    SettingsSectionHeading("Failed covers — tap to retry one", "\u2726")
+                    SettingsSectionHeading("Failed covers. Tap to retry one", "\u2726")
                 }
                 items(failedList, key = { it }) { name ->
                     val failedDark = isCurioDarkTheme()

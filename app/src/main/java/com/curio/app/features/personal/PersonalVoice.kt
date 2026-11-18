@@ -1029,7 +1029,7 @@ internal fun PersonalVoiceBar(
 internal enum class PersonalVoiceStyle(val key: String, val label: String, val hint: String) {
     HAND("hand", "Hand-drawn", "A drawn pulse in ink, with a drawn play mark"),
     BARS("bars", "Bars", "Rounded columns on a centre line, with a filled disc"),
-    BUBBLE("bubble", "Bubble", "A voice message — mirrored bars in a tinted bubble"),
+    BUBBLE("bubble", "Bubble", "A voice message. Mirrored bars in a tinted bubble"),
     MINIMAL("minimal", "Minimal", "One thin line and a dot, with an outlined mark"),
     RIBBON("ribbon", "Ribbon", "A single drawn ribbon, out along the voice and back"),
     BEADS("beads", "Beads", "A bead per moment, strung evenly on the centre line"),

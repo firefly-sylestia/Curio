@@ -116,7 +116,7 @@ internal fun PersonalDoc.exportName(): String {
 private fun exportLine(block: PersonalBlock): String = when {
     block.isPhoto -> block.caption.trim()
         .takeIf { it.isNotEmpty() }
-        ?.let { "[Photo — $it]" }
+        ?.let { " [Photo: $it]" }
         ?: "[Photo]"
 
     block.isAudio -> "[Voice note ${formatRecordingTime(block.audioSeconds)}]"

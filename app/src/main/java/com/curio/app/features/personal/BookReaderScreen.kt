@@ -11531,9 +11531,9 @@ private fun ReaderTapZoneEditor(palette: ReaderPalette, onDone: () -> Unit) {
                     Text(
                         when {
                             !ReaderLook.tapZones ->
-                                "The gestures are off — turn them on in Reading settings."
+                                "The gestures are off. Turn them on in Reading settings."
                             showOverlay -> "Tap a zone on the page to pick it, then say what it does."
-                            else -> "The washes are off — the page is clear to read."
+                            else -> "The washes are off. The page is clear to read."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = ink.copy(alpha = 0.7f)

@@ -804,7 +804,7 @@ private fun JournalReadView(
         Spacer(Modifier.height(18.dp))
         if (doc.isEmpty) {
             Text(
-                "Nothing written for this day yet — tap the pen to start.",
+                "Nothing written for this day yet. Tap the pen to start.",
                 style = TextStyle(
                     fontFamily = FrauncesFontFamily,
                     fontSize = 15.sp,

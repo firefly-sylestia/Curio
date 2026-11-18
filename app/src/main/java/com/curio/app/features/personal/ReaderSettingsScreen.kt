@@ -754,7 +754,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                                 if (voices.isEmpty()) {
                                     Text(
                                         if (ReaderLook.speakEngine == ReaderEngine.NEURAL) {
-                                            "No voice packs are downloaded yet — download one below."
+                                            "No voice packs are downloaded yet. Download one below."
                                         } else {
                                             "No voices are installed on this phone yet."
                                         },
@@ -914,7 +914,7 @@ internal fun ReadAloudSettingsBody(palette: ReaderPalette) {
                     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                         ReaderSettingsSection("Voice packs", palette)
                         Text(
-                            "Downloaded once, then yours — these read with no engine, no network " +
+                            "Downloaded once, then yours. These read with no engine, no network " +
                                 "and no account.",
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.ink.copy(alpha = 0.6f)

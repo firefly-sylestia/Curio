@@ -1557,7 +1557,7 @@ private fun AutoLayoutPill(onTap: () -> Unit, modifier: Modifier = Modifier) {
         Box(contentAlignment = Alignment.Center) {
             CurioIcon(
                 name = "auto_awesome",
-                contentDescription = "Auto layout — tap to fit the card, tap again for another arrangement",
+                contentDescription = "Auto layout. Tap to fit the card, tap again for another arrangement",
                 size = 18.dp,
                 tint = curioAccentInk()
             )
@@ -9362,8 +9362,8 @@ fun TopicShareSheet(
                             ToolWithCaption(caption = if (classicDesign) "Classic" else "Current") {
                                 EditToolPill(
                                     glyph = ShareCardStyle.SIGNATURE.glyph,
-                                    description = if (classicDesign) "Signature \u00b7 Classic — tap for the current design"
-                                    else "Signature \u00b7 Current — tap for the classic design",
+                                    description = if (classicDesign) "Signature \u00b7 Classic. Tap for the current design"
+                                    else "Signature \u00b7 Current. Tap for the classic design",
                                     active = false,
                                     onClick = {
                                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -10488,8 +10488,8 @@ fun TopicShareSheet(
                                         }
                                     }
                                     Text(
-                                        if (isTitle) "Longer titles auto-fit their box — this scales the type precisely."
-                                        else "The shown size is what the card renders — smart fit folds its auto size into this thumb.",
+                                        if (isTitle) "Longer titles auto-fit their box. This scales the type precisely."
+                                        else "The shown size is what the card renders. Smart fit folds its auto size into this thumb.",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.weight(1f)
@@ -10634,7 +10634,7 @@ fun TopicShareSheet(
                                     // its full height and the text size shrinks
                                     // with the length; the box only grows when
                                     // the text can't shrink any further.
-                                    Text("Long facts shrink their text to fit (the box keeps its height) — the box grows only when the text can't shrink more. Turning this back ON re-fits the box even after you resized it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("Long facts shrink their text to fit (the box keeps its height). The box grows only when the text can't shrink more. Turning this back ON re-fits the box even after you resized it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 Switch(
                                     checked = AppPreferences.shareAutoFitState,
@@ -10826,7 +10826,7 @@ fun TopicShareSheet(
                                         if (opt.id == NO_FACT_ID) {
                                             IconPill(
                                                 icon = CurioIcons.VisibilityOff,
-                                                contentDesc = "No fact — hide the fact box",
+                                                contentDesc = "No fact. Hide the fact box",
                                                 selected = picked,
                                                 onClick = onPick
                                             )
@@ -10885,7 +10885,7 @@ fun TopicShareSheet(
                                             steps = (bookChapters.size - 1).coerceAtLeast(0)
                                         )
                                         Text(
-                                            "Also updates your Book Notes reading progress for this book — drag back to undo.",
+                                            "Also updates your Book Notes reading progress for this book. Drag back to undo.",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -11329,7 +11329,7 @@ fun TopicShareSheet(
                             Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                "Say something about $displayTopic — your words ride with the picture, and the topic's link rides along too when you turn it on.",
+                                "Say something about $displayTopic. Your words ride with the picture, and the topic's link rides along too when you turn it on.",
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                                 maxLines = 2, overflow = TextOverflow.Ellipsis
                             )
@@ -11338,7 +11338,7 @@ fun TopicShareSheet(
                                 value = linkCaption,
                                 onValueChange = { linkCaption = it },
                                 label = { Text("Your message (optional)") },
-                                placeholder = { Text("e.g. Loved this one — you should check it out") },
+                                placeholder = { Text("e.g. Loved this one. You should check it out") },
                                 minLines = 2, maxLines = 5,
                                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                                 shape = RoundedCornerShape(14.dp),
@@ -11355,7 +11355,7 @@ fun TopicShareSheet(
                                 ) {
                                     Column(Modifier.weight(1f)) {
                                         Text("Include a link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
-                                        Text("Google search — or your music service for songs", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text("Google search, or your music service for songs", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
                                     Switch(
                                         checked = includeLink,

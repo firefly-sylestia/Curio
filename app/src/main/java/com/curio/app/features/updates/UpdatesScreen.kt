@@ -388,7 +388,7 @@ fun UpdatesScreen(navController: NavController) {
                                                 // the CTA is a note instead of a button.
                                                 if (UpdateChecker.isFdroidBuild) {
                                                     Text(
-                                                        "Installed from F-Droid — updates arrive through the F-Droid client.",
+                                                        "Installed from F-Droid. Updates arrive through the F-Droid client.",
                                                         style = MaterialTheme.typography.bodySmall,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )

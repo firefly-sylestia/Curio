@@ -829,7 +829,7 @@ fun ModerationScreen(navController: NavController) {
 /** The line a ban's record keeps: which tier, and for how long. Written once
  *  here so the queue's own action and the ladder describe a ban identically. */
 private fun banNote(kind: String, hours: Int?): String =
-    "${banTierLabel(kind)} — " + when {
+    "${banTierLabel(kind)}. " + when {
         hours == null -> "until it is lifted"
         hours == 24 -> "24 hours"
         else -> "${hours / 24} days"
@@ -890,7 +890,7 @@ private fun ModerationBanRow(
                         maxLines = 1
                     )
                     Text(
-                        text = "@${ban.username.ifBlank { "—" }}",
+                        text = "@${ban.username.ifBlank { "no username" }}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
@@ -1277,7 +1277,7 @@ private fun ModerationTargetPreview(
                     )
                 }
                 else -> Text(
-                    text = "This content is no longer readable — it may already be gone.",
+                                            text = "This content is no longer readable. It may already be gone.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

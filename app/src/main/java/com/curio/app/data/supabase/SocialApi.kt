@@ -787,7 +787,7 @@ private const val PERSON_COLUMNS_PRIVACY =
                 lastSocialWriteAt = throttle(
                     lastSocialWriteAt,
                     SOCIAL_WRITE_GAP_MS,
-                    "One at a time — try again in a moment."
+                    "One at a time. Try again in a moment."
                 )
                 // Treat the action as idempotent: the unique pair constraint
                 // is expected to reject a second tap, so check both directions

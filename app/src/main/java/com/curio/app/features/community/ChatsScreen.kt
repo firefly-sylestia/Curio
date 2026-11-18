@@ -357,8 +357,8 @@ fun ChatsScreen(navController: NavController) {
                         SocialEmptyCard(
                             icon = CurioIcons.BubbleChart,
                             title = "No conversations yet",
-                            body = "Open Friends, pick someone, and say hello — messages are " +
-                                "private and the server forgets them after a day."
+                            body = "Open Friends, pick someone, and say hello. Your chats " +
+                                "stay private between you."
                         )
                     }
                     item(key = "to-friends") {
@@ -478,7 +478,7 @@ fun ChatsScreen(navController: NavController) {
                                 SocialInboxCache.replaceThreads(context, threads)
                                 actionsFor = null
                                 notice = "Deleted for both of you" +
-                                    if (removed > 0) " — $removed message(s) gone." else "."
+                                    if (removed > 0) ". $removed message(s) gone." else "."
                             },
                             onFailure = { error = it.message }
                         )

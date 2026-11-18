@@ -310,7 +310,7 @@ fun IncursionScreen(navController: NavController) {
                 else -> activeStudio?.name.orEmpty()
             },
             blurb = when {
-                searching -> "Matches across Marvel, Sony and X-Men — every group says " +
+                searching -> "Matches across Marvel, Sony and X-Men. Every group says " +
                     "which line it came from."
                 onPersonal -> "Where you are in the whole order: a bar per line, the six " +
                     "states, and the figures your statuses add up to."
@@ -436,7 +436,7 @@ fun IncursionScreen(navController: NavController) {
             text = {
                 Text(
                     "Every status in ${victim.name} goes back to not watched. " +
-                        "The titles themselves stay — only what you marked comes off."
+                        "The titles themselves stay. Only what you marked comes off."
                 )
             },
             confirmButton = {

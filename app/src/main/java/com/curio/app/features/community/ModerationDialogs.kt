@@ -350,7 +350,7 @@ internal fun ModerationBanDialog(
                 )
 
                 Text(
-                    text = if (chosen == null) "Why (required — pick one)" else "Why (required)",
+                    text = if (chosen == null) "Why (required, pick one)" else "Why (required)",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = if (chosen == null) MaterialTheme.colorScheme.error
                             else MaterialTheme.colorScheme.onSurface,

@@ -7100,7 +7100,7 @@ private fun FileToCollectionSheet(
             } else {
                 if (collections.isEmpty()) {
                     Text(
-                        text = "No collections yet — create one below.",
+                        text = "No collections yet. Create one below.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -7239,7 +7239,7 @@ private fun RevealShareChoiceSheet(
             RevealShareChoice(
                 glyph = CurioIcons.Share,
                 title = "Share a card",
-                subtitle = "The topic's card — words, style and art, yours to edit",
+                subtitle = "The topic's card. Words, style and art, yours to edit",
                 onClick = onCard
             )
             if (canPost) {

@@ -889,7 +889,7 @@ onSuccess = {
                             SocialEmptyCard(
                                 icon = CurioIcons.Notes,
                                 title = "Nothing said yet",
-                                body = "This thread is only the two of you — start it with a hello."
+                                body = "Only the two of you here. Say hello."
                             )
                         }
                     }
@@ -1137,7 +1137,7 @@ private fun PeerMutePill(userId: String, ink: Color) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CurioIcon(
                 CurioIcons.Notifications,
-                if (muted) "Muted — tap to unmute" else "Mute this conversation",
+                if (muted) "Muted. Tap to unmute" else "Mute this conversation",
                 tint = if (muted) ink.copy(alpha = 0.32f) else ink.copy(alpha = 0.8f),
                 size = 18.dp
             )

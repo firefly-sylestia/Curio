@@ -302,20 +302,20 @@ fun BookDetailScreen(navController: NavController, bookId: String) {
                     // v426b — the message names the right catalogue: a manga or
                     // a comic is never looked up in Open Library.
                     if (com.curio.app.data.PersonalKinds.asksComicSources(current.kind))
-                        "Lookups are off in Settings — turn them on to search the comics sources."
-                    else "Book lookups are off in Settings — turn them on to search Open Library."
+                        "Lookups are off in Settings. Turn them on to search the comics sources."
+                    else "Book lookups are off in Settings. Turn them on to search Open Library."
                 // v465g — THE OTHER WAY THE OLD MESSAGE COULD LIE. A book Curio
                 // knows is not reported as needing consent (its record is local),
                 // so with lookups off it fell past the branch above and was told
                 // "nothing more found" — for a search the off switch had already
                 // forbidden. The switch is the honest thing to name.
                 !AppPreferences.bookFetchEnabledState ->
-                    "Book lookups are off in Settings — turn them on to search Open Library."
+                    "Book lookups are off in Settings. Turn them on to search Open Library."
                 // v465g — AND WHEN IT DID LOOK. The pass reached Open Library and
                 // the catalogue agreed this book is already complete, which is a
                 // different fact from "found nothing", and the only sentence the
                 // member was ever given was the wrong one.
-                report.consulted -> "Open Library has this book — nothing new to add."
+                report.consulted -> "Open Library has this book. Nothing new to add."
                 else -> "Nothing more found for this book."
             }
         }

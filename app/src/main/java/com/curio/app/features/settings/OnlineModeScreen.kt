@@ -201,9 +201,9 @@ fun OnlineModeScreen(navController: NavController) {
                         icon = CurioIcons.Refresh,
                         title = "Keep my areas in sync",
                         subtitle = if (account.signedIn) {
-                            "Keeps your account and liked topics in sync. Text only — photos, audio and screenshots never leave this device."
+                            "Keeps your account and liked topics in sync. Text only. Photos, audio and screenshots never leave this device."
                         } else {
-                            "Sign in to turn sync on. Text only — photos, audio and screenshots never leave this device."
+                            "Sign in to turn sync on. Text only. Photos, audio and screenshots never leave this device."
                         },
                         checked = onlineMode && account.signedIn,
                         enabled = account.signedIn && !account.busy,

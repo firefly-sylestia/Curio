@@ -109,7 +109,7 @@ internal fun StudioAddRowDoor(
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Text(
-                text = "A voice take, a review, a moodboard or field notes — below what you have written.",
+                text = "A voice take, a review, a moodboard or field notes, added below your words.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -143,8 +143,8 @@ internal fun FormatRenameDialog(
                     placeholder = { Text(FormatLabels.defaultLabel(format)) }
                 )
                 Text(
-                    text = "This name is used everywhere: the row, the page, the cabinet and the entry. " +
-                        "Leave it empty to go back to \"${FormatLabels.defaultLabel(format)}\".",
+                    text = "Used everywhere: the row, the page, the cabinet and the entry. " +
+                        "Leave it empty for \"${FormatLabels.defaultLabel(format)}\".",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

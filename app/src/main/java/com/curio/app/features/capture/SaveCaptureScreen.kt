@@ -1286,7 +1286,7 @@ fun SaveCaptureScreen(
                 shape = CurioDialogShape,
                 onDismissRequest = { pendingRemoveIndex = null },
                 title = { Text("Remove this take?") },
-                text = { Text("This will delete the content you've drafted in this take (including any live recording).") },
+                text = { Text("This deletes what you drafted in this take, including a live recording.") },
                 confirmButton = {
                     CurioGlassWindowBlur()
                     TextButton(onClick = {
@@ -1317,7 +1317,7 @@ fun SaveCaptureScreen(
                 shape = CurioDialogShape,
                 onDismissRequest = { pendingFormatSwitch = null },
                 title = { Text("Switch format?") },
-                text = { Text("Switch to ${fmt.shortName}? You can keep what you've added here as its own take first, or switch and clear it.") },
+                text = { Text("Switch to ${fmt.shortName}? Keep what you added here as its own take, or switch and clear it.") },
                 dismissButton = {
                     TextButton(
                         onClick = { pendingFormatSwitch = null },
@@ -1384,7 +1384,7 @@ fun SaveCaptureScreen(
                 shape = CurioDialogShape,
                 onDismissRequest = { showDiscardDialog = false },
                 title = { Text("Unsaved changes") },
-                text = { Text("You have unsaved edits. Save them and switch away, or leave without saving.") },
+                text = { Text("Save your edits before switching, or leave without saving.") },
                 dismissButton = {
                     TextButton(onClick = {
                         showDiscardDialog = false
@@ -1472,7 +1472,7 @@ fun SaveCaptureScreen(
                 showResumeDraftDialog = false
             },
             title = { Text("Resume draft?") },
-            text = { Text("You have an autosaved draft for this topic. Pick up where you left off, or start fresh.") },
+            text = { Text("A draft is waiting for this topic. Pick it up, or start fresh.") },
             dismissButton = {
                 TextButton(onClick = {
                     CaptureDraftStore.clear(context, categorySlug, topicName)
