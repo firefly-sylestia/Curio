@@ -107,6 +107,78 @@ object OnlineAccount {
         }
     }
 
+    /**
+     * Sends the reset email. The answer never says whether the address exists —
+     * a member typing a stranger's email must not learn that it has an account,
+     * so a request that reached the server counts as done.
+     */
+    suspend fun requestPasswordReset(context: Context, email: String): Boolean {
+        appContext = context.applicationContext
+        val address = email.trim()
+        if (address.isEmpty()) {
+            state = state.copy(error = "Enter your email first.")
+            return false
+        }
+        state = state.copy(busy = true, error = null, notice = null)
+        return SupabaseClient.requestPasswordReset(address).fold(
+            onSuccess = {
+                state = state.copy(
+                    busy = false,
+                    notice = "If that email has a Curio account, a reset link is on its way."
+                )
+                true
+            },
+            onFailure = { failure ->
+                state = state.copy(busy = false, error = onlineAuthMessage(failure))
+                false
+            }
+        )
+    }
+
+    /**
+     * Changes the password of the signed-in account, proving the CURRENT one
+     * first: Supabase only issues a fresh session when the old password is
+     * right, and that fresh token is what authorises the new one. A wrong old
+     * password therefore fails here, before anything is written.
+     */
+    suspend fun changePassword(
+        context: Context,
+        currentPassword: String,
+        newPassword: String
+    ): Boolean {
+        appContext = context.applicationContext
+        val address = state.session?.email
+        if (address.isNullOrBlank()) {
+            state = state.copy(error = "Sign in first.")
+            return false
+        }
+        if (currentPassword.isEmpty()) {
+            state = state.copy(error = "Enter your current password.")
+            return false
+        }
+        if (newPassword.length < 6) {
+            state = state.copy(error = "Use at least 6 characters for the new password.")
+            return false
+        }
+        state = state.copy(busy = true, error = null, notice = null)
+        val verified = SupabaseClient.signIn(address, currentPassword).getOrElse {
+            state = state.copy(busy = false, error = "That is not your current password.")
+            return false
+        }
+        return SupabaseClient.updatePassword(verified.accessToken, newPassword).fold(
+            onSuccess = {
+                SupabaseSessionStore.save(context, verified)
+                state = State(session = verified, notice = "Your password is changed.")
+                keepSessionFresh(context, verified)
+                true
+            },
+            onFailure = { failure ->
+                state = state.copy(busy = false, error = onlineAuthMessage(failure))
+                false
+            }
+        )
+    }
+
     /** Signs in and, on success, turns Online Mode on (the user asked for it). */
     suspend fun signIn(context: Context, email: String, password: String): Boolean {
         appContext = context.applicationContext

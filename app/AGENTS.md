@@ -136,6 +136,20 @@ app/src/main/java/com/curio/app/
 - **Community is on by default** (`isCommunityTabEnabled`), and a signed-out
   member gets the wall's calm signed-out prompt rather than a hidden tab.
 
+### Passwords (v516)
+- **One dialog, three doors.** `CurioSignInDialog` handles sign in, create, and
+  `AuthMode.RESET` (a forgotten password). Reset copy never confirms whether an
+  address has an account — `OnlineAccount.requestPasswordReset` reports only
+  that a request reached the server.
+- **Changing a password proves the old one.** `OnlineAccount.changePassword`
+  signs in with the current password first and uses that fresh token for
+  `PUT /auth/v1/user`; a wrong current password writes nothing. The dialog is
+  `CurioChangePasswordDialog`, reached from Online mode's Account card.
+- **Everyone is findable.** `SocialApi.searchPeople` lists people for an EMPTY
+  query (limit 50), and `prof_select_own` no longer requires `discoverable` —
+  Online Mode is the consent. FriendsScreen therefore opens on the directory
+  rather than a blank page.
+
 ### Signing in (v516)
 - **The dialog is the door.** `CurioSignInDialog` (`ui/components`) is the one
   sign-in surface reached from inside the app: it offers sign in and create an

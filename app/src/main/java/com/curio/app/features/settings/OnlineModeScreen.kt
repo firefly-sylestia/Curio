@@ -33,6 +33,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.CurioChangePasswordDialog
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -124,9 +125,24 @@ fun OnlineModeScreen(navController: NavController) {
                 SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         if (account.signedIn) {
+                            // v516 — changing a password you still remember: the
+                            // dialog asks for the current one first, and a wrong
+                            // answer changes nothing. A forgotten one goes through
+                            // the reset link on the sign-in dialog.
+                            var changePasswordOpen by remember { mutableStateOf(false) }
+                            if (changePasswordOpen) {
+                                CurioChangePasswordDialog(onDismiss = { changePasswordOpen = false })
+                            }
                             Column(modifier = Modifier.padding(14.dp)) {
                                 CurioAccountIdentityCard(email = account.email)
                             }
+                            SettingsOptionDivider()
+                            SettingsOptionRow(
+                                icon = CurioIcons.Lock,
+                                title = "Change password",
+                                subtitle = "You'll enter your current password",
+                                onClick = { changePasswordOpen = true }
+                            )
                             SettingsOptionDivider()
                             SettingsOptionRow(
                                 icon = CurioIcons.Close,

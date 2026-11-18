@@ -228,10 +228,11 @@ fun FriendsScreen(navController: NavController) {
         refreshQuietly(token, myUserId)
     }
 
-    // Search runs off the typed text; [SocialApi.searchPeople] ignores anything
-    // shorter than two characters, so this needs no debounce to stay quiet.
+    // Search runs off the typed text, and an EMPTY box is the directory (v516):
+    // [SocialApi.searchPeople] lists the first fifty people when nothing is
+    // typed, so the screen opens showing everyone instead of a blank page.
     LaunchedEffect(query, eligible, token, myUserId) {
-        if (!eligible || token == null || myUserId == null || query.trim().length < 2) {
+        if (!eligible || token == null || myUserId == null) {
             results = emptyList()
             searching = false
             return@LaunchedEffect

@@ -6,6 +6,44 @@ from the state rather than from memory.
 
 ---
 
+## §111 — PASSWORDS AND PEOPLE (v516 / `1.5.20` / `20260963`)
+
+> "add password reset feature with ability to chnage password if user knows previous password. remove
+> the content floating button from journal, and fix video import not properly showing, and redesign
+> the way video plays in full screen make it beautiful curio style. and please enable show all users
+> somehow, and if not guest sign in, just add social page enabled to sign in to use, and read only
+> thing bruh, its my app i make my rules"
+
+**BUILT — PASSWORDS.** `SupabaseClient.requestPasswordReset` (`POST /auth/v1/recover`, no redirect: a
+recovery token on the app's `/confirm` page would confirm a sign-up, not a password) and
+`SupabaseClient.updatePassword` (`PUT /auth/v1/user`). `OnlineAccount.requestPasswordReset` answers
+only that a request reached the server, never whether the address exists.
+`OnlineAccount.changePassword` proves the CURRENT password by signing in with it, then writes the new
+one with that fresh token — a wrong old password writes nothing. UI: `CurioSignInDialog` gained
+`AuthMode.RESET` behind "Forgot your password?", and `CurioChangePasswordDialog` sits on Online
+mode's Account card.
+
+**BUILT — EVERYONE IS FINDABLE.** `SocialApi.searchPeople` now lists the first 50 people for an
+EMPTY query, `prof_select_own` drops the `discoverable` requirement (Online Mode is the consent — it
+is what lets an account post at all), and `FriendsScreen` opens on the directory because its
+`LaunchedEffect` no longer skips queries shorter than two characters. Sending a request already
+existed; this is what makes there be anyone to send one to.
+
+**NOT DONE — THE JOURNAL BUTTON AND VIDEO.** Searched and could not find either: there is no
+`FloatingActionButton` anywhere in `features/capture`, and Journal's only add control is a HEADER
+action (`PersonalHeaderAction(glyph = CurioIcons.Add, …)` at `JournalListScreen.kt:1294`), while
+`PersonalFloatingLayer` is used by Book Detail. There is also **no video feature in this repo at
+all** — no capture, no import, no playback, no media3 video use; the only ExoPlayer in the app is the
+AUDIO clip bar in `EntryDetailScreen`. So "fix video import" and "redesign fullscreen video" cannot
+be done by fixing what is here: they describe something that does not exist yet or lives in another
+client (`curio_flutter/`). ASKED, not guessed — per the root rule.
+
+**⚠️ NOT COMPILED / NOT SEEN.** All six Kotlin files pass the brace scan (0), annotation placement
+checked on the new dialog file (two `@Composable` functions each keep their own), `git diff --check`
+clean. Version `1.5.19 → 1.5.20`.
+
+---
+
 ## §110 — SHARPER PICTURES, NO CLOCKS, ONE PREVIEW, COMMUNITY ON (v516 / `1.5.19` / `20260962`)
 
 > "the images are too low res, make the png or jpg to svg coversition very high. and ... dont show

@@ -113,6 +113,41 @@ object SupabaseClient {
         authRequest("/auth/v1/token?grant_type=password", email, password)
             .mapCatching { it ?: error("Supabase did not return a session") }
 
+    /**
+     * Sends the password-reset email.
+     *
+     * v516 — the reset link is deliberately left to the project's own Site URL.
+     * Pointing it at the app's `/confirm` page would land a recovery token on a
+     * page that confirms sign-ups, not passwords, so no redirect is sent at all.
+     */
+    suspend fun requestPasswordReset(email: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            requireConfigured()
+            val body = JSONObject().put("email", email.trim())
+            val request = requestBuilder("/auth/v1/recover")
+                .post(body.toString().toRequestBody(jsonMediaType))
+                .build()
+            execute(request)
+        }
+    }
+
+    /**
+     * Writes a new password for a session whose owner has JUST proved they know
+     * the old one — [signIn] with the current password is what earns the token
+     * this call needs, so this is only ever reached after that check.
+     */
+    suspend fun updatePassword(accessToken: String, newPassword: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                requireConfigured()
+                val body = JSONObject().put("password", newPassword)
+                val request = requestBuilder("/auth/v1/user", accessToken)
+                    .put(body.toString().toRequestBody(jsonMediaType))
+                    .build()
+                execute(request)
+            }
+        }
+
     suspend fun refreshSession(refreshToken: String): Result<Session> = withContext(Dispatchers.IO) {
         runCatching {
             requireConfigured()

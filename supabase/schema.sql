@@ -76,7 +76,10 @@ create unique index if not exists profiles_username_unique
 drop policy if exists prof_select_own on public.profiles;
 create policy prof_select_own on public.profiles
     for select to authenticated
-    using (id = auth.uid() or (online_mode_enabled and discoverable));
+    -- v516 — discoverability is no longer required: Online Mode is the consent,
+    -- because it is what lets an account post at all. `discoverable` kept a
+    -- member online but unfindable, which made "show me everyone" impossible.
+    using (id = auth.uid() or online_mode_enabled);
 
 drop policy if exists prof_insert_own on public.profiles;
 create policy prof_insert_own on public.profiles

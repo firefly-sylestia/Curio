@@ -334,9 +334,15 @@ private const val PERSON_COLUMNS_PRIVACY =
     // ── people ───────────────────────────────────────────────────────────
 
     /**
-     * Finds accounts by display name. Only accounts that turned Online Mode on
-     * and left themselves discoverable can come back, and the caller is never
-     * included — asking yourself for friendship is refused by the schema too.
+     * Finds accounts by display name — or, with an EMPTY query, lists people
+     * (v516). The member asked to see everyone, not only the names they could
+     * already think of, so the same call now doubles as the directory: an empty
+     * box shows the first fifty accounts instead of an empty screen.
+     *
+     * `discoverable` is no longer required. Online Mode is the consent that
+     * matters — it is what lets an account post at all — so every account that
+     * is online can be found and asked. The caller is still never included;
+     * asking yourself for friendship is refused by the schema too.
      */
     suspend fun searchPeople(
         accessToken: String,
@@ -345,12 +351,17 @@ private const val PERSON_COLUMNS_PRIVACY =
     ): Result<List<CurioPerson>> = withContext(Dispatchers.IO) {
         mapped {
             val text = query.trim()
-            if (text.length < 2) return@mapped emptyList()
             val path = "$PROFILES?select=$PERSON_COLUMNS" +
-                "&online_mode_enabled=is.true&discoverable=is.true" +
-                "&or=(display_name.ilike.*${encode(text)}*,username.ilike.*${encode(text)}*)" +
+                "&online_mode_enabled=is.true" +
+                (
+                    if (text.isNotEmpty()) {
+                        "&or=(display_name.ilike.*${encode(text)}*,username.ilike.*${encode(text)}*)"
+                    } else {
+                        ""
+                    }
+                ) +
                 (myUserId?.let { "&id=neq.$it" } ?: "") +
-                "&order=display_name.asc&limit=20"
+                "&order=display_name.asc&limit=${if (text.isEmpty()) 50 else 20}"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
             parsePeople(SupabaseClient.executeBody(request)).values.toList()
         }
