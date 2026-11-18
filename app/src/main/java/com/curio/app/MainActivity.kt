@@ -108,6 +108,10 @@ class MainActivity : ComponentActivity() {
         // composition, before the splash coroutine has a chance to run.
         TopicJsonLoader.install(this)
 
+        // v514 — the member's own names for the capture formats, read once for
+        // the run so every surface prints the same name.
+        com.curio.app.data.FormatLabels.load(this)
+
         // Shared Coil ImageLoader with an EXPLICIT memory + disk cache so the
         // fetched book covers (and any other network image) download ONCE and
         // are served from disk on every later visit — including app restarts.

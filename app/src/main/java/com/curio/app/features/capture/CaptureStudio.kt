@@ -45,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -168,7 +169,8 @@ internal fun CaptureStudio(
     // The New-take picker: pick what the next take IS, then it is created.
     var newTakeOpen by remember { mutableStateOf(false) }
     val activeSection = sections.getOrNull(activeIndex)
-    val activeFormat = activeSection?.format ?: CaptureFormat.SoundBite
+    // v514 — journal is the default shape of an express-yourself page.
+    val activeFormat = activeSection?.format ?: CaptureFormat.Marginalia
 
     Column(modifier = modifier) {
         StudioTopBar(
@@ -202,6 +204,8 @@ internal fun CaptureStudio(
             onAddTag = onAddTag,
             onRemoveTag = onRemoveTag,
             onImageTap = onImageTap,
+            onAddRow = { newTakeOpen = true },
+            onRequestRemoveTake = onRequestRemoveTake,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -532,6 +536,8 @@ private fun StudioCanvas(
     onAddTag: (String) -> Unit,
     onRemoveTag: (String) -> Unit,
     onImageTap: (String) -> Unit,
+    onAddRow: () -> Unit,
+    onRequestRemoveTake: (Int) -> Unit,
     modifier: Modifier
 ) {
     val flip = remember { Animatable(1f) }
@@ -567,13 +573,35 @@ private fun StudioCanvas(
                         CircularProgressIndicator(color = cat.themedAccent())
                     }
                 } else {
-                    FormatBodyForCategory(
-                        category = cat,
-                        sections = sections,
-                        activeIndex = activeIndex,
-                        boardSeed = boardSeed,
-                        onImageTap = onImageTap
-                    )
+                    // v514 — ONE PAGE OF ROWS. Every take is drawn, stacked, in
+                    // the order it was added (the member: "it will show as a
+                    // whole, each as one row"); before this only the active
+                    // take was on screen and the rest hid behind a rail of
+                    // pills. Each row keeps its own editor, its own mood and its
+                    // own data — `FormatBodyForCategory` is bound to that row's
+                    // index, so nothing is shared between two rows.
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(22.dp)
+                    ) {
+                        sections.forEachIndexed { index, section ->
+                            key(section.id) {
+                                StudioRowHeader(
+                                    format = section.format,
+                                    canRemove = sections.size > 1,
+                                    onRemove = { onRequestRemoveTake(index) }
+                                )
+                                FormatBodyForCategory(
+                                    category = cat,
+                                    sections = sections,
+                                    activeIndex = index,
+                                    boardSeed = boardSeed,
+                                    onImageTap = onImageTap
+                                )
+                            }
+                        }
+                        StudioAddRowDoor(onClick = onAddRow)
+                    }
                 }
             }
             // This take's labels ride under the note so they read as part of

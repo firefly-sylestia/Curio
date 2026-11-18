@@ -6,6 +6,57 @@ from the state rather than from memory.
 
 ---
 
+## §107 — EXPRESS YOURSELF IS ONE PAGE OF ROWS, AND JOURNAL IS ITS DEFAULT (v514 / `1.5.16` / `20260959`)
+
+> "for express yourself make journal the default one, eith ability to rename it, and instead of
+> separate formats like voice review and moodboard and filednote, user can like add a row in journal
+> itself at the button, it will show as a whole, each as one row, and user can rename it, for field
+> notes user can chnage the question fof what i obsersed and all, also directly push it to the main
+> branch the previous work, on app."
+
+**THE PREVIOUS WORK WAS ALREADY ON `main`** — §106's push (`7bf84a34`) landed at the end of the
+last session, so nothing was outstanding there.
+
+**FOUR DECISIONS ASKED AND ANSWERED** (the member's process, §94): rows are **stacked in one
+continuous page**; a rename changes the **format's name GLOBALLY**; field-note questions are
+**per entry**; and journal is the default **everywhere**, not only where a category used to fall
+back to voice.
+
+**WHAT THE PAGE ALREADY HAD.** A capture was one `CurioEntry` with one format, but the studio kept
+several takes and saved them as `CaptureData.Portfolio(sections)` when more than one was filled — so
+rows needed no storage migration. What it did NOT have: a name on a section, any way to rename a
+format, and a page that shows more than the active take.
+
+**BUILT.**
+- **Journal everywhere:** `SaveCaptureScreen`'s `defaultFormat` is `Marginalia` unconditionally (it
+  was `cat.defaultFormat`, with `OpenNotebook` falling back to `SoundBite`); `CaptureStudio`'s own
+  fallback and `OpenNotebookFormat`'s start choice follow.
+- **Rows:** `CaptureStudio`'s canvas draws every section stacked, keyed by section id, each with
+  `StudioRowHeader` (name · Rename · Remove) and `StudioAddRowDoor` at the foot. New file
+  `features/capture/StudioRows.kt` holds the row header, the add door and the rename dialog, so the
+  imports stay self-contained.
+- **Global rename:** new `data/FormatLabels.kt` — a process-wide `SnapshotStateMap` loaded once in
+  `MainActivity`, persisted in its own `curio_format_labels` prefs file. `CaptureFormat.shortName`
+  reads it first, so all 18 existing call sites (studio tray, format cards, take tabs, cabinet,
+  entry detail, recycle bin, `toPreview`) pick a rename up with no edits. Blank restores the app's
+  name.
+- **Field-note questions:** `CaptureData.FieldNotes` gained `observedLabel` / `surprisedLabel` /
+  `learnNextLabel` (nullable, Gson-reflected, so legacy entries decode null); `FieldNotesFormat`
+  seeds them from the entry, shows them as the three headings and saves them; new
+  `formats/FieldPrompts.kt` holds the door and the dialog plus the `DEFAULT_*` wording the app shipped.
+
+**⚠️ NOT COMPILED.** No Gradle here. All nine edited/created files pass the string/comment-aware
+brace+paren+bracket scan (0), no duplicate imports, `CaptureData` is Gson-reflected rather than
+hand-codec'd (verified: new fields persist and old entries stay readable), Kotlin is 2.3.21 so
+`CaptureFormat.entries` is valid, and Compose runtime is already imported in `data/`. Version
+`1.5.15 → 1.5.16`, code `20260958 → 20260959`, `changelogs/20260959.txt` carried forward.
+
+**OPEN.** The studio still also shows the old take rail in the tray beside the stacked rows (two ways
+to the same thing); it renders the same sections, so nothing is lost, but folding it into the rows is
+the obvious next tidy-up. Reordering rows and per-row collapse were not asked for and are not built.
+
+---
+
 ## §106 — POSTS AND MESSAGES STAY, AND A PICTURE TRAVELS AS SVG TEXT (v513 / `1.5.15` / `20260958`)
 
 > "instead of only last 24 hours when posting make it last forever, as the data is just texts.

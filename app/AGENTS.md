@@ -85,6 +85,27 @@ app/src/main/java/com/curio/app/
   embedded ones decoded straight to a bitmap — so one picture is never rendered
   by two different rules. The composer's door is `CurioPictureDoor`.
 
+### The Express-yourself page (v514)
+- **Journal is the page.** `SaveCaptureScreen`'s `defaultFormat` is
+  `CaptureFormat.Marginalia` unconditionally — a category's own preferred format
+  is something you ADD as a row, never what the page starts on. Wildcard no
+  longer falls back to a voice note.
+- **One page of rows.** `CaptureStudio`'s canvas renders EVERY section stacked
+  (`StudioRowHeader` + `FormatBodyForCategory(activeIndex = i)`), keyed by
+  section id, with `StudioAddRowDoor` at the foot. `FormatBodyForCategory` binds
+  to the row's own index, so two rows never share data, mood or paper style.
+- **A format's name belongs to the member.** `FormatLabels` (its own prefs file,
+  loaded once in `MainActivity`) holds per-format renames, and
+  `CaptureFormat.shortName` reads them — which is why the rename reaches the
+  studio, the cabinet, the entry page and the recycle bin without any call site
+  knowing it exists. `FormatRenameDialog` is the rename door; blank restores the
+  app's own name.
+- **Field-note questions are per entry.** `CaptureData.FieldNotes` carries
+  `observedLabel` / `surprisedLabel` / `learnNextLabel` (nullable, Gson), and
+  `FieldPromptsDoor` edits them for that capture only. A legacy entry decodes
+  null and falls back to the `DEFAULT_*` constants the format already shipped
+  with.
+
 ### Identity
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)

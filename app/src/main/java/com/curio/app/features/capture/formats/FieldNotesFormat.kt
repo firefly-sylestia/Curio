@@ -126,6 +126,18 @@ fun FieldNotesFormat(
     var surprisedExpanded by remember { mutableStateOf(true) }
     var learnNextExpanded by remember { mutableStateOf(true) }
 
+    // v514 — the three questions are the member's, and the wording is saved with
+    // this entry. A legacy entry carries none, so it opens on the app's own.
+    var observedLabel by remember(initialData) {
+        mutableStateOf(initialData?.observedLabel?.takeIf { it.isNotBlank() } ?: DEFAULT_OBSERVED_LABEL)
+    }
+    var surprisedLabel by remember(initialData) {
+        mutableStateOf(initialData?.surprisedLabel?.takeIf { it.isNotBlank() } ?: DEFAULT_SURPRISED_LABEL)
+    }
+    var learnNextLabel by remember(initialData) {
+        mutableStateOf(initialData?.learnNextLabel?.takeIf { it.isNotBlank() } ?: DEFAULT_LEARN_LABEL)
+    }
+
     val canSave = observed.isNotBlank() ||
                   surprised.isNotBlank() ||
                   learnNext.isNotBlank() ||
@@ -133,7 +145,8 @@ fun FieldNotesFormat(
     LaunchedEffect(
         canSave, observed, observedSpans, surprised, surprisedSpans,
         learnNext, learnNextSpans, imageUris, observedStyle, surprisedStyle, learnNextStyle,
-        observedColor, surprisedColor, learnNextColor, mood
+        observedColor, surprisedColor, learnNextColor, mood,
+        observedLabel, surprisedLabel, learnNextLabel
     ) {
         onCanSaveChange(canSave)
         onDataChanged(
@@ -153,7 +166,10 @@ fun FieldNotesFormat(
                 learnNextColor = learnNextColor,
                 // Legacy fallback — mirror the first section's style.
                 paperStyle = observedStyle,
-                mood = mood
+                mood = mood,
+                observedLabel = observedLabel,
+                surprisedLabel = surprisedLabel,
+                learnNextLabel = learnNextLabel
             )
             else null
         )
@@ -163,9 +179,21 @@ fun FieldNotesFormat(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // ── Section 1: What I observed ──────────────────────────────────────
+        // v514 — the three questions can be renamed for this entry.
+        FieldPromptsDoor(
+            observedLabel = observedLabel,
+            surprisedLabel = surprisedLabel,
+            learnNextLabel = learnNextLabel,
+            onLabels = { observed, surprised, learnNext ->
+                observedLabel = observed
+                surprisedLabel = surprised
+                learnNextLabel = learnNext
+            }
+        )
+
+        // ── Section 1: the first question ───────────────────────────────────
         CollapsibleSectionHeader(
-            label = "What I observed",
+            label = observedLabel,
             accent = accent,
             expanded = observedExpanded,
             onToggle = { observedExpanded = !observedExpanded },
@@ -219,7 +247,7 @@ fun FieldNotesFormat(
 
         // ── Section 2: What surprised me ───────────────────────────────────
         CollapsibleSectionHeader(
-            label = "What surprised me",
+            label = surprisedLabel,
             accent = accent,
             expanded = surprisedExpanded,
             onToggle = { surprisedExpanded = !surprisedExpanded },
@@ -269,7 +297,7 @@ fun FieldNotesFormat(
 
         // ── Section 3: What I want to learn next ───────────────────────────
         CollapsibleSectionHeader(
-            label = "What I want to learn next",
+            label = learnNextLabel,
             accent = accent,
             expanded = learnNextExpanded,
             onToggle = { learnNextExpanded = !learnNextExpanded },

@@ -251,7 +251,10 @@ enum class CaptureFormat {
  * UI-safe (pure string, no icons).
  */
 val CaptureFormat.shortName: String
-    get() = when (this) {
+    // v514 — the member may rename a format, and the name holds EVERYWHERE:
+    // every surface prints through this one property, so the override lives in
+    // [FormatLabels] and no call site has to know about it.
+    get() = FormatLabels.labelOf(this) ?: when (this) {
         CaptureFormat.SoundBite -> "Voice"
         CaptureFormat.ReelNotes -> "Review"
         CaptureFormat.Marginalia -> "Journal"

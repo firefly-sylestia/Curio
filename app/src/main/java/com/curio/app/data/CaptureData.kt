@@ -427,6 +427,13 @@ sealed class CaptureData {
         val observedColor: NotePaperColor? = null,
         val surprisedColor: NotePaperColor? = null,
         val learnNextColor: NotePaperColor? = null,
+        // v514 — the member's own wording for the three questions, saved with
+        // THIS entry. Legacy entries omit them (Gson → null), so the format
+        // falls back to the app's own questions rather than showing a blank
+        // heading.
+        val observedLabel: String? = null,
+        val surprisedLabel: String? = null,
+        val learnNextLabel: String? = null,
         // Take-level note-paper style — legacy fallback.
         val paperStyle: NotePaperStyle? = null,
         // Mood — picked in the editor, shown in the saved entry's meta

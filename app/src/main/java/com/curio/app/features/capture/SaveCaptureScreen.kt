@@ -581,8 +581,11 @@ fun SaveCaptureScreen(
         // every take. Section state (format + live data per take) is held
         // here so switching takes never loses in-progress content; the old
         // body-level rules apply unchanged.
-        val defaultFormat = if (cat.defaultFormat == CaptureFormat.OpenNotebook)
-            CaptureFormat.SoundBite else cat.defaultFormat
+        // v514 — every Express-yourself page opens on the JOURNAL (the member:
+        // "for express yourself make journal the default one"). A category's own
+        // preferred format is still a row you can add; it is no longer what the
+        // page starts on, and Wildcard no longer falls back to a voice note.
+        val defaultFormat = CaptureFormat.Marginalia
         val sectionEntryFormat = editingEntry?.format
         val sectionInitData = editingEntry?.captureData ?: resumedDraftData
         val sections = remember(sectionEntryFormat, sectionInitData) {
