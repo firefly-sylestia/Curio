@@ -42,13 +42,26 @@ object SvgPicture {
     /** The database's own ceiling (mirrors `community_cards_svg_len`). */
     const val MAX_CHARS = 1_200_000
 
-    /** Longest edge the tracer works at — larger buys nothing but characters. */
+    /**
+     * Longest edge the TRACER works at — larger buys nothing but characters.
+     *
+     * Tracing costs O(pixels × palette), so the vector path works on a
+     * thumbnail of the picture; the photograph path does not (see [PHOTO_EDGE]).
+     */
     const val MAX_EDGE = 320
 
     /** Colours in a traced picture. Sixteen reads as art, not as a broken GIF. */
     private const val TRACE_PALETTE = 16
 
-    /** Longest edge the embedded fallback is resampled to. */
+    /**
+     * Longest edge the embedded (photograph) form is decoded and kept at.
+     *
+     * v517 — THIS IS THE PHOTOGRAPH'S OWN SIZE, and it used to be dead code:
+     * [fromUri] decoded the picture at [MAX_EDGE] and handed THAT to the
+     * encoder, so the fallback could never be larger than 320px however it was
+     * configured, and every photograph on the wall was a 320px thumbnail. The
+     * big decode now happens on the embedded path alone — see [fromUri].
+     */
     private const val PHOTO_EDGE = 1080
 
     /** JPEG quality for the embedded form — small enough to stay under the cap. */
@@ -60,6 +73,15 @@ object SvgPicture {
     /** Floor for the embedded form's quality while it steps down. */
     private const val MIN_QUALITY = 60
 
+    /** Tallest a framed picture is DRAWN — a portrait phone photo (9:16). */
+    const val MIN_FRAME_RATIO = 0.55f
+
+    /** Widest a framed picture is DRAWN — a wide panorama (12:5). */
+    const val MAX_FRAME_RATIO = 2.4f
+
+    /** The dimensions every document this object writes states in its root tag. */
+    private val VIEW_BOX = Regex("viewBox\\s*=\\s*\"0 0 ([0-9.]+) ([0-9.]+)\"")
+
     /**
      * Reads a picked image and answers the SVG document to store.
      *
@@ -68,25 +90,58 @@ object SvgPicture {
      * with an empty picture.
      */
     fun fromUri(context: Context, uri: Uri): String? = runCatching {
+        val bounds = boundsOf(context, uri) ?: return null
+
+        // 1. THE VECTOR ATTEMPT, from a thumbnail. A few thousand merged
+        //    rectangles are what a logo, an icon or an illustration comes out
+        //    as, and 320px is enough of a copy to decide that with.
+        val tracedSource = decodeAt(context, uri, bounds, MAX_EDGE) ?: return null
+        val traced = trace(tracedSource)
+        tracedSource.recycle()
+        if (traced.length in 1..MAX_CHARS) return traced
+
+        // 2. THE PHOTOGRAPH, from a real decode. Tracing failed because the
+        //    palette form grew past the budget, which means this is a
+        //    photograph (or close to one) — and a photograph read at 320px is a
+        //    smudge. It is decoded AGAIN at [PHOTO_EDGE] and compressed to fit
+        //    the ceiling, which is the picture the wall actually deserves.
+        val photoSource = decodeAt(context, uri, bounds, PHOTO_EDGE) ?: return null
+        val document = embedded(photoSource)
+        photoSource.recycle()
+        document
+    }.getOrNull()
+
+    /** The picture's own pixel size, read without allocating the bitmap. */
+    private fun boundsOf(context: Context, uri: Uri): BitmapFactory.Options? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         context.contentResolver.openInputStream(uri)?.use {
             BitmapFactory.decodeStream(it, null, bounds)
         }
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        return bounds.takeIf { it.outWidth > 0 && it.outHeight > 0 }
+    }
 
+    /**
+     * [uri] decoded so that its LONGEST edge is [maxEdge] — and its ratio left
+     * exactly as the picture has it: only a scale factor is applied, never a
+     * crop and never a box.
+     */
+    private fun decodeAt(
+        context: Context,
+        uri: Uri,
+        bounds: BitmapFactory.Options,
+        maxEdge: Int
+    ): Bitmap? {
         val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, MAX_EDGE)
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxEdge)
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         val decoded = context.contentResolver.openInputStream(uri)?.use {
             BitmapFactory.decodeStream(it, null, options)
         } ?: return null
-
-        val scaled = scaleDown(decoded, MAX_EDGE)
-        val svg = encode(scaled)
+        val scaled = scaleDown(decoded, maxEdge)
         if (scaled !== decoded) decoded.recycle()
-        svg
-    }.getOrNull()
+        return scaled
+    }
 
     /**
      * Turns a bitmap into an SVG document, preferring the traced form and
@@ -102,6 +157,37 @@ object SvgPicture {
     /** True when [svg] looks like a document we wrote (a card may carry none). */
     fun isPicture(svg: String): Boolean =
         svg.isNotBlank() && svg.trimStart().startsWith("<svg", ignoreCase = true)
+
+    /**
+     * The document's own width ÷ height, read from the `viewBox` it states.
+     *
+     * A picture is not one shape: a screenshot is tall, a camera photograph is
+     * usually 4:3 or 3:2, a phone held upright is 9:16, a panorama runs wide.
+     * Every document this object writes carries its real dimensions, so a
+     * surface can draw the picture in the shape it actually has instead of
+     * squeezing it into one band. [fallback] answers for a document that says
+     * nothing about its size.
+     */
+    fun ratioOf(svg: String, fallback: Float = 1f): Float {
+        val match = VIEW_BOX.find(svg) ?: return fallback
+        val width = match.groupValues[1].toFloatOrNull() ?: return fallback
+        val height = match.groupValues[2].toFloatOrNull() ?: return fallback
+        if (width <= 0f || height <= 0f) return fallback
+        return width / height
+    }
+
+    /**
+     * The ratio a framed picture is DRAWN at — [ratioOf] held inside
+     * [MIN_FRAME_RATIO]..[MAX_FRAME_RATIO].
+     *
+     * Every ordinary picture lands exactly on its own shape: 3:2 is 1.5, an
+     * upright phone photo is 0.56, a square is 1, a 4:5 portrait is 0.8. The
+     * band only catches shapes that would otherwise take over the page (a 9:1
+     * strip of sky, a 1:6 screenshot of a chat), and the excess is CROPPED by
+     * the frame rather than stretched, so no picture is ever squashed.
+     */
+    fun frameRatio(svg: String): Float =
+        ratioOf(svg).coerceIn(MIN_FRAME_RATIO, MAX_FRAME_RATIO)
 
     /**
      * The bitmap inside an EMBEDDED document, or null for a traced one (that
@@ -288,9 +374,12 @@ object SvgPicture {
 
     /** One attempt at the embedded form: [source] as a JPEG of [edge], [quality]. */
     private fun embeddedAt(source: Bitmap, edge: Int, quality: Int): String {
-        val width = source.width
-        val height = source.height
         val scaled = scaleDown(source, edge)
+        // The document states the JPEG's OWN dimensions, which keep the
+        // picture's ratio exactly (a scale is all [scaleDown] does) — that is
+        // what every surface reads back to draw it in its own shape.
+        val width = scaled.width
+        val height = scaled.height
         val stream = ByteArrayOutputStream()
         scaled.compress(Bitmap.CompressFormat.JPEG, quality, stream)
         if (scaled !== source) scaled.recycle()

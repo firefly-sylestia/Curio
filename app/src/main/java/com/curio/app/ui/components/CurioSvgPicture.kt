@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -77,6 +79,44 @@ fun CurioSvgPicture(
         modifier = modifier,
         contentScale = ContentScale.Crop
     )
+}
+
+/**
+ * A PICTURE IN ITS OWN SHAPE (v517).
+ *
+ * The wall drew every picture into a fixed 180dp band, the post's page into a
+ * fixed 220dp one, and both cropped — so a tall screenshot, a 4:3 photograph and
+ * a panorama all arrived as the same wide strip with their edges cut off. The
+ * document states its own width and height (see [SvgPicture.frameRatio]), so the
+ * frame takes the picture's ratio instead: a square is square, an upright photo
+ * stands up, a panorama runs wide, and every surface that shows a picture shows
+ * the same shape without each one deciding for itself.
+ *
+ * Only the shapes that would take over a page are held inside a band, and those
+ * overflow is cropped by the frame rather than stretched, so nothing is squashed.
+ *
+ * Blank draws nothing at all, the way [CurioSvgPicture] does.
+ */
+@Composable
+fun CurioPicture(
+    svg: String,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    shape: Shape = RoundedCornerShape(16.dp)
+) {
+    if (!SvgPicture.isPicture(svg)) return
+    val ratio = remember(svg) { SvgPicture.frameRatio(svg) }
+    Box(
+        modifier = modifier
+            .aspectRatio(ratio)
+            .clip(shape)
+    ) {
+        CurioSvgPicture(
+            svg = svg,
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }
 
 /**

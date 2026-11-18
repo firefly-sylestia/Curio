@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import com.curio.app.ui.components.CurioSvgPicture
+import com.curio.app.ui.components.CurioPicture
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -489,19 +489,15 @@ internal fun SocialTextPost(
             // the server stores. It sits above the words for every kind, so a
             // note, a quote and a topic card all show their picture the same
             // way; a post without one draws nothing at all.
+            // v517 — in the picture's OWN shape, not a 180dp band. A square
+            // photograph is square on the wall now, a screenshot of a chat
+            // stands up, and a panorama runs wide; see [CurioPicture].
             if (card.svg.isNotBlank()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                ) {
-                    CurioSvgPicture(
-                        svg = card.svg,
-                        contentDescription = "A picture attached to this post",
-                        modifier = Modifier.fillMaxWidth().height(180.dp)
-                    )
-                }
+                CurioPicture(
+                    svg = card.svg,
+                    contentDescription = "A picture attached to this post",
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             if (card.kind == KIND_QUOTE) {
                 // A QUOTE IS ITS OWN THING — see [SocialPullQuote]. The old

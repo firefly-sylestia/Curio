@@ -6,6 +6,45 @@ from the state rather than from memory.
 
 ---
 
+## §113 — THE PICTURE'S OWN SIZE AND ITS OWN SHAPE (v517 / `1.5.22` / `20260965`)
+
+> "add proper big picture compression too, and add proper dimension ration of that image, not just
+> one ratio, but it can be any size,"
+
+**BUILT — BIG PICTURES ARE PICTURES NOW.** `SvgPicture.fromUri` decoded the picked image ONCE, at
+`MAX_EDGE = 320`, and handed that bitmap to the encoder — so `PHOTO_EDGE = 1080` could never apply
+and every photograph was stored as a 320px thumbnail (the v516 changelog's "up to 1080px" was not
+what the code did; §112 flagged it). `fromUri` now decodes TWICE, on purpose: a 320px copy for the
+tracer (tracing is O(pixels × palette), so it wants a thumbnail) and, only when tracing blows the
+budget, a `PHOTO_EDGE` 1080px copy for the embedded JPEG, which `embedded` compresses down through
+its quality/edge ladder until it fits `MAX_CHARS`. The two decodes go through one helper
+(`decodeAt`), which also fixes the old recycle: the pre-scale bitmap is released rather than leaked.
+
+**BUILT — ANY SHAPE, NOT ONE BAND.** The wall drew a picture into a fixed `height(180.dp)` box and
+the post's page into `height(220.dp)`, both `ContentScale.Crop` — so a square, a 4:3 photograph and
+a panorama all arrived as the same wide strip with their edges cut off. The document states its own
+width and height in `viewBox`; `SvgPicture.ratioOf` reads them, `SvgPicture.frameRatio` holds the
+result inside `MIN_FRAME_RATIO` 0.55 .. `MAX_FRAME_RATIO` 2.4 (a 9:16 phone photo is 0.5625, a 12:5
+panorama is 2.4 — everything ordinary lands exactly on its own shape), and the new `CurioPicture`
+composable in `ui/components/CurioSvgPicture.kt` frames it with `Modifier.aspectRatio(...)`. Both
+surfaces now call `CurioPicture`, so the wall and the post's page can never disagree about a
+picture's shape. `embeddedAt` also states the JPEG's own dimensions instead of the pre-scale
+source's, so the ratio it reports is exactly the pixels it holds.
+
+**DESIGN NOTE.** The band is a ceiling, not a target: only a shape that would eat the page is
+clipped, and the excess is CROPPED by the frame rather than stretched, so no picture is ever
+squashed. A very tall picture (0.55) at full width is about a screenful on a phone, which is the
+honest height for a screenshot of a chat.
+
+**⚠️ NOT COMPILED / NOT SEEN.** Brace/paren/bracket scan 0/0/0 on all four edited Kotlin files,
+`git diff --check` clean, no declaration inserted above an annotated one (`CurioPicture` was added
+above `CurioPictureDoor`, which keeps its own `@Composable` and its doc block). Version
+`1.5.21 → 1.5.22`. **The 1080px photograph needs the `community_cards_svg_len` paste from §112 — on
+a project still holding the old 180000 check, a sharp photo is larger than a 320px one was and will
+be refused.**
+
+---
+
 ## §112 — THE PICTURE THAT SOMETIMES WOULD NOT POST (v516 / `1.5.21` / `20260964`)
 
 > "why sometimes it says new row for relation community cards violates check constraint

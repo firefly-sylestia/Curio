@@ -68,7 +68,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyLine
-import com.curio.app.ui.components.CurioSvgPicture
+import com.curio.app.ui.components.CurioPicture
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.ShareCardAspect
@@ -255,19 +255,16 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     // picture; drawing it here as well showed the same image
                     // twice — one bare above, one with its caption.
                     if (current.kind == KIND_CARD && current.svg.isNotBlank()) {
+                        // v517 — the picture's own shape here too, so the
+                        // post's page and the wall agree about it. See
+                        // [CurioPicture].
                         item(key = "picture") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(220.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                            ) {
-                                CurioSvgPicture(
-                                    svg = current.svg,
-                                    contentDescription = "A picture attached to this card",
-                                    modifier = Modifier.fillMaxWidth().height(220.dp)
-                                )
-                            }
+                            CurioPicture(
+                                svg = current.svg,
+                                contentDescription = "A picture attached to this card",
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp)
+                            )
                         }
                     }
                     item(key = "card", contentType = "card") {
