@@ -191,7 +191,7 @@ do $$
 begin
     if not exists (select 1 from pg_constraint where conname = 'community_cards_svg_len') then
         alter table public.community_cards
-            add constraint community_cards_svg_len check (char_length(svg) <= 180000);
+            add constraint community_cards_svg_len check (char_length(svg) <= 1200000);
     end if;
 end $$;
 

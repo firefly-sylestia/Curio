@@ -489,8 +489,9 @@ object AppPreferences {
   }
 
   // ── Community tab (opt-in bottom-nav entry) ───────────────────────
+  // v516 — Community is ON by default.
   fun isCommunityTabEnabled(context: Context): Boolean =
-  prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
+  prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, true)
 
     fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
@@ -1613,8 +1614,8 @@ object AppPreferences {
     /** Mirrors [isOnlineModeEnabled] so the nav chrome reacts to the switch. */
     var onlineModeEnabledState by mutableStateOf(false)
         private set
-    /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
-    var communityTabEnabledState by mutableStateOf(false)
+    /** Mirrors [isCommunityTabEnabled] — the Community nav tab (on by default). */
+    var communityTabEnabledState by mutableStateOf(true)
         private set
     /** Mirrors [getProfileVisibility] — "public" or "friends". */
     var profileVisibilityState by mutableStateOf("public")

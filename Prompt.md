@@ -6,6 +6,42 @@ from the state rather than from memory.
 
 ---
 
+## §110 — SHARPER PICTURES, NO CLOCKS, ONE PREVIEW, COMMUNITY ON (v516 / `1.5.19` / `20260962`)
+
+> "the images are too low res, make the png or jpg to svg coversition very high. and ... dont show
+> time left in posted images or note or anything. , and ialso when i open the image it shows double
+> preview one with caption and one above it."
+
+**PICTURES.** `SvgPicture`'s photo path was a 320px thumbnail at JPEG 68 — fine for a wall tile,
+mush when opened. Now `PHOTO_EDGE = 1080`, `PHOTO_QUALITY = 90`, and the trace path samples at
+`MAX_EDGE = 320` instead of 192. `MAX_CHARS` and the `community_cards_svg_len` check both go to
+**1.2 MB** because a picture that big against a 180 KB constraint is a rejected insert, not a small
+picture. ⚠️ **The schema must be re-pasted** or uploads over 180 KB fail.
+
+**CLOCKS.** Every member-facing age is gone: the wall row's `· ${card.ageLabel}`, the comments
+sheet's, the card screen's `agoLabel(...)` in the meta line, and a reply's age (with it, the "edited"
+mark — a lone word with no time beside it is noise). `ageLabel` still exists for staff moderation.
+
+**THE DOUBLE PREVIEW.** `CommunityCardScreen` drew the standalone picture item AND then rendered
+`SocialTextPost`, which draws its own — so a NOTE showed the image bare above and again with its
+caption. The standalone item is now `KIND_CARD` only.
+
+**COMMUNITY ON.** `isCommunityTabEnabled` defaulted to **false** (an opt-in tab). It is **true** now,
+for the tab and for `communityTabEnabledState`.
+
+**⚠️ NOT COMPILED / NOT SEEN.** All five edited files pass the brace scan (0), `git diff --check`
+clean, no `.ageLabel` references remain in the app. Version `1.5.18 → 1.5.19`.
+
+**NOT DONE — NEEDS A DECISION.** Guest read-only and "show all users" are still open. Both are
+blocked on the same boundary: `comm_select_live` requires the READER's own profile to have
+`online_mode_enabled`, and `profiles` discovery requires `discoverable and online_mode_enabled`, so
+an anonymous visitor is refused by the server, not by the UI. Doing it needs (a) Anonymous sign-ins
+enabled in the Supabase dashboard — an owner-only toggle — and (b) that reader clause relaxed to
+"any authenticated session", with `is_anonymous` blocking inserts so a guest stays read-only. Asked,
+not assumed.
+
+---
+
 ## §109 — SIGNING IN IS A DIALOG, AND A SIGNED-OUT PROFILE SAYS SO (v516 / `1.5.18` / `20260961`)
 
 > "curio sign in flow from edit profile is bad replace tuned ear in profile to sign in dialog"

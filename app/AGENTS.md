@@ -121,6 +121,21 @@ app/src/main/java/com/curio/app/
   asked again. The Settings switch is the way to change your mind, and it writes
   the same `KEY_PET_ENABLED` preference.
 
+### Pictures and silence (v516)
+- **Pictures are stored at 1080px / JPEG 90 traces, not as thumbnails.**
+  `SvgPicture`'s `PHOTO_EDGE` / `PHOTO_QUALITY` / `MAX_EDGE` are the quality
+  dial, and the `community_cards_svg_len` check in `supabase/schema.sql` must be
+  raised with them (both are 1.2 MB now) — a bigger picture against an old
+  constraint is a rejected insert, not a small picture.
+- **Nothing on a post wears a clock.** No age, no "time left", no edit mark:
+  `CommunityApi.ageLabel` still exists for staff screens, but no member-facing
+  card, wall row or reply renders it.
+- **A picture is drawn once.** `CommunityCardScreen` paints the standalone
+  picture only for `KIND_CARD`; `SocialTextPost` paints its own, so adding it in
+  both places shows the same image twice.
+- **Community is on by default** (`isCommunityTabEnabled`), and a signed-out
+  member gets the wall's calm signed-out prompt rather than a hidden tab.
+
 ### Signing in (v516)
 - **The dialog is the door.** `CurioSignInDialog` (`ui/components`) is the one
   sign-in surface reached from inside the app: it offers sign in and create an

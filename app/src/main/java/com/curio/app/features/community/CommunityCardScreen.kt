@@ -250,7 +250,11 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     }
                     // v513 — the picture the poster attached, drawn from the SVG
                     // text the server stores, above the card itself.
-                    if (current.svg.isNotBlank()) {
+                    // v516 — only for a plain CARD. A NOTE or QUOTE is drawn by
+                    // [SocialTextPost] below, which already paints its own
+                    // picture; drawing it here as well showed the same image
+                    // twice — one bare above, one with its caption.
+                    if (current.kind == KIND_CARD && current.svg.isNotBlank()) {
                         item(key = "picture") {
                             Box(
                                 modifier = Modifier
@@ -309,8 +313,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                 Text(
                                     text = listOfNotNull(
                                         current.authorHandleLabel,
-                                        current.categoryName.takeIf { it.isNotBlank() },
-                                        agoLabel(current.createdAtMillis)
+                                        current.categoryName.takeIf { it.isNotBlank() }
                                     ).joinToString(" · "),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -260,14 +260,9 @@ internal fun CommunityCommentsSheet(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
+                // v516 — no age. Nothing on a post wears a clock any more.
                 if (loading) {
                     CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
-                } else {
-                    Text(
-                        text = card.ageLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
             Text(
@@ -692,22 +687,6 @@ internal fun CommunityReplyRow(
                             .weight(1f, fill = false)
                             .padding(start = 8.dp)
                             .clickable(onClick = onAuthor)
-                    )
-                    Text(
-                        // The AGE and the edit mark ride the NAME's line: one
-                        // meta line, not two. The @handle is left out on
-                        // purpose — a branch's parent is named in the composer
-                        // chip, and a handle on every line turns a conversation
-                        // into a directory.
-                        text = if (reply.editedAtMillis != null) {
-                            "${agoLabel(reply.createdAtMillis)} · edited"
-                        } else {
-                            agoLabel(reply.createdAtMillis)
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = 6.dp)
                     )
                 }
                 Text(

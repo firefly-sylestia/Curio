@@ -1054,7 +1054,7 @@ private fun CommunityCardItem(
                         maxLines = 1
                     )
                     Text(
-                        text = "${card.authorHandleLabel} · ${card.ageLabel}",
+                        text = card.authorHandleLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1

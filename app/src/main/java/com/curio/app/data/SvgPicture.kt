@@ -40,19 +40,19 @@ import kotlin.math.max
 object SvgPicture {
 
     /** The database's own ceiling (mirrors `community_cards_svg_len`). */
-    const val MAX_CHARS = 180_000
+    const val MAX_CHARS = 1_200_000
 
     /** Longest edge the tracer works at — larger buys nothing but characters. */
-    const val MAX_EDGE = 192
+    const val MAX_EDGE = 320
 
     /** Colours in a traced picture. Sixteen reads as art, not as a broken GIF. */
     private const val TRACE_PALETTE = 16
 
     /** Longest edge the embedded fallback is resampled to. */
-    private const val PHOTO_EDGE = 320
+    private const val PHOTO_EDGE = 1080
 
     /** JPEG quality for the embedded form — small enough to stay under the cap. */
-    private const val PHOTO_QUALITY = 68
+    private const val PHOTO_QUALITY = 90
 
     /**
      * Reads a picked image and answers the SVG document to store.
