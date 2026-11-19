@@ -33,6 +33,9 @@ object OnlineAccount {
     /** The running token-refresh loop; replaced whenever a session starts. */
     private var refreshJob: Job? = null
 
+    /** Supabase refresh tokens rotate; only one request may consume a token at a time. */
+    private val sessionRefreshLock = Any()
+
     /**
      * The application context, captured on the first session-aware entry.
      *
@@ -89,7 +92,7 @@ object OnlineAccount {
         val stored = SupabaseSessionStore.get(context) ?: return
         state = state.copy(session = stored, error = null)
         recoveryScope.launch {
-            SupabaseClient.refreshSession(stored.refreshToken).fold(
+            refreshSessionCoordinated(stored).fold(
                 onSuccess = { refreshed ->
                     SupabaseSessionStore.save(context, refreshed)
                     enableOnlineMode(context)
@@ -273,7 +276,8 @@ object OnlineAccount {
         // refresh already in flight could write the signed-out session back.
         refreshJob?.cancel()
         refreshJob = null
-        state = state.copy(busy = true, error = null, notice = null)
+        // Drop in-memory authority before network work so a waiting refresh cannot resurrect it.
+        state = State(busy = true)
         if (token != null) SupabaseClient.signOut(token)
         SupabaseSessionStore.clear(context)
         AppPreferences.setOnlineModeEnabled(context, false)
@@ -382,10 +386,8 @@ object OnlineAccount {
                         DEFAULT_REFRESH_INTERVAL_MS
                     }
                 )
-                SupabaseClient.refreshSession(current.refreshToken).fold(
+                refreshSessionCoordinated(current).fold(
                     onSuccess = { refreshed ->
-                        SupabaseSessionStore.save(context, refreshed)
-                        state = state.copy(session = refreshed, error = null)
                         current = refreshed
                     },
                     onFailure = { delay(REFRESH_RETRY_MS) }
@@ -421,17 +423,47 @@ object OnlineAccount {
         val refresh = state.session?.refreshToken
             ?: SupabaseSessionStore.get(context)?.refreshToken
             ?: return TokenRefresh.Refused
-        return when (val attempt = SupabaseClient.refreshSessionBlocking(refresh)) {
-            is RefreshAttempt.Ok -> {
-                SupabaseSessionStore.save(context, attempt.session)
-                state = state.copy(session = attempt.session, busy = false, error = null)
-                keepSessionFresh(context, attempt.session)
-                TokenRefresh.Fresh(attempt.session.accessToken)
-            }
-            RefreshAttempt.Unreachable -> TokenRefresh.Unreachable
-            RefreshAttempt.Refused -> TokenRefresh.Refused
+        val expected = state.session ?: SupabaseSessionStore.get(context)
+            ?: return TokenRefresh.Refused
+        val refreshed = refreshSessionCoordinated(expected).getOrElse { failure ->
+            return if (failure is java.io.IOException) TokenRefresh.Unreachable else TokenRefresh.Refused
         }
+        keepSessionFresh(context, refreshed)
+        return TokenRefresh.Fresh(refreshed.accessToken)
     }
+
+    /**
+     * Supabase refresh tokens rotate and are single-use. Restore, the proactive
+     * timer and a 401 retry can otherwise consume the same token concurrently:
+     * one succeeds while the other is rejected, falsely appearing as logout.
+     * Serialize refreshes and reuse the newly rotated session for this user.
+     */
+    private fun refreshSessionCoordinated(expected: SupabaseClient.Session): Result<SupabaseClient.Session> =
+        synchronized(sessionRefreshLock) {
+            val live = state.session
+            if (live == null || live.userId != expected.userId) {
+                return@synchronized Result.failure(IllegalStateException("Session changed during refresh"))
+            }
+            if (live.refreshToken != expected.refreshToken) {
+                return@synchronized Result.success(live)
+            }
+            when (val attempt = SupabaseClient.refreshSessionBlocking(expected.refreshToken)) {
+                is RefreshAttempt.Ok -> {
+                    val current = state.session
+                    if (current == null || current.userId != expected.userId) {
+                        Result.failure(IllegalStateException("Session changed during refresh"))
+                    } else {
+                        val context = appContext
+                            ?: return@synchronized Result.failure(IllegalStateException("Session storage unavailable"))
+                        SupabaseSessionStore.save(context, attempt.session)
+                        state = state.copy(session = attempt.session, busy = false, error = null)
+                        Result.success(attempt.session)
+                    }
+                }
+                RefreshAttempt.Unreachable -> Result.failure(java.io.IOException("No connection."))
+                RefreshAttempt.Refused -> Result.failure(IllegalStateException("Refresh token refused"))
+            }
+        }
 
     /**
      * Makes the ACCOUNT and this device agree on who the member is.
