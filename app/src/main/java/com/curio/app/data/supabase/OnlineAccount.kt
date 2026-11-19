@@ -454,6 +454,10 @@ object OnlineAccount {
                     val current = state.session
                     if (current == null || current.userId != expected.userId) {
                         Result.failure(IllegalStateException("Session changed during refresh"))
+                    } else if (current.refreshToken != expected.refreshToken) {
+                        // A sign-in or another refresh replaced this token while
+                        // the request was in flight. Never overwrite the newer one.
+                        Result.success(current)
                     } else {
                         val context = appContext
                             ?: return@synchronized Result.failure(IllegalStateException("Session storage unavailable"))
