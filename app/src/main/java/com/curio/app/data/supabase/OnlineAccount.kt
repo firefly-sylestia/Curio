@@ -193,17 +193,22 @@ object OnlineAccount {
         state = state.copy(busy = true, error = null, notice = null)
         return SupabaseClient.signIn(address, password).fold(
             onSuccess = { session ->
+                // Persist and publish authentication before any best-effort profile calls.
+                // A slow follow-up must never make a successful login look timed out.
                 SupabaseSessionStore.save(context, session)
-                enableOnlineMode(context)
-                SupabaseClient.updateOnlineMode(session.accessToken, true)
-                reconcileIdentity(context, session)
                 state = State(session = session)
+                enableOnlineMode(context)
                 keepSessionFresh(context, session)
+                recoveryScope.launch {
+                    SupabaseClient.updateOnlineMode(session.accessToken, true)
+                    reconcileIdentity(context, session)
+                }
                 true
             },
             onFailure = { failure ->
-                SupabaseSessionStore.clear(context)
-                state = State(error = onlineAuthMessage(failure))
+                // A transport timeout has an unknown outcome. Do not erase an
+                // existing valid session because a new attempt lost its response.
+                state = state.copy(busy = false, error = onlineAuthMessage(failure))
                 false
             }
         )
@@ -420,9 +425,6 @@ object OnlineAccount {
             if (live.accessToken != refused) return TokenRefresh.Fresh(live.accessToken)
         }
         val context = appContext ?: return TokenRefresh.Refused
-        val refresh = state.session?.refreshToken
-            ?: SupabaseSessionStore.get(context)?.refreshToken
-            ?: return TokenRefresh.Refused
         val expected = state.session ?: SupabaseSessionStore.get(context)
             ?: return TokenRefresh.Refused
         val refreshed = refreshSessionCoordinated(expected).getOrElse { failure ->
