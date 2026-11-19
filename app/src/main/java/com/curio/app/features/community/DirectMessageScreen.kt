@@ -50,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -145,6 +146,22 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DirectMessageScreen(
+    navController: NavController,
+    otherUserId: String,
+    handle: String
+) {
+    // A DM is a completely separate UI session, not merely a screen whose
+    // state happens to be keyed by the peer. Re-key the entire composition so
+    // list state, remembered lambdas, child item state, effects and coroutine
+    // scopes from the previous peer are disposed before the next thread draws.
+    key(otherUserId) {
+        DirectMessageScreenContent(navController, otherUserId, handle)
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DirectMessageScreenContent(
     navController: NavController,
     otherUserId: String,
     handle: String
