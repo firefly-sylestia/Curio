@@ -1458,3 +1458,37 @@ html.amoled .curio-web-app textarea::placeholder {
   .curio-web-app *::before,
   .curio-web-app *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+
+/* Home hero: MCU-style translucent glass with a soft fade instead of a hard gradient block. */
+.curio-home-header {
+  isolation:isolate;
+  border:1px solid rgba(255,255,255,.13);
+  background:
+    linear-gradient(112deg,rgba(13,18,25,.74) 0%,rgba(24,29,38,.56) 54%,rgba(62,22,32,.48) 100%),
+    radial-gradient(ellipse at 88% 8%,rgba(218,30,55,.22),transparent 48%);
+  -webkit-backdrop-filter:blur(26px) saturate(150%);
+  backdrop-filter:blur(26px) saturate(150%);
+  box-shadow:0 22px 58px -38px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.14);
+}
+.curio-home-header::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),transparent 34%,rgba(5,8,13,.13));
+  opacity:.8;
+}
+.curio-home-header>.relative { z-index:1; }
+.curio-home-explore-link {
+  border:1px solid rgba(255,255,255,.17);
+  background:rgba(255,255,255,.075);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  backdrop-filter:blur(16px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+  transition:background 220ms cubic-bezier(.22,1,.36,1),border-color 220ms ease,transform 220ms cubic-bezier(.22,1,.36,1);
+}
+.curio-home-explore-link:hover { background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);transform:translateY(-1px); }
+.curio-home-explore-link:active { transform:scale(.97); }
+@media(prefers-reduced-motion:reduce) { .curio-home-explore-link { transition:none; } }
