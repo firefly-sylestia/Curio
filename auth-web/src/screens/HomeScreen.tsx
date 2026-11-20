@@ -61,35 +61,31 @@ const HomeScreen: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       {/* Editorial home header, sharing Explore's visual language */}
-      <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-5xl mx-auto">
-        <header className="curio-home-header relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white">
-          <div className="absolute -right-7 -top-9 w-48 h-48 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(218,30,55,.24), transparent 68%)' }} />
-          <div className="absolute right-5 top-8 opacity-[.10] rotate-[-12deg] pointer-events-none" aria-hidden="true">
-            <MaterialIcon name="auto_awesome" size={116} />
-          </div>
+      <div className="curio-home-heading-wrap px-4 pt-5 sm:px-6 sm:pt-7 max-w-5xl mx-auto">
+        <header className={`curio-home-header relative overflow-hidden p-5 sm:p-7 ${isDark ? "is-dark" : "is-light"}`}>
+          <div className="curio-home-ambient absolute -right-7 -top-9 w-48 h-48 rounded-full pointer-events-none" aria-hidden="true" />
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase text-white/55">
+              <div className="curio-home-eyebrow flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} />
                 Curio / Your space
               </div>
               <button type="button" onClick={() => navigate('/browse')} className="curio-home-explore-link inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[10px] font-bold tracking-[.14em] uppercase text-white/85" aria-label="Explore topics">Explore <MaterialIcon name="arrow_forward" size={14} /></button>
             </div>
-            <p className="text-sm font-semibold text-white/65">{greeting || 'Welcome back'}</p>
-            <h1 className="mt-1 text-[38px] sm:text-[46px] leading-[1.05] font-extrabold tracking-tight"
+            <p className="curio-home-greeting text-sm font-semibold">{greeting || 'Welcome back'}</p>
+            <h1 className="curio-home-title mt-1 text-[38px] sm:text-[46px] leading-[1.05] font-extrabold tracking-tight"
               style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
               {displayName}<span style={{ color: '#F05265' }}>.</span>
             </h1>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/60">
+            <p className="curio-home-description mt-3 max-w-md text-sm leading-relaxed">
               A little curiosity goes a long way. Pick up where you left off, or find something new.
             </p>
-            <div className="mt-7 flex items-end gap-6">
+            <div className="curio-home-stats mt-7 flex items-end gap-6">
               <div>
                 <div className="text-2xl font-bold tabular-nums">{stats.streak}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Streak</div>
+                <div className="curio-home-stat-label mt-0.5 text-[10px] uppercase tracking-[.16em]">Streak</div>
               </div>
-              <div className="h-8 w-px bg-white/15" />
+              <div className="curio-home-stat-divider h-8 w-px" />
               <div>
                 <div className="text-2xl font-bold tabular-nums">{stats.saved}</div>
                 <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Saved</div>
