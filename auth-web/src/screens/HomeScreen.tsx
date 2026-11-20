@@ -62,8 +62,7 @@ const HomeScreen: React.FC = () => {
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       {/* Editorial home header, sharing Explore's visual language */}
       <div className="px-4 pt-5 sm:px-6 sm:pt-7 max-w-5xl mx-auto">
-        <header className="relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white"
-          style={{ background: 'linear-gradient(125deg, #111820 0%, #202831 58%, #38151D 100%)', boxShadow: '0 20px 48px -30px rgba(0,0,0,.65)' }}>
+        <header className="curio-home-header relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white">
           <div className="absolute -right-7 -top-9 w-48 h-48 rounded-full pointer-events-none"
             style={{ background: 'radial-gradient(circle, rgba(218,30,55,.24), transparent 68%)' }} />
           <div className="absolute right-5 top-8 opacity-[.10] rotate-[-12deg] pointer-events-none" aria-hidden="true">
@@ -75,7 +74,7 @@ const HomeScreen: React.FC = () => {
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} />
                 Curio / Your space
               </div>
-              <span className="text-[10px] tracking-widest uppercase text-white/45">01 / Home</span>
+              <button type="button" onClick={() => navigate('/browse')} className="curio-home-explore-link inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[10px] font-bold tracking-[.14em] uppercase text-white/85" aria-label="Explore topics">Explore <MaterialIcon name="arrow_forward" size={14} /></button>
             </div>
             <p className="text-sm font-semibold text-white/65">{greeting || 'Welcome back'}</p>
             <h1 className="mt-1 text-[38px] sm:text-[46px] leading-[1.05] font-extrabold tracking-tight"
