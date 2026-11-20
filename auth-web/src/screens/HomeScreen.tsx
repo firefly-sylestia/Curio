@@ -88,12 +88,12 @@ const HomeScreen: React.FC = () => {
               <div className="curio-home-stat-divider h-8 w-px" />
               <div>
                 <div className="text-2xl font-bold tabular-nums">{stats.saved}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Saved</div>
+                <div className="curio-home-stat-label mt-0.5 text-[10px] uppercase tracking-[.16em]">Saved</div>
               </div>
-              <div className="h-8 w-px bg-white/15" />
+              <div className="curio-home-stat-divider h-8 w-px" />
               <div>
                 <div className="text-2xl font-bold tabular-nums">{stats.topics}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Topics</div>
+                <div className="curio-home-stat-label mt-0.5 text-[10px] uppercase tracking-[.16em]">Topics</div>
               </div>
             </div>
           </div>
