@@ -1240,3 +1240,221 @@ html.amoled .curio-bottom-nav button.active { color:rgba(255,255,255,.98)!import
 @media(prefers-reduced-motion:reduce) {
   .curio-bottom-nav .curio-nav-blob { transition:none!important; }
 }
+
+
+/* ─────────────────────────────────────────────────────────────
+   Curio visual system · unified finish
+   Shared geometry, legible type, restrained glass and touch states.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --curio-radius-xs: 9px;
+  --curio-radius-sm: 12px;
+  --curio-radius-md: 16px;
+  --curio-radius-lg: 20px;
+  --curio-radius-xl: 24px;
+  --curio-radius-pill: 999px;
+  --curio-ease: cubic-bezier(.22,1,.36,1);
+  --curio-text-strong-light: #171b26;
+  --curio-text-body-light: #343b49;
+  --curio-text-muted-light: #667080;
+  --curio-text-strong-dark: #f5f6f8;
+  --curio-text-body-dark: #d5d9e0;
+  --curio-text-muted-dark: #a2aab7;
+  --curio-line-light: rgba(23,27,38,.085);
+  --curio-line-dark: rgba(255,255,255,.09);
+  --curio-panel-light: rgba(255,255,255,.72);
+  --curio-panel-dark: rgba(22,25,32,.72);
+}
+.curio-web-app {
+  --curio-radius-control: var(--curio-radius-sm);
+  --curio-radius-card: var(--curio-radius-lg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+html:not(.dark):not(.amoled) .curio-web-app {
+  --curio-text: var(--curio-text-strong-light);
+  --curio-muted: var(--curio-text-muted-light);
+  --curio-glass-border: var(--curio-line-light);
+}
+html.dark .curio-web-app, html.amoled .curio-web-app {
+  --curio-text: var(--curio-text-strong-dark);
+  --curio-muted: var(--curio-text-muted-dark);
+  --curio-glass-border: var(--curio-line-dark);
+}
+
+/* Consistent geometry: controls, cards, dialogs and nested surfaces. */
+.curio-web-app .rounded,
+.curio-web-app .rounded-md { border-radius: var(--curio-radius-xs) !important; }
+.curio-web-app .rounded-lg { border-radius: var(--curio-radius-sm) !important; }
+.curio-web-app .rounded-xl { border-radius: var(--curio-radius-sm) !important; }
+.curio-web-app .rounded-2xl { border-radius: var(--curio-radius-md) !important; }
+.curio-web-app .rounded-3xl { border-radius: var(--curio-radius-lg) !important; }
+.curio-web-app .rounded-full { border-radius: var(--curio-radius-pill) !important; }
+.curio-web-app button,
+.curio-web-app [role="button"],
+.curio-web-app a,
+.curio-web-app input,
+.curio-web-app textarea,
+.curio-web-app select {
+  transition:
+    color 180ms var(--curio-ease),
+    background-color 180ms var(--curio-ease),
+    border-color 180ms var(--curio-ease),
+    box-shadow 220ms var(--curio-ease),
+    transform 220ms var(--curio-ease);
+}
+.curio-web-app button:focus-visible,
+.curio-web-app [role="button"]:focus-visible,
+.curio-web-app a:focus-visible {
+  outline: 2px solid color-mix(in srgb, #da1e37 72%, transparent);
+  outline-offset: 3px;
+}
+
+/* Type hierarchy and contrast. Avoid tiny, washed-out helper text. */
+.curio-web-app h1,
+.curio-web-app h2,
+.curio-web-app h3,
+.curio-web-app h4 {
+  color: var(--curio-text);
+  text-wrap: balance;
+  letter-spacing: -.035em;
+}
+.curio-web-app p,
+.curio-web-app li,
+.curio-web-app label {
+  text-wrap: pretty;
+}
+.curio-web-app .text-xs { line-height: 1.55; }
+.curio-web-app .text-sm { line-height: 1.6; }
+.curio-web-app .text-\[9px\],
+.curio-web-app .text-\[10px\] { line-height: 1.45; }
+html:not(.dark):not(.amoled) .curio-web-app .text-gray-400,
+html:not(.dark):not(.amoled) .curio-web-app .text-gray-500,
+html:not(.dark):not(.amoled) .curio-web-app .text-slate-400,
+html:not(.dark):not(.amoled) .curio-web-app .text-slate-500,
+html:not(.dark):not(.amoled) .curio-web-app .text-zinc-400,
+html:not(.dark):not(.amoled) .curio-web-app .text-zinc-500 {
+  color: #687282 !important;
+}
+html.dark .curio-web-app .text-gray-400,
+html.dark .curio-web-app .text-gray-500,
+html.dark .curio-web-app .text-slate-400,
+html.dark .curio-web-app .text-slate-500,
+html.dark .curio-web-app .text-zinc-400,
+html.dark .curio-web-app .text-zinc-500,
+html.amoled .curio-web-app .text-gray-400,
+html.amoled .curio-web-app .text-gray-500,
+html.amoled .curio-web-app .text-slate-400,
+html.amoled .curio-web-app .text-slate-500,
+html.amoled .curio-web-app .text-zinc-400,
+html.amoled .curio-web-app .text-zinc-500 {
+  color: #aab2bf !important;
+}
+
+/* Neutral panels share one soft, translucent material instead of competing cards. */
+.curio-web-app .bg-white,
+.curio-web-app .bg-white\/80,
+.curio-web-app .bg-white\/90,
+.curio-web-app .bg-gray-50,
+.curio-web-app .bg-gray-100,
+.curio-web-app .bg-slate-50,
+.curio-web-app .bg-slate-100 {
+  background: var(--curio-panel-light) !important;
+  border-color: var(--curio-line-light);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  backdrop-filter: blur(20px) saturate(145%);
+}
+html.dark .curio-web-app .bg-white,
+html.dark .curio-web-app .bg-white\/80,
+html.dark .curio-web-app .bg-white\/90,
+html.dark .curio-web-app .bg-gray-50,
+html.dark .curio-web-app .bg-gray-100,
+html.dark .curio-web-app .bg-slate-50,
+html.dark .curio-web-app .bg-slate-100,
+html.amoled .curio-web-app .bg-white,
+html.amoled .curio-web-app .bg-white\/80,
+html.amoled .curio-web-app .bg-white\/90,
+html.amoled .curio-web-app .bg-gray-50,
+html.amoled .curio-web-app .bg-gray-100,
+html.amoled .curio-web-app .bg-slate-50,
+html.amoled .curio-web-app .bg-slate-100 {
+  background: var(--curio-panel-dark) !important;
+  border-color: var(--curio-line-dark);
+}
+.curio-web-app .shadow-sm,
+.curio-web-app .shadow,
+.curio-web-app .shadow-md {
+  box-shadow: 0 12px 32px -25px rgba(12,16,24,.34), inset 0 1px 0 rgba(255,255,255,.26) !important;
+}
+html.dark .curio-web-app .shadow-sm,
+html.dark .curio-web-app .shadow,
+html.dark .curio-web-app .shadow-md,
+html.amoled .curio-web-app .shadow-sm,
+html.amoled .curio-web-app .shadow,
+html.amoled .curio-web-app .shadow-md {
+  box-shadow: 0 16px 38px -28px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+/* Inputs: calm, readable, and visually related across every screen. */
+.curio-web-app input:not([type="checkbox"]):not([type="radio"]),
+.curio-web-app textarea,
+.curio-web-app select {
+  min-height: 42px;
+  border-radius: var(--curio-radius-sm) !important;
+  border: 1px solid var(--curio-glass-border) !important;
+  color: var(--curio-text) !important;
+}
+html:not(.dark):not(.amoled) .curio-web-app input::placeholder,
+html:not(.dark):not(.amoled) .curio-web-app textarea::placeholder {
+  color: #778191 !important;
+  opacity: 1;
+}
+html.dark .curio-web-app input::placeholder,
+html.dark .curio-web-app textarea::placeholder,
+html.amoled .curio-web-app input::placeholder,
+html.amoled .curio-web-app textarea::placeholder {
+  color: #9aa3b1 !important;
+  opacity: 1;
+}
+.curio-web-app input:focus,
+.curio-web-app textarea:focus,
+.curio-web-app select:focus {
+  outline: none;
+  border-color: rgba(218,30,55,.58) !important;
+  box-shadow: 0 0 0 3px rgba(218,30,55,.12) !important;
+}
+
+/* Dialogs and overlays: softened edges with a consistent depth cue. */
+.curio-web-app [role="dialog"],
+.curio-web-app [aria-modal="true"] {
+  border-radius: var(--curio-radius-xl);
+  border: 1px solid var(--curio-glass-border);
+  box-shadow: 0 30px 90px -42px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.12);
+  -webkit-backdrop-filter: blur(26px) saturate(145%);
+  backdrop-filter: blur(26px) saturate(145%);
+}
+.curio-web-app hr {
+  border-color: var(--curio-glass-border);
+  opacity: .8;
+}
+
+/* Make touch targets comfortable without inflating compact icon controls. */
+@media (hover: hover) {
+  .curio-web-app button:not(:disabled):hover,
+  .curio-web-app a:hover {
+    filter: brightness(1.025);
+  }
+}
+.curio-web-app button:disabled { cursor: not-allowed; }
+@media (max-width: 640px) {
+  .curio-web-app .min-h-screen { padding-bottom: max(108px, calc(96px + env(safe-area-inset-bottom))); }
+  .curio-web-app main { min-width: 0; }
+  .curio-web-app h1 { line-height: 1.04; }
+  .curio-web-app [role="dialog"],
+  .curio-web-app [aria-modal="true"] { border-radius: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .curio-web-app *,
+  .curio-web-app *::before,
+  .curio-web-app *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
