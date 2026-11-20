@@ -87,12 +87,8 @@ export const TopicBrowserScreen: React.FC = () => {
   return (
     <div className="curio-explore-screen min-h-screen relative pb-32" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <ScreenEntrance>
-        <div className="curio-explore-content w-full mx-auto px-4 pt-4 sm:px-6 sm:pt-7">
-          <header className="relative overflow-hidden rounded-[24px] p-5 sm:p-7 text-white"
-            style={{
-              background: 'linear-gradient(125deg, #111820 0%, #202831 58%, #38151D 100%)',
-              boxShadow: '0 20px 48px -30px rgba(0,0,0,.65)',
-            }}>
+        <div className="curio-explore-content curio-explore-heading-wrap w-full mx-auto px-4 pt-4 sm:px-6 sm:pt-7">
+          <header className={`curio-explore-header relative overflow-hidden p-5 sm:p-7 ${isDark ? 'is-dark' : 'is-light'}`}>
             <div className="absolute -right-7 -top-9 w-44 h-44 rounded-full pointer-events-none"
               style={{ background: 'radial-gradient(circle, rgba(218,30,55,.30), transparent 68%)' }} />
             <div className="absolute right-5 top-5 opacity-[.12] rotate-[-12deg] pointer-events-none">
@@ -100,24 +96,24 @@ export const TopicBrowserScreen: React.FC = () => {
             </div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-7">
-                <div className="flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase text-white/55">
+                <div className="curio-explore-eyebrow flex items-center gap-2 text-[10px] font-bold tracking-[.22em] uppercase">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT }} />
                   Curio / Discovery index
                 </div>
-                <span className="text-[10px] tracking-widest uppercase text-white/45">01 — Explore</span>
+                <span className="curio-explore-index text-[10px] tracking-widest uppercase">01 — Explore</span>
               </div>
-              <h1 className="text-[34px] sm:text-[42px] leading-none font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
+              <h1 className="curio-explore-title text-[34px] sm:text-[42px] leading-none font-extrabold tracking-tight" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
                 Explore<span style={{ color: '#F05265' }}>.</span>
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
+              <p className="curio-explore-description mt-3 max-w-2xl text-sm leading-relaxed">
                 Follow a curiosity. Find a new favourite. There is always something worth discovering.
               </p>
               <div className="mt-6 flex items-end gap-6">
                 <div>
                   <div className="text-2xl font-bold tabular-nums">{loading ? '—' : totalTopics.toLocaleString()}</div>
-                  <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Topics to explore</div>
+                  <div className="curio-explore-stat-label mt-0.5 text-[10px] uppercase tracking-[.16em]">Topics to explore</div>
                 </div>
-                <div className="h-8 w-px bg-white/15" />
+                <div className="curio-explore-stat-divider h-8 w-px" />
                 <div>
                   <div className="text-2xl font-bold tabular-nums">{loading ? '—' : catalog.length}</div>
                   <div className="mt-0.5 text-[10px] uppercase tracking-[.16em] text-white/45">Curated lanes</div>
