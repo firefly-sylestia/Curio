@@ -1482,3 +1482,64 @@ html.dark .curio-home-heading-wrap:before,html.amoled .curio-home-heading-wrap:b
 .curio-home-ambient{background:radial-gradient(circle,rgba(218,30,55,.12),transparent 70%);filter:blur(12px)}
 @media(max-width:520px){.curio-home-heading-wrap{padding-top:24px!important}.curio-home-header{padding-top:14px!important;padding-bottom:22px!important}.curio-home-header:before{inset:-12px -16px -12px;border-radius:20px}.curio-home-header .curio-home-title{font-size:clamp(34px,10vw,40px)}}
 @media(prefers-reduced-motion:reduce){.curio-home-header .curio-home-explore-link{transition:none}}
+
+
+/* Explore uses the same page-blended top atmosphere as Home, not a standalone hero card. */
+.curio-explore-heading-wrap{position:relative;z-index:1;padding-top:clamp(30px,5vw,58px)!important}
+.curio-explore-heading-wrap:before{
+ content:"";position:absolute;z-index:-1;pointer-events:none;top:-40px;left:50%;
+ width:100vw;height:480px;transform:translateX(-50%);
+ background:
+  radial-gradient(ellipse 76% 54% at 12% 0%,rgba(218,30,55,.105),transparent 75%),
+  radial-gradient(ellipse 65% 58% at 88% 4%,rgba(90,112,145,.10),transparent 76%),
+  linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.15) 38%,transparent);
+ -webkit-backdrop-filter:blur(22px) saturate(118%);backdrop-filter:blur(22px) saturate(118%);
+ -webkit-mask-image:linear-gradient(to bottom,#000,rgba(0,0,0,.82) 45%,transparent);
+ mask-image:linear-gradient(to bottom,#000,rgba(0,0,0,.82) 45%,transparent)
+}
+html.dark .curio-explore-heading-wrap:before,html.amoled .curio-explore-heading-wrap:before{
+ background:
+  radial-gradient(ellipse 76% 54% at 12% 0%,rgba(218,30,55,.17),transparent 75%),
+  radial-gradient(ellipse 65% 58% at 88% 4%,rgba(80,104,140,.13),transparent 76%),
+  linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018) 42%,transparent)
+}
+.curio-explore-header{
+ isolation:isolate;overflow:visible!important;border:0!important;border-radius:0!important;
+ padding:clamp(18px,3vw,30px) 0 24px!important;
+ color:var(--curio-text)!important;background:transparent!important;
+ box-shadow:none!important;backdrop-filter:none!important
+}
+.curio-explore-header:before{
+ content:"";position:absolute;z-index:-1;pointer-events:none;inset:-22px -24px -16px;
+ border:1px solid color-mix(in srgb,var(--curio-glass-border) 48%,transparent);
+ border-radius:26px;
+ background:linear-gradient(145deg,
+  color-mix(in srgb,var(--curio-glass) 28%,transparent),
+  color-mix(in srgb,var(--curio-glass) 10%,transparent) 56%,transparent);
+ -webkit-backdrop-filter:blur(24px) saturate(142%);backdrop-filter:blur(24px) saturate(142%);
+ opacity:.4;-webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.66) 62%,transparent);
+ mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.66) 62%,transparent)
+}
+.curio-explore-header:after{display:none!important}
+.curio-explore-header .relative{z-index:1}
+.curio-explore-header.is-light{
+ --explore-primary:#171B26;--explore-secondary:rgba(23,27,38,.78);
+ --explore-muted:rgba(23,27,38,.58);--explore-divider:rgba(23,27,38,.15)
+}
+.curio-explore-header.is-dark{
+ --explore-primary:#F5F3F4;--explore-secondary:rgba(245,243,244,.84);
+ --explore-muted:rgba(245,243,244,.64);--explore-divider:rgba(255,255,255,.18)
+}
+.curio-explore-header .curio-explore-eyebrow,
+.curio-explore-header .curio-explore-index{color:var(--explore-muted)}
+.curio-explore-header .curio-explore-eyebrow>span:first-child{background:#DA1E37!important}
+.curio-explore-header .curio-explore-title{color:var(--explore-primary)!important}
+.curio-explore-header .curio-explore-description{color:var(--explore-secondary)!important}
+.curio-explore-header .curio-explore-stat-label{color:var(--explore-muted)!important}
+.curio-explore-header .curio-explore-stat-divider{background:var(--explore-divider)}
+@media(max-width:520px){
+ .curio-explore-heading-wrap{padding-top:24px!important}
+ .curio-explore-header{padding-top:14px!important;padding-bottom:22px!important}
+ .curio-explore-header:before{inset:-12px -16px -12px;border-radius:20px}
+ .curio-explore-header .curio-explore-title{font-size:clamp(34px,10vw,40px)}
+}
