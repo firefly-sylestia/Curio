@@ -1559,3 +1559,11 @@ body .curio-bottom-nav {
 @media (min-width: 900px) {
   body .curio-bottom-nav { bottom: 24px !important; }
 }
+
+
+/* Home has a taller scroll surface; lift its floating nav to match the other screens. */
+@media (max-width: 899px) {
+  body .curio-bottom-nav.curio-bottom-nav-home {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 24px) !important;
+  }
+}
