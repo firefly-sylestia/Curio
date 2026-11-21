@@ -26,7 +26,7 @@ const BottomNav: React.FC = () => {
 
   return (
     <nav
-      className="curio-bottom-nav fixed bottom-0 left-0 right-0 z-50"
+      className={`curio-bottom-nav fixed bottom-0 left-0 right-0 z-50 ${isActive('/') ? 'curio-bottom-nav-home' : ''}`}
       aria-label="Primary navigation"
       style={{
         '--nav-index': activeIndex,
