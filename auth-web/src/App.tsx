@@ -21,6 +21,7 @@ import { PetDesignerScreen } from './screens/PetDesignerScreen';
 import { TopicHistoryScreen } from './screens/TopicHistoryScreen';
 import { ManageCategoriesScreen } from './screens/ManageCategoriesScreen';
 import React, { useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './index.css';
 import './mcu-interface.css';
 
@@ -78,7 +79,7 @@ const App: React.FC = () => {
         </Routes>
         </div>
 
-        {showBottomNav && <BottomNav />}
+        {showBottomNav && createPortal(<BottomNav />, document.body)}
         <Analytics />
       </div>
     </ThemeProvider>
